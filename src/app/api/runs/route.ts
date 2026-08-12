@@ -17,9 +17,6 @@ export const runtime = "nodejs";
 /** Hard cap on the raw request body read before JSON parsing (bounds memory). */
 const MAX_REQUEST_BYTES = 8 * 1024 * 1024;
 
-/** Bounds each model call; the route also forwards the client abort signal. */
-const MODEL_TIMEOUT_MS = 120_000;
-
 export async function GET() {
   const cfg = loadConfig();
   const roots = [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")];
@@ -196,7 +193,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
           model: cfg.modelName,
           jsonMode: cfg.modelJsonMode,
           signal: req.signal,
-          timeoutMs: MODEL_TIMEOUT_MS,
+          timeoutMs: cfg.modelTimeoutMs,
         })
       : // No model configured: executeRun short-circuits before any model call.
         ({ generate: async () => { throw new Error("model not configured"); } } as never);
