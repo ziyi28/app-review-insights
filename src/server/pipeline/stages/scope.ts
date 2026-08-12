@@ -1,6 +1,6 @@
 import type { Limitation } from "@/server/sources/apple-rss-collector";
 import { ScopeOutputSchema, scopePrompt } from "@/server/model/prompts/prompts";
-import type { StageModelClient } from "../dependencies";
+import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type ScopeStageContext = {
   model: StageModelClient;
@@ -8,6 +8,9 @@ export type ScopeStageContext = {
   stats: unknown;
   sourceLimitations: Limitation[];
   outputLocale: "en" | "zh-CN";
+  /** Live progress callback; invoked with a human-readable message while the
+   *  model call is in flight so the UI can show feedback. */
+  onProgress?: (message: string) => void;
 };
 
 export type ScopeStageResult = {
@@ -22,6 +25,7 @@ export type ScopeStageResult = {
  * to want that the data cannot support is recorded as an explicit limitation.
  */
 export async function runScopeStage(ctx: ScopeStageContext): Promise<ScopeStageResult> {
+  ctx.onProgress?.("interpreting the analysis scope");
   const output = await ctx.model.generate({
     stage: "scope",
     promptVersion: scopePrompt.version,
@@ -32,6 +36,7 @@ export async function runScopeStage(ctx: ScopeStageContext): Promise<ScopeStageR
       sourceLimitations: ctx.sourceLimitations,
     }),
     schema: ScopeOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
   });
 
   const filters = output.filters ?? {};

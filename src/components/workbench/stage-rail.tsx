@@ -4,7 +4,7 @@ import type { Dictionary } from "@/i18n";
 import type { RunEvent } from "@/domain/contracts/events";
 
 const STAGE_ORDER = ["source", "prepare", "scope", "topics", "findings", "planning", "tests", "traceability", "revision"] as const;
-const STAGE_LABELS: Record<(typeof STAGE_ORDER)[number], keyof Dictionary> = {
+export const STAGE_LABELS: Record<(typeof STAGE_ORDER)[number], keyof Dictionary> = {
   source: "stageSource",
   prepare: "stagePrepare",
   scope: "stageScope",

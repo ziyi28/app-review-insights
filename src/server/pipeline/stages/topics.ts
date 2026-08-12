@@ -1,7 +1,7 @@
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { TopicConsolidationOutputSchema, TopicDiscoveryOutputSchema, topicDiscoveryPrompt, topicConsolidationPrompt } from "@/server/model/prompts/prompts";
 import { isExactExcerpt } from "@/domain/analysis/evidence";
-import type { StageModelClient } from "../dependencies";
+import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type TopicsStageContext = {
   model: StageModelClient;
@@ -9,6 +9,9 @@ export type TopicsStageContext = {
   outputLocale: string;
   goal: string;
   sourceStatus: "complete" | "partial" | "suspect-empty" | "failed";
+  /** Live progress callback; invoked with a human-readable message while the
+   *  model calls are in flight so the UI can show feedback. */
+  onProgress?: (message: string) => void;
 };
 
 export type TopicStageResult = {
@@ -59,12 +62,14 @@ export async function runTopicsStage(ctx: TopicsStageContext): Promise<TopicStag
 
   const chunks = chunkReviews(ctx.reviews);
   for (const [chunkIndex, chunk] of chunks.entries()) {
+    ctx.onProgress?.(`analyzing review batch ${chunkIndex + 1} of ${chunks.length}`);
     const discovery = await ctx.model.generate({
       stage: "topics",
       promptVersion: topicDiscoveryPrompt.version,
       system: topicDiscoveryPrompt.system,
       user: topicDiscoveryPrompt.buildUser({ reviews: chunk, outputLocale: ctx.outputLocale }),
       schema: TopicDiscoveryOutputSchema,
+      onProgress: modelProgressRelay(ctx.onProgress),
     });
 
     for (const c of discovery.topics) {
@@ -94,6 +99,7 @@ export async function runTopicsStage(ctx: TopicsStageContext): Promise<TopicStag
     system: topicConsolidationPrompt.system,
     user: topicConsolidationPrompt.buildUser({ candidates, outputLocale: ctx.outputLocale }),
     schema: TopicConsolidationOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
   });
 
   const candidateIndex = candidateById(candidates);

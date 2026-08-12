@@ -109,4 +109,27 @@ describe("runTopicsStage", () => {
     const result = await runTopicsStage(ctx);
     expect(result.topics.length).toBeLessThanOrEqual(5);
   });
+
+  it("reports live progress for each discovery batch", async () => {
+    const onProgress = vi.fn();
+    // 30 reviews with ~500-char bodies push the corpus past the 12k chunk
+    // budget so discovery runs in 2 batches.
+    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const discoveryForChunk = {
+      topics: many.slice(0, 5).map((r, i) => ({
+        id: `topic-candidate-${i + 1}`,
+        label: "x",
+        description: "y",
+        supportingReviewIds: [r.reviewId],
+        quote: `review number ${i}`,
+      })),
+    };
+    const ctx = context({ reviews: many, onProgress }, discoveryForChunk);
+    await runTopicsStage(ctx);
+    // A progress message is emitted before each discovery call, so the number
+    // of batches and which batch is current are always visible.
+    const msgs = onProgress.mock.calls.map((c) => String(c[0]));
+    expect(msgs.some((m) => m.includes("1 of"))).toBe(true);
+    expect(msgs.some((m) => m.includes("2 of"))).toBe(true);
+  });
 });

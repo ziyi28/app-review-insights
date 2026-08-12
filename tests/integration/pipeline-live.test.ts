@@ -146,6 +146,30 @@ describe("executeRun (live pipeline)", () => {
     expect(prd.requirements).toHaveLength(1);
   });
 
+  it("publishes live progress events while model stages run", async () => {
+    const model = new ScriptedModelClient(await buildScript());
+    const deps = makeDeps(model);
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand why users love it", "en", deps, publisher, store);
+
+    const events = await collectEvents(runId);
+    const progress = events.filter((e) => (e as { type: string }).type === "stage.progress" && (e as { stage?: string }).stage !== undefined) as {
+      type: string;
+      stage: string;
+      data: { message: string };
+    }[];
+    // Every model stage emits at least one progress message (scope, topics,
+    // findings, planning, tests).
+    expect(progress.length).toBeGreaterThanOrEqual(5);
+    const stages = new Set(progress.map((p) => p.stage));
+    for (const s of ["scope", "topics", "findings", "planning", "tests"]) {
+      expect(stages.has(s)).toBe(true);
+    }
+    expect(progress.some((p) => /batch|review/i.test(p.data.message))).toBe(true);
+  });
+
   it("applies scope filters so only matching reviews reach the model stages", async () => {
     // PAGE1 is a single 5-star review. A scope that filters to rating 1 must
     // exclude it, ending the run as insufficient-data WITHOUT calling the model.
