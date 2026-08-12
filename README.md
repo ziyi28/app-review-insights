@@ -78,6 +78,13 @@ a model you can still:
 Copy `.env.example` to `.env` (git-ignored) and fill in your values. Keys are
 never logged, persisted, or committed. Temperature is fixed at 0.1.
 
+**You can also configure the model from the UI:** open **Settings** in the
+header to set the API Base URL, API Key, Model Name, and JSON mode. Saving
+applies the values immediately (no restart) and persists them to the local,
+git-ignored `.env.local` so they survive a restart. The API key is never
+returned to the client — the panel only shows whether one is configured, with
+an option to clear it.
+
 For the bundled demo fixture the analysis used a DeepSeek-compatible endpoint
 (`deepseek-v4-flash`); that configuration is documented in
 `fixtures/demo-runs/run-workout-for-women-us/provenance.json` and is **not**
