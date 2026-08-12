@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "1",
+  "app": { "id": "839285684", "name": "Workout for Women", "storefront": "us" },
+  "reviews": [
+    {
+      "id": "import-1",
+      "title": "Love it",
+      "body": "The workouts are great and easy to follow.",
+      "rating": 5,
+      "version": "3.2.1",
+      "updatedAt": "2026-07-01T10:00:00Z",
+      "language": "en"
+    },
+    {
+      "id": "import-2",
+      "title": "太贵了",
+      "body": "订阅费太贵了，很多功能都要付费才能用。",
+      "rating": 1,
+      "version": "3.2.0",
+      "updatedAt": "2026-07-02T10:00:00Z",
+      "language": "zh"
+    },
+    {
+      "id": "import-3",
+      "title": "Love it",
+      "body": "The workouts are great and easy to follow.",
+      "rating": 5,
+      "version": "3.2.1",
+      "updatedAt": "2026-07-01T10:00:00Z",
+      "language": "en"
+    },
+    {
+      "id": "import-1",
+      "title": "Changed my mind",
+      "body": "Different body text for the same imported id.",
+      "rating": 3,
+      "version": "3.2.0",
+      "updatedAt": "2026-07-03T10:00:00Z",
+      "language": "en"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+import { randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
+import { promises as fs } from "node:fs";
+import path from "node:path";
+
+export const ARTIFACT_NAMES = [
+  "scope",
+  "source-evidence",
+  "raw-reviews",
+  "cleaned-reviews",
+  "stats",
+  "topic-candidates",
+  "topics",
+  "findings",
+  "version-plan",
+  "prd",
+  "tests",
+  "traceability",
+  "final-report",
+] as const;
+export type ArtifactName = (typeof ARTIFACT_NAMES)[number];
+
+export type RunManifest = {
+  runId: string;
+  status: "running" | "completed" | "failed" | "cancelled";
+  executionMode: "live" | "import" | "cached-replay";
+  createdAt: string;
+  updatedAt: string;
+  stages: Record<string, { status: string; startedAt?: string; finishedAt?: string; attempt?: number }>;
+  artifacts: Record<string, { attempt: number; file: string }>;
+  limitations: { code: string; message: string }[];
+  canReplay: boolean;
+  modelUsage?: Record<string, unknown>;
+  promptVersions?: string[];
+};
+
+function runIdRegex(runId: string): void {
+  if (!/^run-[a-z0-9-]{1,120}$/.test(runId)) {
+    throw new Error(`Invalid run id: ${runId}`);
+  }
+}
+
+function artifactNameOk(name: string): name is ArtifactName {
+  return (ARTIFACT_NAMES as readonly string[]).includes(name);
+}
+
+/**
+ * File-based run snapshot store. All writes are atomic (temp file + rename),
+ * attempt files are immutable, and every resolved path stays inside the run
+ * directory (path traversal / SSRF guard).
+ */
+export class RunStore {
+  constructor(private readonly root: string) {}
+
+  createRunId(): string {
+    return `run-${randomUUID()}`;
+  }
+
+  resolveRunDir(runId: string): string {
+    runIdRegex(runId);
+    const resolved = path.resolve(this.root, runId);
+    if (!resolved.startsWith(path.resolve(this.root))) {
+      throw new Error(`Run id escapes the store root: ${runId}`);
+    }
+    return resolved;
+  }
+
+  existsFile(file: string): boolean {
+    return existsSync(file);
+  }
+
+  async writeArtifact(runId: string, name: string, attempt: number, value: unknown): Promise<string> {
+    if (!artifactNameOk(name)) throw new Error(`Unknown artifact name: ${name}`);
+    if (!Number.isInteger(attempt) || attempt < 1) throw new Error(`Invalid attempt: ${attempt}`);
+    const runDir = this.resolveRunDir(runId);
+    await fs.mkdir(runDir, { recursive: true });
+    const artifactsDir = path.join(runDir, "artifacts");
+    await fs.mkdir(artifactsDir, { recursive: true });
+    const fileName = `${name}.attempt-${String(attempt).padStart(2, "0")}.json`;
+    const finalPath = path.join(artifactsDir, fileName);
+    const tmp = path.join(artifactsDir, `.${fileName}.${randomUUID()}.tmp`);
+    await fs.writeFile(tmp, JSON.stringify(value, null, 2), "utf8");
+    await fs.rename(tmp, finalPath);
+    return finalPath;
+  }
+
+  async readArtifact(runId: string, name: string, attempt: number): Promise<unknown> {
+    if (!artifactNameOk(name)) throw new Error(`Unknown artifact name: ${name}`);
+    const runDir = this.resolveRunDir(runId);
+    const fileName = `${name}.attempt-${String(attempt).padStart(2, "0")}.json`;
+    const file = path.join(runDir, "artifacts", fileName);
+    return JSON.parse(await fs.readFile(file, "utf8"));
+  }
+
+  /**
+   * Appends a fully-framed NDJSON line (must already end with "\n"). Writing an
+   * already-framed line keeps the on-disk byte stream identical to the HTTP
+   * stream and avoids double newlines between events.
+   */
+  async appendEvent(runId: string, line: string): Promise<void> {
+    const runDir = this.resolveRunDir(runId);
+    await fs.mkdir(runDir, { recursive: true });
+    if (!line.endsWith("\n")) line += "\n";
+    await fs.appendFile(path.join(runDir, "events.ndjson"), line, "utf8");
+  }
+
+  async writeManifest(runId: string, manifest: RunManifest): Promise<void> {
+    const runDir = this.resolveRunDir(runId);
+    await fs.mkdir(runDir, { recursive: true });
+    manifest.updatedAt = new Date().toISOString();
+    const tmp = path.join(runDir, `.manifest.${randomUUID()}.tmp`);
+    await fs.writeFile(tmp, JSON.stringify(manifest, null, 2), "utf8");
+    await fs.rename(tmp, path.join(runDir, "manifest.json"));
+  }
+
+  async readManifest(runId: string): Promise<RunManifest> {
+    const runDir = this.resolveRunDir(runId);
+    return JSON.parse(await fs.readFile(path.join(runDir, "manifest.json"), "utf8")) as RunManifest;
+  }
+
+  async listRuns(): Promise<string[]> {
+    try {
+      const entries = await fs.readdir(this.root);
+      return entries.filter((e) => e.startsWith("run-"));
+    } catch {
+      return [];
+    }
+  }
+}

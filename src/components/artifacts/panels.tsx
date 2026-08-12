@@ -1,0 +1,156 @@
+"use client";
+
+import type { Dictionary } from "@/i18n";
+import type { Finding, Requirement, TestCase } from "@/domain/contracts/analysis";
+import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
+
+export function TopicsPanel({ topics, t }: { topics: { id: string; label: string; description: string; reviewIds: string[] }[]; t: Dictionary }) {
+  if (!topics.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
+  return (
+    <div style={{ display: "grid", gap: "8px" }}>
+      {topics.map((topic) => (
+        <div key={topic.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
+          <h4 style={{ margin: "0 0 4px" }}>
+            {topic.label} <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
+          </h4>
+          <p style={{ margin: "0 0 4px" }}>{topic.description}</p>
+          <code style={{ color: "var(--text-muted)", fontSize: "12px" }}>{topic.id} · {topic.reviewIds.length} {t.supportCount}</code>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function FindingsPanel({ findings, t }: { findings: Finding[]; t: Dictionary }) {
+  if (!findings.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
+  return (
+    <div style={{ display: "grid", gap: "10px" }}>
+      {findings.map((f) => (
+        <div key={f.id} style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "4px" }}>
+            <h4 style={{ margin: 0 }}>{f.title}</h4>
+            <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
+            <ProvenanceBadge kind="computed" label={`${t.confidence}: ${f.confidence.level}`} />
+          </div>
+          <p style={{ margin: "0 0 6px" }}>{f.summary}</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            {t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}: {f.supportingReviewIds.slice(0, 5).join(", ")}
+          </p>
+          {f.evidenceExcerpts.length > 0 ? (
+            <ul style={{ margin: "4px 0", paddingLeft: "20px" }}>
+              {f.evidenceExcerpts.slice(0, 3).map((e, i) => (
+                <li key={i} style={{ fontSize: "13px" }}>
+                  “{e.excerpt}” <code style={{ color: "var(--text-muted)" }}>{e.reviewId.slice(0, 8)}</code>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          {f.conflictingReviewIds.length > 0 ? (
+            <p style={{ color: "var(--danger)", fontSize: "13px" }}>
+              <ProvenanceBadge kind="conflict" label={t.conflict} /> {f.conflictingReviewIds.join(", ")}
+            </p>
+          ) : null}
+          {f.uncertainties.length > 0 ? (
+            <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+              <strong>{t.uncertain}:</strong> {f.uncertainties.join("; ")}
+            </p>
+          ) : null}
+          {f.limitations.length > 0 ? (
+            <p style={{ color: "var(--warn)", fontSize: "13px" }}>
+              <ProvenanceBadge kind="limitation" label={t.limitations} /> {f.limitations.join("; ")}
+            </p>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function RequirementsPanel({ requirements, versions, assumptions, t }: { requirements: Requirement[]; versions: { id: string; name: string; summary: string; requirementIds: string[] }[]; assumptions: { id: string; text: string; basis: string }[]; t: Dictionary }) {
+  return (
+    <div style={{ display: "grid", gap: "10px" }}>
+      {versions.length > 0 ? (
+        <div>
+          <h4>{t.versionPlan}</h4>
+          {versions.map((v) => (
+            <div key={v.id} style={{ padding: "8px", border: "1px solid var(--border)", borderRadius: "6px", marginBottom: "6px", background: "var(--bg-panel)" }}>
+              <strong>{v.name}</strong> — {v.summary}
+              <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>{v.requirementIds.join(", ")}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {requirements.map((r) => (
+        <div key={r.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <h4 style={{ margin: 0 }}>{r.title}</h4>
+            <ProvenanceBadge kind="computed" label={`${r.priority}`} />
+          </div>
+          <p style={{ margin: "4px 0" }}>{r.description}</p>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            {t.reviewId}: {r.sourceReviewIds.slice(0, 5).join(", ")}
+          </p>
+          <ul style={{ margin: "4px 0", fontSize: "13px", paddingLeft: "20px" }}>
+            {r.acceptanceCriteria.map((c, i) => (
+              <li key={i}>{c}</li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      {assumptions.length > 0 ? (
+        <div>
+          <h4>{t.assumptions}</h4>
+          {assumptions.map((a) => (
+            <div key={a.id} style={{ padding: "8px", border: "1px dashed var(--border)", borderRadius: "6px", marginBottom: "6px" }}>
+              <ProvenanceBadge kind="assumption" label={t.assumptions} /> <strong>{a.text}</strong>
+              <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>{a.basis}</div>
+            </div>
+          ))}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function TestsPanel({ tests, t }: { tests: TestCase[]; t: Dictionary }) {
+  if (!tests.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
+  return (
+    <div style={{ display: "grid", gap: "10px" }}>
+      {tests.map((test) => (
+        <div key={test.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
+          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+            <h4 style={{ margin: 0 }}>{test.id}</h4>
+            <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
+          </div>
+          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+            {t.reviewId}: {test.sourceReviewIds.slice(0, 4).join(", ")}
+          </p>
+          <ol style={{ margin: "4px 0", fontSize: "13px", paddingLeft: "20px" }}>
+            {test.steps.map((s, i) => (
+              <li key={i}>{s}</li>
+            ))}
+          </ol>
+          <p style={{ margin: 0, fontSize: "13px" }}>
+            <strong>{t.expected}:</strong> {test.expectedResult}
+          </p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function TraceabilityPanel({ report, t }: { report: { valid: boolean; violations: { code: string; message: string }[] } | null; t: Dictionary }) {
+  if (!report) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
+  return (
+    <div>
+      <div style={{ padding: "10px", borderRadius: "8px", background: report.valid ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.12)", border: `1px solid ${report.valid ? "var(--ok)" : "var(--danger)"}`, marginBottom: "8px" }}>
+        <strong>{report.valid ? t.completed : t.failed}</strong> — {report.violations.length} {t.errors}
+      </div>
+      {report.violations.map((v, i) => (
+        <div key={i} style={{ padding: "6px", border: "1px solid var(--border)", borderRadius: "6px", marginBottom: "4px", fontSize: "13px" }}>
+          <code>{v.code}</code>: {v.message}
+        </div>
+      ))}
+    </div>
+  );
+}

@@ -1,0 +1,440 @@
+{
+  "schemaVersion": "1",
+  "app": {
+    "id": "839285684",
+    "storefront": "us"
+  },
+  "source": "apple-rss",
+  "capturedAt": "2026-08-12T11:48:19.791Z",
+  "pages": [
+    {
+      "page": 1,
+      "url": "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json",
+      "status": 200,
+      "byteLength": 873,
+      "sha256": "ff664a8887c7ae625bc3deab823749d1b9ebd8c86821241e4136070b7c4c6b4d",
+      "reviewCount": 0,
+      "capturedAt": "2026-08-12T11:48:17.357Z"
+    },
+    {
+      "page": 2,
+      "url": "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json",
+      "status": 200,
+      "byteLength": 42029,
+      "sha256": "c2b68137063ec9d76a83043c9ed6d0c7019a6c995a8a2ce6539a3f50d5c6876a",
+      "reviewCount": 50,
+      "capturedAt": "2026-08-12T11:48:18.811Z"
+    },
+    {
+      "page": 3,
+      "url": "https://itunes.apple.com/us/rss/customerreviews/page=3/id=839285684/sortby=mostRecent/json",
+      "status": 200,
+      "byteLength": 873,
+      "sha256": "208d8298f95b61ee3f255b7b7a33eac56203e11e06192b5c2e7286460c435a6f",
+      "reviewCount": 0,
+      "capturedAt": "2026-08-12T11:48:19.558Z"
+    }
+  ],
+  "reviews": [
+    {
+      "sourceReviewId": "14275682276",
+      "rating": 4,
+      "title": "Updates",
+      "body": "I’ve had this app for over five years now and I’ve loved them, but hate how they kept going from completely free to charging for everything now. Really great app but not paying for it.",
+      "version": "8.4.26",
+      "updatedAt": "2026-07-07T22:15:30.000Z"
+    },
+    {
+      "sourceReviewId": "14275420028",
+      "rating": 4,
+      "title": "Cost",
+      "body": "I get it life is not easy you have to pay for stuff but really? Why does it have to cost money I want a workout im under 18 no job how do I pay? Still the question were understandable seemed like it was really gonna help",
+      "version": "8.4.26",
+      "updatedAt": "2026-07-07T20:38:21.000Z"
+    },
+    {
+      "sourceReviewId": "14274175102",
+      "rating": 5,
+      "title": "Nice",
+      "body": "I love it",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-07T14:13:54.000Z"
+    },
+    {
+      "sourceReviewId": "14271423099",
+      "rating": 5,
+      "title": "Very good!",
+      "body": "A very good app for motivation and everything, it’s fun to do for me at least, I love the warm ups and cool downs and demonstrations. Worth the money really.",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-06T20:45:22.000Z"
+    },
+    {
+      "sourceReviewId": "14270786563",
+      "rating": 2,
+      "title": "Started great, then locked up",
+      "body": "The app allows you to access almost everything at the start, and then begins to restrict. I’ve had the app for over a year now and I am unable to do anything at all. I cannot do saved workouts or any other plan that I used to be able to access after watching over a minute of ads.",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-06T17:20:45.000Z"
+    },
+    {
+      "sourceReviewId": "14264918620",
+      "rating": 1,
+      "title": "Idk",
+      "body": "It made me pay after the first day and u didn’t like it",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-05T06:49:12.000Z"
+    },
+    {
+      "sourceReviewId": "14260733949",
+      "rating": 4,
+      "title": "Maggie",
+      "body": "It's  ok",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-04T05:08:01.000Z"
+    },
+    {
+      "sourceReviewId": "14254614594",
+      "rating": 5,
+      "title": "The best!!",
+      "body": "This app has everything you need to get in shape and be healthy. Very easy to follow good music and great workouts. Highly recommended.",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-02T17:27:16.000Z"
+    },
+    {
+      "sourceReviewId": "14251432995",
+      "rating": 5,
+      "title": "Very good app",
+      "body": "I am really enjoying this app… lots of different options.",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-01T23:30:25.000Z"
+    },
+    {
+      "sourceReviewId": "14250373918",
+      "rating": 5,
+      "title": "Love this app!",
+      "body": "Finally found an app that fits my workout needs!",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-01T17:29:44.000Z"
+    },
+    {
+      "sourceReviewId": "14249980354",
+      "rating": 3,
+      "title": "Great app, downloads impossible",
+      "body": "This app and the workouts are great. Even with a paid subscription, you cannot download. No help or steps from online searches help.",
+      "version": "8.4.25",
+      "updatedAt": "2026-07-01T15:39:13.000Z"
+    },
+    {
+      "sourceReviewId": "14246967026",
+      "rating": 3,
+      "title": "Cannot access paid subscription",
+      "body": "I was logged out of the app recently and cannot log back in to access my workouts and benefits of my paid subscription",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-30T22:30:32.000Z"
+    },
+    {
+      "sourceReviewId": "14243194565",
+      "rating": 1,
+      "title": "Nothing but paywalls",
+      "body": "Is there anything that is free on this app anymore?? Even workouts I had previously saved now ask you to pay. Ridiculous",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-30T01:47:03.000Z"
+    },
+    {
+      "sourceReviewId": "14241644246",
+      "rating": 5,
+      "title": "Great for beginners",
+      "body": "I’ve been off and on with the Sweat app but it’s a lot of dedication from the start. Workout for Women from home and gym it’s great for beginners and it’s not killer or time consuming. I can fit 20 min or less anytime in between my schedule. Works out aren’t out of this world and one can sustain it for beginners. Def recommend!",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-29T16:45:23.000Z"
+    },
+    {
+      "sourceReviewId": "14229833137",
+      "rating": 4,
+      "title": "Good, but...",
+      "body": "I LOVE this app. Great workouts for all ages. But... I am on the free version and there are a lot of things that I can't do without paying. Still has good options for the free version but please allow the free version to make me able to do more things.",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-26T19:13:48.000Z"
+    },
+    {
+      "sourceReviewId": "14227812994",
+      "rating": 5,
+      "title": "Thank you",
+      "body": "Im\nLiking the app so far thanks so Much!!!",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-26T08:50:46.000Z"
+    },
+    {
+      "sourceReviewId": "14225692756",
+      "rating": 5,
+      "title": "￼So great",
+      "body": "Short workouts perfect for anyday",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-25T18:51:31.000Z"
+    },
+    {
+      "sourceReviewId": "14222226181",
+      "rating": 1,
+      "title": "Scam and expensive",
+      "body": "Cancelled my subscription and then received not one but two charges in the same day totaling almost $100!!! Don’t do it! Not worth it.",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-24T21:58:30.000Z"
+    },
+    {
+      "sourceReviewId": "14221168828",
+      "rating": 3,
+      "title": "Subscriptions",
+      "body": "The is a good workout app but the only thing that i don’t like is that it said it was giving me a free subscription because it was my first time using this app, i get the subscription and its charged me 30 dollars idk if i did something wrong but warning, just stick to the free version and don’t be scammed like me 😭",
+      "version": "8.4.25",
+      "updatedAt": "2026-06-24T16:06:59.000Z"
+    },
+    {
+      "sourceReviewId": "14220597773",
+      "rating": 5,
+      "title": "The Best Workout App in the World",
+      "body": "Update, June 24, 2026 - I’ve been using this app for a while and I like it even more than when I started.  One of the rare and fantastic things about the workouts is that they are genuinely well thought out, really nicely put together.  It seems a person sat down and thought this through and put the exercises in the right order and the most beneficial exercises.  So, there are no surprises.  The workouts do what they say they will do.  Anyway, I do wish they’d put out some new PROGRAMS, though I’m sure at some point they will.   ———-         I am absolutely crazy about this app.  It has everything, almost (no tai chi, yet).  All types of exercises and yoga . . . Of various lengths.  I am on a 30 day dumbbell program right now.  The variety of exercises in that one program is amazing.  I’ve never seen some of those moves.  Also, doing a 7-minute workout in the morning; love those unique moves, too.  Basically, you get this and you don’t need anything else.  I downloaded dozens of workout apps and this is the one who stood out way, way above the others; nothing even compares. Totally love it!",
+      "version": "8.4.24",
+      "updatedAt": "2026-06-24T13:22:35.000Z"
+    },
+    {
+      "sourceReviewId": "14217181753",
+      "rating": 5,
+      "title": "Good but why subscription??!!😭",
+      "body": "The app is good! I had it once before but I stopped using it then I started using again then bam u have to get a subscription on the 4th day. I don’t know why but I just hope it won’t happen again. Anyway besides that the app is pretty good. Though I do suggest getting younger ages below 18 because some girls who want to change and get a bit healthier in 6th grade or older can be a better version of themselves.",
+      "version": "8.4.24",
+      "updatedAt": "2026-06-23T15:49:01.000Z"
+    },
+    {
+      "sourceReviewId": "14212862587",
+      "rating": 1,
+      "title": "Subscription",
+      "body": "Cancelled subscription and still got charged for it. No spot in app to manage no place on website either. Went to contact support and every time I hit submit it would say the request couldn’t be submitted because it’s spam. Don’t get app it not free it will make you sign up for a subscription and not let you cancel it.",
+      "version": "8.4.24",
+      "updatedAt": "2026-06-22T13:28:51.000Z"
+    },
+    {
+      "sourceReviewId": "14210920635",
+      "rating": 1,
+      "title": "Free Version So Frustrating",
+      "body": "I do not care if I have to watch ads but what I do care about is if I get a pop up screen with no continuation option only advertising the paid version. The workout is available with ads yet the interface traps you with their predatory ads.",
+      "version": "8.4.24",
+      "updatedAt": "2026-06-21T23:55:36.000Z"
+    },
+    {
+      "sourceReviewId": "14209021980",
+      "rating": 5,
+      "title": "Great app",
+      "body": "Love the variety of the workouts and being able to choose different programs",
+      "version": "8.4.23",
+      "updatedAt": "2026-06-21T13:10:42.000Z"
+    },
+    {
+      "sourceReviewId": "14204125134",
+      "rating": 1,
+      "title": "Free trial SCAM",
+      "body": "I downloaded this app yesterday and I wanted to try the 1-week free trial, but once I used the Apple Pay feature to subscribe to the free trial I was charged $29.99!? Dealing with my bank now to get my money back but it literally said I would not get charged until a week after.",
+      "version": "8.4.24",
+      "updatedAt": "2026-06-20T06:19:22.000Z"
+    },
+    {
+      "sourceReviewId": "14203283136",
+      "rating": 5,
+      "title": "My #1.",
+      "body": "Life changing. <3",
+      "version": "8.4.24",
+      "updatedAt": "2026-06-20T00:38:51.000Z"
+    },
+    {
+      "sourceReviewId": "14190183704",
+      "rating": 5,
+      "title": "My opinio",
+      "body": "It’s perfect",
+      "version": "8.4.23",
+      "updatedAt": "2026-06-16T16:55:44.000Z"
+    },
+    {
+      "sourceReviewId": "14187519047",
+      "rating": 5,
+      "title": "Kendall Serage WFW Review",
+      "body": "This workout app is probably the best option out there! It gives me so much motivation and excitement to get up and do the workouts in the morning. The best thing about it is that you can pick the type of workouts you want to focus on, whether it’s pilates, wall pilates, fitness, postpartum workouts, and more! Truly the best option.🫶🏻",
+      "version": "8.4.23",
+      "updatedAt": "2026-06-15T23:48:35.000Z"
+    },
+    {
+      "sourceReviewId": "14185702009",
+      "rating": 4,
+      "title": "Syn",
+      "body": "I had a trouble with a few things but I really love this app and I definitely feel like I wanna do more!",
+      "version": "8.4.23",
+      "updatedAt": "2026-06-15T13:53:29.000Z"
+    },
+    {
+      "sourceReviewId": "14174937162",
+      "rating": 1,
+      "title": "Stupid",
+      "body": "It let me start my training on the \"free app\" but the second day it was making me have to pay to continue so I don't recommend getting it unless u have the money to waste on it if u do it's pretty great",
+      "version": "8.4.23",
+      "updatedAt": "2026-06-12T18:44:17.000Z"
+    },
+    {
+      "sourceReviewId": "14174692818",
+      "rating": 5,
+      "title": "Workout at home",
+      "body": "Amazing",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-12T17:26:30.000Z"
+    },
+    {
+      "sourceReviewId": "14174457575",
+      "rating": 5,
+      "title": "Easy to follow along",
+      "body": "Love the easy every day consistency. The daily quotes help me with my mental health and keep me motivated.",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-12T16:16:02.000Z"
+    },
+    {
+      "sourceReviewId": "14167037105",
+      "rating": 5,
+      "title": "I’m giving it five stars so you can see it",
+      "body": "It’s OK for the first day, but as soon as you hit the second day, it fires in your face, a bunch of different ads to get their premium, which you have to pay for and you can’t get to the without paying",
+      "version": "8.4.22",
+      "updatedAt": "2026-06-10T18:25:33.000Z"
+    },
+    {
+      "sourceReviewId": "14166078145",
+      "rating": 1,
+      "title": "🧐🧐🧐🧐🧐🧐",
+      "body": "You told me a free trial for a week and the charged me $19.99 right away. What can I do?!",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-10T13:35:45.000Z"
+    },
+    {
+      "sourceReviewId": "14165948645",
+      "rating": 1,
+      "title": "They say is free but they charge you",
+      "body": "They offer a free week then when you accept they charge you. Also doesn’t let you use the free part of the app anymore. Very disappointed I used to love this app",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-10T12:56:48.000Z"
+    },
+    {
+      "sourceReviewId": "14163546305",
+      "rating": 5,
+      "title": "Great app!",
+      "body": "I started using this app when I was in the Marines and am now using it postpartum! I still love it! I have purchased the membership a couple times with breaks in between. So I like how convenient it is to be able to take a break. No match for an expensive gym membership. I prefer this for its simplicity and motivational content. I can work around my babies naps now that I’m almost a year postpartum. I’m also easing my body back into movement by doing the postpartum recovery plan! There’s so many options. And I have a bad back and knee problem, along with shoulder issues too. Just need to listen to your body. Check it out!!",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-09T20:29:24.000Z"
+    },
+    {
+      "sourceReviewId": "14162328271",
+      "rating": 2,
+      "title": "No longer free bummer",
+      "body": "I used this app for years and it’s no longer free, you have to pay monthly or yearly",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-09T14:05:31.000Z"
+    },
+    {
+      "sourceReviewId": "14160080073",
+      "rating": 3,
+      "title": "AMack91",
+      "body": "Great app for working at your own pace. It really helped me tone and lose weight. Plenty workout outs and exercises too. I took away two stars because I used this app a lot when most of the exercise routines were free. Now everything I click on they want you to subscribe and that sucks",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-08T22:57:37.000Z"
+    },
+    {
+      "sourceReviewId": "14157097193",
+      "rating": 1,
+      "title": "Horrible",
+      "body": "Horrible wouldn’t let me cancel my subscription",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-08T04:40:12.000Z"
+    },
+    {
+      "sourceReviewId": "14152184353",
+      "rating": 1,
+      "title": "No longer free with ads",
+      "body": "Paywall to use what a disapppointment once you have reached “free access limit”",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-06T21:26:27.000Z"
+    },
+    {
+      "sourceReviewId": "14149160522",
+      "rating": 5,
+      "title": "Great app.",
+      "body": "This is a beautiful app. It’s amazing. I got this app last year in October. And I already lost 80 pounds I recommend this app a lot.",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-06T03:16:47.000Z"
+    },
+    {
+      "sourceReviewId": "14148499373",
+      "rating": 4,
+      "title": "Workouts",
+      "body": "Really gets you sweating and pumped great for any exercise!!",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-05T22:55:07.000Z"
+    },
+    {
+      "sourceReviewId": "14147454883",
+      "rating": 5,
+      "title": "Awesome and Great Experience!",
+      "body": "My first initial thought was this was just gonna be any other workout app I’ve downloaded before but it actually wasn’t the case at all! I really liked it overall and just the app itself is very helpful and easygoing. I liked how consistent the app is whenever it is time to get that daily workout in and how easy it is to customize and navigate your way through. The app is I would say easy to use especially for beginners because I was a beginner myself. I would recommend having more workout or exercise options though.",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-05T16:47:46.000Z"
+    },
+    {
+      "sourceReviewId": "14144994589",
+      "rating": 4,
+      "title": "Very good overall",
+      "body": "Very good overall but I was looking for a workout plan that was free and I didn’t have to pay so if they could that you had to pay for the 2nd training session that’ll be great",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-05T01:20:08.000Z"
+    },
+    {
+      "sourceReviewId": "14144426555",
+      "rating": 5,
+      "title": "Audrey’s review",
+      "body": "I think it’s great but I hate that we have to pay just to work out when we already have a lot to do like pay  bills and extra but everything else is great",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-04T21:29:05.000Z"
+    },
+    {
+      "sourceReviewId": "14144153169",
+      "rating": 3,
+      "title": "I shouldn’t have to pay!!!😤😡",
+      "body": "I shouldn’t have to pay for this app because I’m not wasting money for an app that i am going to end up deleting when I reach my goal and it’s a waste of of money.",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-04T19:49:04.000Z"
+    },
+    {
+      "sourceReviewId": "14140886742",
+      "rating": 4,
+      "title": "now you have to pay",
+      "body": "i really enjoyed this app in the past, the workouts were great! downloaded it again to use it, now you have to pay. ugh.",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-03T23:24:01.000Z"
+    },
+    {
+      "sourceReviewId": "14138797995",
+      "rating": 1,
+      "title": "Not Free (239.88 YEARLY)",
+      "body": "I only got to do one session for free. Now it wants me to pay for a subscription.\nThe ‘deal’ I was given was \n12 Months for 29.99. (84% Off)\nThe Non-Discounted Monthly Payment is 19.99. \nSo yearly it’ll be around 239.88 after your deal gets dropped. \nRidiculous.",
+      "version": "8.4.21",
+      "updatedAt": "2026-06-03T11:52:50.000Z"
+    },
+    {
+      "sourceReviewId": "14132101956",
+      "rating": 3,
+      "title": "$$$",
+      "body": "I currently can’t afford to pay the monthly fee for the better experience this app will give me. I wish they made it completely free. While I do understand this is somebody’s income I believe there could have been other ways in the app they could have added a price tag that wouldn’t be so restricting for the free users.",
+      "version": "8.4.20",
+      "updatedAt": "2026-06-01T17:51:46.000Z"
+    },
+    {
+      "sourceReviewId": "14131609157",
+      "rating": 1,
+      "title": "Lack of Transparency",
+      "body": "My app updated and I no longer have access to Free with Ads. Though the free option with ads is shown when they promote the subscription, there’s actually no where to choose that option. You are only given the options of paying yearly or monthly. This lack of transparency is now making me lose my free access while also trying to force me to pay for this app. Have had this app for years and it truly has turned awful.",
+      "version": "8.4.20",
+      "updatedAt": "2026-06-01T15:23:20.000Z"
+    }
+  ]
+}
