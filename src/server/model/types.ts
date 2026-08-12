@@ -2,12 +2,21 @@ import type { z } from "zod";
 
 export type ModelJsonMode = "prompt" | "json_object";
 
+export type ModelProgress = {
+  /** Milliseconds since the call started, for "model is working" feedback. */
+  elapsedMs: number;
+};
+
 export type ModelRequest<T> = {
   stage: string;
   promptVersion: string;
   system: string;
   user: string;
   schema: z.ZodType<T>;
+  /** Invoked periodically while the model call is in flight so callers can
+   *  surface live progress to the user (a long topic call is otherwise a silent
+   *  wait). Never called when the call finishes before the first tick. */
+  onProgress?: (info: ModelProgress) => void;
 };
 
 export type ModelResult<T> = T & {

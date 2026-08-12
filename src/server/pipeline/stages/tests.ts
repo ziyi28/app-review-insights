@@ -1,7 +1,7 @@
 import type { Prd, Requirement, TestCase } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { testsPrompt, TestsOutputSchema, type TestsOutput } from "@/server/model/prompts/prompts";
-import type { StageModelClient } from "../dependencies";
+import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type TestsStageContext = {
   model: StageModelClient;
@@ -9,6 +9,9 @@ export type TestsStageContext = {
   outputLocale: "en" | "zh-CN";
   prd?: Prd;
   reviews?: NormalizedReview[];
+  /** Live progress callback; invoked with a human-readable message while the
+   *  model call is in flight so the UI can show feedback. */
+  onProgress?: (message: string) => void;
 };
 
 export type TestsStageResult = {
@@ -98,12 +101,14 @@ export function normalizeTestsOutput(
  * The result also merges the tests into the prd bundle.
  */
 export async function runTestsStage(ctx: TestsStageContext): Promise<TestsStageResult> {
+  ctx.onProgress?.("generating test cases from the PRD");
   const output = await ctx.model.generate({
     stage: "tests",
     promptVersion: testsPrompt.version,
     system: testsPrompt.system,
     user: testsPrompt.buildUser({ requirements: ctx.requirements, outputLocale: ctx.outputLocale }),
     schema: TestsOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
   });
 
   return normalizeTestsOutput(output, ctx.requirements, ctx.reviews ?? [], ctx.prd);

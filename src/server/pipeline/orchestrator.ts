@@ -115,6 +115,11 @@ export async function executeRun(
     stages[stage] = { ...stages[stage], status: "completed", finishedAt: new Date().toISOString() };
     await publisher.publish({ type: "stage.completed", runId, stage: stage as never, data: { stage } });
   };
+  // Forwards a stage's live progress message into a streamed stage.progress
+  // event so the UI can show what the model is doing instead of a silent wait.
+  const onStageProgress = (stage: string) => (message: string) => {
+    void publisher.publish({ type: "stage.progress", runId, stage: stage as never, data: { message } });
+  };
   // Publishes an artifact and records its attempt/file for the final manifest.
   // The manifest is NOT rewritten here: rewriting it on every artifact while
   // consumers concurrently read it races on Windows (rename over an open file
@@ -204,6 +209,7 @@ export async function executeRun(
       stats: prepared.stats,
       sourceLimitations: prepared.limitations,
       outputLocale,
+      onProgress: onStageProgress("scope"),
     });
     for (const l of scope.explicitLimitations) {
       limitations.push({ code: "SCOPE_LIMITATION", message: l, stage: "scope" });
@@ -235,6 +241,7 @@ export async function executeRun(
       outputLocale,
       goal,
       sourceStatus: sourceStatusOf(limitations),
+      onProgress: onStageProgress("topics"),
     });
     for (const w of topics.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "topics", data: w });
     await publishArtifact("topics", 1, topics);
@@ -249,6 +256,7 @@ export async function executeRun(
       outputLocale,
       goal,
       sourceStatus: sourceStatusOf(limitations),
+      onProgress: onStageProgress("findings"),
     });
     for (const w of findingsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "findings", data: w });
     await publishArtifact("findings", 1, findingsResult);
@@ -260,14 +268,14 @@ export async function executeRun(
 
     // Planning
     await startStage("planning");
-    const planning = await runPlanningStage({ model: deps.model, findings: findingsResult.findings, outputLocale, goal });
+    const planning = await runPlanningStage({ model: deps.model, findings: findingsResult.findings, outputLocale, goal, onProgress: onStageProgress("planning") });
     for (const w of planning.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "planning", data: w });
     await publishArtifact("prd", 1, planning.prd);
     await endStage("planning");
 
     // Tests
     await startStage("tests");
-    const testsResult = await runTestsStage({ model: deps.model, requirements: planning.prd.requirements, outputLocale, prd: planning.prd, reviews: scoped });
+    const testsResult = await runTestsStage({ model: deps.model, requirements: planning.prd.requirements, outputLocale, prd: planning.prd, reviews: scoped, onProgress: onStageProgress("tests") });
     for (const w of testsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "tests", data: w });
     prd = testsResult.prd;
     await publishArtifact("tests", 1, testsResult);
@@ -305,6 +313,7 @@ export async function executeRun(
           assumptions: prd.assumptions,
         },
         outputLocale,
+        onProgress: onStageProgress("revision"),
       });
       // Re-validate the revised bundle. The revision's entities replace the
       // originals wholesale (the constrained revision may delete/fix/downgrade
