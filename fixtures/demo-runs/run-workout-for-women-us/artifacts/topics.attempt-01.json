@@ -1,0 +1,201 @@
+{
+  "topics": [
+    {
+      "id": "topic-1",
+      "label": "Free tier monetization and subscription creep",
+      "description": "Users are frustrated that the free version is increasingly limited: many workouts are locked behind a subscription, ads and premium pop-ups interrupt use, and formerly free or ad-supported features now require payment.",
+      "candidateIds": [
+        "topic-candidate-1",
+        "topic-candidate-3",
+        "topic-candidate-4"
+      ],
+      "reviewIds": [
+        "4546f3670dc7c0d6f3eb",
+        "c664f11934600e695a36",
+        "e6c0f7edc552c6574e26",
+        "78bd365e2b71159b59a7",
+        "3861832cace1a3167df0",
+        "890532d228e5b53e42a5",
+        "0955b1baaf3c35c4b0a2",
+        "9760d9c68d286009fcd4",
+        "f0a0854553f8f39a0c64",
+        "16597fa69a8ed2f41f93",
+        "1a0c9d8d86e92d3b18ed",
+        "a2451880885af05b2966",
+        "cfc6ea747499385150d1",
+        "f68c70a9a54252220e38",
+        "8e29cbd327532e501aa5",
+        "840f2c9a34205dfe692c",
+        "48c9d51ab9c80825ee38",
+        "4d5a83e9749ba168245c",
+        "cab0fd7b86ed209c8875",
+        "74ef2e9c6c35231735e0"
+      ]
+    },
+    {
+      "id": "topic-2",
+      "label": "Unexpected charges and cancellation problems",
+      "description": "Users report being charged immediately after signing up for free trials or after cancelling, and struggle to cancel subscriptions or get support.",
+      "candidateIds": [
+        "topic-candidate-2"
+      ],
+      "reviewIds": [
+        "ecd1a5a16fb30b466a55",
+        "bf46b6a695918370fa9a",
+        "09323a6117b5c4b17e32",
+        "561324f2c4558e29ae78",
+        "d3a0e7c9c05477052b2c",
+        "369176d0336ebb41f2b4",
+        "121c4f95281a8c6778ea"
+      ]
+    },
+    {
+      "id": "topic-3",
+      "label": "Workout quality, variety, and motivation",
+      "description": "Satisfied users praise the range of workouts, easy-to-follow routines, short flexible options, and motivational content that help them stay active.",
+      "candidateIds": [
+        "topic-candidate-5"
+      ],
+      "reviewIds": [
+        "20432ecd738e63d400d9",
+        "6ed88a2c06c8fb79f4fd",
+        "15004a338c92e12015d8",
+        "36d485f0d80d63405c87",
+        "68952e8c6b95054e4a5e",
+        "359fc5d62b1a720c3ac0",
+        "195ae5a7998be4072b39",
+        "cee60c8aebaf97e5af4d",
+        "2cfbff7ada9d1b55c394",
+        "df2b9cabead4196e079e",
+        "510948e77f793a117b89",
+        "d96ead0e494ec0087513",
+        "6a48840b4c012c277e75",
+        "ac713b7574e3d03b8e0c",
+        "caa2b95cb09f3d4f423c",
+        "f794ef43a23a9d5fb7ce",
+        "227cd28bd6b0782d266c",
+        "f864d22587e7cfdd2e73",
+        "a27de028e014f913dadd",
+        "2c750fcda0aef4ff2c76"
+      ]
+    },
+    {
+      "id": "topic-4",
+      "label": "Technical and account access problems",
+      "description": "Some users cannot download workouts even after paying, get logged out and cannot restore access, or have no way to manage subscriptions and contact support.",
+      "candidateIds": [
+        "topic-candidate-6"
+      ],
+      "reviewIds": [
+        "11f74b393c3cec9387f5",
+        "49f4bd6c7c917e7b055d",
+        "561324f2c4558e29ae78"
+      ]
+    }
+  ],
+  "candidates": [
+    {
+      "id": "topic-candidate-1",
+      "label": "Paywall and subscription creep",
+      "description": "Long-time users say the app started free or ad-supported but now requires a subscription for most workouts, including previously saved plans.",
+      "supportingReviewIds": [
+        "4546f3670dc7c0d6f3eb",
+        "c664f11934600e695a36",
+        "e6c0f7edc552c6574e26",
+        "78bd365e2b71159b59a7",
+        "3861832cace1a3167df0",
+        "890532d228e5b53e42a5",
+        "0955b1baaf3c35c4b0a2",
+        "9760d9c68d286009fcd4",
+        "f0a0854553f8f39a0c64",
+        "16597fa69a8ed2f41f93",
+        "1a0c9d8d86e92d3b18ed",
+        "a2451880885af05b2966",
+        "cfc6ea747499385150d1"
+      ],
+      "quote": "hate how they kept going from completely free to charging for everything now"
+    },
+    {
+      "id": "topic-candidate-2",
+      "label": "Unexpected charges and cancellation problems",
+      "description": "Users report being charged immediately after signing up for a free trial, charged after cancelling, and unable to cancel or get support.",
+      "supportingReviewIds": [
+        "ecd1a5a16fb30b466a55",
+        "bf46b6a695918370fa9a",
+        "09323a6117b5c4b17e32",
+        "561324f2c4558e29ae78",
+        "d3a0e7c9c05477052b2c",
+        "369176d0336ebb41f2b4",
+        "121c4f95281a8c6778ea"
+      ],
+      "quote": "you told me a free trial for a week and the charged me $19.99 right away. what can i do?!"
+    },
+    {
+      "id": "topic-candidate-3",
+      "label": "Free version too restrictive or unaffordable",
+      "description": "Free users say too many workouts are locked behind payment, ask for more free options, and mention they cannot afford a subscription.",
+      "supportingReviewIds": [
+        "f68c70a9a54252220e38",
+        "8e29cbd327532e501aa5",
+        "840f2c9a34205dfe692c",
+        "48c9d51ab9c80825ee38",
+        "4d5a83e9749ba168245c",
+        "cab0fd7b86ed209c8875",
+        "0955b1baaf3c35c4b0a2"
+      ],
+      "quote": "i am on the free version and there are a lot of things that i can't do without paying"
+    },
+    {
+      "id": "topic-candidate-4",
+      "label": "Aggressive ads and premium pop-ups",
+      "description": "Users describe a frustrating free tier in which ads interrupt access and pop-ups push the paid version, sometimes with no way to continue.",
+      "supportingReviewIds": [
+        "74ef2e9c6c35231735e0",
+        "c664f11934600e695a36",
+        "0955b1baaf3c35c4b0a2",
+        "cfc6ea747499385150d1"
+      ],
+      "quote": "the workout is available with ads yet the interface traps you with their predatory ads."
+    },
+    {
+      "id": "topic-candidate-5",
+      "label": "Loved for workout variety, quality, and motivation",
+      "description": "Satisfied reviewers praise the workout selection, easy-to-follow routines, short flexible options, and motivational content that help them stay active.",
+      "supportingReviewIds": [
+        "20432ecd738e63d400d9",
+        "6ed88a2c06c8fb79f4fd",
+        "15004a338c92e12015d8",
+        "36d485f0d80d63405c87",
+        "68952e8c6b95054e4a5e",
+        "359fc5d62b1a720c3ac0",
+        "195ae5a7998be4072b39",
+        "cee60c8aebaf97e5af4d",
+        "2cfbff7ada9d1b55c394",
+        "df2b9cabead4196e079e",
+        "510948e77f793a117b89",
+        "d96ead0e494ec0087513",
+        "6a48840b4c012c277e75",
+        "ac713b7574e3d03b8e0c",
+        "caa2b95cb09f3d4f423c",
+        "f794ef43a23a9d5fb7ce",
+        "227cd28bd6b0782d266c",
+        "f864d22587e7cfdd2e73",
+        "a27de028e014f913dadd",
+        "2c750fcda0aef4ff2c76"
+      ],
+      "quote": "this app has everything you need to get in shape and be healthy. very easy to follow good music and great workouts. highly recommended."
+    },
+    {
+      "id": "topic-candidate-6",
+      "label": "Technical and account access problems",
+      "description": "Some users cannot download workouts even after paying, get logged out and cannot restore access, or find no way to manage subscriptions and contact support.",
+      "supportingReviewIds": [
+        "11f74b393c3cec9387f5",
+        "49f4bd6c7c917e7b055d",
+        "561324f2c4558e29ae78"
+      ],
+      "quote": "even with a paid subscription, you cannot download. no help or steps from online searches help."
+    }
+  ],
+  "warnings": []
+}

@@ -1,0 +1,28 @@
+{
+  "provenance": {
+    "schemaVersion": "1",
+    "reviewData": "apple-rss-real",
+    "storefront": "us",
+    "appId": "839285684",
+    "capturedAt": "2026-08-12T11:48:19.791Z",
+    "captureMethod": "Apple Customer Reviews RSS (sequential, max 10 pages, >=500ms delay)",
+    "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained",
+    "snapshotSha256": "aef0924f3581fc66b52dfbf976ab63b62d90dc0155723d3d0935d89e50dac149"
+  },
+  "analysis": {
+    "executionMode": "live",
+    "outputLocale": "en",
+    "goal": "Identify the most impactful product problems and opportunities from real user reviews",
+    "modelProvider": "OpenAI-compatible (DeepSeek-compatible endpoint)",
+    "modelName": "deepseek-v4-flash",
+    "temperature": 0.1,
+    "promptVersions": [
+      "scope@1",
+      "topics.discovery@1",
+      "topics.consolidation@1",
+      "findings@1",
+      "planning@1",
+      "tests@1"
+    ]
+  }
+}

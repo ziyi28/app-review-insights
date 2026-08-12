@@ -1,0 +1,4 @@
+id,title,body,rating,version,updatedAt,language
+csv-1,Great app,Love the variety of exercises,5,3.2.1,2026-07-01T10:00:00Z,en
+csv-2,Glitchy,The timer restarts randomly during rest,1,3.2.0,2026-07-02T10:00:00Z,en
+csv-3,很好,动作讲解很清晰，很喜欢,4,3.2.1,2026-07-03T10:00:00Z,zh

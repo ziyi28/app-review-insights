@@ -1,0 +1,12 @@
+{
+  "feed": {
+    "author": { "name": { "label": "iTunes Store" } },
+    "entry": [],
+    "link": [
+      { "attributes": { "rel": "self", "href": "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json" } }
+    ],
+    "id": { "label": "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json" },
+    "title": { "label": "iTunes Store: Customer Reviews" },
+    "updated": { "label": "2026-08-12T00:00:00-07:00" }
+  }
+}

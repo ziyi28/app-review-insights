@@ -1,0 +1,46 @@
+{
+  "feed": {
+    "author": { "name": { "label": "iTunes Store" } },
+    "entry": [
+      {
+        "id": { "label": "8435931487" },
+        "author": {
+          "name": { "label": "ReviewerOne" },
+          "uri": { "label": "https://itunes.apple.com/us/reviews?user=u1" }
+        },
+        "updated": { "label": "2026-07-20T18:04:23-07:00" },
+        "im:rating": { "label": "5" },
+        "im:version": { "label": "3.2.1" },
+        "title": { "label": "Great workout app" },
+        "content": { "label": "I love the variety of workouts. Easy to follow at home.", "attributes": { "type": "text" } },
+        "link": { "attributes": { "rel": "alternate", "href": "https://apps.apple.com/us/review?appId=839285684&reviewId=8435931487" } },
+        "im:voteSum": { "label": "0" },
+        "im:voteCount": { "label": "0" },
+        "im:contentType": { "attributes": { "term": "Application", "label": "Application" } }
+      },
+      {
+        "id": { "label": "8435931488" },
+        "author": {
+          "name": { "label": "ReviewerTwo" },
+          "uri": { "label": "https://itunes.apple.com/us/reviews?user=u2" }
+        },
+        "updated": { "label": "2026-07-19T09:12:00-07:00" },
+        "im:rating": { "label": "1" },
+        "im:version": { "label": "3.2.0" },
+        "title": { "label": "Subscription is too expensive" },
+        "content": { "label": "You have to pay to unlock anything useful. Way too expensive.", "attributes": { "type": "text" } },
+        "link": { "attributes": { "rel": "alternate", "href": "https://apps.apple.com/us/review?appId=839285684&reviewId=8435931488" } },
+        "im:voteSum": { "label": "0" },
+        "im:voteCount": { "label": "0" },
+        "im:contentType": { "attributes": { "term": "Application", "label": "Application" } }
+      }
+    ],
+    "link": [
+      { "attributes": { "rel": "self", "href": "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json" } },
+      { "attributes": { "rel": "last", "href": "https://itunes.apple.com/us/rss/customerreviews/page=10/id=839285684/sortby=mostRecent/json" } }
+    ],
+    "id": { "label": "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json" },
+    "title": { "label": "iTunes Store: Customer Reviews" },
+    "updated": { "label": "2026-08-12T00:00:00-07:00" }
+  }
+}

@@ -1,0 +1,60 @@
+:root {
+  --bg: #0f172a;
+  --bg-panel: #1e293b;
+  --bg-elevated: #334155;
+  --border: #475569;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --accent: #38bdf8;
+  --accent-strong: #0ea5e9;
+  --ok: #4ade80;
+  --warn: #facc15;
+  --danger: #f87171;
+  --info: #c084fc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid var(--border);
+  padding: 6px 8px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  background: var(--bg-elevated);
+}
+
+pre {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

@@ -1,0 +1,95 @@
+{
+  "runId": "run-workout-for-women-us",
+  "status": "completed",
+  "executionMode": "import",
+  "createdAt": "2026-08-12T12:01:49.636Z",
+  "updatedAt": "2026-08-12T12:01:49.636Z",
+  "stages": {
+    "source": {
+      "status": "completed",
+      "startedAt": "2026-08-12T11:53:40.175Z",
+      "finishedAt": "2026-08-12T11:53:40.178Z"
+    },
+    "prepare": {
+      "status": "completed",
+      "startedAt": "2026-08-12T11:53:40.179Z",
+      "finishedAt": "2026-08-12T11:53:40.202Z"
+    },
+    "scope": {
+      "status": "completed",
+      "startedAt": "2026-08-12T11:53:40.203Z",
+      "finishedAt": "2026-08-12T11:53:51.556Z"
+    },
+    "topics": {
+      "status": "completed",
+      "startedAt": "2026-08-12T11:53:51.556Z",
+      "finishedAt": "2026-08-12T11:57:00.514Z"
+    },
+    "findings": {
+      "status": "completed",
+      "startedAt": "2026-08-12T11:57:00.514Z",
+      "finishedAt": "2026-08-12T11:59:04.442Z"
+    },
+    "planning": {
+      "status": "completed",
+      "startedAt": "2026-08-12T11:59:04.443Z",
+      "finishedAt": "2026-08-12T12:00:06.091Z"
+    },
+    "tests": {
+      "status": "completed",
+      "startedAt": "2026-08-12T12:00:06.091Z",
+      "finishedAt": "2026-08-12T12:01:49.629Z"
+    },
+    "traceability": {
+      "status": "completed",
+      "startedAt": "2026-08-12T12:01:49.630Z",
+      "finishedAt": "2026-08-12T12:01:49.632Z"
+    }
+  },
+  "artifacts": {},
+  "limitations": [
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "Review text is not included in the provided statistics, so actual user-reported problems and opportunities cannot be directly extracted."
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "The provided statistics do not include cross-tabulations of rating by version, language, or date, so specific problematic versions or segments cannot be identified."
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "The language value 'other' is an aggregate and does not identify which non-English languages are represented."
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "The dataset is small (50 reviews) and spans only about one month, limiting the generalizability of findings."
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "No app-specific category or theme information is available, so product problems and opportunities can only be inferred from rating and distribution patterns."
+    }
+  ],
+  "canReplay": true,
+  "modelUsage": {
+    "provider": "https://api.deepseek.com",
+    "model": "deepseek-v4-flash",
+    "temperature": 0.1,
+    "promptVersions": [
+      "scope@1",
+      "topics.discovery@1",
+      "topics.consolidation@1",
+      "findings@1",
+      "planning@1",
+      "tests@1"
+    ],
+    "usage": "usage tokens are captured at runtime from the provider response; not stored here to keep the fixture stable"
+  },
+  "promptVersions": [
+    "scope@1",
+    "topics.discovery@1",
+    "topics.consolidation@1",
+    "findings@1",
+    "planning@1",
+    "tests@1"
+  ]
+}
