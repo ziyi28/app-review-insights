@@ -86,7 +86,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
       </div>
 
       {mode === "live" ? (
-        <label>
+        <label key="field-live">
           {t.appStoreUrl}
           <input
             value={url}
@@ -95,12 +95,12 @@ export function RunForm({ t, onStart }: RunFormProps) {
           />
         </label>
       ) : mode === "import" ? (
-        <label>
+        <label key="field-import">
           {t.importFile}
           <input type="file" accept=".json,.csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
         </label>
       ) : (
-        <label>
+        <label key="field-replay">
           {t.cachedReplay}
           <select
             value={sourceRunId}
