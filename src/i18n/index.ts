@@ -69,6 +69,18 @@ export type Dictionary = {
   normalized: string;
   sourceId: string;
   replaySource: string;
+  settings: string;
+  modelBaseUrl: string;
+  modelApiKey: string;
+  modelName: string;
+  modelJsonMode: string;
+  save: string;
+  saved: string;
+  close: string;
+  apiKeyConfigured: string;
+  apiKeyPlaceholder: string;
+  apiKeyClear: string;
+  configApplyError: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -141,6 +153,18 @@ export const dictionaries: Record<Locale, Dictionary> = {
     normalized: "normalized",
     sourceId: "source id",
     replaySource: "Cached Replay",
+    settings: "Settings",
+    modelBaseUrl: "API Base URL",
+    modelApiKey: "API Key",
+    modelName: "Model Name",
+    modelJsonMode: "JSON Mode",
+    save: "Save",
+    saved: "Saved",
+    close: "Close",
+    apiKeyConfigured: "Configured",
+    apiKeyPlaceholder: "Enter a new key to replace the current one",
+    apiKeyClear: "Clear key",
+    configApplyError: "Failed to save settings",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -211,6 +235,18 @@ export const dictionaries: Record<Locale, Dictionary> = {
     normalized: "规范化",
     sourceId: "来源 ID",
     replaySource: "缓存回放",
+    settings: "设置",
+    modelBaseUrl: "API Base URL",
+    modelApiKey: "API Key",
+    modelName: "模型名称",
+    modelJsonMode: "JSON 模式",
+    save: "保存",
+    saved: "已保存",
+    close: "关闭",
+    apiKeyConfigured: "已配置",
+    apiKeyPlaceholder: "输入新 Key 以替换当前 Key",
+    apiKeyClear: "清除 Key",
+    configApplyError: "保存设置失败",
   },
 };
 

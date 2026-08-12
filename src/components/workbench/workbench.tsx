@@ -9,6 +9,7 @@ import { useRunStream } from "@/hooks/use-run-stream";
 import { RunForm } from "./run-form";
 import { StageRail } from "./stage-rail";
 import { EventDrawer } from "./event-drawer";
+import { SettingsPanel } from "./settings-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
 import { ProvenanceBadge } from "./provenance-badge";
@@ -40,6 +41,7 @@ type ArtifactCache = {
 
 export function Workbench() {
   const [uiLocale, setUiLocale] = useState<Locale>("en");
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const t = getDictionary(uiLocale);
 
   // Keep the document language in sync with the UI locale so assistive
@@ -185,10 +187,12 @@ export function Workbench() {
         <span style={{ flex: 1 }} />
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
         <button onClick={handleNewRun}>{t.newRun}</button>
+        <button onClick={() => setSettingsOpen(true)}>{t.settings}</button>
         <select value={uiLocale} onChange={(e) => setUiLocale(e.target.value as Locale)} aria-label={t.language}>
           <option value="en">English</option>
           <option value="zh-CN">中文</option>
         </select>
+        <SettingsPanel t={t} open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       </header>
 
       {/* Left: stage rail */}
