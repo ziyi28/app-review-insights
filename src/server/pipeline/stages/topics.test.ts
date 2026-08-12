@@ -112,7 +112,7 @@ describe("runTopicsStage", () => {
 
   it("reports live progress for each discovery batch", async () => {
     const onProgress = vi.fn();
-    // 30 reviews with ~500-char bodies push the corpus past the 12k chunk
+    // 30 reviews with ~500-char bodies push the corpus past the 8k chunk
     // budget so discovery runs in 2 batches.
     const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
     const discoveryForChunk = {
@@ -131,5 +131,112 @@ describe("runTopicsStage", () => {
     const msgs = onProgress.mock.calls.map((c) => String(c[0]));
     expect(msgs.some((m) => m.includes("1 of"))).toBe(true);
     expect(msgs.some((m) => m.includes("2 of"))).toBe(true);
+    expect(msgs.some((m) => /\(\d+ reviews\)/.test(m))).toBe(true);
+    expect(msgs.some((m) => m.includes("in parallel"))).toBe(true);
+  });
+
+  it("calls discovery once per chunk", async () => {
+    // 30 reviews with ~500-char bodies split into 2 chunks; each chunk must
+    // get its own discovery call regardless of parallel execution.
+    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const generate = vi.fn(async () => ({ topics: [] }));
+    const ctx = context({ reviews: many, model: { generate } as never });
+    await runTopicsStage(ctx);
+    // No candidates -> consolidation is skipped, so exactly one call per chunk.
+    expect(generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("respects maxConcurrency when running discovery batches in parallel", async () => {
+    // 60 reviews with ~500-char bodies split into 4 chunks.
+    const many = Array.from({ length: 60 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    let active = 0;
+    let maxActive = 0;
+    const generate = vi.fn(async () => {
+      active += 1;
+      maxActive = Math.max(maxActive, active);
+      await new Promise((r) => setTimeout(r, 2));
+      active -= 1;
+      return { topics: [] };
+    });
+    const ctx = context({ reviews: many, maxConcurrency: 2, model: { generate } as never });
+    await runTopicsStage(ctx);
+    // Parallel execution actually overlaps discovery calls, but never more
+    // than the configured limit at once.
+    expect(maxActive).toBeGreaterThan(1);
+    expect(maxActive).toBeLessThanOrEqual(2);
+  });
+
+  it("splits a large candidate set into small consolidation calls", async () => {
+    // A corpus large enough to produce many candidates across chunks: 30
+    // reviews with ~500-char bodies → 2 chunks → 2 discovery calls, each
+    // returning 10 candidates = 20 candidates > the 15-per-call budget.
+    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const discoveryForChunk = {
+      topics: Array.from({ length: 10 }, (_, i) => ({
+        id: `topic-candidate-${i + 1}`,
+        label: `candidate ${i + 1}`,
+        description: "d",
+        supportingReviewIds: [many[0].reviewId],
+        quote: "review number 0",
+      })),
+    };
+    const fedCounts: number[] = [];
+    const generate = vi.fn(async (request: { promptVersion: string; user?: unknown }) => {
+      if (request.promptVersion === "topics.consolidation@1") {
+        const parsed = JSON.parse(request.user as string) as { candidates: unknown[] };
+        fedCounts.push(parsed.candidates.length);
+        return { topics: [] };
+      }
+      return discoveryForChunk;
+    });
+    const ctx = context({ reviews: many, model: { generate } as never });
+    const result = await runTopicsStage(ctx);
+    // 20 candidates / 15 budget = 2 consolidation calls, each fed at most 15.
+    expect(fedCounts).toHaveLength(2);
+    expect(fedCounts[0]).toBe(15);
+    expect(fedCounts[1]).toBe(5);
+    expect(result.topics).toHaveLength(0); // groups returned no topics
+  });
+
+  it("merges topics with the same label across consolidation groups", async () => {
+    // 30 reviews → 2 chunks → 20 candidates → 2 consolidation groups. Group 0
+    // gets candidates @c0 (10) + @c1 (5); group 1 gets @c1 (5) + @c2 (10).
+    // Both groups return a "Pricing" topic citing candidates they actually
+    // hold; the code merge joins them into one topic.
+    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const discoveryForChunk = {
+      topics: Array.from({ length: 10 }, (_, i) => ({
+        id: `topic-candidate-${i + 1}`,
+        label: `candidate ${i + 1}`,
+        description: "d",
+        supportingReviewIds: [many[0].reviewId],
+        quote: "review number 0",
+      })),
+    };
+    let consGroup = 0;
+    const generate = vi.fn(async (request: { promptVersion: string }) => {
+      if (request.promptVersion === "topics.consolidation@1") {
+        const group = consGroup++;
+        // Group 0 holds @c0 (10) + @c1 (5); group 1 holds @c1 (5) + @c2 (10).
+        // Cite distinct candidates that each group actually owns.
+        const ids = group === 0 ? ["topic-candidate-1@c0", "topic-candidate-2@c0"] : ["topic-candidate-6@c1", "topic-candidate-7@c1"];
+        return {
+          topics: [
+            {
+              id: "topic-1",
+              label: "Pricing concerns",
+              description: "users complain about cost",
+              candidateIds: ids,
+            },
+          ],
+        };
+      }
+      return discoveryForChunk;
+    });
+    const ctx = context({ reviews: many, model: { generate } as never });
+    const result = await runTopicsStage(ctx);
+    expect(result.topics).toHaveLength(1);
+    expect(result.topics[0].label).toBe("Pricing concerns");
+    expect(result.topics[0].candidateIds).toEqual(["topic-candidate-1@c0", "topic-candidate-2@c0", "topic-candidate-6@c1", "topic-candidate-7@c1"]);
   });
 });

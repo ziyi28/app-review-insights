@@ -56,4 +56,25 @@ describe("LiveProgress", () => {
     expect(screen.getByText(/batch 2 of 2/)).toBeInTheDocument();
     expect(screen.queryByText(/batch 1 of 2/)).not.toBeInTheDocument();
   });
+
+  it("prefers a specific stage message over the periodic heartbeat", () => {
+    const events = [
+      event({ type: "stage.started", sequence: 1, data: { stage: "topics" } }),
+      event({ type: "stage.progress", sequence: 2, data: { message: "model generation in progress (10s)" } }),
+      event({ type: "stage.progress", sequence: 3, data: { message: "analyzing review batch 2 of 5" } }),
+      event({ type: "stage.progress", sequence: 4, data: { message: "model generation in progress (30s)" } }),
+    ];
+    render(<LiveProgress events={events} running t={t} />);
+    expect(screen.getByText(/analyzing review batch 2 of 5/)).toBeInTheDocument();
+    expect(screen.queryByText(/model generation in progress/)).not.toBeInTheDocument();
+  });
+
+  it("falls back to the heartbeat when no specific message exists", () => {
+    const events = [
+      event({ type: "stage.started", sequence: 1, data: { stage: "findings" } }),
+      event({ type: "stage.progress", sequence: 2, data: { message: "model generation in progress (137s)" } }),
+    ];
+    render(<LiveProgress events={events} running t={t} />);
+    expect(screen.getByText(/model generation in progress \(137s\)/)).toBeInTheDocument();
+  });
 });

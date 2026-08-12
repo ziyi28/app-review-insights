@@ -90,20 +90,26 @@ export function Workbench() {
 
   // Poll the run's artifacts until every expected one has loaded OR the run
   // reached a terminal state (which may legitimately lack some artifacts, e.g.
-  // insufficient-data or early failure). The poll also stops after a bounded
-  // number of attempts so a broken run cannot trigger an infinite 404 loop.
+  // insufficient-data or early failure). Polling continues for as long as the
+  // run is in flight: a real run took ~25min (topics alone ~17min), so a fixed
+  // attempt ceiling must never stop the poller while the run is still healthy.
+  // The normal exit is the terminal-event signal below; after termination one
+  // final flush tries once more so artifacts published right before the
+  // terminal event (e.g. final-report) are still fetched, then the poller stops.
   const loadedArtifacts = useRef<Set<string>>(new Set());
   const seenRunId = useRef<string | null>(null);
+  const runTerminatedRef = useRef(false);
+  const flushedAfterTerminationRef = useRef(false);
   useEffect(() => {
     if (!runId) return;
     // New run -> fresh cache (never show the previous run's artifacts). The
     // reset happens inside the async loader so it is not a synchronous setState
     // in the effect body.
     loadedArtifacts.current.clear();
+    runTerminatedRef.current = false;
+    flushedAfterTerminationRef.current = false;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
-    let attempts = 0;
-    const MAX_ATTEMPTS = 60; // ~48s of 800ms polls, then give up
 
     const loadOnce = async () => {
       if (cancelled) return;
@@ -112,7 +118,6 @@ export function Workbench() {
         setCache({ runId });
         setTab("overview");
       }
-      attempts += 1;
       const names = Object.keys(artifactNameToKey);
       const next: Record<string, unknown> = {};
       for (const name of names) {
@@ -129,13 +134,18 @@ export function Workbench() {
         }
       }
       if (!cancelled) setCache((c) => ({ ...c, runId, ...(next as Partial<ArtifactCache>) }));
-      // Keep polling until every artifact is loaded OR we hit the attempt
-      // ceiling. A run that legitimately lacks some artifacts (insufficient
-      // data, early failure) will exhaust MAX_ATTEMPTS and stop; a completed
-      // run loads everything it produced.
-      if (!cancelled && loadedArtifacts.current.size < names.length && attempts < MAX_ATTEMPTS) {
-        timer = setTimeout(loadOnce, 800);
+      // Keep polling while the run is still in flight. Once it terminates, a
+      // final flush runs once more (in case the last artifacts appeared between
+      // the previous poll and the terminal event) and then stops — artifacts a
+      // terminated run never produced will never appear.
+      const terminated = runTerminatedRef.current;
+      if (cancelled) return;
+      if (loadedArtifacts.current.size >= names.length) return;
+      if (terminated) {
+        if (flushedAfterTerminationRef.current) return;
+        flushedAfterTerminationRef.current = true;
       }
+      timer = setTimeout(loadOnce, 800);
     };
     void loadOnce();
 
@@ -144,6 +154,15 @@ export function Workbench() {
       if (timer) clearTimeout(timer);
     };
   }, [runId, artifactNameToKey]);
+
+  // Flip the terminal flag the moment the run stream reports completion or
+  // failure. Read through a ref so the poll loop above observes it without
+  // being rebuilt on every streamed event.
+  useEffect(() => {
+    if (events.some((e) => e.type === "run.completed" || e.type === "run.failed")) {
+      runTerminatedRef.current = true;
+    }
+  }, [events]);
 
   const cleanedReviews = useMemo(() => {
     const prepared = cache.cleaned as { reviews?: NormalizedReview[] } | undefined;
