@@ -9,6 +9,7 @@ import { useRunStream } from "@/hooks/use-run-stream";
 import { RunForm } from "./run-form";
 import { StageRail } from "./stage-rail";
 import { EventDrawer } from "./event-drawer";
+import { LiveProgress } from "./live-progress";
 import { SettingsPanel } from "./settings-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
@@ -211,6 +212,8 @@ export function Workbench() {
           </div>
         ) : (
           <>
+            <LiveProgress events={events} running={running} t={t} />
+
             <nav style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "12px" }}>
               {TABS.map((tabDef) => (
                 <button
