@@ -44,6 +44,8 @@ export type ServerConfig = {
   modelApiKey: string | null;
   modelName: string | null;
   modelJsonMode: "prompt" | "json_object";
+  /** Hard deadline for a single model call (ms); the run aborts when exceeded. */
+  modelTimeoutMs: number;
   runsDir: string;
   appleRssBaseUrl: string;
   appleRssPageDelayMs: number;
@@ -72,6 +74,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     modelApiKey,
     modelName,
     modelJsonMode: effectiveJsonMode,
+    // A single topic-discovery call often takes minutes on a large prompt;
+    // 300s default, floored at 10s so a 0/negative env cannot abort instantly.
+    modelTimeoutMs: Math.max(10_000, intFromEnv("MODEL_TIMEOUT_MS", 300_000)),
     runsDir,
     appleRssBaseUrl: env.APPLE_RSS_BASE_URL?.trim() || "https://itunes.apple.com/us/rss/customerreviews",
     // Rate-limit discipline: never more than 10 pages and never faster than

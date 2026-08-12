@@ -16,6 +16,7 @@ beforeEach(() => {
   delete process.env.MODEL_API_KEY;
   delete process.env.MODEL_NAME;
   delete process.env.MODEL_JSON_MODE;
+  delete process.env.MODEL_TIMEOUT_MS;
   delete process.env.RUNS_DIR;
   delete process.env.APPLE_RSS_BASE_URL;
   delete process.env.APPLE_RSS_PAGE_DELAY_MS;
@@ -35,6 +36,7 @@ describe("loadConfig", () => {
     expect(cfg.modelBaseUrl).toBeNull();
     expect(cfg.modelName).toBeNull();
     expect(cfg.modelJsonMode).toBe("prompt");
+    expect(cfg.modelTimeoutMs).toBe(300_000);
     expect(cfg.appleRssMaxPages).toBe(10);
     expect(cfg.appleRssPageDelayMs).toBe(500);
     expect(isModelConfigured(cfg)).toBe(false);
@@ -73,6 +75,18 @@ describe("loadConfig", () => {
 
     process.env.APPLE_RSS_PAGE_DELAY_MS = "not-a-number";
     expect(loadConfig().appleRssPageDelayMs).toBe(500);
+  });
+
+  it("parses model timeout with a floor", () => {
+    process.env.MODEL_TIMEOUT_MS = "180000";
+    expect(loadConfig().modelTimeoutMs).toBe(180_000);
+
+    // A too-small value is clamped up so a misconfig cannot abort instantly.
+    process.env.MODEL_TIMEOUT_MS = "0";
+    expect(loadConfig().modelTimeoutMs).toBe(10_000);
+
+    process.env.MODEL_TIMEOUT_MS = "not-a-number";
+    expect(loadConfig().modelTimeoutMs).toBe(300_000);
   });
 
   it("resolves runsDir and supports an apple rss override", () => {
