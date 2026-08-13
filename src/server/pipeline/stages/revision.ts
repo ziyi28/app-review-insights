@@ -1,6 +1,6 @@
 import { revisionPrompt, RevisionOutputSchema } from "@/server/model/prompts/prompts";
 import type { Violation } from "@/domain/traceability/validate";
-import type { StageModelClient } from "../dependencies";
+import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type CitationLedger = {
   findings: Record<string, string[]>;
@@ -30,6 +30,9 @@ export type RevisionStageContext = {
     assumptions: unknown[];
   };
   outputLocale: "en" | "zh-CN";
+  /** Live progress callback; invoked with a human-readable message while the
+   *  model call is in flight so the UI can show feedback. */
+  onProgress?: (message: string) => void;
 };
 
 export type RevisionStageResult = {
@@ -110,6 +113,7 @@ function allowedPair(kind: "finding" | "req", entityId: string, reviewId: string
 export async function runRevisionStage(ctx: RevisionStageContext): Promise<RevisionStageResult> {
   const before = currentLedger(ctx.current);
 
+  ctx.onProgress?.("revising the plan to satisfy traceability");
   const output = await ctx.model.generate({
     stage: "revision",
     promptVersion: revisionPrompt.version,
@@ -122,6 +126,7 @@ export async function runRevisionStage(ctx: RevisionStageContext): Promise<Revis
       outputLocale: ctx.outputLocale,
     }),
     schema: RevisionOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
   });
 
   const after = new Set<string>();

@@ -1,6 +1,6 @@
 import type { Assumption, Finding, Prd, Requirement } from "@/domain/contracts/analysis";
 import { planningPrompt, PlanningOutputSchema, type PlanningOutput } from "@/server/model/prompts/prompts";
-import type { StageModelClient } from "../dependencies";
+import { modelProgressRelay, type StageModelClient } from "../dependencies";
 import { reviewIdsForFindings } from "@/domain/traceability/evidence-sources";
 
 export type PlanningStageContext = {
@@ -8,6 +8,9 @@ export type PlanningStageContext = {
   findings: Finding[];
   outputLocale: "en" | "zh-CN";
   goal: string;
+  /** Live progress callback; invoked with a human-readable message while the
+   *  model call is in flight so the UI can show feedback. */
+  onProgress?: (message: string) => void;
 };
 
 export type PlanningStageResult = {
@@ -82,12 +85,14 @@ export function normalizePlanningOutput(
  * Turns grounded findings into a version plan and PRD via the model.
  */
 export async function runPlanningStage(ctx: PlanningStageContext): Promise<PlanningStageResult> {
+  ctx.onProgress?.("planning versions and writing the PRD");
   const output = await ctx.model.generate({
     stage: "planning",
     promptVersion: planningPrompt.version,
     system: planningPrompt.system,
     user: planningPrompt.buildUser({ findings: ctx.findings, goal: ctx.goal, outputLocale: ctx.outputLocale }),
     schema: PlanningOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
   });
 
   return normalizePlanningOutput(output, ctx.findings, ctx.outputLocale);
