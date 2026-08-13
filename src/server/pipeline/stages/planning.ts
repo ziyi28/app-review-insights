@@ -105,6 +105,26 @@ export function normalizePlanningOutput(
     });
   }
 
+  // Second pass over dependencies: a scheduled requirement may only depend on
+  // requirements that are themselves scheduled. A dependency on an unscheduled
+  // requirement would fail traceability later, so it is pruned here (with a
+  // warning) instead of being fixed by a revision.
+  const scheduledRequirementIds = new Set(
+    requirements.filter((r) => r.versionId !== null).map((r) => r.id),
+  );
+  for (const req of requirements) {
+    if (req.versionId === null) continue; // unscheduled reqs may depend on anything
+    const deps = req.planningFactors!.dependencyRequirementIds;
+    const kept = deps.filter((id) => scheduledRequirementIds.has(id));
+    if (kept.length !== deps.length) {
+      req.planningFactors!.dependencyRequirementIds = kept;
+      warnings.push({
+        code: "PLANNING_DEPENDENCY_UNSCHEDULED",
+        message: `${req.id} dependency on unscheduled requirement removed`,
+      });
+    }
+  }
+
   const assumptions: Assumption[] = output.assumptions.map((a) => ({
     id: a.id,
     text: a.text,

@@ -298,6 +298,44 @@ describe("runPlanningStage", () => {
     expect(result.warnings.some((w) => w.code === "PLANNING_DEPENDENCY_DROPPED")).toBe(true);
   });
 
+  it("prunes a scheduled requirement's dependency on an unscheduled requirement", async () => {
+    const planningResponse: PlanningResponse = {
+      title: "Release plan",
+      overview: "x",
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "x", rationale: "x", requirementIds: ["req-1"] }],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-3"],
+          title: "A",
+          description: "d",
+          priority: "P1",
+          acceptanceCriteria: ["a"],
+          versionId: "ver-1",
+          planningFactors: { ...PLANNING_FACTORS, dependencyRequirementIds: ["req-2"] },
+        },
+        {
+          id: "req-2",
+          findingIds: ["finding-1"], // insufficient evidence -> versionId becomes null
+          title: "B",
+          description: "d",
+          priority: "P2",
+          acceptanceCriteria: ["b"],
+          versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
+        },
+      ],
+      assumptions: [],
+    };
+    const result = await runPlanningStage(context({}, planningResponse, [STRONG_SUFFICIENT_FINDING, findings[0]]));
+    // req-1 stays scheduled, but its dependency on unscheduled req-2 is pruned.
+    expect(result.prd.requirements[0].versionId).toBe("ver-1");
+    expect(result.prd.requirements[0].planningFactors!.dependencyRequirementIds).toEqual([]);
+    expect(result.warnings.some((w) => w.code === "PLANNING_DEPENDENCY_UNSCHEDULED")).toBe(true);
+    // req-2 itself is dropped to unscheduled (insufficient evidence).
+    expect(result.prd.requirements[1].versionId).toBeNull();
+  });
+
   it("keeps one version from one version and two versions from two versions", async () => {
     const one = await runPlanningStage(context());
     expect(one.prd.versions).toHaveLength(0); // req-1 dropped (insufficient)
