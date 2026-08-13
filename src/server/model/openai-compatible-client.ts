@@ -17,11 +17,20 @@ export type ModelClientDeps = {
 
 const TEMPERATURE = 0.1;
 const PROGRESS_INTERVAL_MS = 2000;
+// A single long model call (topic discovery can take 100-200s) occasionally
+// fails with a transient provider 5xx. Retrying a bounded number of times with
+// backoff keeps one flaky call from failing the whole (potentially 25-minute)
+// run, without masking deterministic failures.
+const MAX_RETRIES = 2;
+const RETRY_BASE_DELAY_MS = 1000;
 
 /**
  * Minimal OpenAI-compatible chat completions client. No provider-specific
- * features, no hidden retries. If the api key is empty no Authorization header
- * is sent (for local model runtimes). The request snapshot strips the key.
+ * features. Transient failures (5xx, network errors, per-call timeouts) are
+ * retried a bounded number of times with backoff; deterministic failures (4xx,
+ * schema/model-output errors) and client disconnects are not retried. If the
+ * api key is empty no Authorization header is sent (for local model runtimes).
+ * The request snapshot strips the key.
  */
 export class OpenAiCompatibleClient {
   private readonly baseUrl: string;
@@ -54,6 +63,26 @@ export class OpenAiCompatibleClient {
   }
 
   async generate<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
+    let lastError: Error | null = null;
+    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      try {
+        return await this.generateOnce(request);
+      } catch (err) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        // Never retry once the client disconnected; otherwise the pipeline would
+        // keep working against a dead stream.
+        if (this.signal?.aborted) throw lastError;
+        if (!isTransient(lastError) || attempt === MAX_RETRIES) throw lastError;
+        const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
+        console.warn(`[model] transient error (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${delay}ms: ${lastError.message}`);
+        await sleep(delay);
+      }
+    }
+    // Unreachable (the loop either returns or throws), but satisfies the type.
+    throw lastError ?? new Error("model generate failed");
+  }
+
+  private async generateOnce<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
     const url = `${this.baseUrl}/chat/completions`;
     const headers: Record<string, string> = { "content-type": "application/json" };
     if (this.apiKey) headers.authorization = `Bearer ${this.apiKey}`;
@@ -73,12 +102,18 @@ export class OpenAiCompatibleClient {
     const startedAt = Date.now();
     let res: Response;
     let bodyText: string;
+    let timedOut = false;
     try {
       // Combine the caller's abort signal with a hard per-call deadline.
       const controller = new AbortController();
       const onAbort = () => controller.abort();
       this.signal?.addEventListener("abort", onAbort, { once: true });
-      const timer = this.timeoutMs ? setTimeout(() => controller.abort(), this.timeoutMs) : undefined;
+      const timer = this.timeoutMs
+        ? setTimeout(() => {
+            timedOut = true;
+            controller.abort();
+          }, this.timeoutMs)
+        : undefined;
       // Heartbeat while waiting so long calls don't look frozen to the user.
       const heartbeat = request.onProgress
         ? setInterval(() => request.onProgress?.({ elapsedMs: Date.now() - startedAt }), this.progressIntervalMs)
@@ -93,6 +128,9 @@ export class OpenAiCompatibleClient {
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
+      // The timer aborts the fetch with timedOut set; the caller's signal aborts
+      // it without (client disconnect). Both surface as an AbortError.
+      if (timedOut && /abort/i.test(message)) throw new Error(`MODEL_REQUEST_TIMEOUT: exceeded ${this.timeoutMs}ms`);
       if (/abort/i.test(message)) throw new Error(`MODEL_REQUEST_ABORTED: ${message}`);
       throw new Error(`MODEL_NETWORK_ERROR: ${message}`);
     }
@@ -173,4 +211,21 @@ function safeProviderLabel(baseUrl: string): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * True for failures worth retrying: a transient provider 5xx, a network error,
+ * or a per-call timeout. Everything else is deterministic and must surface
+ * immediately (4xx, malformed/schema-violating model output, client abort).
+ */
+function isTransient(err: Error): boolean {
+  const message = err.message;
+  if (/^MODEL_HTTP_ERROR: 5\d\d/.test(message)) return true;
+  if (/^MODEL_NETWORK_ERROR:/.test(message)) return true;
+  if (/^MODEL_REQUEST_TIMEOUT:/.test(message)) return true;
+  return false;
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

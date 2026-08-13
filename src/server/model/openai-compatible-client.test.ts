@@ -64,10 +64,11 @@ describe("OpenAiCompatibleClient", () => {
     expect(body.temperature).toBe(0.1);
   });
 
-  it("distinguishes a timeout error", async () => {
+  it("surfaces a client abort as a non-transient abort error", async () => {
     const { client, fetchMock } = makeClient();
     fetchMock.mockRejectedValue(new DOMException("aborted", "AbortError"));
-    await expect(client.generate(requestBase())).rejects.toThrow(/timeout|abort|network/i);
+    await expect(client.generate(requestBase())).rejects.toThrow(/MODEL_REQUEST_ABORTED/);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("reports a schema validation failure distinctly", async () => {
@@ -98,10 +99,104 @@ describe("OpenAiCompatibleClient", () => {
     expect(log.durationsMs.length).toBe(2);
   });
 
-  it("does not retry automatically", async () => {
+  it("retries a transient 5xx and succeeds", async () => {
+    vi.useFakeTimers();
+    try {
+      const { client, fetchMock } = makeClient();
+      fetchMock
+        .mockResolvedValueOnce(new Response("err", { status: 500 }))
+        .mockResolvedValueOnce(new Response("err", { status: 500 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const pending = client.generate(requestBase());
+      await vi.advanceTimersByTimeAsync(10_000);
+      const result = await pending;
+      expect(result.ok).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      warn.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("retries a network error and succeeds", async () => {
+    vi.useFakeTimers();
+    try {
+      const { client, fetchMock } = makeClient();
+      fetchMock
+        .mockRejectedValueOnce(new Error("connection reset"))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const pending = client.generate(requestBase());
+      await vi.advanceTimersByTimeAsync(10_000);
+      const result = await pending;
+      expect(result.ok).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      warn.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("retries a call that times out", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = vi.fn(async (_url: unknown, init?: RequestInit) => {
+        const signal = (init as { signal?: AbortSignal } | undefined)?.signal;
+        return await new Promise<Response>((_resolve, reject) => {
+          signal?.addEventListener("abort", () => reject(new DOMException("aborted", "AbortError")));
+        });
+      });
+      const client = new OpenAiCompatibleClient({
+        baseUrl: "https://example.com/v1",
+        apiKey: "key",
+        model: "model-x",
+        jsonMode: "prompt",
+        timeoutMs: 1000,
+        fetchFn: fetchMock as unknown as typeof fetch,
+      });
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const pending = client.generate(requestBase());
+      // Attach the rejection handler before advancing so the eventual reject
+      // is observed, not treated as an unhandled rejection.
+      const expectation = expect(pending).rejects.toThrow(/MODEL_REQUEST_TIMEOUT/);
+      await vi.advanceTimersByTimeAsync(10_000);
+      await expectation;
+      // 1 initial + 2 retries, each timing out.
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      warn.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not retry a 4xx", async () => {
     const { client, fetchMock } = makeClient();
-    fetchMock.mockRejectedValue(new Error("boom"));
-    await expect(client.generate(requestBase())).rejects.toThrow();
+    fetchMock.mockResolvedValue(new Response("bad", { status: 400 }));
+    await expect(client.generate(requestBase())).rejects.toThrow(/MODEL_HTTP_ERROR: 400/);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry a schema violation", async () => {
+    const { client, fetchMock } = makeClient();
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":"nope"}' } }] })));
+    await expect(client.generate(requestBase())).rejects.toThrow(/schema/i);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry once the client has disconnected", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchMock = vi.fn(async () => new Response("err", { status: 500 }));
+    const client = new OpenAiCompatibleClient({
+      baseUrl: "https://example.com/v1",
+      apiKey: "key",
+      model: "model-x",
+      jsonMode: "prompt",
+      signal: controller.signal,
+      fetchFn: fetchMock as unknown as typeof fetch,
+    });
+    await expect(client.generate(requestBase())).rejects.toThrow(/MODEL_HTTP_ERROR: 500/);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
