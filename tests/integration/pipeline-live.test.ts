@@ -161,13 +161,18 @@ describe("executeRun (live pipeline)", () => {
       data: { message: string };
     }[];
     // Every model stage emits at least one progress message (scope, topics,
-    // findings, planning, tests).
-    expect(progress.length).toBeGreaterThanOrEqual(5);
+    // findings, planning, tests), and the deterministic source/prepare stages
+    // announce themselves too so the UI is never silent at run start.
+    expect(progress.length).toBeGreaterThanOrEqual(7);
     const stages = new Set(progress.map((p) => p.stage));
     for (const s of ["scope", "topics", "findings", "planning", "tests"]) {
       expect(stages.has(s)).toBe(true);
     }
+    expect(stages.has("source")).toBe(true);
+    expect(stages.has("prepare")).toBe(true);
     expect(progress.some((p) => /batch|review/i.test(p.data.message))).toBe(true);
+    // The collected-count message from the source stage must reflect the page.
+    expect(progress.some((p) => p.stage === "source" && /collected 1 reviews/.test(p.data.message))).toBe(true);
   });
 
   it("applies scope filters so only matching reviews reach the model stages", async () => {
