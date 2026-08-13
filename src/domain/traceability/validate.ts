@@ -15,6 +15,39 @@ export type TraceabilityReport = {
 };
 
 /**
+ * Detects requirement ids that participate in a dependency cycle via iterative
+ * DFS. Self-links are excluded (the planner already removes them), so any cycle
+ * member here means two or more requirements depend on each other.
+ */
+function requirementsInDependencyCycles(requirements: Requirement[]): Set<string> {
+  const byId = new Map(requirements.map((requirement) => [requirement.id, requirement]));
+  const visiting = new Set<string>();
+  const visited = new Set<string>();
+  const cyclic = new Set<string>();
+  const stack: string[] = [];
+
+  const visit = (id: string) => {
+    if (visiting.has(id)) {
+      const cycleStart = stack.indexOf(id);
+      for (const cycleId of stack.slice(cycleStart)) cyclic.add(cycleId);
+      return;
+    }
+    if (visited.has(id)) return;
+    visiting.add(id);
+    stack.push(id);
+    for (const dependencyId of byId.get(id)?.planningFactors?.dependencyRequirementIds ?? []) {
+      if (byId.has(dependencyId)) visit(dependencyId);
+    }
+    stack.pop();
+    visiting.delete(id);
+    visited.add(id);
+  };
+
+  for (const id of byId.keys()) visit(id);
+  return cyclic;
+}
+
+/**
  * Deterministic validation of the full review -> finding -> requirement ->
  * test traceability chain. Never invents evidence; unsupported references are
  * reported as violations.
@@ -29,6 +62,11 @@ export function validateTraceability(
   const findingIds = new Set(prd.findings.map((f) => f.id));
   const reqIds = new Set(prd.requirements.map((r) => r.id));
   const versionIds = new Set(prd.versions.map((v) => v.id));
+
+  // Dependency ordering: a requirement may only depend on requirements that
+  // are scheduled in the same or an earlier version, never in a later one.
+  const versionOrder = new Map<string, number>();
+  prd.versions.forEach((v, i) => versionOrder.set(v.id, i));
 
   // IDs must be unique and correctly prefixed (id convention keeps assumptions
   // out of requirements/tests).
@@ -99,6 +137,37 @@ export function validateTraceability(
     }
   };
   prd.requirements.forEach(requirementChecks);
+
+  // Dependencies: no cycles, no unscheduled targets, and a dependency must
+  // never be scheduled later than the requirement that depends on it.
+  const cyclicRequirementIds = requirementsInDependencyCycles(prd.requirements);
+  for (const requirement of prd.requirements) {
+    if (cyclicRequirementIds.has(requirement.id)) {
+      violations.push({
+        code: "REQUIREMENT_DEPENDENCY_CYCLE",
+        message: `${requirement.id} is part of a dependency cycle`,
+        entity: requirement.id,
+      });
+    }
+    for (const dependencyId of requirement.planningFactors?.dependencyRequirementIds ?? []) {
+      const dependency = prd.requirements.find((candidate) => candidate.id === dependencyId);
+      if (!dependency) continue; // unknown/self links were removed by normalizer
+      if (requirement.versionId && !dependency.versionId) {
+        violations.push({
+          code: "REQUIREMENT_DEPENDENCY_UNSCHEDULED",
+          message: `${requirement.id} depends on unscheduled ${dependencyId}`,
+          entity: requirement.id,
+        });
+      } else if (requirement.versionId && dependency.versionId &&
+        versionOrder.get(dependency.versionId)! > versionOrder.get(requirement.versionId)!) {
+        violations.push({
+          code: "REQUIREMENT_DEPENDENCY_LATE",
+          message: `${requirement.id} depends on later ${dependencyId}`,
+          entity: requirement.id,
+        });
+      }
+    }
+  }
 
   // Versions reference existing requirements.
   for (const v of prd.versions) {

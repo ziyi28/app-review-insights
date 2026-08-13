@@ -5,6 +5,8 @@ import {
   PrdSchema,
   TestCaseSchema,
   AssumptionSchema,
+  PlanningFactorsSchema,
+  VersionPlanArtifactSchema,
 } from "./analysis";
 
 describe("analysis contracts", () => {
@@ -162,6 +164,91 @@ describe("analysis contracts", () => {
     });
     expect(test.findingIds).toEqual(["finding-1"]);
     expect(test.priority).toBe("P1");
+  });
+
+  it("round-trips a full planning factors object", () => {
+    const factors = PlanningFactorsSchema.parse({
+      severity: "high",
+      evidenceStrength: "medium",
+      confidence: "medium",
+      userImpact: "high",
+      frequency: { supportingReviewCount: 8, corpusReviewCount: 100, supportRatio: 0.08 },
+      implementationScope: "medium",
+      dependencyRequirementIds: ["req-2"],
+      rationale: "Supported user impact and bounded implementation scope",
+    });
+    expect(factors.frequency.supportRatio).toBe(0.08);
+    expect(factors.dependencyRequirementIds).toEqual(["req-2"]);
+  });
+
+  it("rejects planning factors with an invalid support ratio", () => {
+    expect(() =>
+      PlanningFactorsSchema.parse({
+        severity: "high",
+        evidenceStrength: "medium",
+        confidence: "medium",
+        userImpact: "high",
+        frequency: { supportingReviewCount: 8, corpusReviewCount: 100, supportRatio: 1.5 },
+        implementationScope: "medium",
+        dependencyRequirementIds: [],
+        rationale: "reason",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects planning factors with an empty rationale", () => {
+    expect(() =>
+      PlanningFactorsSchema.parse({
+        severity: "high",
+        evidenceStrength: "medium",
+        confidence: "medium",
+        userImpact: "high",
+        frequency: { supportingReviewCount: 8, corpusReviewCount: 100, supportRatio: 0.08 },
+        implementationScope: "medium",
+        dependencyRequirementIds: [],
+        rationale: "",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects planning factors with an unknown enum value", () => {
+    expect(() =>
+      PlanningFactorsSchema.parse({
+        severity: "urgent",
+        evidenceStrength: "medium",
+        confidence: "medium",
+        userImpact: "high",
+        frequency: { supportingReviewCount: 8, corpusReviewCount: 100, supportRatio: 0.08 },
+        implementationScope: "medium",
+        dependencyRequirementIds: [],
+        rationale: "reason",
+      }),
+    ).toThrow();
+  });
+
+  it("round-trips a version plan artifact with per-requirement decisions", () => {
+    const artifact = VersionPlanArtifactSchema.parse({
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "x", requirementIds: ["req-1"], rationale: "ships the highest-impact fixes first" }],
+      decisions: [
+        {
+          requirementId: "req-1",
+          priority: "P1",
+          versionId: "ver-1",
+          planningFactors: {
+            severity: "high",
+            evidenceStrength: "medium",
+            confidence: "medium",
+            userImpact: "high",
+            frequency: { supportingReviewCount: 8, corpusReviewCount: 100, supportRatio: 0.08 },
+            implementationScope: "medium",
+            dependencyRequirementIds: [],
+            rationale: "Supported user impact and bounded implementation scope",
+          },
+        },
+      ],
+    });
+    expect(artifact.versions[0].rationale).toBe("ships the highest-impact fixes first");
+    expect(artifact.decisions[0].priority).toBe("P1");
   });
 
   it("round-trips a full prd bundle", () => {

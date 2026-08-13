@@ -347,6 +347,7 @@ export async function executeRun(
     await startStage("planning");
     const planning = await runPlanningStage({ model: deps.model, findings: findingsResult.findings, outputLocale, goal, onProgress: onStageProgress("planning") });
     for (const w of planning.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "planning", data: w });
+    await publishArtifact("version-plan", 1, planning.versionPlan);
     await publishArtifact("prd", 1, planning.prd);
     await endStage("planning");
 
@@ -428,6 +429,7 @@ export async function executeRun(
       prd = revisedPrd;
       // Publish the revised artifacts as attempt-02 so consumers never see a
       // stale pre-revision PRD/tests/traceability next to a valid run.
+      await publishArtifact("version-plan", 2, revisedPlanning.versionPlan);
       await publishArtifact("prd", 2, prd);
       await publishArtifact("tests", 2, { tests: prd.tests, prd, warnings: [] });
       await publishArtifact("traceability", 2, report);

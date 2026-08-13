@@ -6,6 +6,28 @@ export type ConfidenceLevel = z.infer<typeof ConfidenceLevelSchema>;
 export const PrioritySchema = z.enum(["P0", "P1", "P2"]);
 export type Priority = z.infer<typeof PrioritySchema>;
 
+/**
+ * The seven decision factors behind a version planning decision. Severity,
+ * User Impact, Implementation Scope, Dependency and rationale are the model's
+ * semantic judgment; evidenceStrength, confidence and frequency are always
+ * recomputed deterministically from the linked findings.
+ */
+export const PlanningFactorsSchema = z.object({
+  severity: z.enum(["critical", "high", "medium", "low"]),
+  evidenceStrength: z.enum(["insufficient", "low", "medium", "high"]),
+  confidence: ConfidenceLevelSchema,
+  userImpact: z.enum(["high", "medium", "low"]),
+  frequency: z.object({
+    supportingReviewCount: z.number().int().min(0),
+    corpusReviewCount: z.number().int().min(0),
+    supportRatio: z.number().min(0).max(1),
+  }),
+  implementationScope: z.enum(["small", "medium", "large"]),
+  dependencyRequirementIds: z.array(z.string()).default([]),
+  rationale: z.string().min(1).max(2_000),
+});
+export type PlanningFactors = z.infer<typeof PlanningFactorsSchema>;
+
 /** A single verbatim excerpt anchored to a specific review. */
 export const EvidenceExcerptSchema = z.object({
   reviewId: z.string().min(1),
@@ -82,6 +104,8 @@ export const RequirementSchema = z.object({
   priority: PrioritySchema.default("P2"),
   acceptanceCriteria: z.array(z.string()).min(1),
   versionId: z.string().nullable().default(null),
+  // Optional only for old cached runs; the planning normalizer always writes it.
+  planningFactors: PlanningFactorsSchema.optional(),
 });
 export type Requirement = z.infer<typeof RequirementSchema>;
 
@@ -98,8 +122,22 @@ export const VersionPlanSchema = z.object({
   name: z.string().min(1).max(128),
   summary: z.string().min(1).max(2_000),
   requirementIds: z.array(z.string()).default([]),
+  // Optional only for old cached runs; the planning normalizer always writes it.
+  rationale: z.string().min(1).max(2_000).optional(),
 });
 export type VersionPlan = z.infer<typeof VersionPlanSchema>;
+
+/** A persisted snapshot of the version planning decision for every requirement. */
+export const VersionPlanArtifactSchema = z.object({
+  versions: z.array(VersionPlanSchema),
+  decisions: z.array(z.object({
+    requirementId: z.string().regex(/^req-/),
+    priority: PrioritySchema,
+    versionId: z.string().nullable(),
+    planningFactors: PlanningFactorsSchema,
+  })),
+});
+export type VersionPlanArtifact = z.infer<typeof VersionPlanArtifactSchema>;
 
 /** A test case linked to requirements, their findings, and source reviews. */
 export const TestCaseSchema = z.object({
