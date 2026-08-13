@@ -6,6 +6,7 @@ import { getDictionary } from "@/i18n";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { useRunStream } from "@/hooks/use-run-stream";
+import { useArtifactVersions } from "@/hooks/use-artifact-versions";
 import { RunForm } from "./run-form";
 import { StageRail } from "./stage-rail";
 import { EventDrawer } from "./event-drawer";
@@ -14,38 +15,52 @@ import { SettingsPanel } from "./settings-panel";
 import { HistoryPanel } from "./history-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
+import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, RunDiagnosticsPanel, ArtifactPhaseSelector, FinalDeliverablesPanel } from "@/components/artifacts/workflow-panels";
 import { ProvenanceBadge } from "./provenance-badge";
+import type { VersionPlanArtifact } from "@/domain/contracts/analysis";
 
-type Tab = "overview" | "raw" | "cleaned" | "topics" | "findings" | "plan" | "tests" | "traceability";
+type Tab = "overview" | "raw" | "cleaned" | "classification" | "topics" | "findings" | "evidence" | "versions" | "prd" | "tests" | "traceability" | "deliverables";
 
 // Stage order for auto-advancing the tab as artifacts land. When a run is in
 // flight and the user has not taken over by clicking a tab, the UI follows the
 // newest artifact to its tab so results appear without manual clicks.
 const AUTO_ADVANCE_ORDER: { key: keyof ArtifactCache; tab: Tab }[] = [
+  { key: "topicCandidates", tab: "classification" },
   { key: "topics", tab: "topics" },
   { key: "findings", tab: "findings" },
-  { key: "prd", tab: "plan" },
+  { key: "evidenceValidation", tab: "evidence" },
+  { key: "versionPlan", tab: "versions" },
+  { key: "prd", tab: "prd" },
   { key: "tests", tab: "tests" },
   { key: "traceability", tab: "traceability" },
+  { key: "finalReport", tab: "deliverables" },
 ];
 
 const TABS: { id: Tab; labelKey: keyof Dictionary }[] = [
   { id: "overview", labelKey: "overview" },
   { id: "raw", labelKey: "rawReviews" },
   { id: "cleaned", labelKey: "cleanedData" },
+  { id: "classification", labelKey: "classification" },
   { id: "topics", labelKey: "topics" },
   { id: "findings", labelKey: "findings" },
-  { id: "plan", labelKey: "prd" },
+  { id: "evidence", labelKey: "evidenceValidation" },
+  { id: "versions", labelKey: "versionPlan" },
+  { id: "prd", labelKey: "prd" },
   { id: "tests", labelKey: "testCases" },
   { id: "traceability", labelKey: "traceability" },
+  { id: "deliverables", labelKey: "finalDeliverables" },
 ];
 
 type ArtifactCache = {
   runId: string | null;
   scope?: unknown;
-  cleaned?: { reviews: unknown[] };
+  cleaned?: { reviews: unknown[]; stats?: unknown };
+  stats?: unknown;
+  topicCandidates?: { candidates: { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string }[] };
   topics?: { topics: { id: string; label: string; description: string; reviewIds: string[] }[] };
   findings?: { findings: Finding[] };
+  evidenceValidation?: unknown;
+  versionPlan?: VersionPlanArtifact;
   prd?: Prd;
   tests?: { tests: Prd["tests"] };
   traceability?: { valid: boolean; violations: { code: string; message: string }[] };
@@ -99,8 +114,12 @@ export function Workbench() {
     const map: Record<string, keyof ArtifactCache> = {
       "scope": "scope",
       "cleaned-reviews": "cleaned",
+      "stats": "stats",
+      "topic-candidates": "topicCandidates",
       "topics": "topics",
       "findings": "findings",
+      "evidence-validation": "evidenceValidation",
+      "version-plan": "versionPlan",
       "prd": "prd",
       "tests": "tests",
       "traceability": "traceability",
@@ -211,7 +230,8 @@ export function Workbench() {
   }, [cache.cleaned, tab]);
 
   const stats = useMemo(() => {
-    const s = (cache.cleaned as { stats?: unknown } | undefined)?.stats as
+    const s = (cache.stats ??
+      (cache.cleaned as { stats?: unknown } | undefined)?.stats) as
       | {
           rawCount: number;
           includedCount: number;
@@ -221,13 +241,33 @@ export function Workbench() {
         }
       | undefined;
     return s;
-  }, [cache.cleaned]);
+  }, [cache.stats, cache.cleaned]);
 
-  // Authoritative panels: prefer the final report when present (it holds the
-  // post-revision PRD/report), else the intermediate artifacts.
-  const planPrd = cache.finalReport?.prd ?? cache.prd;
-  const traceReport = cache.finalReport?.report ?? cache.traceability ?? null;
-  const testCases = cache.tests?.tests ?? cache.finalReport?.prd?.tests ?? [];
+  // Terminal state: fetch the Draft/Final artifact pairs once the run finishes
+  // so revised runs show attempt 1 vs attempt 2 and never a stale draft.
+  const terminal = events.some((e) => e.type === "run.completed" || e.type === "run.failed");
+  const versions = useArtifactVersions(runId, terminal);
+  const [prdPhase, setPrdPhase] = useState<"draft" | "final">("draft");
+  const [testsPhase, setTestsPhase] = useState<"draft" | "final">("draft");
+  const [tracePhase, setTracePhase] = useState<"draft" | "final">("draft");
+  const [versionPhase, setVersionPhase] = useState<"draft" | "final">("draft");
+
+  // Authoritative panels: during a run use the live cache (marked Draft); at
+  // terminal, prefer the hook's attempt 1/latest pair. A never-revised run
+  // shows the draft as the final (no revision required).
+  const prdDraft = versions.prd.draft ?? cache.prd ?? null;
+  const prdFinal = versions.prd.final ?? cache.finalReport?.prd ?? null;
+  const testsDraft = versions.tests.draft?.tests ?? cache.tests?.tests ?? [];
+  const testsFinal = versions.tests.final?.tests ?? cache.finalReport?.prd?.tests ?? [];
+  const traceDraft = versions.traceability.draft ?? cache.traceability ?? null;
+  const traceFinal = versions.traceability.final ?? cache.finalReport?.report ?? null;
+  const versionPlanDraft = versions.versionPlan.draft ?? cache.versionPlan ?? null;
+  const versionPlanFinal = versions.versionPlan.final ?? null;
+
+  const activePrd = prdPhase === "final" && prdFinal ? prdFinal : prdDraft;
+  const activeTests = testsPhase === "final" && testsFinal.length > 0 ? testsFinal : testsDraft;
+  const activeTrace = tracePhase === "final" && traceFinal ? traceFinal : traceDraft;
+  const activeVersionPlan = versionPhase === "final" && versionPlanFinal ? versionPlanFinal : versionPlanDraft;
 
   const handleNewRun = () => {
     reset();
@@ -335,6 +375,7 @@ export function Workbench() {
                       ))}
                     </div>
                   ) : null}
+                  <RunDiagnosticsPanel events={events} t={t} />
                 </div>
               ) : null}
 
@@ -344,13 +385,35 @@ export function Workbench() {
                 <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>
               ) : null}
 
+              {tab === "classification" ? <ClassificationPanel candidates={cache.topicCandidates?.candidates ?? []} t={t} /> : null}
               {tab === "topics" ? <TopicsPanel topics={cache.topics?.topics ?? []} t={t} /> : null}
               {tab === "findings" ? <FindingsPanel findings={cache.findings?.findings ?? []} t={t} /> : null}
-              {tab === "plan" ? <RequirementsPanel requirements={planPrd?.requirements ?? []} versions={planPrd?.versions ?? []} assumptions={planPrd?.assumptions ?? []} t={t} /> : null}
-              {tab === "tests" ? (
-                <TestsPanel tests={testCases} requirements={planPrd?.requirements ?? []} t={t} />
+              {tab === "evidence" ? <EvidenceValidationPanel report={cache.evidenceValidation as never} t={t} /> : null}
+              {tab === "versions" ? (
+                <>
+                  <ArtifactPhaseSelector revised={versionPlanFinal !== null} phase={versionPhase} onSelect={setVersionPhase} t={t} />
+                  <VersionPlanPanel versionPlan={activeVersionPlan} t={t} />
+                </>
               ) : null}
-              {tab === "traceability" ? <TraceabilityPanel report={traceReport} t={t} /> : null}
+              {tab === "prd" ? (
+                <>
+                  <ArtifactPhaseSelector revised={prdFinal !== null} phase={prdPhase} onSelect={setPrdPhase} t={t} />
+                  <RequirementsPanel requirements={activePrd?.requirements ?? []} versions={activePrd?.versions ?? []} assumptions={activePrd?.assumptions ?? []} t={t} />
+                </>
+              ) : null}
+              {tab === "tests" ? (
+                <>
+                  <ArtifactPhaseSelector revised={testsFinal.length > 0} phase={testsPhase} onSelect={setTestsPhase} t={t} />
+                  <TestsPanel tests={activeTests} requirements={activePrd?.requirements ?? []} t={t} />
+                </>
+              ) : null}
+              {tab === "traceability" ? (
+                <>
+                  <ArtifactPhaseSelector revised={traceFinal !== null} phase={tracePhase} onSelect={setTracePhase} t={t} />
+                  <TraceabilityPanel report={activeTrace} t={t} />
+                </>
+              ) : null}
+              {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} t={t} /> : null}
             </div>
           </>
         )}

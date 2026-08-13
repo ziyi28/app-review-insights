@@ -114,6 +114,30 @@ export type Dictionary = {
   findingId: string;
   priority: string;
   precondition: string;
+  classification: string;
+  evidenceValidation: string;
+  finalDeliverables: string;
+  draft: string;
+  final: string;
+  noRevisionRequired: string;
+  legacyArtifactUnavailable: string;
+  versionRationale: string;
+  factorSeverity: string;
+  factorEvidenceStrength: string;
+  factorConfidence: string;
+  factorUserImpact: string;
+  factorFrequency: string;
+  factorImplementationScope: string;
+  factorDependency: string;
+  logicalCalls: string;
+  modelAttempts: string;
+  modelRetries: string;
+  modelRetryReasons: string;
+  promptVersions: string;
+  diagnosticsError: string;
+  diagnosticsWarning: string;
+  diagnosticsValidation: string;
+  diagnosticsRevision: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -231,6 +255,30 @@ export const dictionaries: Record<Locale, Dictionary> = {
     findingId: "Finding",
     priority: "Priority",
     precondition: "Precondition",
+    classification: "Classification",
+    evidenceValidation: "Evidence Validation",
+    finalDeliverables: "Final Deliverables",
+    draft: "Draft",
+    final: "Final",
+    noRevisionRequired: "Final · no revision required",
+    legacyArtifactUnavailable: "Not available in this cached run",
+    versionRationale: "Version rationale",
+    factorSeverity: "Severity",
+    factorEvidenceStrength: "Evidence Strength",
+    factorConfidence: "Confidence",
+    factorUserImpact: "User Impact",
+    factorFrequency: "Frequency",
+    factorImplementationScope: "Implementation Scope",
+    factorDependency: "Dependency",
+    logicalCalls: "Logical calls",
+    modelAttempts: "HTTP attempts",
+    modelRetries: "Retries",
+    modelRetryReasons: "Retry reasons",
+    promptVersions: "Prompt versions",
+    diagnosticsError: "Errors",
+    diagnosticsWarning: "Warnings",
+    diagnosticsValidation: "Validation",
+    diagnosticsRevision: "Revision",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -346,6 +394,30 @@ export const dictionaries: Record<Locale, Dictionary> = {
     findingId: "发现",
     priority: "优先级",
     precondition: "前置条件",
+    classification: "分类",
+    evidenceValidation: "证据验证",
+    finalDeliverables: "最终交付物",
+    draft: "草稿",
+    final: "终稿",
+    noRevisionRequired: "终稿 · 无需修订",
+    legacyArtifactUnavailable: "该缓存运行中不可用",
+    versionRationale: "版本理由",
+    factorSeverity: "严重程度",
+    factorEvidenceStrength: "证据强度",
+    factorConfidence: "置信度",
+    factorUserImpact: "用户影响",
+    factorFrequency: "出现频率",
+    factorImplementationScope: "实施范围",
+    factorDependency: "依赖关系",
+    logicalCalls: "逻辑调用数",
+    modelAttempts: "HTTP 尝试数",
+    modelRetries: "重试次数",
+    modelRetryReasons: "重试原因",
+    promptVersions: "提示词版本",
+    diagnosticsError: "错误",
+    diagnosticsWarning: "警告",
+    diagnosticsValidation: "校验",
+    diagnosticsRevision: "修订",
   },
 };
 
