@@ -174,4 +174,55 @@ describe("runFindingsStage", () => {
     expect(result.findings[0].supportingSampleCount).toBe(1);
     expect(result.findings[0].confidence.level).toBe("low");
   });
+
+  it("splits a large review set into bounded chunks without losing or duplicating reviews", async () => {
+    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const seenReviewIds: string[] = [];
+    const generate = vi.fn(async (request: { user?: string }) => {
+      const parsed = JSON.parse(request.user as string) as { reviews: { reviewId: string; sourceReviewId: string; rating: number; bodyNormalized: string }[] };
+      for (const r of parsed.reviews) {
+        seenReviewIds.push(r.reviewId);
+        // The model only sees a slim copy of each review.
+        expect(Object.keys(r).sort()).toEqual(["bodyNormalized", "rating", "reviewId", "sourceReviewId"]);
+      }
+      return { findings: [] };
+    });
+    const ctx = context({ reviews: many, model: { generate } as never });
+    await runFindingsStage(ctx);
+    // Every review is fed exactly once across chunks, in order — none dropped.
+    expect(seenReviewIds).toEqual(many.map((r) => r.reviewId));
+  });
+
+  it("namespaces per-chunk finding ids and merges them without collision", async () => {
+    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const generate = vi.fn(async (request: { user?: string }) => {
+      const parsed = JSON.parse(request.user as string) as { reviews: { reviewId: string }[] };
+      return {
+        findings: [
+          {
+            id: "finding-1",
+            topicIds: ["topic-1"],
+            title: "x",
+            summary: "y",
+            supportingReviewIds: [parsed.reviews[0].reviewId],
+            evidenceExcerpts: [{ reviewId: parsed.reviews[0].reviewId, excerpt: "x".repeat(10) }],
+            conflictingReviewIds: [],
+            uncertainties: [],
+            limitations: [],
+          },
+        ],
+      };
+    });
+    const ctx = context({ reviews: many, model: { generate } as never });
+    const result = await runFindingsStage(ctx);
+    // One chunk per bounded batch; each returns `finding-1` which must be
+    // namespaced so the merged findings stay distinct.
+    expect(generate).toHaveBeenCalledTimes(result.findings.length);
+    expect(result.findings.length).toBeGreaterThan(1);
+    const ids = result.findings.map((f) => f.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.every((id) => /^finding-1@c\d+$/.test(id))).toBe(true);
+    // Merged findings still carry code-derived sample counts.
+    expect(result.findings.every((f) => f.supportingSampleCount === 1)).toBe(true);
+  });
 });
