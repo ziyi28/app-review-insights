@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test";
-import { getUpstreamState, setSocialCrawlMode, resetCounters } from "./upstream-server";
+import { getUpstreamState, setSerpApiMode, resetCounters } from "./upstream-server";
 
 test("live analysis runs preview-first and shows grounded artifacts", async ({ page }) => {
   // The stub mode and counters persist across runs in the temp dir; force the
-  // SocialCrawl live envelope so this test is deterministic.
-  setSocialCrawlMode("live");
+  // SerpApi live envelope so this test is deterministic.
+  setSerpApiMode("live");
   resetCounters();
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /App Review Planner/i })).toBeVisible();
@@ -20,10 +20,10 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   const previewPromise = page.waitForResponse("**/api/source-previews");
   await page.getByRole("button", { name: /Check review sample/i }).click();
   expect((await previewPromise).status()).toBe(200);
-  // The SocialCrawl live sample card shows 2 fresh reviews and the fresh-fetch
+  // The SerpApi live sample card shows 2 fresh reviews and the forced-fresh
   // label (never presented as cached).
   await expect(page.getByText(/2 fresh reviews/i)).toBeVisible();
-  await expect(page.getByText(/SocialCrawl · fresh fetch/i)).toBeVisible();
+  await expect(page.getByText(/SerpApi · forced fresh/i)).toBeVisible();
 
   // Analyze the fresh sample: POST /api/runs carries the preview selection.
   const postPromise = page.waitForResponse("**/api/runs");
@@ -76,32 +76,32 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   await expect(page.getByText(/Test Cases/i).first()).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText(/Traceability/i).first()).toBeVisible();
 
-  // The run must not re-collect: exactly one SocialCrawl request (the preview)
-  // happened, and the provenance badge reflects the SocialCrawl source.
+  // The run must not re-collect: exactly one SerpApi request (the preview)
+  // happened, and the provenance badge reflects the SerpApi source.
   const state = getUpstreamState();
-  expect(state.socialCrawlRequests).toBe(1);
-  await expect(page.getByText(/SocialCrawl \/ US App Store/i)).toBeVisible();
+  expect(state.serpApiRequests).toBe(1);
+  await expect(page.getByText(/SerpApi \/ US App Store/i)).toBeVisible();
 });
 
-test("analyzes a forced-fresh SocialCrawl preview via the settings page", async ({ page }) => {
-  setSocialCrawlMode("live");
+test("analyzes a forced-fresh SerpApi preview via the settings page", async ({ page }) => {
+  setSerpApiMode("live");
   resetCounters();
   await page.goto("/");
   await page.getByRole("button", { name: "Settings" }).click();
-  const socialCrawlKey = page.getByLabel("SocialCrawl API Key");
-  await expect(socialCrawlKey).toHaveValue("");
-  await socialCrawlKey.fill("sc_e2e_only");
+  const serpApiKey = page.getByLabel("SerpApi API Key");
+  await expect(serpApiKey).toHaveValue("");
+  await serpApiKey.fill("serp_e2e_only");
   const configPostPromise = page.waitForResponse((r) => r.url().includes("/api/config") && r.request().method() === "POST", { timeout: 10_000 });
   await page.getByRole("button", { name: "Save" }).click();
   const configPost = await configPostPromise;
   expect(configPost.status()).toBe(200);
-  await expect(socialCrawlKey).toHaveValue("", { timeout: 5_000 });
+  await expect(serpApiKey).toHaveValue("", { timeout: 5_000 });
   await page.getByText("Close", { exact: true }).click();
 
   await page.getByLabel(/Analysis goal/i).fill("Understand recent workout usability complaints");
   await page.getByRole("button", { name: /Check review sample/i }).click();
-  await expect(page.getByText(/SocialCrawl · fresh fetch/i)).toBeVisible();
+  await expect(page.getByText(/SerpApi · forced fresh/i)).toBeVisible();
   await expect(page.getByText(/2 fresh reviews/i)).toBeVisible();
   await page.getByRole("button", { name: /Analyze fresh sample/i }).click();
-  await expect(page.getByText(/SocialCrawl \/ US App Store/i, { exact: true })).toBeVisible();
+  await expect(page.getByText(/SerpApi \/ US App Store/i, { exact: true })).toBeVisible();
 });
