@@ -3,6 +3,7 @@ import type { NormalizedReview } from "@/domain/contracts/review";
 import { isExactExcerpt } from "@/domain/analysis/evidence";
 import { computeConfidence, type SourceStatus } from "@/domain/analysis/confidence";
 import { FindingOutputSchema, findingsPrompt, type FindingOutput } from "@/server/model/prompts/prompts";
+import { chunkByBodyBudget, mapWithConcurrency } from "../batching";
 import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type FindingsStageContext = {
@@ -15,6 +16,8 @@ export type FindingsStageContext = {
   /** Live progress callback; invoked with a human-readable message while the
    *  model call is in flight so the UI can show feedback. */
   onProgress?: (message: string) => void;
+  /** Max findings calls issued in parallel (default 3). */
+  maxConcurrency?: number;
 };
 
 export type FindingsStageResult = {
@@ -105,20 +108,64 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
   };
 }
 
+// Findings is the one stage that historically fed the entire review corpus into
+// a single model call. For a large corpus that input ballooned to hundreds of
+// KB and the provider returned truncated, non-JSON output. Splitting into
+// size-bounded chunks (same budget as topic discovery) keeps each call small
+// enough to succeed; results are then merged deterministically by code.
+const FINDINGS_CHUNK_CHAR_BUDGET = 8_000;
+const DEFAULT_FINDINGS_CONCURRENCY = 3;
+
+// The model only needs the review id (stable + source) and the normalized body
+// it must quote exactly. Stripping the original body/title/rawRef (and the rest)
+// removes ~300KB of redundant input on a 500-review corpus while keeping the
+// exact-excerpt validation in normalizeFindings intact (it runs against the
+// full ctx.reviews, not the slim copy).
+type SlimReview = { reviewId: string; sourceReviewId: string; rating: number; bodyNormalized: string };
+
 /**
- * Generates evidence-grounded findings. The model output is passed through the
- * shared deterministic normalizer (see normalizeFindings).
+ * Generates evidence-grounded findings. Reviews are slimmed down, split into
+ * size-bounded chunks, and analyzed per-chunk in parallel; each chunk's output
+ * is passed through the shared deterministic normalizer (see normalizeFindings)
+ * against the full review set, then findings are id-namespaced per chunk to
+ * avoid cross-chunk collisions and merged.
  */
 export async function runFindingsStage(ctx: FindingsStageContext): Promise<FindingsStageResult> {
-  ctx.onProgress?.("generating evidence-grounded findings");
-  const output = await ctx.model.generate({
-    stage: "findings",
-    promptVersion: findingsPrompt.version,
-    system: findingsPrompt.system,
-    user: findingsPrompt.buildUser({ reviews: ctx.reviews, topics: ctx.topics, goal: ctx.goal, outputLocale: ctx.outputLocale }),
-    schema: FindingOutputSchema,
-    onProgress: modelProgressRelay(ctx.onProgress),
+  const warnings: { code: string; message: string }[] = [];
+  const slimReviews: SlimReview[] = ctx.reviews.map((r) => ({
+    reviewId: r.reviewId,
+    sourceReviewId: r.sourceReviewId,
+    rating: r.rating,
+    bodyNormalized: r.bodyNormalized,
+  }));
+
+  const chunks = chunkByBodyBudget(slimReviews, FINDINGS_CHUNK_CHAR_BUDGET);
+  const perChunk = await mapWithConcurrency(chunks, ctx.maxConcurrency ?? DEFAULT_FINDINGS_CONCURRENCY, async (chunk, chunkIndex) => {
+    ctx.onProgress?.(`generating findings for review batch ${chunkIndex + 1} of ${chunks.length} (${chunk.length} reviews)`);
+    const output = await ctx.model.generate({
+      stage: "findings",
+      promptVersion: findingsPrompt.version,
+      system: findingsPrompt.system,
+      user: findingsPrompt.buildUser({ reviews: chunk, topics: ctx.topics, goal: ctx.goal, outputLocale: ctx.outputLocale }),
+      schema: FindingOutputSchema,
+      onProgress: modelProgressRelay(ctx.onProgress),
+    });
+    // Normalize against the full review set: the model saw only this chunk, so
+    // any review it cites resolves here and its excerpt is still verified as an
+    // exact substring of the normalized body.
+    const result = normalizeFindings(output, { reviews: ctx.reviews, topics: ctx.topics, sourceStatus: ctx.sourceStatus });
+    return { chunkIndex, result };
   });
 
-  return normalizeFindings(output, ctx);
+  // Namespacing is only needed when the corpus actually split: two chunks can
+  // both emit `finding-1` and collide. For a single chunk the ids pass through
+  // unchanged so the small-corpus path is identical to before chunking.
+  const namespaceIds = chunks.length > 1;
+  const findings: Finding[] = [];
+  for (const { chunkIndex, result } of perChunk) {
+    warnings.push(...result.warnings);
+    for (const f of result.findings) findings.push(namespaceIds ? { ...f, id: `${f.id}@c${chunkIndex}` } : f);
+  }
+
+  return { findings, warnings, insufficientEvidence: findings.length === 0 };
 }
