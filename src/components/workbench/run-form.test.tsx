@@ -32,7 +32,7 @@ function previewSummary(
       collectedAt: "2026-08-12T00:00:00.000Z",
       status: liveCount > 0 ? "complete" : "suspect-empty",
       reviewCount: liveCount,
-      pageCount: provider === "serpapi" ? 1 : 1,
+      pageCount: 1,
       requestCount: 1,
       dateRange: { earliest: null, latest: null },
       limitations: (overrides.limitations as { code: string; message: string }[] | undefined) ?? [],
@@ -65,6 +65,14 @@ function stubFetch(preview: unknown) {
   return fetchMock;
 }
 
+/** Step 1 → live mode card, then fill URL + goal and advance to the confirm step. */
+async function navigateToLiveConfirm(user: ReturnType<typeof userEvent.setup>, goalText: string, urlText = "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684") {
+  await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+  await user.type(screen.getByLabelText(t.appStoreUrl), urlText);
+  await user.type(screen.getByLabelText(t.goal), goalText);
+  await user.click(screen.getByRole("button", { name: t.next }));
+}
+
 describe("RunForm", () => {
   beforeEach(() => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ runs: [] }) }));
@@ -82,10 +90,16 @@ describe("RunForm", () => {
     try {
       const user = userEvent.setup();
       render(<RunForm t={t} onStart={vi.fn()} />);
-      await user.click(screen.getByRole("button", { name: t.importMode }));
+      // Step 1 → import mode shows the file input.
+      await user.click(screen.getByRole("radio", { name: new RegExp(t.importMode) }));
       expect(screen.getByLabelText(t.importFile)).toBeInTheDocument();
-      await user.click(screen.getByRole("button", { name: t.liveMode }));
-      await user.click(screen.getByRole("button", { name: t.replayMode }));
+      // Back to step 1, then live mode shows the URL input.
+      await user.click(screen.getByRole("button", { name: t.back }));
+      await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+      expect(screen.getByLabelText(t.appStoreUrl)).toBeInTheDocument();
+      // Back again, then replay mode shows the run selector.
+      await user.click(screen.getByRole("button", { name: t.back }));
+      await user.click(screen.getByRole("radio", { name: new RegExp(t.replayMode) }));
       expect(screen.getByLabelText(new RegExp(t.cachedReplay))).toBeInTheDocument();
     } finally {
       spy.mockRestore();
@@ -94,18 +108,17 @@ describe("RunForm", () => {
     expect(warning).toBeUndefined();
   });
 
-  it("checks the sample first and lets the user pick the live dataset", async () => {
+  it("checks the sample on confirm and lets the user pick the live dataset", async () => {
     const fetchMock = stubFetch(previewSummary({ liveCount: 2, stableCount: 0 }));
     const user = userEvent.setup();
     const onStart = vi.fn();
     render(<RunForm t={t} onStart={onStart} />);
-    await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
-    await user.click(screen.getByRole("button", { name: t.checkSample }));
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
 
-    // The preview request went out.
+    // Entering the confirm step auto-checks the sample.
+    expect(await screen.findByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/api/source-previews"), expect.objectContaining({ method: "POST" }));
-    // Both choice cards render; live has 2 reviews.
-    expect(screen.getByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
+
     // Choosing the live sample starts the analysis with previewId + selection.
     await user.click(screen.getByRole("button", { name: t.analyzeFresh }));
     expect(onStart).toHaveBeenCalledWith(
@@ -122,10 +135,9 @@ describe("RunForm", () => {
     const user = userEvent.setup();
     const onStart = vi.fn();
     render(<RunForm t={t} onStart={onStart} />);
-    await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
-    await user.click(screen.getByRole("button", { name: t.checkSample }));
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
 
-    expect(screen.getByText(t.recommended)).toBeInTheDocument();
+    expect(await screen.findByText(t.recommended)).toBeInTheDocument();
     expect(screen.getByText(`500 ${t.localHistoryReviews}`)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: t.analyzeHistory }));
     expect(onStart).toHaveBeenCalledWith(
@@ -140,13 +152,12 @@ describe("RunForm", () => {
     const user = userEvent.setup();
     const onStart = vi.fn();
     render(<RunForm t={t} onStart={onStart} />);
-    await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
-    await user.click(screen.getByRole("button", { name: t.checkSample }));
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
 
     // The live option is hidden entirely (no analyze-fresh button), and the
     // stable choice remains available.
+    expect(await screen.findByRole("button", { name: t.analyzeHistory })).toBeEnabled();
     expect(screen.queryByRole("button", { name: t.analyzeFresh })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: t.analyzeHistory })).toBeEnabled();
   });
 
   it("clears the checked preview when the URL changes", async () => {
@@ -154,28 +165,32 @@ describe("RunForm", () => {
     const user = userEvent.setup();
     const onStart = vi.fn();
     render(<RunForm t={t} onStart={onStart} />);
-    await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
-    await user.click(screen.getByRole("button", { name: t.checkSample }));
-    expect(screen.getByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
+    expect(await screen.findByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
 
+    // Go back, change the URL, and advance again: the stale preview is gone and
+    // a fresh check runs.
+    await user.click(screen.getByRole("button", { name: t.back }));
     const urlInput = screen.getByLabelText(t.appStoreUrl);
     await user.clear(urlInput);
     await user.type(urlInput, "https://apps.apple.com/us/app/another-app/id123");
-    // The sample is gone; the hint returns.
-    expect(screen.queryByText(`2 ${t.freshReviews}`)).not.toBeInTheDocument();
-    expect(screen.getByText(t.notChecked)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: t.next }));
+    expect(await screen.findByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
   });
 
-  it("disables Start until the analysis goal is at least 10 characters", async () => {
+  it("disables Next until the analysis goal is at least 10 characters", async () => {
     const user = userEvent.setup();
     render(<RunForm t={t} onStart={vi.fn()} />);
-    const check = screen.getByRole("button", { name: t.checkSample });
-    expect(check).toBeDisabled();
+    await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+    await user.type(screen.getByLabelText(t.appStoreUrl), "https://apps.apple.com/us/app/x/id123");
+
+    const next = screen.getByRole("button", { name: t.next });
+    expect(next).toBeDisabled();
     await user.type(screen.getByLabelText(t.goal), "short");
-    expect(check).toBeDisabled();
+    expect(next).toBeDisabled();
     expect(screen.getByText(t.goalTooShort)).toBeInTheDocument();
     await user.type(screen.getByLabelText(t.goal), " but long enough for the server");
-    expect(check).toBeEnabled();
+    expect(next).toBeEnabled();
     expect(screen.queryByText(t.goalTooShort)).not.toBeInTheDocument();
   });
 
@@ -184,10 +199,9 @@ describe("RunForm", () => {
     const user = userEvent.setup();
     const onStart = vi.fn();
     render(<RunForm t={t} onStart={onStart} />);
-    await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
-    await user.click(screen.getByRole("button", { name: t.checkSample }));
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
 
-    expect(screen.getByText(`500 ${t.freshReviews}`)).toBeVisible();
+    expect(await screen.findByText(`500 ${t.freshReviews}`)).toBeVisible();
     expect(screen.getByText(t.serpApiFresh)).toBeVisible();
     expect(screen.getByText(`${t.searchesUsed}: 2`)).toBeVisible();
     expect(screen.getByRole("button", { name: t.analyzeFresh })).toBeEnabled();
@@ -197,8 +211,7 @@ describe("RunForm", () => {
     stubFetch(previewSummary({ provider: "apple-rss", liveCount: 50, limitations: [{ code: "SERPAPI_UPSTREAM_FAILED", message: "SerpApi request failed (HTTP 503)" }] }));
     const user = userEvent.setup();
     render(<RunForm t={t} onStart={vi.fn()} />);
-    await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
-    await user.click(screen.getByRole("button", { name: t.checkSample }));
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
 
     expect(await screen.findByText(t.appleRssFallback)).toBeVisible();
     expect(screen.getByText(/HTTP 503/)).toBeVisible();
@@ -210,10 +223,9 @@ describe("RunForm", () => {
     stubFetch(previewSummary({ provider: "serpapi", liveCount: 50, stableCount: 500, stableAvailable: true }));
     const user = userEvent.setup();
     render(<RunForm t={t} onStart={vi.fn()} />);
-    await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
-    await user.click(screen.getByRole("button", { name: t.checkSample }));
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
 
-    expect(screen.getByText(`50 ${t.freshReviews}`)).toBeVisible();
+    expect(await screen.findByText(`50 ${t.freshReviews}`)).toBeVisible();
     expect(screen.getByText(`500 ${t.localHistoryReviews}`)).toBeVisible();
   });
 });

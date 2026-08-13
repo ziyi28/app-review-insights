@@ -9,21 +9,25 @@ import { useRunStream } from "@/hooks/use-run-stream";
 import { useArtifactVersions } from "@/hooks/use-artifact-versions";
 import { RunForm } from "./run-form";
 import { StageRail } from "./stage-rail";
-import { EventDrawer } from "./event-drawer";
 import { LiveProgress } from "./live-progress";
 import { SettingsPanel } from "./settings-panel";
 import { HistoryPanel } from "./history-panel";
+import { TabList } from "./tab-list";
+import { RunLogPanel } from "./run-log-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
-import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, RunDiagnosticsPanel, ArtifactPhaseSelector, FinalDeliverablesPanel } from "@/components/artifacts/workflow-panels";
+import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, ArtifactPhaseSelector, FinalDeliverablesPanel } from "@/components/artifacts/workflow-panels";
 import { ProvenanceBadge } from "./provenance-badge";
 import type { VersionPlanArtifact } from "@/domain/contracts/analysis";
+import styles from "./workbench.module.css";
 
-type Tab = "overview" | "raw" | "cleaned" | "classification" | "topics" | "findings" | "evidence" | "versions" | "prd" | "tests" | "traceability" | "deliverables";
+type Tab = "overview" | "raw" | "cleaned" | "classification" | "topics" | "findings" | "evidence" | "versions" | "prd" | "tests" | "traceability" | "deliverables" | "diagnostics";
 
 // Stage order for auto-advancing the tab as artifacts land. When a run is in
 // flight and the user has not taken over by clicking a tab, the UI follows the
-// newest artifact to its tab so results appear without manual clicks.
+// newest artifact to its tab so results appear without manual clicks. Only
+// applies while a live run is `running` — viewing a completed history run stays
+// pinned to Overview.
 const AUTO_ADVANCE_ORDER: { key: keyof ArtifactCache; tab: Tab }[] = [
   { key: "topicCandidates", tab: "classification" },
   { key: "topics", tab: "topics" },
@@ -49,6 +53,7 @@ const TABS: { id: Tab; labelKey: keyof Dictionary }[] = [
   { id: "tests", labelKey: "testCases" },
   { id: "traceability", labelKey: "traceability" },
   { id: "deliverables", labelKey: "finalDeliverables" },
+  { id: "diagnostics", labelKey: "runLog" },
 ];
 
 type SourceEvidence = {
@@ -84,8 +89,10 @@ type ArtifactCache = {
   finalReport?: { prd?: Prd; report?: { valid: boolean; violations: { code: string; message: string }[] }; limitations?: unknown[] };
 };
 
+type ConfigStatus = { modelConfigured: boolean; serpApiConfigured: boolean };
+
 export function Workbench() {
-  const [uiLocale, setUiLocale] = useState<Locale>("en");
+  const [uiLocale, setUiLocale] = useState<Locale>("zh-CN");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const t = getDictionary(uiLocale);
 
@@ -94,10 +101,32 @@ export function Workbench() {
   useEffect(() => {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
+
   const { events, running, error, droppedEvents, start, reset, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
   const [historyOpen, setHistoryOpen] = useState(false);
+  const [configStatus, setConfigStatus] = useState<ConfigStatus>({ modelConfigured: false, serpApiConfigured: false });
+
+  // Non-secret config status for the header badges. Fetched once on mount and
+  // refreshed after the settings panel saves/clears.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/config", { cache: "no-store" });
+        const json = (await res.json()) as { modelConfigured?: boolean; serpApiKeyConfigured?: boolean };
+        if (!cancelled) {
+          setConfigStatus({ modelConfigured: Boolean(json.modelConfigured), serpApiConfigured: Boolean(json.serpApiKeyConfigured) });
+        }
+      } catch {
+        // Non-fatal: badges simply stay "not configured".
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Auto-advance bookkeeping: which artifact keys we already jumped to, and
   // whether the user has manually chosen a tab (which stops auto-advancing for
@@ -239,8 +268,11 @@ export function Workbench() {
 
   // Auto-advance the active tab to the newest artifact as it lands, so a live
   // run shows results without manual clicking. Stops the moment the user picks
-  // a tab themselves (userNavigated) or once a key has already been followed.
+  // a tab themselves (userNavigated), once a key has already been followed, or
+  // once the run is no longer in flight (a completed history view stays pinned
+  // to Overview rather than jumping to whichever tab loaded last).
   useEffect(() => {
+    if (!running) return;
     if (userNavigated.current) return;
     for (const { key, tab: target } of AUTO_ADVANCE_ORDER) {
       if (cache[key] !== undefined && !autoJumpedKeys.current.has(key)) {
@@ -249,7 +281,7 @@ export function Workbench() {
         break;
       }
     }
-  }, [cache]);
+  }, [cache, running]);
 
   const cleanedReviews = useMemo(() => {
     const prepared = cache.cleaned as { reviews?: NormalizedReview[] } | undefined;
@@ -309,21 +341,50 @@ export function Workbench() {
     userNavigated.current = false;
   };
 
+  const idle = !running && events.length === 0;
+  const starting = running && runId === null;
+
+  const runningStatusText = running ? (starting ? t.starting : t.running) : events.length > 0 ? (terminal ? t.completed : t.waiting) : t.waiting;
+
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gridTemplateRows: "auto 1fr auto", minHeight: "100vh" }}>
+    <div className={styles.shell}>
+      {/* Visually-hidden live region for run status. */}
+      <div className="live-region" aria-live="polite">
+        {runningStatusText}
+      </div>
+
       {/* Header */}
-      <header style={{ gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: "12px", padding: "12px 16px", borderBottom: "1px solid var(--border)" }}>
-        <h1 style={{ margin: 0, fontSize: "18px" }}>{t.appTitle}</h1>
-        <span style={{ flex: 1 }} />
+      <header className={styles.header}>
+        <h1 className={styles.brand}>{t.appTitle}</h1>
+        <div className={styles.headerStatus}>
+          <span className={configStatus.modelConfigured ? "chip chip-ok" : "chip chip-muted"} title={t.modelStatus}>
+            {t.modelStatus}: {configStatus.modelConfigured ? t.modelConfigured : t.modelNotConfigured}
+          </span>
+          <span className="chip chip-accent" title={t.collectionStatus}>
+            {t.collectionStatus}: {t.collectionConfigured}
+          </span>
+        </div>
+        <span className={styles.spacer} />
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
-        <button onClick={handleNewRun}>{t.newRun}</button>
-        <button onClick={() => setHistoryOpen(true)}>{t.history}</button>
-        <button onClick={() => setSettingsOpen(true)}>{t.settings}</button>
-        <select value={uiLocale} onChange={(e) => setUiLocale(e.target.value as Locale)} aria-label={t.language}>
+        <button className="btn btn-primary" onClick={handleNewRun} disabled={running}>
+          {t.newRun}
+        </button>
+        <button className="btn btn-secondary" onClick={() => setHistoryOpen(true)}>
+          {t.history}
+        </button>
+        <button className="btn btn-secondary" onClick={() => setSettingsOpen(true)}>
+          {t.settings}
+        </button>
+        <select className="field" value={uiLocale} onChange={(e) => setUiLocale(e.target.value as Locale)} aria-label={t.language} style={{ width: "auto", padding: "6px 8px" }}>
           <option value="en">English</option>
           <option value="zh-CN">中文</option>
         </select>
-        <SettingsPanel t={t} open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+        <SettingsPanel
+          t={t}
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          onConfigChange={(status) => setConfigStatus(status)}
+        />
         <HistoryPanel
           t={t}
           open={historyOpen}
@@ -339,46 +400,48 @@ export function Workbench() {
         />
       </header>
 
-      {/* Left: stage rail */}
-      <aside style={{ borderRight: "1px solid var(--border)", padding: "12px", overflowY: "auto" }}>
-        <StageRail events={events} t={t} />
-        {error ? <p style={{ color: "var(--danger)" }}>{error}</p> : null}
-        {running ? <p style={{ color: "var(--accent)" }}>{t.running}</p> : null}
-        {!running && droppedEvents > 0 ? <p style={{ color: "var(--warn)", fontSize: "12px" }}>{t.someEventsDropped}</p> : null}
-      </aside>
-
-      {/* Right: tabs + content */}
-      <main style={{ padding: "16px", overflowY: "auto" }}>
-        {!running && events.length === 0 ? (
-          <div style={{ maxWidth: "560px", margin: "0 auto", padding: "24px", border: "1px solid var(--border)", borderRadius: "12px", background: "var(--bg-panel)" }}>
+      {/* Idle: centered analysis wizard */}
+      {idle ? (
+        <div className={styles.idle}>
+          <div className={styles.wizardCard}>
             <RunForm t={t} onStart={start} />
-            <p style={{ color: "var(--text-muted)", marginTop: "12px" }}>{t.waiting}</p>
+            <p className={styles.waiting}>{t.waiting}</p>
           </div>
-        ) : runId === null ? (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--bg-panel)", fontSize: "13px" }}>
-            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "var(--accent)", flexShrink: 0, animation: "pulse 1.2s ease-in-out infinite" }} />
+        </div>
+      ) : starting ? (
+        <div className={styles.startingWrap}>
+          <div className={styles.starting}>
+            <span className={styles.startingDot} />
             <span>{t.starting}</span>
           </div>
-        ) : (
-          <>
-            <LiveProgress events={events} running={running} t={t} />
+        </div>
+      ) : (
+        <div className={styles.workbench}>
+          {/* Left: stage rail */}
+          <aside className={styles.rail}>
+            <StageRail events={events} t={t} />
+            {error ? <p className={styles.railError}>{error}</p> : null}
+            {running ? <p className={styles.railRunning}>{t.running}</p> : null}
+            {!running && droppedEvents > 0 ? <p className={styles.railDropped}>{t.someEventsDropped}</p> : null}
+          </aside>
 
-            <nav style={{ display: "flex", gap: "4px", flexWrap: "wrap", marginBottom: "12px" }}>
-              {TABS.map((tabDef) => (
-                <button
-                  key={tabDef.id}
-                  onClick={() => {
-                    userNavigated.current = true;
-                    setTab(tabDef.id);
-                  }}
-                  style={{ padding: "6px 12px", borderRadius: "6px", border: tab === tabDef.id ? "1px solid var(--accent)" : "1px solid var(--border)", background: tab === tabDef.id ? "var(--bg-elevated)" : "transparent" }}
-                >
-                  {t[tabDef.labelKey]}
-                </button>
-              ))}
-            </nav>
+          {/* Right: tabs + content */}
+          <main className={styles.content}>
+            <div className={styles.progressRow}>
+              <LiveProgress events={events} running={running} t={t} />
+            </div>
 
-            <div>
+            <TabList
+              tabs={TABS.map((tabDef) => ({ id: tabDef.id, label: t[tabDef.labelKey] }))}
+              active={tab}
+              label={t.overview}
+              onSelect={(id) => setTab(id as Tab)}
+              onUserNavigate={() => {
+                userNavigated.current = true;
+              }}
+            />
+
+            <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
               {tab === "overview" ? (
                 <div style={{ display: "grid", gap: "12px" }}>
                   {stats ? (
@@ -389,19 +452,19 @@ export function Workbench() {
                         { k: t.duplicates, v: stats.duplicateCount },
                         { k: t.identityConflicts, v: stats.identityConflictCount },
                       ].map((s) => (
-                        <div key={s.k} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-                          <div style={{ fontSize: "20px", fontWeight: 700 }}>{s.v}</div>
-                          <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>{s.k}</div>
+                        <div key={s.k} className="stat-card">
+                          <div className="stat-value">{s.v}</div>
+                          <div className="stat-label">{s.k}</div>
                         </div>
                       ))}
                     </div>
                   ) : null}
                   {cache.analysisSample ? (
-                    <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-                      <h4>
+                    <div className="card">
+                      <h4 style={{ margin: 0 }}>
                         {t.sampleAnalyzed}: {cache.analysisSample.selectedCount} {t.sampleOf} {cache.analysisSample.eligibleCount}
                       </h4>
-                      <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0" }}>
+                      <p className="muted" style={{ fontSize: "12px", margin: "4px 0 0" }}>
                         {t.sampleStratified} · {cache.analysisSample.strategy}
                       </p>
                     </div>
@@ -410,23 +473,23 @@ export function Workbench() {
                     const cleaning = (cache.cleaned as { cleaning?: { unicodeNormalizedCount: number; whitespaceCollapsedCount: number; caseFoldedCount: number; exactDuplicateRemovedCount: number; identityConflictCount: number; keptShortUniqueCount: number; languageLabels: { tag: string; count: number }[] } } | undefined)?.cleaning;
                     if (!cleaning) return null;
                     return (
-                      <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-                        <h4>{t.cleaningUnicode}</h4>
-                        <p style={{ fontSize: "13px", margin: "4px 0", color: "var(--text-muted)" }}>
+                      <div className="card">
+                        <h4 style={{ margin: 0 }}>{t.cleaningUnicode}</h4>
+                        <p className="muted" style={{ fontSize: "13px", margin: "4px 0" }}>
                           {cleaning.unicodeNormalizedCount} {t.cleaningUnicode} · {cleaning.whitespaceCollapsedCount} {t.cleaningWhitespace} · {cleaning.caseFoldedCount} {t.cleaningCaseFolded}
                         </p>
-                        <p style={{ fontSize: "13px", margin: "4px 0", color: "var(--text-muted)" }}>
+                        <p className="muted" style={{ fontSize: "13px", margin: "4px 0" }}>
                           {t.cleaningExactDuplicates}: {cleaning.exactDuplicateRemovedCount} · {t.cleaningIdentityConflicts}: {cleaning.identityConflictCount} · {t.cleaningShortKept}: {cleaning.keptShortUniqueCount}
                         </p>
-                        <p style={{ fontSize: "12px", margin: "4px 0", color: "var(--text-muted)" }}>
+                        <p className="muted" style={{ fontSize: "12px", margin: "4px 0 0" }}>
                           {t.cleaningLanguages}: {cleaning.languageLabels.map((l) => `${l.tag} ${l.count}`).join(" · ")}
                         </p>
                       </div>
                     );
                   })()}
                   {cache.finalReport ? (
-                    <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-                      <h4>{t.limitations}</h4>
+                    <div className="card">
+                      <h4 style={{ margin: 0 }}>{t.limitations}</h4>
                       {(cache.finalReport as { limitations?: { code: string; message: string }[] }).limitations?.map((l, i) => (
                         <p key={i} style={{ fontSize: "13px", margin: "4px 0" }}>
                           <ProvenanceBadge kind="limitation" label={l.code} /> {l.message}
@@ -434,14 +497,13 @@ export function Workbench() {
                       ))}
                     </div>
                   ) : null}
-                  <RunDiagnosticsPanel events={events} t={t} />
                 </div>
               ) : null}
 
               {(tab === "raw" || tab === "cleaned") && cleanedReviews.length > 0 ? (
                 <ReviewsTable reviews={cleanedReviews} t={t} />
               ) : (tab === "raw" || tab === "cleaned") && !running ? (
-                <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>
+                <p className="muted">{t.noData}</p>
               ) : null}
 
               {tab === "classification" ? <ClassificationPanel candidates={cache.topicCandidates?.candidates ?? []} t={t} /> : null}
@@ -473,15 +535,11 @@ export function Workbench() {
                 </>
               ) : null}
               {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} t={t} /> : null}
+              {tab === "diagnostics" ? <RunLogPanel events={events} t={t} /> : null}
             </div>
-          </>
-        )}
-      </main>
-
-      {/* Footer: event drawer */}
-      <footer style={{ gridColumn: "1 / -1" }}>
-        <EventDrawer events={events} t={t} />
-      </footer>
+          </main>
+        </div>
+      )}
     </div>
   );
 }

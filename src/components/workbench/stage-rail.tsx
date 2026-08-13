@@ -80,10 +80,11 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
         const current = currentStage === stage && !done;
         const duration = elapsedFor(stage);
         const batch = current ? batchProgress(events, stage) : null;
+        const statusText = done ? t.completed : current ? t.running : t.waiting;
         return (
           <li key={stage} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: done || current ? 1 : 0.55 }}>
             <span
-              aria-label={label}
+              aria-hidden="true"
               style={{
                 width: "10px",
                 height: "10px",
@@ -92,14 +93,17 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
                 flexShrink: 0,
               }}
             />
-            <span>{label}</span>
+            <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+            <span className="sr-only">
+              {label}: {statusText}
+            </span>
             {done ? (
-              <span style={{ color: "var(--ok)", fontSize: "12px" }}>✓{duration != null ? ` ${duration}` : ""}</span>
-            ) : current && duration != null ? (
-              <span style={{ color: "var(--accent)", fontSize: "12px" }}>{duration}</span>
+              <span style={{ color: "var(--ok)", fontSize: "12px", flexShrink: 0 }} aria-hidden="true">✓{duration != null ? ` ${duration}` : ""}</span>
+            ) : current ? (
+              <span style={{ color: "var(--accent)", fontSize: "12px", flexShrink: 0 }} aria-hidden="true">{duration != null ? duration : "…"}</span>
             ) : null}
             {current && batch ? (
-              <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>
+              <span style={{ color: "var(--text-muted)", fontSize: "12px", flexShrink: 0 }} aria-hidden="true">
                 {t.stageBatch} {batch.done}/{batch.total}
               </span>
             ) : null}
@@ -107,7 +111,10 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
         );
       })}
       {failed ? (
-        <li style={{ color: "var(--danger)", fontWeight: 600 }}>✗</li>
+        <li style={{ color: "var(--danger)", fontWeight: 600 }}>
+          <span className="sr-only">{t.failed}</span>
+          <span aria-hidden="true">✗</span>
+        </li>
       ) : null}
     </ol>
   );

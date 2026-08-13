@@ -3,7 +3,7 @@ import { render, screen, act, fireEvent } from "@testing-library/react";
 import { Workbench } from "./workbench";
 import { getDictionary } from "@/i18n";
 
-const tEn = getDictionary("en");
+const tZh = getDictionary("zh-CN");
 
 // A live run whose artifacts are published long after the run started, with
 // `run.completed` arriving even later. The frontend must keep polling for
@@ -95,7 +95,7 @@ beforeEach(() => {
       }
       return Promise.resolve({
         ok: true,
-        json: async () => ({ modelConfigured: false, modelApiKeyConfigured: false, modelName: null, modelBaseUrl: null, jsonMode: "prompt" }),
+        json: async () => ({ modelConfigured: false, modelApiKeyConfigured: false, serpApiKeyConfigured: false, modelName: null, modelBaseUrl: null, jsonMode: "prompt" }),
       });
     }),
   );
@@ -107,21 +107,38 @@ afterEach(() => {
   delete availableArtifacts["topics"];
 });
 
+/** Walk the wizard to a live confirm, then start the live run. */
+async function startLiveRun() {
+  await act(async () => {
+    fireEvent.click(screen.getByRole("radio", { name: new RegExp(tZh.liveMode) }));
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: tZh.useExampleApp }));
+  });
+  await act(async () => {
+    fireEvent.change(screen.getByLabelText(tZh.goal), { target: { value: "理解用户为什么喜欢这个应用" } });
+  });
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: tZh.next }));
+  });
+  // Entering the confirm step auto-checks the sample (an async effect + fetch).
+  // Flush microtasks/timers until the live sample card renders; avoid waitFor,
+  // which does not advance under fake timers.
+  for (let i = 0; i < 10; i++) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(0);
+    });
+    if (screen.queryByRole("button", { name: tZh.analyzeFresh })) break;
+  }
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: tZh.analyzeFresh }));
+  });
+}
+
 describe("Workbench long-running artifact polling", () => {
   it("keeps polling for artifacts beyond a fixed attempt ceiling while the run is still running", async () => {
     render(<Workbench />);
-
-    // Start a live run (RunForm is in live mode by default with a prefilled
-    // URL). The analysis goal must be long enough for the Start button to enable.
-    await act(async () => {
-      fireEvent.change(screen.getByLabelText(tEn.goal), { target: { value: "Understand why users love the app" } });
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.checkSample }));
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.analyzeFresh }));
-    });
+    await startLiveRun();
 
     // Advance WELL past the old attempt ceiling (1000 × 800ms ≈ 13.3min).
     // With the old ceiling the poller has now stopped entirely; the topics
@@ -140,7 +157,7 @@ describe("Workbench long-running artifact polling", () => {
 
     // Open the topics tab; the late artifact must be shown.
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.topics }));
+      fireEvent.click(screen.getByRole("tab", { name: tZh.topics }));
     });
 
     expect(screen.getByText(/Pricing/)).toBeInTheDocument();
@@ -148,16 +165,7 @@ describe("Workbench long-running artifact polling", () => {
 
   it("auto-advances to the topics tab when the topics artifact lands (no manual click)", async () => {
     render(<Workbench />);
-
-    await act(async () => {
-      fireEvent.change(screen.getByLabelText(tEn.goal), { target: { value: "Understand why users love the app" } });
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.checkSample }));
-    });
-    await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.analyzeFresh }));
-    });
+    await startLiveRun();
 
     // Publish the topics artifact; the UI should follow it to the topics tab
     // automatically without the user clicking the tab.

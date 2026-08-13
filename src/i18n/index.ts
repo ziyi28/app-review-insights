@@ -166,6 +166,28 @@ export type Dictionary = {
   sampleAnalyzed: string;
   sampleOf: string;
   sampleStratified: string;
+  wizardStepSource: string;
+  wizardStepConfigure: string;
+  wizardStepConfirm: string;
+  liveModeDesc: string;
+  importModeDesc: string;
+  replayModeDesc: string;
+  useExampleApp: string;
+  back: string;
+  next: string;
+  confirmFile: string;
+  replayNoNetwork: string;
+  collectionStatus: string;
+  collectionConfigured: string;
+  runLog: string;
+  eventCount: string;
+  filterByStage: string;
+  filterByEventType: string;
+  all: string;
+  sequence: string;
+  stage: string;
+  type: string;
+  message: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -335,6 +357,28 @@ export const dictionaries: Record<Locale, Dictionary> = {
     sampleAnalyzed: "Analyzed",
     sampleOf: "of scope-matching reviews",
     sampleStratified: "stratified sample",
+    wizardStepSource: "Choose a source",
+    wizardStepConfigure: "Configure input",
+    wizardStepConfirm: "Confirm & start",
+    liveModeDesc: "Collect fresh US App Store reviews (SerpApi with Apple RSS fallback)",
+    importModeDesc: "Import a local JSON or CSV review file — no live collection",
+    replayModeDesc: "Replay a completed cached run — no network or model calls",
+    useExampleApp: "Use example app",
+    back: "Back",
+    next: "Next",
+    confirmFile: "File",
+    replayNoNetwork: "Replay makes no network or model calls",
+    collectionStatus: "Collection",
+    collectionConfigured: "SerpApi / Apple RSS fallback",
+    runLog: "Run Log",
+    eventCount: "Event count",
+    filterByStage: "Filter by stage",
+    filterByEventType: "Filter by type",
+    all: "All",
+    sequence: "Seq",
+    stage: "Stage",
+    type: "Type",
+    message: "Message",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -502,6 +546,28 @@ export const dictionaries: Record<Locale, Dictionary> = {
     sampleAnalyzed: "已分析",
     sampleOf: "条范围匹配评论",
     sampleStratified: "分层样本",
+    wizardStepSource: "选择数据来源",
+    wizardStepConfigure: "配置输入",
+    wizardStepConfirm: "确认并开始",
+    liveModeDesc: "实时采集美国区 App Store 最新评论（SerpApi 主用，Apple RSS 备用）",
+    importModeDesc: "导入本地 JSON 或 CSV 评论文件，无需联网采集",
+    replayModeDesc: "回放一次已完成的缓存运行，不调用网络或模型",
+    useExampleApp: "使用示例 App",
+    back: "上一步",
+    next: "下一步",
+    confirmFile: "文件",
+    replayNoNetwork: "回放不会调用网络或模型",
+    collectionStatus: "采集",
+    collectionConfigured: "SerpApi / Apple RSS 备用",
+    runLog: "运行日志",
+    eventCount: "事件数量",
+    filterByStage: "按阶段筛选",
+    filterByEventType: "按类型筛选",
+    all: "全部",
+    sequence: "序号",
+    stage: "阶段",
+    type: "类型",
+    message: "消息",
   },
 };
 

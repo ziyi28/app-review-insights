@@ -1,0 +1,126 @@
+.shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-panel);
+  flex-shrink: 0;
+}
+
+.brand {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.headerStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Idle: centered wizard */
+.idle {
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.wizardCard {
+  width: 100%;
+  max-width: 640px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-panel);
+}
+
+.waiting {
+  color: var(--text-muted);
+  margin: 16px 0 0;
+  font-size: 13px;
+}
+
+/* Starting (run in flight, no accepted event yet) */
+.startingWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.starting {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--bg-panel);
+  font-size: 13px;
+}
+
+.startingDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* Active run: stage rail + content */
+.workbench {
+  display: grid;
+  grid-template-columns: var(--stage-rail-width) 1fr;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rail {
+  border-right: 1px solid var(--border);
+  padding: 14px;
+  overflow-y: auto;
+  background: var(--bg-panel);
+}
+
+.railError {
+  color: var(--danger);
+  font-size: 13px;
+}
+
+.railRunning {
+  color: var(--accent);
+  font-size: 13px;
+}
+
+.railDropped {
+  color: var(--warn);
+  font-size: 12px;
+}
+
+.content {
+  padding: 16px;
+  overflow-y: auto;
+  min-width: 0;
+}
+
+.progressRow {
+  margin-bottom: 12px;
+}

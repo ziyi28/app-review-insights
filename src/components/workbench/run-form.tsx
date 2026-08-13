@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { Dictionary, Locale } from "@/i18n";
+import styles from "./run-form.module.css";
 
 export type RunFormProps = {
   t: Dictionary;
   onStart: (payload: unknown) => void;
 };
+
+type Step = 1 | 2 | 3;
+type Mode = "live" | "import" | "replay";
 
 type SourcePreviewSummary = {
   protocolVersion: "1";
@@ -39,11 +43,31 @@ type SourcePreviewSummary = {
   recommendedSelection: "live" | "stable" | null;
 };
 
+const EXAMPLE_URL = "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684";
+
+const STEP_LABELS: Record<Step, keyof Dictionary> = {
+  1: "wizardStepSource",
+  2: "wizardStepConfigure",
+  3: "wizardStepConfirm",
+};
+
+/**
+ * Three-step "new run" wizard:
+ *   1. choose a data source (live / import / cached replay)
+ *   2. configure the input (URL+goal+language, file+goal+language, or a run)
+ *   3. confirm — live shows the checked sample and lets the user pick fresh vs
+ *      local-history; import confirms the file; replay confirms the run and the
+ *      "no network/model" guarantee.
+ *
+ * The `onStart` payload shapes are unchanged from the single-form version so the
+ * server contract and cached-replay flow are untouched.
+ */
 export function RunForm({ t, onStart }: RunFormProps) {
-  const [mode, setMode] = useState<"live" | "import" | "replay">("live");
-  const [url, setUrl] = useState("https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684");
+  const [step, setStep] = useState<Step>(1);
+  const [mode, setMode] = useState<Mode>("live");
+  const [url, setUrl] = useState("");
   const [goal, setGoal] = useState("");
-  const [outputLocale, setOutputLocale] = useState<Locale>("en");
+  const [outputLocale, setOutputLocale] = useState<Locale>("zh-CN");
   const [file, setFile] = useState<File | null>(null);
   const [replayRuns, setReplayRuns] = useState<{ runId: string; createdAt: string }[]>([]);
   const [sourceRunId, setSourceRunId] = useState<string>("");
@@ -67,21 +91,16 @@ export function RunForm({ t, onStart }: RunFormProps) {
       .catch(() => {});
   }, []);
 
-  // The server requires a goal of at least 10 characters for analyze runs.
-  const goalOk = goal.trim().length >= 10;
-  const canCheck = mode === "live" && url.trim().length > 0 && goalOk;
-  const canStart = mode === "replay" ? sourceRunId.trim().length > 0 : mode === "live" ? preview !== null && preview !== "loading" : file !== null && goalOk;
-
-  const checkSample = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mode !== "live") return;
+  const checkSample = useCallback(async () => {
+    const targetUrl = url.trim();
+    if (!targetUrl) return;
     setPreview("loading");
     setPreviewError(null);
     try {
       const res = await fetch("/api/source-previews", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ protocolVersion: "1", appStoreUrl: url.trim() }),
+        body: JSON.stringify({ protocolVersion: "1", appStoreUrl: targetUrl }),
       });
       if (!res.ok) {
         const problem = await res.json().catch(() => ({}));
@@ -93,7 +112,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
       setPreview(null);
       setPreviewError(err instanceof Error ? err.message : t.sampleCheckFailed);
     }
-  };
+  }, [url, t]);
 
   // A URL change makes the previously checked sample stale: any live run must
   // re-check against the new URL.
@@ -102,6 +121,10 @@ export function RunForm({ t, onStart }: RunFormProps) {
     setPreview(null);
     setPreviewError(null);
   };
+
+  const goalOk = goal.trim().length >= 10;
+  // Step 2 can advance only when the mode's required input is filled.
+  const step2Valid = mode === "replay" ? sourceRunId.trim().length > 0 : mode === "import" ? file !== null && goalOk : url.trim().length > 0 && goalOk;
 
   const startWithPreview = (selection: "live" | "stable") => {
     if (preview === null || preview === "loading") return;
@@ -120,216 +143,297 @@ export function RunForm({ t, onStart }: RunFormProps) {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mode === "replay") {
-      if (!sourceRunId.trim()) return;
-      onStart({ protocolVersion: "1", mode: "cached-replay", sourceRunId: sourceRunId.trim() });
-      return;
-    }
-    if (mode === "live") {
-      // The form's primary action is now "check the sample"; the analyze action
-      // happens through the choice cards below (or the direct live path).
-      void checkSample(e);
-    } else if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const content = String(reader.result ?? "");
-        onStart({
-          protocolVersion: "1",
-          mode: "analyze",
-          uiLocale: outputLocale,
-          outputLocale,
-          goal,
-          source: {
-            kind: "import",
-            fileName: file.name,
-            mediaType: file.name.endsWith(".csv") ? "text/csv" : "application/json",
-            content,
-          },
-        });
-      };
-      reader.readAsText(file);
+  const startImport = () => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const content = String(reader.result ?? "");
+      onStart({
+        protocolVersion: "1",
+        mode: "analyze",
+        uiLocale: outputLocale,
+        outputLocale,
+        goal,
+        source: {
+          kind: "import",
+          fileName: file.name,
+          mediaType: file.name.endsWith(".csv") ? "text/csv" : "application/json",
+          content,
+        },
+      });
+    };
+    reader.readAsText(file);
+  };
+
+  const startReplay = () => {
+    if (!sourceRunId.trim()) return;
+    onStart({ protocolVersion: "1", mode: "cached-replay", sourceRunId: sourceRunId.trim() });
+  };
+
+  const handleNext = () => {
+    if (step === 2 && step2Valid) {
+      setStep(3);
+      // Entering the confirm step for a live run checks the sample right away
+      // so the user can pick fresh vs local-history without a separate action.
+      if (mode === "live" && preview === null) {
+        void checkSample();
+      }
     }
   };
 
+  const handleBack = () => setStep((s) => (s - 1) as Step);
+
+  const selectMode = (next: Mode) => {
+    setMode(next);
+    setStep(2);
+  };
+
+  // Live sample card state (step 3).
   const liveDisabled = preview !== null && preview !== "loading" && preview.live.reviewCount === 0;
   const stableDisabled = preview !== null && preview !== "loading" && !preview.stable.available;
-
-  // Honest provider label: forced-fresh SerpApi, or an explicit Apple RSS
-  // fallback.
   const providerLabel =
-    preview !== null && preview !== "loading" && preview.live.provider === "serpapi"
-      ? t.serpApiFresh
-      : t.appleRssFallback;
-
-  // The sanitized server-side fallback reason: the first SERPAPI_* limitation's
-  // message (already stripped of any raw upstream text). Never a fixed credits
-  // message.
+    preview !== null && preview !== "loading" && preview.live.provider === "serpapi" ? t.serpApiFresh : t.appleRssFallback;
   const fallbackReason =
     preview !== null && preview !== "loading"
       ? preview.live.limitations.find((l) => l.code.startsWith("SERPAPI_"))
       : undefined;
 
   return (
-    <form onSubmit={handleSubmit} style={{ display: "grid", gap: "10px" }}>
-      <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-        <button type="button" onClick={() => { setMode("live"); setPreview(null); setPreviewError(null); }} style={{ opacity: mode === "live" ? 1 : 0.6 }}>
-          {t.liveMode}
-        </button>
-        <button type="button" onClick={() => setMode("import")} style={{ opacity: mode === "import" ? 1 : 0.6 }}>
-          {t.importMode}
-        </button>
-        <button type="button" onClick={() => setMode("replay")} style={{ opacity: mode === "replay" ? 1 : 0.6 }}>
-          {t.replayMode}
-        </button>
-      </div>
+    <div className={styles.wizard}>
+      {/* Step indicator */}
+      <ol className={styles.stepper} aria-label={t.wizardStepSource}>
+        {([1, 2, 3] as const).map((s) => (
+          <li key={s} className={s === step ? `${styles.step} ${styles.stepActive}` : s < step ? `${styles.step} ${styles.stepDone}` : styles.step} aria-current={s === step ? "step" : undefined}>
+            <span className={styles.stepDot}>{s}</span>
+            <span className={styles.stepLabel}>{t[STEP_LABELS[s]]}</span>
+          </li>
+        ))}
+      </ol>
 
-      {mode === "live" ? (
-        <>
-          <label key="field-live">
-            {t.appStoreUrl}
-            <input
-              value={url}
-              onChange={(e) => handleUrlChange(e.target.value)}
-              style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}
-            />
-          </label>
-          {preview !== null && preview !== "loading" && (
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" }}>
-              {/* Live sample card */}
-              <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)", opacity: liveDisabled ? 0.6 : 1 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <strong>{t.liveSample}</strong>
-                  {preview.recommendedSelection === "live" ? (
-                    <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "10px", background: "var(--accent)", color: "#fff" }}>{t.recommended}</span>
-                  ) : null}
-                </div>
-                <p style={{ fontSize: "13px", margin: "6px 0 2px" }}>{preview.live.reviewCount} {t.freshReviews}</p>
-                <p style={{ fontSize: "12px", color: "var(--accent)", margin: "2px 0", fontWeight: 600 }}>{providerLabel}</p>
-                {preview.live.collectedAt ? (
-                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>{new Date(preview.live.collectedAt).toLocaleString()}</p>
-                ) : null}
-                {preview.live.provider === "serpapi" && preview.live.searchCount > 0 ? (
-                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>{t.searchesUsed}: {preview.live.searchCount}</p>
-                ) : null}
-                {fallbackReason ? (
-                  <p style={{ fontSize: "12px", color: "var(--warn)", margin: "2px 0" }}>{fallbackReason.message}</p>
-                ) : null}
-                <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "4px 0" }}>{t.freshnessCaveat}</p>
-                {liveDisabled ? (
-                  <p style={{ fontSize: "12px", color: "var(--warn)", margin: "4px 0" }}>{t.noSampleAvailable}</p>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => startWithPreview("live")}
-                    style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "6px", background: "var(--accent-strong)", color: "#fff", fontWeight: 600 }}
-                  >
-                    {t.analyzeFresh}
-                  </button>
-                )}
-              </div>
-
-              {/* Stable sample card */}
-              <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)", opacity: stableDisabled ? 0.6 : 1 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                  <strong>{t.stableSample}</strong>
-                  {preview.recommendedSelection === "stable" ? (
-                    <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "10px", background: "var(--accent)", color: "#fff" }}>{t.recommended}</span>
-                  ) : null}
-                </div>
-                <p style={{ fontSize: "13px", margin: "6px 0 2px" }}>{preview.stable.reviewCount} {t.localHistoryReviews}</p>
-                <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>
-                  {t.cacheUpdated}: {preview.stable.cacheUpdatedAt ? new Date(preview.stable.cacheUpdatedAt).toLocaleString() : "—"}
-                </p>
-                {stableDisabled ? (
-                  <p style={{ fontSize: "12px", color: "var(--warn)", margin: "4px 0" }}>{t.noSampleAvailable}</p>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => startWithPreview("stable")}
-                    style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "6px", background: "var(--accent-strong)", color: "#fff", fontWeight: 600 }}
-                  >
-                    {t.analyzeHistory}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </>
-      ) : mode === "import" ? (
-        <label key="field-import">
-          {t.importFile}
-          <input type="file" accept=".json,.csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
-        </label>
-      ) : (
-        <label key="field-replay">
-          {t.cachedReplay}
-          <select
-            value={sourceRunId}
-            onChange={(e) => setSourceRunId(e.target.value)}
-            style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}
-          >
-            {replayRuns.length === 0 ? (
-              <option value="">—</option>
-            ) : (
-              replayRuns.map((r) => (
-                <option key={r.runId} value={r.runId}>
-                  {r.runId} ({new Date(r.createdAt).toLocaleString()})
-                </option>
-              ))
-            )}
-          </select>
-          {replayRuns.length === 0 ? (
-            <p style={{ color: "var(--text-muted)", fontSize: "12px", margin: "4px 0" }}>{t.noData}</p>
-          ) : null}
-        </label>
-      )}
-
-      <div>
-        <label htmlFor="run-form-goal">{t.goal}</label>
-        <textarea
-          id="run-form-goal"
-          value={goal}
-          onChange={(e) => setGoal(e.target.value)}
-          rows={3}
-          aria-describedby={goal.trim().length > 0 && !goalOk ? "run-form-goal-hint" : undefined}
-          style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}
-        />
-        {goal.trim().length > 0 && !goalOk ? (
-          <p id="run-form-goal-hint" style={{ color: "var(--warn)", fontSize: "12px", margin: "4px 0 0" }}>
-            {t.goalTooShort}
-          </p>
-        ) : null}
-      </div>
-
-      <label>
-        {t.outputLocale}
-        <select value={outputLocale} onChange={(e) => setOutputLocale(e.target.value as Locale)} style={{ padding: "8px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}>
-          <option value="en">English</option>
-          <option value="zh-CN">中文</option>
-        </select>
-      </label>
-
-      {previewError ? <p style={{ color: "var(--danger)", fontSize: "13px" }}>{previewError}</p> : null}
-
-      {mode === "live" ? (
-        <button type="submit" disabled={!canCheck} style={{ padding: "10px", borderRadius: "6px", background: "var(--accent-strong)", color: "#fff", fontWeight: 600 }}>
-          {preview === "loading" ? t.checkingSample : preview !== null ? t.recheck : t.checkSample}
-        </button>
-      ) : (
-        <button type="submit" disabled={!canStart} style={{ padding: "10px", borderRadius: "6px", background: "var(--accent-strong)", color: "#fff", fontWeight: 600 }}>
-          {t.start}
-        </button>
-      )}
-
-      {mode === "live" && preview !== null && preview !== "loading" && liveDisabled && stableDisabled ? (
-        <p style={{ fontSize: "12px", color: "var(--warn)", margin: "0" }}>
-          {t.noSampleAvailable} <button type="button" onClick={() => setMode("import")} style={{ textDecoration: "underline" }}>{t.useImportInstead}</button>
-        </p>
+      {/* Step 1 — choose a source */}
+      {step === 1 ? (
+        <div className={styles.stepBody}>
+          <div role="radiogroup" aria-label={t.wizardStepSource} className={styles.modeGrid}>
+            {(["live", "import", "replay"] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                role="radio"
+                aria-checked={mode === m}
+                onClick={() => selectMode(m)}
+                className={`${styles.modeCard} ${mode === m ? styles.modeCardSelected : ""}`}
+              >
+                <span className={styles.modeTitle}>{m === "live" ? t.liveMode : m === "import" ? t.importMode : t.replayMode}</span>
+                <span className={styles.modeDesc}>{m === "live" ? t.liveModeDesc : m === "import" ? t.importModeDesc : t.replayModeDesc}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       ) : null}
 
-      {mode === "live" && preview === null ? <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "0" }}>{t.notChecked}</p> : null}
-    </form>
+      {/* Step 2 — configure input */}
+      {step === 2 ? (
+        <div className={styles.stepBody}>
+          {mode === "live" ? (
+            <>
+              <div className={styles.fieldRow}>
+                <label className={styles.label}>
+                  {t.appStoreUrl}
+                  <input
+                    className={styles.input}
+                    value={url}
+                    onChange={(e) => handleUrlChange(e.target.value)}
+                    placeholder="https://apps.apple.com/us/app/…"
+                  />
+                </label>
+                <button type="button" className={styles.exampleBtn} onClick={() => handleUrlChange(EXAMPLE_URL)}>
+                  {t.useExampleApp}
+                </button>
+              </div>
+              <label className={styles.label}>
+                {t.goal}
+                <textarea
+                  className={styles.input}
+                  id="run-form-goal"
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  rows={3}
+                  aria-describedby={goal.trim().length > 0 && !goalOk ? "run-form-goal-hint" : undefined}
+                />
+              </label>
+              {goal.trim().length > 0 && !goalOk ? (
+                <p id="run-form-goal-hint" className={styles.hintWarn}>
+                  {t.goalTooShort}
+                </p>
+              ) : null}
+              <label className={styles.label}>
+                {t.outputLocale}
+                <select className={styles.input} value={outputLocale} onChange={(e) => setOutputLocale(e.target.value as Locale)}>
+                  <option value="en">English</option>
+                  <option value="zh-CN">中文</option>
+                </select>
+              </label>
+            </>
+          ) : mode === "import" ? (
+            <>
+              <label className={styles.label}>
+                {t.importFile}
+                <input type="file" accept=".json,.csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+              </label>
+              <label className={styles.label}>
+                {t.goal}
+                <textarea
+                  className={styles.input}
+                  id="run-form-goal"
+                  value={goal}
+                  onChange={(e) => setGoal(e.target.value)}
+                  rows={3}
+                  aria-describedby={goal.trim().length > 0 && !goalOk ? "run-form-goal-hint" : undefined}
+                />
+              </label>
+              {goal.trim().length > 0 && !goalOk ? (
+                <p id="run-form-goal-hint" className={styles.hintWarn}>
+                  {t.goalTooShort}
+                </p>
+              ) : null}
+              <label className={styles.label}>
+                {t.outputLocale}
+                <select className={styles.input} value={outputLocale} onChange={(e) => setOutputLocale(e.target.value as Locale)}>
+                  <option value="en">English</option>
+                  <option value="zh-CN">中文</option>
+                </select>
+              </label>
+            </>
+          ) : (
+            <label className={styles.label}>
+              {t.cachedReplay}
+              <select className={styles.input} value={sourceRunId} onChange={(e) => setSourceRunId(e.target.value)}>
+                {replayRuns.length === 0 ? (
+                  <option value="">—</option>
+                ) : (
+                  replayRuns.map((r) => (
+                    <option key={r.runId} value={r.runId}>
+                      {r.runId} ({new Date(r.createdAt).toLocaleString()})
+                    </option>
+                  ))
+                )}
+              </select>
+              {replayRuns.length === 0 ? <p className={styles.hintMuted}>{t.noData}</p> : null}
+            </label>
+          )}
+        </div>
+      ) : null}
+
+      {/* Step 3 — confirm & start */}
+      {step === 3 ? (
+        <div className={styles.stepBody}>
+          {mode === "live" ? (
+            preview === "loading" ? (
+              <p className={styles.checking}>{t.checkingSample}</p>
+            ) : previewError ? (
+              <div className={styles.errorBox} role="alert">
+                <p className={styles.errorText}>{previewError}</p>
+                <button type="button" className="btn btn-secondary" onClick={() => void checkSample()}>
+                  {t.recheck}
+                </button>
+              </div>
+            ) : preview ? (
+              <div className={styles.sampleGrid}>
+                {/* Live sample card */}
+                <div className={`${styles.sampleCard} ${liveDisabled ? styles.sampleCardDisabled : ""}`}>
+                  <div className={styles.sampleHead}>
+                    <strong>{t.liveSample}</strong>
+                    {preview.recommendedSelection === "live" ? <span className="chip chip-accent">{t.recommended}</span> : null}
+                  </div>
+                  <p className={styles.sampleCount}>
+                    {preview.live.reviewCount} {t.freshReviews}
+                  </p>
+                  <p className={styles.sampleSource}>{providerLabel}</p>
+                  {preview.live.collectedAt ? <p className={styles.sampleMeta}>{new Date(preview.live.collectedAt).toLocaleString()}</p> : null}
+                  {preview.live.provider === "serpapi" && preview.live.searchCount > 0 ? (
+                    <p className={styles.sampleMeta}>
+                      {t.searchesUsed}: {preview.live.searchCount}
+                    </p>
+                  ) : null}
+                  {fallbackReason ? <p className={styles.sampleWarn}>{fallbackReason.message}</p> : null}
+                  <p className={styles.sampleCaveat}>{t.freshnessCaveat}</p>
+                  {liveDisabled ? (
+                    <p className={styles.sampleWarn}>{t.noSampleAvailable}</p>
+                  ) : (
+                    <button type="button" className="btn btn-primary" onClick={() => startWithPreview("live")}>
+                      {t.analyzeFresh}
+                    </button>
+                  )}
+                </div>
+
+                {/* Stable sample card */}
+                <div className={`${styles.sampleCard} ${stableDisabled ? styles.sampleCardDisabled : ""}`}>
+                  <div className={styles.sampleHead}>
+                    <strong>{t.stableSample}</strong>
+                    {preview.recommendedSelection === "stable" ? <span className="chip chip-accent">{t.recommended}</span> : null}
+                  </div>
+                  <p className={styles.sampleCount}>
+                    {preview.stable.reviewCount} {t.localHistoryReviews}
+                  </p>
+                  <p className={styles.sampleMeta}>
+                    {t.cacheUpdated}: {preview.stable.cacheUpdatedAt ? new Date(preview.stable.cacheUpdatedAt).toLocaleString() : "—"}
+                  </p>
+                  {stableDisabled ? (
+                    <p className={styles.sampleWarn}>{t.noSampleAvailable}</p>
+                  ) : (
+                    <button type="button" className="btn btn-primary" onClick={() => startWithPreview("stable")}>
+                      {t.analyzeHistory}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : null
+          ) : mode === "import" ? (
+            <div className={styles.confirmBox}>
+              <p className={styles.confirmRow}>
+                <span className={styles.muted}>{t.confirmFile}:</span> <strong>{file?.name}</strong>
+              </p>
+              <p className={styles.confirmRow}>
+                <span className={styles.muted}>{t.goal}:</span> {goal}
+              </p>
+              <p className={styles.confirmRow}>
+                <span className={styles.muted}>{t.outputLocale}:</span> {outputLocale === "zh-CN" ? "中文" : "English"}
+              </p>
+              <button type="button" className="btn btn-primary" onClick={startImport}>
+                {t.start}
+              </button>
+            </div>
+          ) : (
+            <div className={styles.confirmBox}>
+              <p className={styles.confirmRow}>
+                <span className={styles.muted}>{t.cachedReplay}:</span> <strong>{sourceRunId}</strong>
+              </p>
+              <p className={styles.confirmRow}>
+                <span className={styles.muted}>{t.replayNoNetwork}</span>
+              </p>
+              <button type="button" className="btn btn-primary" onClick={startReplay}>
+                {t.start}
+              </button>
+            </div>
+          )}
+        </div>
+      ) : null}
+
+      {/* Footer navigation */}
+      <div className={styles.nav}>
+        {step > 1 ? (
+          <button type="button" className="btn btn-secondary" onClick={handleBack}>
+            {t.back}
+          </button>
+        ) : (
+          <span />
+        )}
+        {step === 2 ? (
+          <button type="button" className="btn btn-primary" disabled={!step2Valid} onClick={handleNext}>
+            {t.next}
+          </button>
+        ) : null}
+      </div>
+    </div>
   );
 }

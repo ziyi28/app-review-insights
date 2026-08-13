@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { getUpstreamState, setSerpApiMode, resetCounters } from "./upstream-server";
+import { waitForRunComplete } from "./wizard";
 
 // A live preview first merges its collected reviews into the isolated cache,
 // so the stable sample card is usable in the very same response. Clicking
@@ -10,33 +11,36 @@ test("stable sample analysis uses the live-merged cache and reports local histor
   setSerpApiMode("live");
   resetCounters();
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /App Review Planner/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
 
-  // Check the review sample: the live result is merged into the cache, making
-  // the stable card available in the same response.
-  await page.getByLabel(/Analysis goal/i).fill("Understand why users love the app and what problems they have");
+  // Walk the wizard: live mode, example URL, goal, confirm. The sample is
+  // checked automatically; the live result is merged into the cache, making the
+  // stable card available in the same response.
+  await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /使用示例 App/ }).click();
+  await page.getByLabel(/分析目标/).fill("了解用户为什么喜欢这个应用以及他们遇到的问题");
   const previewPromise = page.waitForResponse("**/api/source-previews");
-  await page.getByRole("button", { name: /Check review sample/i }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
   expect((await previewPromise).status()).toBe(200);
 
   // The stable sample card shows local-history wording and becomes actionable.
-  await expect(page.getByText(/2 local-history reviews/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /Analyze local history/i })).toBeEnabled();
+  await expect(page.getByText(/2 条本地历史评论/)).toBeVisible();
+  await expect(page.getByRole("button", { name: /分析本地历史样本/ })).toBeEnabled();
 
   // Analyze the stable sample.
   const postPromise = page.waitForResponse("**/api/runs");
-  await page.getByRole("button", { name: /Analyze local history/i }).click();
+  await page.getByRole("button", { name: /分析本地历史样本/ }).click();
   expect((await postPromise).status()).toBe(200);
 
   // Wait for the run to complete.
-  await expect(page.locator("footer").getByText(/run.completed/)).toBeVisible({ timeout: 20_000 });
+  await waitForRunComplete(page);
 
   // Header badge shows the local-history source, never the fresh-fetch label.
-  await expect(page.getByText(/SerpApi \/ US App Store · Local history/i)).toBeVisible();
+  await expect(page.getByText(/SerpApi \/ 美国区 App Store · 本地历史/i)).toBeVisible();
 
   // Overview limitation reports LOCAL_HISTORY_SELECTED (scoped to the Overview
-  // panel; the event log JSON also carries it).
-  await page.getByRole("button", { name: /Overview/i }).click();
+  // panel; the run-log event list also carries it).
+  await page.getByRole("tab", { name: /概览/ }).click();
   const overviewLimitation = page.getByText(/LOCAL_HISTORY_SELECTED/i).first();
   await expect(overviewLimitation).toBeVisible({ timeout: 10_000 });
 
@@ -44,8 +48,8 @@ test("stable sample analysis uses the live-merged cache and reports local histor
   expect(getUpstreamState().serpApiRequests).toBe(1);
 
   // Traceability passes.
-  await page.getByRole("button", { name: /Traceability/i }).click();
-  await expect(page.getByText(/Completed/)).toBeVisible();
+  await page.getByRole("tab", { name: /追溯/ }).click();
+  await expect(page.getByText(/已完成/)).toBeVisible();
 });
 
 test("falls back to Apple RSS when SerpApi is rate-limited", async ({ page }) => {
@@ -54,14 +58,16 @@ test("falls back to Apple RSS when SerpApi is rate-limited", async ({ page }) =>
   resetCounters();
   setSerpApiMode("fallback");
   await page.goto("/");
-  await page.getByLabel(/Analysis goal/i).fill("Understand why users love the app and what problems they have");
+  await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /使用示例 App/ }).click();
+  await page.getByLabel(/分析目标/).fill("了解用户为什么喜欢这个应用以及他们遇到的问题");
   const previewPromise = page.waitForResponse("**/api/source-previews");
-  await page.getByRole("button", { name: /Check review sample/i }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
   expect((await previewPromise).status()).toBe(200);
 
   // One SerpApi attempt happened, then RSS produced the sample.
-  await expect(page.getByText(/Apple RSS fallback/i).first()).toBeVisible();
-  await expect(page.getByText(/SerpApi · forced fresh/i)).toHaveCount(0);
+  await expect(page.getByText(/Apple RSS 降级采集/).first()).toBeVisible();
+  await expect(page.getByText(/SerpApi · 强制实时采集/)).toHaveCount(0);
 
   const state = getUpstreamState();
   expect(state.serpApiRequests).toBe(1);

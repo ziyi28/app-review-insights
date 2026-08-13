@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { waitForRunComplete } from "./wizard";
 
 const CSV = [
   "id,title,body,rating,version,updatedAt,language",
@@ -9,12 +10,10 @@ const CSV = [
 
 test("imports a mixed-language CSV with duplicates and identity conflicts", async ({ page }) => {
   await page.goto("/");
-  // Switch UI to Chinese.
-  await page.getByRole("combobox", { name: /Language|界面语言/ }).selectOption("zh-CN");
   await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
 
-  // Switch to import mode.
-  await page.getByRole("button", { name: /导入/ }).click();
+  // Switch to import mode (the UI already defaults to Chinese).
+  await page.getByRole("radio", { name: /导入/ }).click();
 
   // Upload the CSV via a file chooser.
   const chooserPromise = page.waitForEvent("filechooser");
@@ -27,13 +26,14 @@ test("imports a mixed-language CSV with duplicates and identity conflicts", asyn
   });
 
   await page.getByLabel(/分析目标/).fill("理解用户为什么会流失以及如何改进订阅转化");
+  await page.getByRole("button", { name: /下一步/ }).click();
   await page.getByRole("button", { name: /开始分析/ }).click();
 
   // Analysis completes and shows the imported source.
-  await expect(page.locator("footer").getByText(/run.completed/)).toBeVisible({ timeout: 20_000 });
+  await waitForRunComplete(page);
 
   // Cleaned data tab shows identity-conflict handling.
-  await page.getByRole("button", { name: /清洗数据/ }).click();
+  await page.getByRole("tab", { name: /清洗数据/ }).click();
   await expect(page.getByText(/Too expensive now/)).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText(/订阅费太贵了/)).toBeVisible();
 });
