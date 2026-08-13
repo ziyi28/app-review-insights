@@ -12,6 +12,7 @@ export const ARTIFACT_NAMES = [
   "topic-candidates",
   "topics",
   "findings",
+  "evidence-validation",
   "version-plan",
   "prd",
   "tests",

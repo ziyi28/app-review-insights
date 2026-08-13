@@ -30,6 +30,11 @@ describe("run event contract", () => {
     expect(evt.stage).toBe("source");
   });
 
+  it("accepts the evidence-validation stage in events", () => {
+    const evt = RunEventSchema.parse({ ...base, type: "stage.started", stage: "evidence-validation", data: {} });
+    expect(evt.stage).toBe("evidence-validation");
+  });
+
   it("rejects an unknown stage name", () => {
     expect(() =>
       RunEventSchema.parse({ ...base, type: "stage.started", stage: "nope", data: {} }),

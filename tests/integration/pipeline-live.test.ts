@@ -163,6 +163,33 @@ describe("executeRun (live pipeline)", () => {
     expect(prd.requirements).toHaveLength(1);
   });
 
+  it("publishes stats, topic-candidates, evidence-validation and version-plan intermediates in stage order", async () => {
+    const model = new ScriptedModelClient(await buildScript());
+    const deps = makeDeps(model);
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand why users love it", "en", deps, publisher, store);
+
+    const events = await collectEvents(runId) as { type: string; stage?: string }[];
+    const stages = events.filter((e) => e.type === "stage.started").map((e) => e.stage);
+    const fIdx = stages.indexOf("findings");
+    const evIdx = stages.indexOf("evidence-validation");
+    const pIdx = stages.indexOf("planning");
+    expect(fIdx).toBeGreaterThan(-1);
+    expect(evIdx).toBeGreaterThan(fIdx);
+    expect(pIdx).toBeGreaterThan(evIdx);
+
+    const stats = (await store.readArtifact(runId, "stats", 1)) as { rawCount?: number };
+    expect(stats.rawCount).toBe(1);
+    const topicCandidates = (await store.readArtifact(runId, "topic-candidates", 1)) as { candidates: unknown[] };
+    expect(topicCandidates.candidates).toHaveLength(1);
+    const evidence = (await store.readArtifact(runId, "evidence-validation", 1)) as { validFindingCount?: number };
+    expect(evidence.validFindingCount).toBe(1);
+    const versionPlan = (await store.readArtifact(runId, "version-plan", 1)) as { decisions?: unknown[] };
+    expect(versionPlan.decisions).toHaveLength(1);
+  });
+
   it("publishes live progress events while model stages run", async () => {
     const model = new ScriptedModelClient(await buildScript());
     const deps = makeDeps(model);

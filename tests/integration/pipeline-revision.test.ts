@@ -97,6 +97,15 @@ describe("executeRun (revision path)", () => {
     expect(events.some((e) => (e as { type: string }).type === "revision.started")).toBe(true);
     const manifest = await store.readManifest(runId);
     expect(manifest.status).toBe("completed");
+    // Evidence-validation and version-plan both carry attempt 1 and attempt 2;
+    // the manifest points at the latest.
+    for (const name of ["evidence-validation", "version-plan", "prd", "tests", "traceability"] as const) {
+      const a1 = await store.readArtifact(runId, name, 1);
+      const a2 = await store.readArtifact(runId, name, 2);
+      expect(a1).toBeDefined();
+      expect(a2).toBeDefined();
+      expect(manifest.artifacts[name].attempt).toBe(2);
+    }
   });
 
   it("recomputes P2/null for a requirement whose only finding stays insufficient after revision", async () => {

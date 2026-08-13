@@ -47,6 +47,16 @@ describe("RunStore", () => {
     expect(a2).toEqual({ attempt: 2 });
   });
 
+  it("keeps evidence-validation attempt 1 and attempt 2 separate", async () => {
+    const runId = store.createRunId();
+    await store.writeArtifact(runId, "evidence-validation", 1, { attempt: 1 });
+    await store.writeArtifact(runId, "evidence-validation", 2, { attempt: 2 });
+    const a1 = await store.readArtifact(runId, "evidence-validation", 1);
+    const a2 = await store.readArtifact(runId, "evidence-validation", 2);
+    expect(a1).toEqual({ attempt: 1 });
+    expect(a2).toEqual({ attempt: 2 });
+  });
+
   it("appends events and maintains sequence", async () => {
     const runId = store.createRunId();
     await store.appendEvent(runId, JSON.stringify({ sequence: 1, payload: "a" }));
