@@ -112,4 +112,25 @@ describe("Workbench long-running artifact polling", () => {
 
     expect(screen.getByText(/Pricing/)).toBeInTheDocument();
   });
+
+  it("auto-advances to the topics tab when the topics artifact lands (no manual click)", async () => {
+    render(<Workbench />);
+
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(tEn.goal), { target: { value: "Understand why users love the app" } });
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tEn.start }));
+    });
+
+    // Publish the topics artifact; the UI should follow it to the topics tab
+    // automatically without the user clicking the tab.
+    availableArtifacts["topics"] = { topics: [{ id: "topic-1", label: "Pricing", description: "cost complaints", reviewIds: [] }] };
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(800);
+    });
+
+    // No manual tab click: the topics panel content must be visible already.
+    expect(screen.getByText(/Pricing/)).toBeInTheDocument();
+  });
 });

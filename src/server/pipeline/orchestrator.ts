@@ -140,6 +140,7 @@ export async function executeRun(
       runId,
       status: "running",
       executionMode,
+      goal,
       createdAt,
       updatedAt: new Date().toISOString(),
       stages,
@@ -165,7 +166,7 @@ export async function executeRun(
     if (source.status === "failed") {
       limitations.push({ code: "SOURCE_FAILED", message: "Source collection failed; no reviews could be analyzed", stage: "source" });
       await publisher.publish({ type: "run.failed", runId, data: { error: "source collection failed" } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, deps.model);
+      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
       return;
     }
 
@@ -192,7 +193,7 @@ export async function executeRun(
         stage: "scope",
       });
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "model-not-configured", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
       return;
     }
 
@@ -203,7 +204,7 @@ export async function executeRun(
     if (corpus.length === 0) {
       // Suspect-empty / no analyzable reviews: do not enter model stages.
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-data", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
       return;
     }
 
@@ -235,7 +236,7 @@ export async function executeRun(
 
     if (scoped.length === 0) {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-data", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
       return;
     }
 
@@ -378,16 +379,16 @@ export async function executeRun(
     await publishArtifact("final-report", 1, { prd, report, limitations });
     if (report.valid) {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "valid", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model);
     } else {
       await publisher.publish({ type: "run.failed", runId, data: { outcome: "invalid-after-revision", limitations } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, deps.model);
+      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     limitations.push({ code: "PIPELINE_ERROR", message, stage: "pipeline" });
     await publisher.publish({ type: "run.failed", runId, data: { error: message } });
-    await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, deps.model);
+    await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
   }
 }
 
@@ -446,12 +447,14 @@ async function finalizeManifest(
   executionMode: "live" | "import",
   artifacts: Record<string, { attempt: number; file: string }>,
   store: RunStore,
+  goal: string,
   model?: unknown,
 ): Promise<void> {
   await store.writeManifest(runId, {
     runId,
     status,
     executionMode,
+    goal,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     stages,

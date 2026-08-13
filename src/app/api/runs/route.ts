@@ -22,7 +22,7 @@ export async function GET() {
   const roots = [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")];
   const catalog = new RunCatalog(roots);
   const runs = await catalog.list();
-  return NextResponse.json({ runs: runs.map((r) => ({ runId: r.runId, status: r.manifest.status, createdAt: r.manifest.createdAt, canReplay: r.manifest.canReplay })) }, { headers: { "cache-control": "no-store" } });
+  return NextResponse.json({ runs: runs.map((r) => ({ runId: r.runId, status: r.manifest.status, createdAt: r.manifest.createdAt, canReplay: r.manifest.canReplay, goal: r.manifest.goal, executionMode: r.manifest.executionMode })) }, { headers: { "cache-control": "no-store" } });
 }
 
 /**
