@@ -189,7 +189,6 @@ const NDJSON_HEADERS: HeadersInit = {
 async function loadValidPreview(
   previewsDir: string,
   previewId: string,
-  requestedUrl: string,
   requestedAppId: string,
   selection: "live" | "stable",
 ): Promise<SourcePreview | { problem: string; title: string; detail: string }> {
@@ -234,8 +233,8 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
         ({ generate: async () => { throw new Error("model not configured"); } } as never);
   try {
     if (request.source.kind === "live") {
-      const { parseUsAppStoreUrl } = await import("@/server/sources/app-store-url");
-      const parsed = parseUsAppStoreUrl(request.source.appStoreUrl);
+      const { parseAppStoreUrl } = await import("@/server/sources/app-store-url");
+      const parsed = parseAppStoreUrl(request.source.appStoreUrl);
       executionMode = "live";
       const hasPreview = request.source.previewId !== undefined || request.source.reviewSelection !== undefined;
       if (request.source.previewId !== undefined && request.source.reviewSelection === undefined) {
@@ -247,7 +246,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
       if (hasPreview) {
         // A preview-backed run: read the snapshot, validate it, and feed the
         // selected dataset straight into the pipeline (no Apple re-collection).
-        const preview = await loadValidPreview(cfg.sourcePreviewsDir, request.source.previewId!, request.source.appStoreUrl, parsed.appId, request.source.reviewSelection!);
+        const preview = await loadValidPreview(cfg.sourcePreviewsDir, request.source.previewId!, parsed.appId, request.source.reviewSelection!);
         if ("problem" in preview) {
           return problem(preview.problem, preview.title, preview.detail);
         }
