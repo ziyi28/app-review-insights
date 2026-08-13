@@ -1,7 +1,7 @@
 import type { Prd, Requirement } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { isExactExcerpt } from "@/domain/analysis/evidence";
-import { reviewIdsForFindings } from "./evidence-sources";
+import { findingIdsForRequirements, priorityForRequirements, reviewIdsForFindings } from "./evidence-sources";
 
 export type Violation = {
   code: string;
@@ -138,6 +138,21 @@ export function validateTraceability(
       if (!corpus.has(id)) {
         violations.push({ code: "REVIEW_NOT_FOUND", message: `${t.id} cites unknown review ${id}`, entity: t.id });
       }
+    }
+    // Direct Finding links and priority are deterministic code fields derived
+    // from the requirement graph. A test carrying different values means the
+    // ledger was tampered with — never silently accepted.
+    const expectedFindingIds = new Set(findingIdsForRequirements(t.requirementIds, prd.requirements));
+    const actualFindingIds = new Set(t.findingIds);
+    if (
+      expectedFindingIds.size !== actualFindingIds.size ||
+      [...expectedFindingIds].some((id) => !actualFindingIds.has(id))
+    ) {
+      violations.push({ code: "TEST_FINDING_MISMATCH", message: `${t.id} findingIds must equal its requirements' findings`, entity: t.id });
+    }
+    const expectedPriority = priorityForRequirements(t.requirementIds, prd.requirements);
+    if (expectedPriority && t.priority !== expectedPriority) {
+      violations.push({ code: "TEST_PRIORITY_MISMATCH", message: `${t.id} priority must be the most urgent of its requirements`, entity: t.id });
     }
   }
   for (const r of prd.requirements) {
