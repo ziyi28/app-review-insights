@@ -30,6 +30,12 @@ export default defineConfig({
       SOURCE_CACHE_DIR: "./data/source-cache-e2e",
       SOURCE_PREVIEWS_DIR: "./data/source-previews-e2e",
       REPLAY_EVENT_DELAY_MS: "0",
+      // Server-process-only test values: the SocialCrawl key is non-production
+      // and must never equal the operator's real key. The isolated env file
+      // keeps settings-page persistence out of the developer's .env.local.
+      SOCIALCRAWL_API_KEY: "sc_e2e_only",
+      SOCIALCRAWL_BASE_URL: "http://127.0.0.1:39876",
+      ENV_LOCAL_FILE: "./data/config-e2e/.env.local",
     },
   },
   projects: [

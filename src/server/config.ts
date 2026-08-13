@@ -1,5 +1,5 @@
 import path from "node:path";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 
 /**
  * Runtime model configuration, set by the UI's settings panel via
@@ -206,7 +206,11 @@ export function persistEnvLocal(key: string, value: string | null, env: NodeJS.P
   const lines = Object.entries(current)
     .filter(([, v]) => v !== undefined)
     .map(([k, v]) => `${k}=${quoteEnvValue(v)}`);
-  writeFileSync(envLocalPath(env), lines.length > 0 ? `${lines.join("\n")}\n` : "", "utf8");
+  const file = envLocalPath(env);
+  // The parent directory may not exist yet (e.g. an isolated ENV_LOCAL_FILE
+  // used by tests); create it so the write never fails on a missing dir.
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, lines.length > 0 ? `${lines.join("\n")}\n` : "", "utf8");
 }
 
 function quoteEnvValue(value: string): string {

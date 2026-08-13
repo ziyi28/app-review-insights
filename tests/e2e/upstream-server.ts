@@ -4,6 +4,7 @@ import path from "node:path";
 import os from "node:os";
 
 export type UpstreamState = {
+  socialCrawlRequests: number;
   rssRequests: number;
   modelRequests: number;
 };
@@ -17,25 +18,52 @@ export type UpstreamState = {
  */
 const COUNTERS_FILE = path.join(os.tmpdir(), "laientech-e2e-upstream-counters.json");
 
+/** Switch: "live" serves the SocialCrawl success envelope; "fallback" serves a 402. */
+const STUB_SWITCH_FILE = path.join(os.tmpdir(), "laientech-e2e-socialcrawl-mode.json");
+
+export function setSocialCrawlMode(mode: "live" | "fallback"): void {
+  writeFileSync(STUB_SWITCH_FILE, JSON.stringify({ mode }), "utf8");
+}
+
+function socialCrawlMode(): "live" | "fallback" {
+  try {
+    if (existsSync(STUB_SWITCH_FILE)) {
+      const parsed = JSON.parse(readFileSync(STUB_SWITCH_FILE, "utf8")) as { mode?: "live" | "fallback" };
+      if (parsed.mode === "fallback") return "fallback";
+    }
+  } catch {
+    // ignore corrupt switch
+  }
+  return "live";
+}
+
 export function readCounters(): UpstreamState {
   try {
     if (existsSync(COUNTERS_FILE)) {
       const parsed = JSON.parse(readFileSync(COUNTERS_FILE, "utf8")) as Partial<UpstreamState>;
-      return { rssRequests: parsed.rssRequests ?? 0, modelRequests: parsed.modelRequests ?? 0 };
+      return {
+        socialCrawlRequests: parsed.socialCrawlRequests ?? 0,
+        rssRequests: parsed.rssRequests ?? 0,
+        modelRequests: parsed.modelRequests ?? 0,
+      };
     }
   } catch {
     // ignore corrupt counters
   }
-  return { rssRequests: 0, modelRequests: 0 };
+  return { socialCrawlRequests: 0, rssRequests: 0, modelRequests: 0 };
 }
 
 export function resetCounters(): void {
-  writeFileSync(COUNTERS_FILE, JSON.stringify({ rssRequests: 0, modelRequests: 0 }), "utf8");
+  writeFileSync(COUNTERS_FILE, JSON.stringify({ socialCrawlRequests: 0, rssRequests: 0, modelRequests: 0 }), "utf8");
 }
 
-function bump(kind: "rss" | "model"): void {
+function bump(kind: "socialcrawl" | "rss" | "model"): void {
   const current = readCounters();
-  const next = { rssRequests: current.rssRequests + (kind === "rss" ? 1 : 0), modelRequests: current.modelRequests + (kind === "model" ? 1 : 0) };
+  const next = {
+    socialCrawlRequests: current.socialCrawlRequests + (kind === "socialcrawl" ? 1 : 0),
+    rssRequests: current.rssRequests + (kind === "rss" ? 1 : 0),
+    modelRequests: current.modelRequests + (kind === "model" ? 1 : 0),
+  };
   writeFileSync(COUNTERS_FILE, JSON.stringify(next), "utf8");
 }
 
@@ -55,6 +83,53 @@ export function startUpstreamServer() {
 
   const server = createServer((req: IncomingMessage, res: ServerResponse) => {
     const url = req.url ?? "";
+    if (url.startsWith("/v1/app_store/app-reviews")) {
+      bump("socialcrawl");
+      const headers = req.headers;
+      const params = new URLSearchParams(url.split("?")[1] ?? "");
+      const mode = socialCrawlMode();
+      const validRequest =
+        headers["x-api-key"] === "sc_e2e_only" &&
+        headers["cache-control"] === "no-cache" &&
+        typeof headers["idempotency-key"] === "string" &&
+        params.get("country") === "US" &&
+        params.get("language") === "en" &&
+        params.get("depth") === "500" &&
+        params.get("sort_by") === "most_recent";
+      if (!validRequest) {
+        res.writeHead(401, { "content-type": "application/json" });
+        res.end(JSON.stringify({ success: false, error: { type: "INVALID_API_KEY", message: "bad request" } }));
+        return;
+      }
+      if (mode === "fallback") {
+        res.writeHead(402, { "content-type": "application/json" });
+        res.end(JSON.stringify({ success: false, error: { type: "INSUFFICIENT_CREDITS", message: "out of credits" } }));
+        return;
+      }
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(
+        JSON.stringify({
+          success: true,
+          platform: "app_store",
+          endpoint: "/v1/app_store/app-reviews",
+          data: {
+            items: [
+              { review: { id: "r1", entity_id: "839285684", title: "Great workout", text: "I love the workout variety and it is easy to follow at home.", rating: { value: 5, max: 5 }, author: { name: "user-1" }, published_at: "2026-07-01T10:00:00Z", ext: { appdata: { version: "3.2.1" } } } },
+              { review: { id: "r2", entity_id: "839285684", title: "Too expensive", text: "The subscription is way too expensive for me.", rating: { value: 1, max: 5 }, author: { name: "user-2" }, published_at: "2026-07-02T10:00:00Z", ext: { appdata: { version: "3.2.0" } } } },
+            ],
+            total: 2,
+            dropped: 0,
+          },
+          credits_used: 5,
+          credits_remaining: 95,
+          request_id: "req_e2e",
+          cached: false,
+          pagination: { next_cursor: null, has_more: false, page_size: 50 },
+        }),
+      );
+      return;
+    }
+
     if (url.startsWith("/rss/customerreviews")) {
       bump("rss");
       const page = url.match(/page=(\d+)/)?.[1] ?? "1";
