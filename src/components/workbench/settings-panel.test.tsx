@@ -114,47 +114,47 @@ describe("SettingsPanel", () => {
     expect(screen.getByLabelText(tZh.modelApiKey)).toBeInTheDocument();
   });
 
-  it("shows configured SocialCrawl status without prefilling the secret", async () => {
-    mockFetch({ socialCrawlApiKeyConfigured: true });
+  it("shows configured SerpApi status without prefilling the secret", async () => {
+    mockFetch({ serpApiKeyConfigured: true });
     render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
-    const input = await screen.findByLabelText(tEn.socialCrawlApiKey);
+    const input = await screen.findByLabelText(tEn.serpApiKey);
     expect(input).toHaveAttribute("type", "password");
     expect(input).toHaveAttribute("autocomplete", "off");
     expect(input).toHaveValue("");
-    expect(screen.getByText(tEn.socialCrawlApiKeyConfigured)).toBeVisible();
+    expect(screen.getByText(tEn.serpApiKeyConfigured)).toBeVisible();
   });
 
-  it("sends a newly entered SocialCrawl key and clears the input after save", async () => {
+  it("sends a newly entered SerpApi key and clears the input after save", async () => {
     const fetchMock = configFetchSequence(
-      { socialCrawlApiKeyConfigured: false },
-      { socialCrawlApiKeyConfigured: true },
+      { serpApiKeyConfigured: false },
+      { serpApiKeyConfigured: true },
     );
     const user = userEvent.setup();
     render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
-    const input = await screen.findByLabelText(tEn.socialCrawlApiKey);
-    await user.type(input, "sc_ui_test");
+    const input = await screen.findByLabelText(tEn.serpApiKey);
+    await user.type(input, "serp_ui_test");
     await user.click(screen.getByRole("button", { name: tEn.save }));
-    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toMatchObject({ socialCrawlApiKey: "sc_ui_test" });
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toMatchObject({ serpApiKey: "serp_ui_test" });
     await waitFor(() => expect(input).toHaveValue(""));
-    expect(screen.getByText(tEn.socialCrawlApiKeyConfigured)).toBeVisible();
+    expect(screen.getByText(tEn.serpApiKeyConfigured)).toBeVisible();
   });
 
-  it("clears only the SocialCrawl key", async () => {
+  it("clears only the SerpApi key", async () => {
     const fetchMock = configFetchSequence(
-      { socialCrawlApiKeyConfigured: true },
-      { socialCrawlApiKeyConfigured: false },
+      { serpApiKeyConfigured: true },
+      { serpApiKeyConfigured: false },
     );
     const user = userEvent.setup();
     render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
-    await user.click(await screen.findByRole("button", { name: tEn.socialCrawlApiKeyClear }));
-    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ socialCrawlApiKey: null });
+    await user.click(await screen.findByRole("button", { name: tEn.serpApiKeyClear }));
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ serpApiKey: null });
   });
 
-  it("shows the SocialCrawl section labels in Chinese", async () => {
-    mockFetch({ socialCrawlApiKeyConfigured: true });
+  it("shows the SerpApi section labels in Chinese", async () => {
+    mockFetch({ serpApiKeyConfigured: true });
     render(<SettingsPanel t={tZh} open onClose={vi.fn()} />);
     expect(await screen.findByText(tZh.dataSourceSettings)).toBeVisible();
-    expect(screen.getByLabelText(tZh.socialCrawlApiKey)).toBeInTheDocument();
-    expect(screen.getByText(tZh.socialCrawlApiKeyConfigured)).toBeVisible();
+    expect(screen.getByLabelText(tZh.serpApiKey)).toBeInTheDocument();
+    expect(screen.getByText(tZh.serpApiKeyConfigured)).toBeVisible();
   });
 });

@@ -53,7 +53,7 @@ const TABS: { id: Tab; labelKey: keyof Dictionary }[] = [
 
 type SourceEvidence = {
   kind: "app-store-reviews" | "apple-rss" | "import";
-  provider?: "socialcrawl" | "apple-rss";
+  provider?: "serpapi" | "apple-rss" | "socialcrawl";
   selection?: "live" | "stable";
 };
 
@@ -104,8 +104,13 @@ export function Workbench() {
     const last = events.at(-1);
     if (last?.deliveryMode === "cached-replay") return { kind: "limitation" as const, label: t.cachedReplay };
     const evidence = cache.sourceEvidence;
+    if (evidence?.kind === "app-store-reviews" && evidence.provider === "serpapi") {
+      return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceSerpApiHistory : t.sourceSerpApi };
+    }
+    // Legacy replay only: old cached artifacts may still carry socialcrawl
+    // provenance; it is read-only and never produced by new previews or runs.
     if (evidence?.kind === "app-store-reviews" && evidence.provider === "socialcrawl") {
-      return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceSocialCrawlHistory : t.sourceSocialCrawl };
+      return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceSerpApiHistory : t.sourceSerpApi };
     }
     if (evidence?.kind === "app-store-reviews" && evidence.provider === "apple-rss") {
       return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceRssHistory : t.sourceRssFallback };
