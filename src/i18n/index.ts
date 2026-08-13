@@ -33,8 +33,11 @@ export type Dictionary = {
   stageTraceability: string;
   stageRevision: string;
   waiting: string;
+  starting: string;
   running: string;
   completed: string;
+  someEventsDropped: string;
+  goalTooShort: string;
   failed: string;
   errors: string;
   limitations: string;
@@ -117,7 +120,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     stageTraceability: "Traceability",
     stageRevision: "Revision",
     waiting: "Enter a URL or import reviews to begin.",
+    starting: "Starting analysis…",
     running: "Analysis running…",
+    someEventsDropped: "Some stream events were dropped — check the browser console.",
+    goalTooShort: "Analysis goal must be at least 10 characters.",
     completed: "Completed",
     failed: "Failed",
     errors: "errors",
@@ -199,7 +205,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     stageTraceability: "追溯",
     stageRevision: "修订",
     waiting: "输入链接或导入评论以开始。",
+    starting: "正在启动分析…",
     running: "分析进行中…",
+    someEventsDropped: "部分流事件被丢弃 — 请查看浏览器控制台。",
+    goalTooShort: "分析目标至少需要 10 个字符。",
     completed: "已完成",
     failed: "失败",
     errors: "错误",

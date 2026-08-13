@@ -50,7 +50,7 @@ export function Workbench() {
   useEffect(() => {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
-  const { events, running, error, start, reset } = useRunStream();
+  const { events, running, error, droppedEvents, start, reset } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
 
@@ -220,14 +220,20 @@ export function Workbench() {
         <StageRail events={events} t={t} />
         {error ? <p style={{ color: "var(--danger)" }}>{error}</p> : null}
         {running ? <p style={{ color: "var(--accent)" }}>{t.running}</p> : null}
+        {!running && droppedEvents > 0 ? <p style={{ color: "var(--warn)", fontSize: "12px" }}>{t.someEventsDropped}</p> : null}
       </aside>
 
       {/* Right: tabs + content */}
       <main style={{ padding: "16px", overflowY: "auto" }}>
-        {events.length === 0 ? (
+        {!running && events.length === 0 ? (
           <div style={{ maxWidth: "560px", margin: "0 auto", padding: "24px", border: "1px solid var(--border)", borderRadius: "12px", background: "var(--bg-panel)" }}>
             <RunForm t={t} onStart={start} />
             <p style={{ color: "var(--text-muted)", marginTop: "12px" }}>{t.waiting}</p>
+          </div>
+        ) : runId === null ? (
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", padding: "10px 12px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--bg-panel)", fontSize: "13px" }}>
+            <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "var(--accent)", flexShrink: 0, animation: "pulse 1.2s ease-in-out infinite" }} />
+            <span>{t.starting}</span>
           </div>
         ) : (
           <>

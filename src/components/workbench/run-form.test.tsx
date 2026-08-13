@@ -57,4 +57,20 @@ describe("RunForm", () => {
       expect.objectContaining({ mode: "analyze", goal: "了解用户对付费订阅的主要痛点" }),
     );
   });
+
+  it("disables Start until the analysis goal is at least 10 characters", async () => {
+    const user = userEvent.setup();
+    render(<RunForm t={t} onStart={vi.fn()} />);
+    const start = screen.getByRole("button", { name: t.start });
+    // Default goal is empty: even with the URL prefilled, Start is disabled.
+    expect(start).toBeDisabled();
+    // A short non-empty goal keeps it disabled and shows an inline hint.
+    await user.type(screen.getByLabelText(t.goal), "short");
+    expect(start).toBeDisabled();
+    expect(screen.getByText(t.goalTooShort)).toBeInTheDocument();
+    // A long enough goal enables Start and clears the hint.
+    await user.type(screen.getByLabelText(t.goal), " but long enough for the server");
+    expect(start).toBeEnabled();
+    expect(screen.queryByText(t.goalTooShort)).not.toBeInTheDocument();
+  });
 });
