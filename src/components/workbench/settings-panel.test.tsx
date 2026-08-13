@@ -17,6 +17,16 @@ function mockFetch(json: unknown) {
   );
 }
 
+/** GET returns the first status, POST returns the second. */
+function configFetchSequence(getJson: unknown, postJson: unknown) {
+  const fetchMock = vi.fn();
+  fetchMock
+    .mockResolvedValueOnce({ ok: true, json: async () => getJson })
+    .mockResolvedValueOnce({ ok: true, json: async () => postJson });
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
 beforeEach(() => {
   vi.unstubAllGlobals();
 });
@@ -102,5 +112,49 @@ describe("SettingsPanel", () => {
     });
     expect(screen.getByLabelText(tZh.modelName)).toBeInTheDocument();
     expect(screen.getByLabelText(tZh.modelApiKey)).toBeInTheDocument();
+  });
+
+  it("shows configured SocialCrawl status without prefilling the secret", async () => {
+    mockFetch({ socialCrawlApiKeyConfigured: true });
+    render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
+    const input = await screen.findByLabelText(tEn.socialCrawlApiKey);
+    expect(input).toHaveAttribute("type", "password");
+    expect(input).toHaveAttribute("autocomplete", "off");
+    expect(input).toHaveValue("");
+    expect(screen.getByText(tEn.socialCrawlApiKeyConfigured)).toBeVisible();
+  });
+
+  it("sends a newly entered SocialCrawl key and clears the input after save", async () => {
+    const fetchMock = configFetchSequence(
+      { socialCrawlApiKeyConfigured: false },
+      { socialCrawlApiKeyConfigured: true },
+    );
+    const user = userEvent.setup();
+    render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
+    const input = await screen.findByLabelText(tEn.socialCrawlApiKey);
+    await user.type(input, "sc_ui_test");
+    await user.click(screen.getByRole("button", { name: tEn.save }));
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toMatchObject({ socialCrawlApiKey: "sc_ui_test" });
+    await waitFor(() => expect(input).toHaveValue(""));
+    expect(screen.getByText(tEn.socialCrawlApiKeyConfigured)).toBeVisible();
+  });
+
+  it("clears only the SocialCrawl key", async () => {
+    const fetchMock = configFetchSequence(
+      { socialCrawlApiKeyConfigured: true },
+      { socialCrawlApiKeyConfigured: false },
+    );
+    const user = userEvent.setup();
+    render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
+    await user.click(await screen.findByRole("button", { name: tEn.socialCrawlApiKeyClear }));
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body)).toEqual({ socialCrawlApiKey: null });
+  });
+
+  it("shows the SocialCrawl section labels in Chinese", async () => {
+    mockFetch({ socialCrawlApiKeyConfigured: true });
+    render(<SettingsPanel t={tZh} open onClose={vi.fn()} />);
+    expect(await screen.findByText(tZh.dataSourceSettings)).toBeVisible();
+    expect(screen.getByLabelText(tZh.socialCrawlApiKey)).toBeInTheDocument();
+    expect(screen.getByText(tZh.socialCrawlApiKeyConfigured)).toBeVisible();
   });
 });

@@ -90,6 +90,11 @@ export type Dictionary = {
   apiKeyPlaceholder: string;
   apiKeyClear: string;
   configApplyError: string;
+  dataSourceSettings: string;
+  socialCrawlApiKey: string;
+  socialCrawlApiKeyHint: string;
+  socialCrawlApiKeyConfigured: string;
+  socialCrawlApiKeyClear: string;
   checkSample: string;
   checkingSample: string;
   sampleCheckFailed: string;
@@ -231,6 +236,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     apiKeyPlaceholder: "Enter a new key to replace the current one",
     apiKeyClear: "Clear key",
     configApplyError: "Failed to save settings",
+    dataSourceSettings: "Data collection platform",
+    socialCrawlApiKey: "SocialCrawl API Key",
+    socialCrawlApiKeyHint: "Stored locally and used only by the server for live App Store reviews.",
+    socialCrawlApiKeyConfigured: "SocialCrawl configured",
+    socialCrawlApiKeyClear: "Clear SocialCrawl Key",
     checkSample: "Check review sample",
     checkingSample: "Checking review sample…",
     sampleCheckFailed: "Could not check the review sample.",
@@ -370,6 +380,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     apiKeyPlaceholder: "输入新 Key 以替换当前 Key",
     apiKeyClear: "清除 Key",
     configApplyError: "保存设置失败",
+    dataSourceSettings: "数据采集平台",
+    socialCrawlApiKey: "SocialCrawl API Key",
+    socialCrawlApiKeyHint: "仅保存在本机，并由服务端用于实时采集 App Store 评论。",
+    socialCrawlApiKeyConfigured: "SocialCrawl 已配置",
+    socialCrawlApiKeyClear: "清除 SocialCrawl Key",
     checkSample: "检查评论样本",
     checkingSample: "正在检查评论样本…",
     sampleCheckFailed: "无法检查评论样本。",

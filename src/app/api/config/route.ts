@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, persistEnvLocal, type RuntimeModelConfig } from "@/server/config";
-import { ModelConfigUpdateSchema } from "@/domain/contracts/config";
+import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, setRuntimeSocialCrawlConfig, persistEnvLocal, isSocialCrawlConfigured, type RuntimeModelConfig } from "@/server/config";
+import { ConfigUpdateSchema } from "@/domain/contracts/config";
 
 export const runtime = "nodejs";
 
@@ -9,6 +9,7 @@ function configStatus(cfg: ReturnType<typeof loadConfig>) {
   return {
     modelConfigured: isModelConfigured(cfg),
     modelApiKeyConfigured: isModelApiKeyConfigured(cfg),
+    socialCrawlApiKeyConfigured: isSocialCrawlConfigured(cfg),
     modelName: cfg.modelName,
     modelBaseUrl: cfg.modelBaseUrl,
     jsonMode: cfg.modelJsonMode,
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
   }
 
-  const parsed = ModelConfigUpdateSchema.safeParse(body);
+  const parsed = ConfigUpdateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: "invalid request", detail: parsed.error.issues[0]?.message }, { status: 422 });
   }
@@ -65,6 +66,11 @@ export async function POST(req: Request) {
     persistEnvLocal("MODEL_JSON_MODE", update.modelJsonMode);
   }
   setRuntimeModelConfig(runtime);
+
+  if (update.socialCrawlApiKey !== undefined) {
+    persistEnvLocal("SOCIALCRAWL_API_KEY", update.socialCrawlApiKey);
+    setRuntimeSocialCrawlConfig({ apiKey: update.socialCrawlApiKey });
+  }
 
   return NextResponse.json(configStatus(loadConfig()), { headers: { "cache-control": "no-store" } });
 }
