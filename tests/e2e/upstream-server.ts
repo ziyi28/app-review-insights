@@ -4,7 +4,7 @@ import path from "node:path";
 import os from "node:os";
 
 export type UpstreamState = {
-  socialCrawlRequests: number;
+  serpApiRequests: number;
   rssRequests: number;
   modelRequests: number;
 };
@@ -18,14 +18,14 @@ export type UpstreamState = {
  */
 const COUNTERS_FILE = path.join(os.tmpdir(), "laientech-e2e-upstream-counters.json");
 
-/** Switch: "live" serves the SocialCrawl success envelope; "fallback" serves a 402. */
-const STUB_SWITCH_FILE = path.join(os.tmpdir(), "laientech-e2e-socialcrawl-mode.json");
+/** Switch: "live" serves the SerpApi success envelope; "fallback" serves a 429. */
+const STUB_SWITCH_FILE = path.join(os.tmpdir(), "laientech-e2e-serpapi-mode.json");
 
-export function setSocialCrawlMode(mode: "live" | "fallback"): void {
+export function setSerpApiMode(mode: "live" | "fallback"): void {
   writeFileSync(STUB_SWITCH_FILE, JSON.stringify({ mode }), "utf8");
 }
 
-function socialCrawlMode(): "live" | "fallback" {
+function serpApiMode(): "live" | "fallback" {
   try {
     if (existsSync(STUB_SWITCH_FILE)) {
       const parsed = JSON.parse(readFileSync(STUB_SWITCH_FILE, "utf8")) as { mode?: "live" | "fallback" };
@@ -42,7 +42,7 @@ export function readCounters(): UpstreamState {
     if (existsSync(COUNTERS_FILE)) {
       const parsed = JSON.parse(readFileSync(COUNTERS_FILE, "utf8")) as Partial<UpstreamState>;
       return {
-        socialCrawlRequests: parsed.socialCrawlRequests ?? 0,
+        serpApiRequests: parsed.serpApiRequests ?? 0,
         rssRequests: parsed.rssRequests ?? 0,
         modelRequests: parsed.modelRequests ?? 0,
       };
@@ -50,17 +50,17 @@ export function readCounters(): UpstreamState {
   } catch {
     // ignore corrupt counters
   }
-  return { socialCrawlRequests: 0, rssRequests: 0, modelRequests: 0 };
+  return { serpApiRequests: 0, rssRequests: 0, modelRequests: 0 };
 }
 
 export function resetCounters(): void {
-  writeFileSync(COUNTERS_FILE, JSON.stringify({ socialCrawlRequests: 0, rssRequests: 0, modelRequests: 0 }), "utf8");
+  writeFileSync(COUNTERS_FILE, JSON.stringify({ serpApiRequests: 0, rssRequests: 0, modelRequests: 0 }), "utf8");
 }
 
-function bump(kind: "socialcrawl" | "rss" | "model"): void {
+function bump(kind: "serpapi" | "rss" | "model"): void {
   const current = readCounters();
   const next = {
-    socialCrawlRequests: current.socialCrawlRequests + (kind === "socialcrawl" ? 1 : 0),
+    serpApiRequests: current.serpApiRequests + (kind === "serpapi" ? 1 : 0),
     rssRequests: current.rssRequests + (kind === "rss" ? 1 : 0),
     modelRequests: current.modelRequests + (kind === "model" ? 1 : 0),
   };
@@ -73,58 +73,49 @@ export function getUpstreamState(): UpstreamState {
 }
 
 /**
- * Local upstream stub for E2E. Serves Apple RSS-style pages and an
- * OpenAI-compatible /chat/completions endpoint so the app under test runs
- * without real network. Request counters let tests assert zero upstream calls
- * during cached replay.
+ * Local upstream stub for E2E. Serves a SerpApi Apple Reviews /search.json, an
+ * Apple RSS-style feed, and an OpenAI-compatible /chat/completions endpoint so
+ * the app under test runs without real network. Request counters let tests
+ * assert zero upstream calls during cached replay.
  */
 export function startUpstreamServer() {
   resetCounters();
 
   const server = createServer((req: IncomingMessage, res: ServerResponse) => {
     const url = req.url ?? "";
-    if (url.startsWith("/v1/app_store/app-reviews")) {
-      bump("socialcrawl");
-      const headers = req.headers;
+    if (url.startsWith("/search.json")) {
+      bump("serpapi");
       const params = new URLSearchParams(url.split("?")[1] ?? "");
-      const mode = socialCrawlMode();
+      const mode = serpApiMode();
       const validRequest =
-        headers["x-api-key"] === "sc_e2e_only" &&
-        headers["cache-control"] === "no-cache" &&
-        typeof headers["idempotency-key"] === "string" &&
-        params.get("country") === "US" &&
-        params.get("language") === "en" &&
-        params.get("depth") === "500" &&
-        params.get("sort_by") === "most_recent";
+        params.get("engine") === "apple_reviews" &&
+        params.get("product_id") === "839285684" &&
+        params.get("country") === "us" &&
+        params.get("sort") === "mostrecent" &&
+        params.get("page") === "1" &&
+        params.get("no_cache") === "true" &&
+        params.get("api_key") === "serp_e2e_only";
       if (!validRequest) {
-        res.writeHead(401, { "content-type": "application/json" });
-        res.end(JSON.stringify({ success: false, error: { type: "INVALID_API_KEY", message: "bad request" } }));
+        res.writeHead(400, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "bad request", search_metadata: { id: "bad", status: "Error" } }));
         return;
       }
       if (mode === "fallback") {
-        res.writeHead(402, { "content-type": "application/json" });
-        res.end(JSON.stringify({ success: false, error: { type: "INSUFFICIENT_CREDITS", message: "out of credits" } }));
+        res.writeHead(429, { "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "Rate limit exceeded", search_metadata: { id: "quota", status: "Error" } }));
         return;
       }
       res.writeHead(200, { "content-type": "application/json" });
       res.end(
         JSON.stringify({
-          success: true,
-          platform: "app_store",
-          endpoint: "/v1/app_store/app-reviews",
-          data: {
-            items: [
-              { review: { id: "r1", entity_id: "839285684", title: "Great workout", text: "I love the workout variety and it is easy to follow at home.", rating: { value: 5, max: 5 }, author: { name: "user-1" }, published_at: "2026-07-01T10:00:00Z", ext: { appdata: { version: "3.2.1" } } } },
-              { review: { id: "r2", entity_id: "839285684", title: "Too expensive", text: "The subscription is way too expensive for me.", rating: { value: 1, max: 5 }, author: { name: "user-2" }, published_at: "2026-07-02T10:00:00Z", ext: { appdata: { version: "3.2.0" } } } },
-            ],
-            total: 2,
-            dropped: 0,
-          },
-          credits_used: 5,
-          credits_remaining: 95,
-          request_id: "req_e2e",
-          cached: false,
-          pagination: { next_cursor: null, has_more: false, page_size: 50 },
+          search_metadata: { id: "search_e2e", status: "Success", created_at: "2026-08-13 12:00:00 UTC", processed_at: "2026-08-13 12:00:01 UTC" },
+          search_parameters: { engine: "apple_reviews", product_id: "839285684", country: "us", sort: "mostrecent", page: "1" },
+          search_information: { total_page_count: 1, reviews_results_state: "Results for exact ID number.", results_count: 2 },
+          reviews: [
+            { position: 1, id: "r1", title: "Great workout", text: "I love the workout variety and it is easy to follow at home.", rating: 5, review_date: "Jul 1, 2026", reviewed_version: "Version 3.2.1", author: { name: "user-1", author_id: "1001" } },
+            { position: 2, id: "r2", title: "Too expensive", text: "The subscription is way too expensive for me.", rating: 1, review_date: "Jul 2, 2026", reviewed_version: "Version 3.2.0", author: { name: "user-2", author_id: "1002" } },
+          ],
+          serpapi_pagination: {},
         }),
       );
       return;
