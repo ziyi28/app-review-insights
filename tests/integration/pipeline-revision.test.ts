@@ -99,6 +99,64 @@ describe("executeRun (revision path)", () => {
     expect(manifest.status).toBe("completed");
   });
 
+  it("recomputes P2/null for a requirement whose only finding stays insufficient after revision", async () => {
+    const parse = parseImportedReviews({
+      fileName: "r.json",
+      mediaType: "application/json",
+      content: JSON.stringify({
+        schemaVersion: "1",
+        reviews: [{ id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" }],
+      }),
+    });
+    const prepared = prepareReviews({ kind: "import", parse });
+    const rid = prepared.reviews[0].reviewId;
+
+    const model = new ScriptedModelClient([
+      JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
+      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: [rid], quote: "too expensive" }] }),
+      JSON.stringify({ topics: [{ id: "topic-1", label: "Price", description: "d", candidateIds: ["topic-candidate-1@c0"] }] }),
+      // findings (1 support in a 1-review corpus -> insufficient)
+      JSON.stringify({
+        findings: [
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        ],
+      }),
+      // planning: model wants P1 but the guardrail already pins it to P2/null.
+      JSON.stringify({
+        title: "Plan", overview: "x", versions: [], requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null }],
+        assumptions: [],
+      }),
+      // tests cite a ghost review -> traceability fails -> revision runs
+      JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
+      // revision: same insufficient finding, still requests P1.
+      JSON.stringify({
+        findings: [
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        ],
+        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null }],
+        tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }],
+        assumptions: [],
+        note: "fixed test citation",
+      }),
+    ]);
+
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+    const importParse = parse as ImportParseShape;
+
+    await executeRun(runId, "Understand pricing", "en", { model, source: { kind: "import", parse: importParse } }, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    // The revised PRD (attempt-02) must still carry the deterministic guardrail.
+    const revisedPrd = (await store.readArtifact(runId, "prd", 2)) as {
+      requirements: { priority: string; versionId: string | null }[];
+      findings: { evidenceSufficiency: { status: string } }[];
+    };
+    expect(revisedPrd.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(revisedPrd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
+  });
+
   it("fails explicitly (run.failed + manifest failed) when revision leaves traceability invalid", async () => {
     const parse = parseImportedReviews({
       fileName: "r.json",
