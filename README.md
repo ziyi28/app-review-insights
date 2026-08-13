@@ -61,9 +61,10 @@ npm run dev
 - **显式降级：** 未配置 SocialCrawl、认证/余额/参数错误、明确的空结果、网络失败或安全重试
   耗尽时，自动降级到 Apple 客户评论 RSS（见下）。降级原因始终作为 limitation 展示，并
   在 UI 标记为 **Apple RSS 降级采集**；本地历史缓存是独立的，绝不会被伪装成实时数据。
-- **错误策略：** SocialCrawl 对瞬时错误 `429 / 500 / 502 / 503`（以及带 `Retry-After`
-  的 `503`）最多重试两次；`400 / 401 / 402 / 404` 以及不带 `Retry-After` 的 `503`
-  不重试。返回部分合法条目时保留合法条目并标记 `partial`，不再混入 RSS 评论。
+- **错误策略：** SocialCrawl 对瞬时错误 `429 / 500 / 502 / 504`，以及带 `Retry-After`
+  的 `503`，最多重试两次；`400 / 401 / 402 / 404` 以及不带 `Retry-After` 的 `503`
+  不重试。`504` 覆盖生产中实际出现的 `UPSTREAM_ERROR`；重试仍复用同一
+  `Idempotency-Key`。返回部分合法条目时保留合法条目并标记 `partial`，不再混入 RSS 评论。
 - **实时（降级路径）：** Apple 客户评论 RSS
   （`/us/rss/customerreviews/page={1..10}/id={id}/sortBy=mostRecent/json`），
   顺序抓取，间隔至少 500ms，最多 10 页，不并发。每一页的原始响应、安全请求头、时间戳、

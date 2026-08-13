@@ -147,7 +147,7 @@ describe("collectSocialCrawlReviews", () => {
 
   it("fails explicitly after exhausting 504 UPSTREAM_ERROR retries", async () => {
     const fetchFn = vi.fn(async () => errorResponse(504, "UPSTREAM_ERROR"));
-    const sleep = vi.fn(async () => {});
+    const sleep = vi.fn(async (_ms: number) => {});
 
     const result = await collectSocialCrawlReviews(
       deps({ fetchFn: fetchFn as unknown as typeof fetch, sleep, maxRetries: 2 }),
