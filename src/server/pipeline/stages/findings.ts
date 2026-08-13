@@ -3,7 +3,7 @@ import type { NormalizedReview } from "@/domain/contracts/review";
 import { isExactExcerpt } from "@/domain/analysis/evidence";
 import { computeConfidence, type SourceStatus } from "@/domain/analysis/confidence";
 import { FindingOutputSchema, findingsPrompt, type FindingOutput } from "@/server/model/prompts/prompts";
-import type { StageModelClient } from "../dependencies";
+import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type FindingsStageContext = {
   model: StageModelClient;
@@ -12,6 +12,9 @@ export type FindingsStageContext = {
   outputLocale: string;
   goal: string;
   sourceStatus: SourceStatus;
+  /** Live progress callback; invoked with a human-readable message while the
+   *  model call is in flight so the UI can show feedback. */
+  onProgress?: (message: string) => void;
 };
 
 export type FindingsStageResult = {
@@ -107,12 +110,14 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
  * shared deterministic normalizer (see normalizeFindings).
  */
 export async function runFindingsStage(ctx: FindingsStageContext): Promise<FindingsStageResult> {
+  ctx.onProgress?.("generating evidence-grounded findings");
   const output = await ctx.model.generate({
     stage: "findings",
     promptVersion: findingsPrompt.version,
     system: findingsPrompt.system,
     user: findingsPrompt.buildUser({ reviews: ctx.reviews, topics: ctx.topics, goal: ctx.goal, outputLocale: ctx.outputLocale }),
     schema: FindingOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
   });
 
   return normalizeFindings(output, ctx);

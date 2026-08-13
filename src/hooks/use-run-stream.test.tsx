@@ -47,6 +47,7 @@ describe("useRunStream", () => {
 
   it("drops events that do not conform to the event protocol", async () => {
     // sequence 0 and missing protocolVersion violate RunEventSchema.
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     mockFetchWithEvents([
       { protocolVersion: "1", sequence: 0, eventId: "bad", runId: "r", timestamp: "x", deliveryMode: "live", type: "run.accepted", data: {} },
       makeEvent(1, "run.accepted"),
@@ -58,6 +59,10 @@ describe("useRunStream", () => {
     });
     await waitFor(() => expect(result.current.events.length).toBe(2));
     expect(result.current.lastEvent?.type).toBe("run.completed");
+    // The dropped event is counted and logged, not silently swallowed.
+    expect(result.current.droppedEvents).toBe(1);
+    expect(warn).toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it("surfaces an error on a non-ok response", async () => {

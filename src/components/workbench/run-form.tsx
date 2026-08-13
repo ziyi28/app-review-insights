@@ -31,7 +31,11 @@ export function RunForm({ t, onStart }: RunFormProps) {
       .catch(() => {});
   }, []);
 
-  const canStart = mode === "live" ? url.trim().length > 0 : mode === "import" ? file !== null : sourceRunId.trim().length > 0;
+  // The server requires a goal of at least 10 characters for analyze runs.
+  // Gate the Start button on it so an empty/short goal fails visibly in the
+  // form instead of returning a 422 that the stream never starts.
+  const goalOk = goal.trim().length >= 10;
+  const canStart = mode === "replay" ? sourceRunId.trim().length > 0 : mode === "live" ? url.trim().length > 0 && goalOk : file !== null && goalOk;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,15 +127,22 @@ export function RunForm({ t, onStart }: RunFormProps) {
         </label>
       )}
 
-      <label>
-        {t.goal}
+      <div>
+        <label htmlFor="run-form-goal">{t.goal}</label>
         <textarea
+          id="run-form-goal"
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
           rows={3}
+          aria-describedby={goal.trim().length > 0 && !goalOk ? "run-form-goal-hint" : undefined}
           style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}
         />
-      </label>
+        {goal.trim().length > 0 && !goalOk ? (
+          <p id="run-form-goal-hint" style={{ color: "var(--warn)", fontSize: "12px", margin: "4px 0 0" }}>
+            {t.goalTooShort}
+          </p>
+        ) : null}
+      </div>
 
       <label>
         {t.outputLocale}
