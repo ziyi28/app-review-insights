@@ -11,6 +11,8 @@ import { loadConfig, isModelConfigured } from "@/server/config";
 import { parseImportedReviews } from "@/server/sources/import-parser";
 import { encodeNdjsonLine } from "@/server/streaming/ndjson";
 import type { RunEvent } from "@/domain/contracts/events";
+import type { Limitation } from "@/server/sources/apple-rss-collector";
+import { readPreview, isPreviewExpired, type SourcePreview } from "@/server/sources/source-preview";
 
 export const runtime = "nodejs";
 
@@ -179,6 +181,36 @@ const NDJSON_HEADERS: HeadersInit = {
   "x-accel-buffering": "no",
 };
 
+/**
+ * Loads and validates a preview snapshot for a preview-backed live run.
+ * Returns the snapshot, or a problem descriptor when the preview is expired,
+ * belongs to a different app, or the requested dataset is unavailable.
+ */
+async function loadValidPreview(
+  previewsDir: string,
+  previewId: string,
+  requestedUrl: string,
+  requestedAppId: string,
+  selection: "live" | "stable",
+): Promise<SourcePreview | { problem: string; title: string; detail: string }> {
+  const preview = await readPreview(previewsDir, previewId);
+  if (!preview) {
+    return { problem: "404", title: "preview not found", detail: `No preview snapshot exists for ${previewId}` };
+  }
+  const now = new Date().toISOString();
+  if (isPreviewExpired(preview, now)) {
+    return { problem: "422", title: "preview expired", detail: `Preview ${previewId} expired at ${preview.expiresAt}; re-check the sample` };
+  }
+  if (preview.appId !== requestedAppId) {
+    return { problem: "422", title: "preview app mismatch", detail: `Preview ${previewId} belongs to app ${preview.appId}, not ${requestedAppId}` };
+  }
+  const available = selection === "live" ? preview.live.reviewCount > 0 : preview.stable.available && preview.stable.reviewCount > 0;
+  if (!available) {
+    return { problem: "422", title: "dataset unavailable", detail: `The ${selection} dataset is empty for this preview; choose the other sample or re-check` };
+  }
+  return preview;
+}
+
 async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: ReturnType<typeof loadConfig>, req: Request): Promise<Response> {
   // Without a model, deterministic stages (collect/import, clean, stats) still
   // run and the run completes with a MODEL_NOT_CONFIGURED limitation.
@@ -205,15 +237,78 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
       const { parseUsAppStoreUrl } = await import("@/server/sources/app-store-url");
       const parsed = parseUsAppStoreUrl(request.source.appStoreUrl);
       executionMode = "live";
-      deps = {
-        model: buildModel(),
-        source: { kind: "apple-rss" as const, appleRssBaseUrl: cfg.appleRssBaseUrl, appId: parsed.appId, canonicalUrl: parsed.canonicalUrl },
-        sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
-        now: () => new Date().toISOString(),
-        pageDelayMs: cfg.appleRssPageDelayMs,
-        maxPages: cfg.appleRssMaxPages,
-        timeoutMs: cfg.appleRssTimeoutMs,
-      };
+      const hasPreview = request.source.previewId !== undefined || request.source.reviewSelection !== undefined;
+      if (request.source.previewId !== undefined && request.source.reviewSelection === undefined) {
+        return problem("422", "previewId and reviewSelection must be provided together");
+      }
+      if (request.source.reviewSelection !== undefined && request.source.previewId === undefined) {
+        return problem("422", "previewId and reviewSelection must be provided together");
+      }
+      if (hasPreview) {
+        // A preview-backed run: read the snapshot, validate it, and feed the
+        // selected dataset straight into the pipeline (no Apple re-collection).
+        const preview = await loadValidPreview(cfg.sourcePreviewsDir, request.source.previewId!, request.source.appStoreUrl, parsed.appId, request.source.reviewSelection!);
+        if ("problem" in preview) {
+          return problem(preview.problem, preview.title, preview.detail);
+        }
+        const selected = preview;
+        const selection = request.source.reviewSelection!;
+        const reviews = selection === "live" ? selected.live.reviews : selected.stable.reviews;
+        const rawRefs = selection === "live" ? selected.live.rawRefs : selected.stable.reviews.map((r) => `cache:${r.sourceReviewId}`);
+        const limitations: Limitation[] = [];
+        if (selection === "stable") {
+          limitations.push({
+            code: "RSS_CACHE_AUGMENTED",
+            message: "Analysis used the stable cached review sample; live collection may be incomplete or empty",
+            stage: "source",
+          });
+        }
+        const liveLimitations = selected.live.limitations.filter((l) => l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL");
+        limitations.push(...liveLimitations);
+        const status: "complete" | "suspect-empty" | "partial" | "failed" =
+          reviews.length === 0 ? "suspect-empty" : liveLimitations.some((l) => l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL") ? "partial" : "complete";
+        deps = {
+          model: buildModel(),
+          source: {
+            kind: "preview",
+            data: {
+              previewId: request.source.previewId!,
+              appId: parsed.appId,
+              canonicalUrl: parsed.canonicalUrl,
+              selection,
+              reviews,
+              rawRefs,
+              limitations,
+              sourceSummary: {
+                kind: "apple-rss",
+                appId: parsed.appId,
+                status,
+                selection,
+                liveCount: selected.live.reviewCount,
+                stableCount: selected.stable.reviewCount,
+                pages: selected.live.pageCount,
+                requestCount: selected.live.requestCount,
+                reviewCount: reviews.length,
+              },
+            },
+          },
+          sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
+          now: () => new Date().toISOString(),
+          pageDelayMs: cfg.appleRssPageDelayMs,
+          maxPages: cfg.appleRssMaxPages,
+          timeoutMs: cfg.appleRssTimeoutMs,
+        };
+      } else {
+        deps = {
+          model: buildModel(),
+          source: { kind: "apple-rss" as const, appleRssBaseUrl: cfg.appleRssBaseUrl, appId: parsed.appId, canonicalUrl: parsed.canonicalUrl },
+          sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
+          now: () => new Date().toISOString(),
+          pageDelayMs: cfg.appleRssPageDelayMs,
+          maxPages: cfg.appleRssMaxPages,
+          timeoutMs: cfg.appleRssTimeoutMs,
+        };
+      }
     } else {
       const parseResult = parseImportedReviews({
         fileName: request.source.fileName,
