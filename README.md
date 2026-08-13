@@ -138,14 +138,36 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
 - A `finding` cites ≥1 review, **each** backed by an exact excerpt; its sample
   count and confidence are code-derived. A support review without an exact
   excerpt is dropped rather than inflating the sample.
+- **Evidence Sufficiency (deterministic v1)** — every finding gets a code
+  verdict on whether its evidence can support a *broad or critical* claim. A
+  finding is `insufficient` when it has fewer than 3 supporting reviews, a
+  support ratio below 1% of the reviewed corpus, a non-`complete` data source,
+  or as many conflicts as supporting reviews (any one condition suffices). An
+  `insufficient` finding survives as a limited, auditable fact — it is never
+  deleted and never passes for "no evidence" — but it cannot produce a P0/P1
+  requirement or a target version: a requirement backed only by insufficient
+  findings is pinned to `P2` with `versionId: null` and dropped from every
+  version's scope. When no finding survives validation at all, the pipeline
+  stops after scope/topics/findings with an `INSUFFICIENT_EVIDENCE` limitation
+  and a `completed/insufficient-evidence` outcome; it is never replayed as a
+  complete analysis.
 - The user's analysis goal is interpreted into generic scope filters
   (rating/version/language/date) that are actually applied: later stages only
   analyze reviews matching the scope.
 - A `requirement` references ≥1 finding; its source reviews are the union of
   those findings' evidence.
 - A `test` references ≥1 requirement and only reviews inside the union of the
-  cited requirements' evidence; every requirement must be covered.
+  cited requirements' evidence; every requirement must be covered. A test's
+  direct **Finding IDs and Priority are derived by code** from the requirement
+  graph (union of the linked requirements' findings; most urgent priority) and
+  validated the same way — the model never supplies them, and tampering is
+  rejected as `TEST_FINDING_MISMATCH` / `TEST_PRIORITY_MISMATCH`.
 - Assumptions are never requirements and never generate tests.
+- **Legacy replay compatibility.** Cached artifacts produced before the
+  sufficiency / direct-finding contracts stay replayable: findings without an
+  `evidenceSufficiency` field show confidence only, and test cases missing
+  `findingIds` / `priority` have them derived from their requirements at the
+  display layer. Bundled fixtures are not rewritten.
 - See `src/domain/traceability/validate.ts` for the full invariant list.
 
 ## Cached Replay and Data Authenticity
