@@ -54,17 +54,18 @@ export class OpenAiCompatibleClient {
     this.signal = deps.signal;
     this.timeoutMs = deps.timeoutMs;
     this.progressIntervalMs = deps.progressIntervalMs ?? PROGRESS_INTERVAL_MS;
-    this.usageLog = { model: deps.model, provider: safeProviderLabel(deps.baseUrl), temperature: this.temperature, calls: 0, promptVersions: [], totalTokens: null, durationsMs: [] };
+    this.usageLog = { model: deps.model, provider: safeProviderLabel(deps.baseUrl), temperature: this.temperature, calls: 0, attempts: 0, retries: 0, retryReasons: [], promptVersions: [], totalTokens: null, durationsMs: [] };
   }
 
   /** Aggregated model usage for the run manifest (never contains the API key). */
   getUsageLog(): ModelUsageLog {
-    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions] };
+    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions], retryReasons: [...this.usageLog.retryReasons] };
   }
 
   async generate<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
     let lastError: Error | null = null;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+      this.usageLog.attempts += 1;
       try {
         return await this.generateOnce(request);
       } catch (err) {
@@ -74,6 +75,16 @@ export class OpenAiCompatibleClient {
         if (this.signal?.aborted) throw lastError;
         if (!isTransient(lastError) || attempt === MAX_RETRIES) throw lastError;
         const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
+        const reason = modelErrorCode(lastError);
+        this.usageLog.retries += 1;
+        this.usageLog.retryReasons.push(reason);
+        request.onProgress?.({
+          kind: "retry",
+          attempt: attempt + 2,
+          maxAttempts: MAX_RETRIES + 1,
+          delayMs: delay,
+          reason,
+        });
         console.warn(`[model] transient error (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${delay}ms: ${lastError.message}`);
         await sleep(delay);
       }
@@ -116,7 +127,7 @@ export class OpenAiCompatibleClient {
         : undefined;
       // Heartbeat while waiting so long calls don't look frozen to the user.
       const heartbeat = request.onProgress
-        ? setInterval(() => request.onProgress?.({ elapsedMs: Date.now() - startedAt }), this.progressIntervalMs)
+        ? setInterval(() => request.onProgress?.({ kind: "heartbeat", elapsedMs: Date.now() - startedAt }), this.progressIntervalMs)
         : undefined;
       try {
         res = await this.fetchFn(url, { method: "POST", headers, body: JSON.stringify(payload), signal: controller.signal });
@@ -239,4 +250,10 @@ function isTransient(err: Error): boolean {
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Extracts the MODEL_* classification for a retry audit (never the body). */
+function modelErrorCode(err: Error): string {
+  const match = err.message.match(/^(MODEL_[A-Z_]+):/);
+  return match ? match[1] : "MODEL_ERROR";
 }

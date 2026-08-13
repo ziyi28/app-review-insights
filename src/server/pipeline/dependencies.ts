@@ -1,4 +1,4 @@
-import type { ModelMeta, ModelRequest, ModelResult } from "@/server/model/types";
+import type { ModelMeta, ModelProgress, ModelRequest, ModelResult } from "@/server/model/types";
 
 /** The minimal model surface used by pipeline stages. */
 export interface StageModelClient {
@@ -6,15 +6,22 @@ export interface StageModelClient {
 }
 
 /**
- * Wraps a stage's live-progress callback so a model-call heartbeat also becomes
- * a progress message. Returns undefined when the stage has no callback, so
- * `onProgress` is never attached unnecessarily.
+ * Wraps a stage's live-progress callback so a model-call heartbeat or retry
+ * also becomes a progress message. Returns undefined when the stage has no
+ * callback, so `onProgress` is never attached unnecessarily.
  */
 export function modelProgressRelay(
   onProgress?: (message: string) => void,
-): ((info: { elapsedMs: number }) => void) | undefined {
+): ((info: ModelProgress) => void) | undefined {
   if (!onProgress) return undefined;
-  return (info) => onProgress(`model generation in progress (${Math.round(info.elapsedMs / 1000)}s)`);
+  return (info) => {
+    if (info.kind === "retry") {
+      return onProgress(
+        `model retry ${info.attempt}/${info.maxAttempts} in ${info.delayMs / 1000}s (${info.reason})`,
+      );
+    }
+    onProgress(`model generation in progress (${Math.round(info.elapsedMs / 1000)}s)`);
+  };
 }
 
 /** Pipeline dependency bundle, injectable for tests and live runs. */

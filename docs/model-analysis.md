@@ -72,7 +72,13 @@ snapshots, or git. `.env.example` documents the shape.
 
 - Network / HTTP / timeout / non-JSON / schema violations are distinct error
   codes, surfaced as `run.failed` events with the stage and error preserved.
-- No automatic retries; the operator may re-run.
+- Model calls are retried a bounded number of times: an initial attempt plus up
+  to 2 retries with 1s/2s backoff. Only transient failures retry — 5xx,
+  network errors, per-call timeouts, and non-JSON/truncated responses. 4xx,
+  schema violations, and client disconnects fail immediately. Each retry emits
+  a `stage.progress` message (`model retry 2/3 in 1s (MODEL_HTTP_ERROR)`) and
+  is recorded in the manifest's `modelUsage` as `attempts`, `retries`, and
+  `retryReasons` (never the provider response body or the API key).
 - Without `MODEL_BASE_URL` + `MODEL_NAME`, live/import analysis fails clearly at
   the first model stage; catalog and cached replay are unaffected.
 

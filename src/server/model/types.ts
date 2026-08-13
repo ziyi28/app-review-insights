@@ -2,10 +2,15 @@ import type { z } from "zod";
 
 export type ModelJsonMode = "prompt" | "json_object";
 
-export type ModelProgress = {
-  /** Milliseconds since the call started, for "model is working" feedback. */
-  elapsedMs: number;
-};
+export type ModelProgress =
+  | { kind: "heartbeat"; elapsedMs: number }
+  | {
+      kind: "retry";
+      attempt: number;
+      maxAttempts: number;
+      delayMs: number;
+      reason: string;
+    };
 
 export type ModelRequest<T> = {
   stage: string;
@@ -44,7 +49,14 @@ export type ModelUsageLog = {
   model: string | null;
   provider: string | null;
   temperature: number;
+  /** Successful logical calls (each scripted/external generate result). */
   calls: number;
+  /** HTTP attempts across retries (initial + retries). */
+  attempts: number;
+  /** Number of retries actually performed. */
+  retries: number;
+  /** MODEL_* reason per retry (never the provider response body). */
+  retryReasons: string[];
   promptVersions: string[];
   totalTokens: number | null;
   durationsMs: number[];

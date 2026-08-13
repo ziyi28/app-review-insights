@@ -9,7 +9,7 @@ export class ScriptedModelClient {
   private readonly error?: Error;
   callIndex = 0;
   requests: ModelRequest<unknown>[] = [];
-  private readonly usageLog: ModelUsageLog = { model: "scripted", provider: "test", temperature: 0.1, calls: 0, promptVersions: [], totalTokens: null, durationsMs: [] };
+  private readonly usageLog: ModelUsageLog = { model: "scripted", provider: "test", temperature: 0.1, calls: 0, attempts: 0, retries: 0, retryReasons: [], promptVersions: [], totalTokens: null, durationsMs: [] };
 
   constructor(script: string[], error?: Error) {
     this.script = script;
@@ -17,7 +17,7 @@ export class ScriptedModelClient {
   }
 
   getUsageLog(): ModelUsageLog {
-    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions] };
+    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions], retryReasons: [...this.usageLog.retryReasons] };
   }
 
   async generate<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
@@ -34,6 +34,7 @@ export class ScriptedModelClient {
       throw new Error(`MODEL_SCHEMA_VIOLATION (scripted): ${JSON.stringify(result.error.issues[0])}`);
     }
     this.usageLog.calls += 1;
+    this.usageLog.attempts += 1;
     this.usageLog.promptVersions.push(request.promptVersion);
     return {
       ...result.data,

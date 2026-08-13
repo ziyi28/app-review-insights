@@ -99,7 +99,7 @@ describe("OpenAiCompatibleClient", () => {
     expect(log.durationsMs.length).toBe(2);
   });
 
-  it("retries a transient 5xx and succeeds", async () => {
+  it("retries a transient 5xx and succeeds, reporting progress and usage", async () => {
     vi.useFakeTimers();
     try {
       const { client, fetchMock } = makeClient();
@@ -108,11 +108,25 @@ describe("OpenAiCompatibleClient", () => {
         .mockResolvedValueOnce(new Response("err", { status: 500 }))
         .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
       const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
-      const pending = client.generate(requestBase());
+      const onProgress = vi.fn();
+      const pending = client.generate({ ...requestBase(), onProgress });
       await vi.advanceTimersByTimeAsync(10_000);
       const result = await pending;
       expect(result.ok).toBe(true);
       expect(fetchMock).toHaveBeenCalledTimes(3);
+      expect(onProgress).toHaveBeenCalledWith({
+        kind: "retry",
+        attempt: 2,
+        maxAttempts: 3,
+        delayMs: 1000,
+        reason: "MODEL_HTTP_ERROR",
+      });
+      expect(client.getUsageLog()).toMatchObject({
+        calls: 1,
+        attempts: 3,
+        retries: 2,
+        retryReasons: ["MODEL_HTTP_ERROR", "MODEL_HTTP_ERROR"],
+      });
       warn.mockRestore();
     } finally {
       vi.useRealTimers();
@@ -221,6 +235,7 @@ describe("OpenAiCompatibleClient", () => {
     fetchMock.mockResolvedValue(new Response("bad", { status: 400 }));
     await expect(client.generate(requestBase())).rejects.toThrow(/MODEL_HTTP_ERROR: 400/);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(client.getUsageLog()).toMatchObject({ attempts: 1, retries: 0, retryReasons: [] });
   });
 
   it("does not retry a schema violation", async () => {
@@ -228,6 +243,7 @@ describe("OpenAiCompatibleClient", () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":"nope"}' } }] })));
     await expect(client.generate(requestBase())).rejects.toThrow(/schema/i);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(client.getUsageLog()).toMatchObject({ attempts: 1, retries: 0 });
   });
 
   it("does not retry once the client has disconnected", async () => {
@@ -244,6 +260,7 @@ describe("OpenAiCompatibleClient", () => {
     });
     await expect(client.generate(requestBase())).rejects.toThrow(/MODEL_HTTP_ERROR: 500/);
     expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(client.getUsageLog()).toMatchObject({ attempts: 1, retries: 0 });
   });
 
   it("invokes onProgress while the model call is in flight", async () => {
@@ -262,7 +279,11 @@ describe("OpenAiCompatibleClient", () => {
     const onProgress = vi.fn();
     await client.generate({ ...requestBase(), onProgress });
     expect(onProgress).toHaveBeenCalled();
-    expect(onProgress.mock.calls[0][0].elapsedMs).toBeGreaterThanOrEqual(0);
+    expect(onProgress.mock.calls[0][0]).toEqual({
+      kind: "heartbeat",
+      elapsedMs: expect.any(Number),
+    });
+    expect((onProgress.mock.calls[0][0] as { elapsedMs: number }).elapsedMs).toBeGreaterThanOrEqual(0);
   });
 
   it("does not call onProgress when the call resolves before the first tick", async () => {
