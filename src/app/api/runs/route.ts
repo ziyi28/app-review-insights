@@ -254,18 +254,19 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
         const selection = request.source.reviewSelection!;
         const reviews = selection === "live" ? selected.live.reviews : selected.stable.reviews;
         const rawRefs = selection === "live" ? selected.live.rawRefs : selected.stable.reviews.map((r) => `cache:${r.sourceReviewId}`);
-        const limitations: Limitation[] = [];
+        // Preserve every source limitation from the preview (provider fallback
+        // reasons, partial markers, unstable pagination) plus the selection hint.
+        const limitations: Limitation[] = [...selected.live.limitations];
         if (selection === "stable") {
           limitations.push({
-            code: "RSS_CACHE_AUGMENTED",
-            message: "Analysis used the stable cached review sample; live collection may be incomplete or empty",
+            code: "LOCAL_HISTORY_SELECTED",
+            message: "Analysis used the stable local-history review sample; it was not re-collected and is not freshly forced",
             stage: "source",
           });
         }
-        const liveLimitations = selected.live.limitations.filter((l) => l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL");
-        limitations.push(...liveLimitations);
+        const liveLimitations = selected.live.limitations.filter((l) => l.code === "SOCIALCRAWL_NOT_CONFIGURED" || l.code === "SOCIALCRAWL_EMPTY" || l.code === "SOCIALCRAWL_ITEMS_DROPPED" || l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL");
         const status: "complete" | "suspect-empty" | "partial" | "failed" =
-          reviews.length === 0 ? "suspect-empty" : liveLimitations.some((l) => l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL") ? "partial" : "complete";
+          reviews.length === 0 ? "suspect-empty" : liveLimitations.length > 0 ? "partial" : "complete";
         deps = {
           model: buildModel(),
           source: {
@@ -279,15 +280,21 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
               rawRefs,
               limitations,
               sourceSummary: {
-                kind: "apple-rss",
+                kind: "app-store-reviews",
+                provider: selected.live.provider,
                 appId: parsed.appId,
+                storefront: "US",
                 status,
                 selection,
                 liveCount: selected.live.reviewCount,
                 stableCount: selected.stable.reviewCount,
-                pages: selected.live.pageCount,
-                requestCount: selected.live.requestCount,
                 reviewCount: reviews.length,
+                collectedAt: selected.live.collectedAt,
+                forcedRefresh: selected.live.forcedRefresh,
+                providerCached: selected.live.cached,
+                requestCount: selected.live.requestCount,
+                requestId: selected.live.provider === "socialcrawl" && "requestId" in selected.live.evidence ? selected.live.evidence.requestId : null,
+                creditsUsed: selected.live.provider === "socialcrawl" && "creditsUsed" in selected.live.evidence ? selected.live.evidence.creditsUsed : null,
               },
             },
           },

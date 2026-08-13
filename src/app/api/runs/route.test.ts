@@ -5,6 +5,7 @@ import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
 import { POST } from "./route";
 import type { SourcePreview } from "@/server/sources/source-preview";
+import { RunStore } from "@/server/runs/run-store";
 
 let baseDir: string;
 const saved = { ...process.env };
@@ -30,12 +31,17 @@ function snapshot(reviewCount: number, opts: { expiresAt?: string; appId?: strin
     createdAt: now,
     expiresAt: opts.expiresAt ?? new Date(new Date(now).getTime() + 30 * 60 * 1000).toISOString(),
     live: {
+      provider: "apple-rss",
+      forcedRefresh: false,
+      cached: null,
+      collectedAt: now,
       status: (opts.liveStatus ?? "complete") as "complete",
       reviewCount,
       pageCount: 1,
       requestCount: 1,
       dateRange: { earliest: null, latest: null },
       limitations: [],
+      evidence: { provider: "apple-rss", pageCount: 1, requestCount: 1 },
       reviews,
       rawRefs: reviews.map((r) => `sources/apple/page-01.json#entry-${r.sourceReviewId}`),
     },
@@ -48,6 +54,57 @@ function writeSnapshot(preview: SourcePreview): void {
   const dir = process.env.SOURCE_PREVIEWS_DIR!;
   mkdirSync(dir, { recursive: true });
   writeFileSync(path.join(dir, `${preview.previewId}.json`), JSON.stringify(preview), "utf8");
+}
+
+/** A SocialCrawl-backed preview snapshot (forced fresh, 2 reviews). */
+function socialSnapshot(): SourcePreview {
+  const now = new Date().toISOString();
+  const reviews: RawReview[] = [
+    { sourceReviewId: "review-1", source: "socialcrawl-app-store", title: "Useful", body: "The guided workout is clear.", rating: 5, version: "8.2.0", updatedAt: "2026-08-12T00:00:00.000Z" },
+    { sourceReviewId: "review-2", source: "socialcrawl-app-store", title: "Timer issue", body: "The timer resets after backgrounding.", rating: 1, version: "8.2.0", updatedAt: "2026-08-11T00:00:00.000Z" },
+  ];
+  return {
+    protocolVersion: "1",
+    previewId: "preview-social",
+    appId: "839285684",
+    canonicalUrl: "https://apps.apple.com/us/app/x/id839285684",
+    createdAt: now,
+    expiresAt: new Date(new Date(now).getTime() + 30 * 60 * 1000).toISOString(),
+    live: {
+      provider: "socialcrawl",
+      forcedRefresh: true,
+      cached: false,
+      collectedAt: now,
+      status: "complete",
+      reviewCount: 2,
+      pageCount: 0,
+      requestCount: 1,
+      dateRange: { earliest: "2026-08-11T00:00:00.000Z", latest: "2026-08-12T00:00:00.000Z" },
+      limitations: [],
+      evidence: {
+        provider: "socialcrawl",
+        endpoint: "/v1/app_store/app-reviews",
+        country: "US",
+        language: "en",
+        requestedDepth: 500,
+        sortBy: "most_recent",
+        forcedRefresh: true,
+        cached: false,
+        requestId: "req_test",
+        creditsUsed: 5,
+        startedAt: now,
+        finishedAt: now,
+        httpStatus: 200,
+        attemptCount: 1,
+        providerDropped: 0,
+        parserDropped: 0,
+      },
+      reviews,
+      rawRefs: reviews.map((r) => `socialcrawl:req_test#review:${r.sourceReviewId}`),
+    },
+    stable: { available: false, reviewCount: 0, cacheUpdatedAt: null, dateRange: { earliest: null, latest: null }, bootstrapRunId: null, reviews: [] },
+    recommendedSelection: "live",
+  };
 }
 
 function analyzeRequest(previewId: string, selection: "live" | "stable"): Request {
@@ -165,5 +222,48 @@ describe("POST /api/runs preview-backed live", () => {
     expect(res.status).toBe(422);
     const body = (await res.json()) as { title?: string };
     expect(body.title).toContain("unavailable");
+  });
+
+  it("persists SocialCrawl provider provenance without leaking the key", async () => {
+    writeSnapshot(socialSnapshot());
+    // No model configured: the deterministic source/prepare stages still run,
+    // the source-evidence artifact is still written, and the run completes with
+    // MODEL_NOT_CONFIGURED — exactly what this provenance test needs.
+    delete process.env.MODEL_BASE_URL;
+    delete process.env.MODEL_NAME;
+    const res = await POST(analyzeRequest("preview-social", "live"));
+    expect(res.status).toBe(200);
+    // Drain the NDJSON stream: the pipeline runs inside the stream and only
+    // completes (writing artifacts) when the stream closes.
+    const text = await res.text();
+
+    // The run reads the frozen preview reviews and produces a provider-aware
+    // source-evidence artifact.
+    const fs = await import("node:fs");
+    const ids = await fs.promises.readdir(process.env.RUNS_DIR!);
+    const store = new RunStore(process.env.RUNS_DIR!);
+    let sourceEvidence: Record<string, unknown> | null = null;
+    for (const id of ids) {
+      if (!id.startsWith("run-")) continue;
+      const value = await store.readArtifact(id, "source-evidence", 1).catch(() => null);
+      if (value && typeof value === "object" && (value as { kind?: string }).kind === "app-store-reviews") {
+        sourceEvidence = value as Record<string, unknown>;
+        break;
+      }
+    }
+    expect(text).toContain("run.completed");
+    expect(sourceEvidence).toMatchObject({
+      kind: "app-store-reviews",
+      provider: "socialcrawl",
+      appId: "839285684",
+      storefront: "US",
+      selection: "live",
+      reviewCount: 2,
+      forcedRefresh: true,
+      providerCached: false,
+      requestId: "req_test",
+      creditsUsed: 5,
+    });
+    expect(JSON.stringify(sourceEvidence)).not.toContain("sc_");
   });
 });
