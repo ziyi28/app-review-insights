@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { loadConfig } from "@/server/config";
 import { parseAppStoreUrl } from "@/server/sources/app-store-url";
-import { buildPreviewSnapshot, pruneExpiredPreviews, type SourcePreview } from "@/server/sources/source-preview";
+import { buildPreviewSnapshot, pruneExpiredPreviews, type SourcePreview, type LiveProvider } from "@/server/sources/source-preview";
 
 export const runtime = "nodejs";
 
@@ -50,22 +50,37 @@ export async function POST(req: Request) {
 
   const previewId = `preview-${randomUUID()}`;
   const now = new Date().toISOString();
-  const baseUrl = cfg.appleRssBaseUrl;
 
   const preview = await buildPreviewSnapshot({
     previewId,
     appId,
     canonicalUrl,
     now,
-    collector: {
+    // SocialCrawl deps are built only when a key is configured; otherwise the
+    // preview dispatches straight to the RSS fallback.
+    socialCrawlCollector: cfg.socialCrawlApiKey
+      ? {
+          fetchFn: fetch,
+          sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
+          now: () => new Date().toISOString(),
+          baseUrl: cfg.socialCrawlBaseUrl,
+          apiKey: cfg.socialCrawlApiKey,
+          appId,
+          timeoutMs: cfg.socialCrawlTimeoutMs,
+          idempotencyKey: previewId,
+          signal: req.signal,
+        }
+      : null,
+    rssCollector: {
       fetchFn: fetch,
       sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
       now: () => new Date().toISOString(),
-      baseUrl,
+      baseUrl: cfg.appleRssBaseUrl,
       appId,
       maxPages: cfg.appleRssMaxPages,
       pageDelayMs: cfg.appleRssPageDelayMs,
       timeoutMs: cfg.appleRssTimeoutMs,
+      signal: req.signal,
     },
     previewsDir: cfg.sourcePreviewsDir,
     cacheDir: cfg.sourceCacheDir,
@@ -78,7 +93,7 @@ export async function POST(req: Request) {
   });
 }
 
-/** Strips the full review payloads so the browser never receives them. */
+/** Strips the full review payloads and secrets so the browser never receives them. */
 function toPublicPreview(preview: SourcePreview) {
   return {
     protocolVersion: "1",
@@ -88,12 +103,18 @@ function toPublicPreview(preview: SourcePreview) {
     createdAt: preview.createdAt,
     expiresAt: preview.expiresAt,
     live: {
+      provider: preview.live.provider as LiveProvider,
+      forcedRefresh: preview.live.forcedRefresh,
+      cached: preview.live.cached,
+      collectedAt: preview.live.collectedAt,
       status: preview.live.status,
       reviewCount: preview.live.reviewCount,
       pageCount: preview.live.pageCount,
       requestCount: preview.live.requestCount,
       dateRange: preview.live.dateRange,
       limitations: preview.live.limitations,
+      creditsUsed: "creditsUsed" in preview.live.evidence ? preview.live.evidence.creditsUsed : null,
+      requestId: "requestId" in preview.live.evidence ? preview.live.evidence.requestId : null,
     },
     stable: {
       available: preview.stable.available,

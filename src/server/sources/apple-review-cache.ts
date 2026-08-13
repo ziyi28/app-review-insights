@@ -135,7 +135,10 @@ export class AppleReviewCacheStore {
       if (entry.manifest.status !== "completed") continue;
       const sourceSummary = await this.readSourceEvidence(entry.runId, entry.root).catch(() => null);
       if (!sourceSummary) continue;
-      if (sourceSummary.kind !== "apple-rss" || String(sourceSummary.appId) !== appId) continue;
+      // Legacy runs carry kind "apple-rss"; newer SocialCrawl runs carry the
+      // provider-aware "app-store-reviews" summary. Both can bootstrap a cache.
+      const supportedKind = sourceSummary.kind === "apple-rss" || sourceSummary.kind === "app-store-reviews";
+      if (!supportedKind || String(sourceSummary.appId) !== appId) continue;
       if (sourceSummary.status !== "complete") continue;
       const count = Number(sourceSummary.reviewCount ?? 0);
       qualified.push({ runId: entry.runId, reviewCount: count, createdAt: entry.manifest.createdAt });
