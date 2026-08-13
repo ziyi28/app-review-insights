@@ -1,9 +1,10 @@
 # App Review Planner
 
 Local, model-driven analysis of App Store user reviews into
-evidence-grounded product plans. Enter a US App Store URL (or import a review
-dataset), pick an analysis goal, and the app collects, cleans, analyzes, plans,
-and validates — surfacing the whole workflow and every intermediate artifact.
+evidence-grounded product plans. Enter an App Store URL from the US or China
+storefront (reviews always come from the US), or import a review dataset, pick
+an analysis goal, and the app collects, cleans, analyzes, plans, and validates
+— surfacing the whole workflow and every intermediate artifact.
 
 **One command to run:** `npm run dev` then open http://localhost:3000.
 
@@ -11,21 +12,32 @@ and validates — surfacing the whole workflow and every intermediate artifact.
 
 1. **Scope** — interprets a free-form goal into generic filters and explicit
    limitations (model + rules).
-2. **Collect / Import** — pulls the Apple Customer Reviews RSS for a US
-   storefront, or accepts a documented JSON/CSV dataset.
+2. **Collect / Import** — accepts a US or **China App Store** page
+   (`https://apps.apple.com/us/...` or `https://apps.apple.com/cn/...`); both
+   resolve to the same app id and are collected through the fixed
+   `/us/rss/customerreviews/...` URL, so reviews always come from the US
+   storefront. JSON/CSV datasets are also accepted.
 3. **Clean** — NFC normalization, exact dedupe, deterministic stats.
-4. **Topics** — dynamic theme discovery (model), no fixed taxonomy.
+4. **Topics** — dynamic theme discovery (model), no fixed taxonomy, with the
+   candidate quotes surfaced in a **Classification** tab.
 5. **Findings** — user problems grounded in specific reviews with exact
-   excerpts (model + code-verified evidence).
-6. **Version plan + PRD** — requirements traceable to findings, split across
-   versions (model).
+   excerpts (model + code-verified evidence), audited in an
+   **Evidence Validation** stage.
+6. **Version Planning + PRD** — requirements traceable to findings, each
+   carrying seven planning factors. Severity, User Impact, Implementation
+   Scope, Dependencies and rationale come from the model; Evidence Strength,
+   Confidence and Frequency are recomputed by code. Priority is capped and
+   dependencies are validated deterministically.
 7. **Tests** — test cases linked to requirements and source reviews (model).
 8. **Traceability** — deterministic validation of the whole chain, with a
-   single constrained revision on failure.
+   single constrained revision on failure. Revised runs keep **Draft/Final**
+   (attempt 1 vs attempt 2) side by side for PRD, tests, traceability and the
+   version plan; never-revised runs show "Final · no revision required".
 
 Every run streams its progress as NDJSON events and persists a complete file
 snapshot under `data/runs/<runId>/`, which can be replayed offline as a
-**Cached Replay**.
+**Cached Replay**. Cached runs that predate these P1 artifacts show a clear
+fallback instead of fabricated data.
 
 ## Quick Start
 
@@ -190,14 +202,15 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
 
 - Distinct error codes for network / HTTP / timeout / non-JSON / schema
   violations, surfaced as `run.failed` events with stage and error preserved.
-- Model calls are retried a bounded number of times: an initial attempt plus
-  up to 2 retries with 1s/2s backoff. Only transient failures retry — 5xx,
-  network errors, per-call timeouts, and non-JSON/truncated responses. 4xx,
-  schema violations, and client disconnects fail immediately. Every retry
-  surfaces as a `stage.progress` message (e.g. `model retry 2/3 in 1s
-  (MODEL_HTTP_ERROR)`), and the run manifest's `modelUsage` records
-  `attempts`, `retries`, and `retryReasons` (never the response body or key).
-  RSS also retries the first page a bounded number of times (see Data Sources).
+- Model calls are retried a bounded number of times: at most **3 attempts**
+  (an initial attempt plus up to 2 retries) with 1s/2s backoff. Only transient
+  failures retry — 5xx, network errors, per-call timeouts, and non-JSON/
+  truncated responses. 4xx, schema violations, and client disconnects fail
+  immediately. Every retry surfaces as a `stage.progress` message (e.g.
+  `model retry 2/3 in 1s (MODEL_HTTP_ERROR)`), and the run manifest's
+  `modelUsage` records `attempts`, `retries`, and `retryReasons` (never the
+  response body or key). RSS also retries the first page a bounded number of
+  times (see Data Sources).
 - Without a model, import/live analysis still runs the deterministic stages
   (collect/import, clean, dedupe, stats) and completes with a
   `MODEL_NOT_CONFIGURED` limitation; catalog and cached replay always work.
