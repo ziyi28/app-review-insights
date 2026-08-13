@@ -76,6 +76,26 @@ describe("POST /api/source-previews", () => {
     expect(snapshot!.live.reviews[0].body).toBe("I love the variety of workouts. Easy to follow at home.");
   });
 
+  it("accepts a China page URL but collects from the US storefront", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/page=1/")) return new Response(fixture("page-01.json"), { status: 200, headers: { "content-type": "application/json" } });
+      return new Response(JSON.stringify({ feed: { entry: [] } }), { status: 200 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const res = await POST(new Request("http://localhost/api/source-previews", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ protocolVersion: "1", appStoreUrl: "https://apps.apple.com/cn/app/workout-for-women-home-gym/id839285684" }),
+    }));
+    expect(res.status).toBe(200);
+    expect((await res.json()).canonicalUrl)
+      .toBe("https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684");
+    expect(fetchMock.mock.calls.every(([url]) =>
+      String(url).includes("/us/rss/customerreviews/"),
+    )).toBe(true);
+  });
+
   it("sets cache-control: no-store", async () => {
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);

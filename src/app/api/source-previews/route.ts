@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { loadConfig } from "@/server/config";
-import { parseUsAppStoreUrl } from "@/server/sources/app-store-url";
+import { parseAppStoreUrl } from "@/server/sources/app-store-url";
 import { buildPreviewSnapshot, pruneExpiredPreviews, type SourcePreview } from "@/server/sources/source-preview";
 
 export const runtime = "nodejs";
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
   let appId: string;
   let canonicalUrl: string;
   try {
-    const u = parseUsAppStoreUrl(parsed.data.appStoreUrl);
+    const u = parseAppStoreUrl(parsed.data.appStoreUrl);
     appId = u.appId;
     canonicalUrl = u.canonicalUrl;
   } catch (err) {

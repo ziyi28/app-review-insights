@@ -135,6 +135,30 @@ describe("POST /api/runs preview-backed live", () => {
     expect(body.title).toContain("unavailable");
   });
 
+  it("accepts a China page URL and matches the US app id preview", async () => {
+    writeSnapshot(snapshot(1, { appId: "839285684" }));
+    const req = new Request("http://localhost/api/runs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        protocolVersion: "1",
+        mode: "analyze",
+        uiLocale: "en",
+        outputLocale: "en",
+        goal: "Understand why users love this app",
+        source: {
+          kind: "live",
+          appStoreUrl: "https://apps.apple.com/cn/app/workout-for-women-home-gym/id839285684",
+          previewId: "preview-test",
+          reviewSelection: "live",
+        },
+      }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    expect(res.headers.get("content-type")).toContain("application/x-ndjson");
+  });
+
   it("rejects an unavailable stable dataset when stable has no reviews (422)", async () => {
     writeSnapshot(snapshot(1));
     const res = await POST(analyzeRequest("preview-test", "stable"));

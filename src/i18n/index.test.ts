@@ -15,4 +15,9 @@ describe("i18n dictionaries", () => {
       expect(dictionaries["zh-CN"]).toHaveProperty(key);
     }
   });
+
+  it("flags that reviews always use the US storefront", () => {
+    expect(dictionaries.en.appStoreUrl).toMatch(/storefront/i);
+    expect(dictionaries["zh-CN"].appStoreUrl).toContain("美国区");
+  });
 });
