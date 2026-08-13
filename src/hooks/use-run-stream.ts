@@ -16,6 +16,8 @@ export type RunStreamState = {
 export type RunStreamActions = {
   start: (body: unknown) => Promise<void>;
   reset: () => void;
+  /** Loads a completed run's persisted events for read-only history viewing. */
+  loadHistory: (runId: string) => Promise<void>;
 };
 
 /**
@@ -90,5 +92,36 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     }
   }, []);
 
-  return { events, running, error, lastEvent: events.at(-1) ?? null, droppedEvents, start, reset };
+  // Loads a completed run's persisted events in one shot (no streaming) so the
+  // history view can inspect a past run without re-running or re-streaming it.
+  const loadHistory = useCallback(async (runId: string) => {
+    aborter.current?.abort();
+    aborter.current = null;
+    const gen = ++generation.current;
+    setEvents([]);
+    setRunning(false);
+    setError(null);
+    setDroppedEvents(0);
+    try {
+      const res = await fetch(`/api/runs/${runId}/events`, { cache: "no-store" });
+      if (!res.ok) {
+        const problem = await res.json().catch(() => ({}));
+        throw new Error(problem.error ?? problem.detail ?? `HTTP ${res.status}`);
+      }
+      const json = (await res.json()) as { events?: unknown[] };
+      const loaded: RunEvent[] = [];
+      for (const evt of json.events ?? []) {
+        const parsed = RunEventSchema.safeParse(evt);
+        if (!parsed.success) continue;
+        if (gen !== generation.current) return; // superseded
+        loaded.push(parsed.data);
+      }
+      setEvents(loaded);
+    } catch (err) {
+      if (gen !== generation.current) return;
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, []);
+
+  return { events, running, error, lastEvent: events.at(-1) ?? null, droppedEvents, start, reset, loadHistory };
 }

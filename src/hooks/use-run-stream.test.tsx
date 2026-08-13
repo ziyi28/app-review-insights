@@ -84,4 +84,30 @@ describe("useRunStream", () => {
     expect(result.current.events).toHaveLength(0);
     expect(result.current.running).toBe(false);
   });
+
+  it("loadHistory loads persisted events in one shot and filters invalid ones", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({
+            events: [
+              makeEvent(1, "run.accepted"),
+              { protocolVersion: "1", sequence: 0, eventId: "bad", runId: "r", timestamp: "x", deliveryMode: "live", type: "run.accepted", data: {} },
+              makeEvent(2, "run.completed"),
+            ],
+          }),
+          { status: 200 },
+        ),
+      ),
+    );
+    const { result } = renderHook(() => useRunStream());
+    await act(async () => {
+      await result.current.loadHistory("run-history");
+    });
+    expect(result.current.events).toHaveLength(2);
+    expect(result.current.events[0].type).toBe("run.accepted");
+    expect(result.current.events[1].type).toBe("run.completed");
+    expect(result.current.running).toBe(false);
+  });
 });

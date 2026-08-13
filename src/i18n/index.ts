@@ -38,6 +38,11 @@ export type Dictionary = {
   completed: string;
   someEventsDropped: string;
   goalTooShort: string;
+  history: string;
+  historyEmpty: string;
+  historyLoadFailed: string;
+  view: string;
+  replay: string;
   failed: string;
   errors: string;
   limitations: string;
@@ -124,6 +129,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     running: "Analysis running…",
     someEventsDropped: "Some stream events were dropped — check the browser console.",
     goalTooShort: "Analysis goal must be at least 10 characters.",
+    history: "History",
+    historyEmpty: "No past runs yet.",
+    historyLoadFailed: "Failed to load history.",
+    view: "View",
+    replay: "Replay",
     completed: "Completed",
     failed: "Failed",
     errors: "errors",
@@ -209,6 +219,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     running: "分析进行中…",
     someEventsDropped: "部分流事件被丢弃 — 请查看浏览器控制台。",
     goalTooShort: "分析目标至少需要 10 个字符。",
+    history: "历史",
+    historyEmpty: "暂无历史运行。",
+    historyLoadFailed: "加载历史失败。",
+    view: "查看",
+    replay: "回放",
     completed: "已完成",
     failed: "失败",
     errors: "错误",
