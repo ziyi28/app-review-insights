@@ -11,9 +11,12 @@ export type ModelClientDeps = {
   signal?: AbortSignal;
   /** Hard deadline for a single model call; aborts the fetch when exceeded. */
   timeoutMs?: number;
+  /** Interval (ms) between onProgress heartbeats while a call is in flight. */
+  progressIntervalMs?: number;
 };
 
 const TEMPERATURE = 0.1;
+const PROGRESS_INTERVAL_MS = 2000;
 
 /**
  * Minimal OpenAI-compatible chat completions client. No provider-specific
@@ -29,6 +32,7 @@ export class OpenAiCompatibleClient {
   private readonly fetchFn: typeof fetch;
   private readonly signal?: AbortSignal;
   private readonly timeoutMs?: number;
+  private readonly progressIntervalMs: number;
   private readonly usageLog: ModelUsageLog;
 
   constructor(deps: ModelClientDeps) {
@@ -40,6 +44,7 @@ export class OpenAiCompatibleClient {
     this.fetchFn = deps.fetchFn ?? fetch;
     this.signal = deps.signal;
     this.timeoutMs = deps.timeoutMs;
+    this.progressIntervalMs = deps.progressIntervalMs ?? PROGRESS_INTERVAL_MS;
     this.usageLog = { model: deps.model, provider: safeProviderLabel(deps.baseUrl), temperature: this.temperature, calls: 0, promptVersions: [], totalTokens: null, durationsMs: [] };
   }
 
@@ -74,11 +79,16 @@ export class OpenAiCompatibleClient {
       const onAbort = () => controller.abort();
       this.signal?.addEventListener("abort", onAbort, { once: true });
       const timer = this.timeoutMs ? setTimeout(() => controller.abort(), this.timeoutMs) : undefined;
+      // Heartbeat while waiting so long calls don't look frozen to the user.
+      const heartbeat = request.onProgress
+        ? setInterval(() => request.onProgress?.({ elapsedMs: Date.now() - startedAt }), this.progressIntervalMs)
+        : undefined;
       try {
         res = await this.fetchFn(url, { method: "POST", headers, body: JSON.stringify(payload), signal: controller.signal });
         bodyText = await res.text();
       } finally {
         if (timer) clearTimeout(timer);
+        if (heartbeat) clearInterval(heartbeat);
         this.signal?.removeEventListener("abort", onAbort);
       }
     } catch (err) {

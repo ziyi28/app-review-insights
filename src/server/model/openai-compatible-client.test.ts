@@ -104,4 +104,31 @@ describe("OpenAiCompatibleClient", () => {
     await expect(client.generate(requestBase())).rejects.toThrow();
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
+
+  it("invokes onProgress while the model call is in flight", async () => {
+    const fetchMock = vi.fn(async () => {
+      await new Promise((r) => setTimeout(r, 40));
+      return new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] }));
+    });
+    const client = new OpenAiCompatibleClient({
+      baseUrl: "https://example.com/v1",
+      apiKey: "key",
+      model: "model-x",
+      jsonMode: "prompt",
+      fetchFn: fetchMock as unknown as typeof fetch,
+      progressIntervalMs: 5,
+    });
+    const onProgress = vi.fn();
+    await client.generate({ ...requestBase(), onProgress });
+    expect(onProgress).toHaveBeenCalled();
+    expect(onProgress.mock.calls[0][0].elapsedMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it("does not call onProgress when the call resolves before the first tick", async () => {
+    const { client, fetchMock } = makeClient();
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+    const onProgress = vi.fn();
+    await client.generate({ ...requestBase(), onProgress });
+    expect(onProgress).not.toHaveBeenCalled();
+  });
 });

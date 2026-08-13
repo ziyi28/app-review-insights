@@ -132,8 +132,11 @@ async function replayRun(sourceRunId: string, store: RunStore, delayMs: number, 
       publisher.onEvent((evt) => {
         try {
           controller.enqueue(encoder.encode(encodeNdjsonLine(evt)));
-        } catch {
-          // client disconnected; the publisher continues writing to disk
+        } catch (err) {
+          // client disconnected; the publisher continues writing to disk. Log it:
+          // a stream that errors early while disk writes continue would otherwise
+          // look like "backend fine, frontend silent".
+          console.error("[runs] replay stream enqueue failed", evt.type, err);
         }
       });
       try {
@@ -237,8 +240,10 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
       publisher.onEvent((evt) => {
         try {
           controller.enqueue(encoder.encode(encodeNdjsonLine(evt)));
-        } catch {
-          // client disconnected; pipeline aborts via cancel() below
+        } catch (err) {
+          // client disconnected; pipeline aborts via cancel() below. Log it so
+          // an early stream error is visible server-side instead of silent.
+          console.error("[runs] stream enqueue failed", evt.type, err);
         }
       });
       void (async () => {
