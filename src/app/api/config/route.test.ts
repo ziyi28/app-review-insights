@@ -3,7 +3,7 @@ import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { GET, POST } from "./route";
-import { loadConfig, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSocialCrawlConfig, resetRuntimeSocialCrawlConfig } from "@/server/config";
+import { loadConfig, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSerpApiConfig, resetRuntimeSerpApiConfig } from "@/server/config";
 import type { RuntimeModelConfig } from "@/server/config";
 
 const saved = { ...process.env };
@@ -15,19 +15,19 @@ beforeEach(() => {
   delete process.env.MODEL_API_KEY;
   delete process.env.MODEL_NAME;
   delete process.env.MODEL_JSON_MODE;
-  delete process.env.SOCIALCRAWL_API_KEY;
-  delete process.env.SOCIALCRAWL_BASE_URL;
-  delete process.env.SOCIALCRAWL_TIMEOUT_MS;
+  delete process.env.SERPAPI_API_KEY;
+  delete process.env.SERPAPI_BASE_URL;
+  delete process.env.SERPAPI_TIMEOUT_MS;
   envFile = path.join(mkdtempSync(path.join(tmpdir(), "cfgroute-")), ".env.local");
   process.env.ENV_LOCAL_FILE = envFile;
   resetRuntimeModelConfig();
-  resetRuntimeSocialCrawlConfig();
+  resetRuntimeSerpApiConfig();
 });
 
 afterEach(() => {
   process.env = saved;
   resetRuntimeModelConfig();
-  resetRuntimeSocialCrawlConfig();
+  resetRuntimeSerpApiConfig();
   if (envFile) rmSync(path.dirname(envFile), { recursive: true, force: true });
 });
 
@@ -141,40 +141,45 @@ describe("POST /api/config", () => {
     expect(res.status).toBe(400);
   });
 
-  it("rejects an empty or oversized SocialCrawl key with 422", async () => {
-    const empty = await POST(configRequest({ socialCrawlApiKey: "   " }));
+  it("rejects an empty or oversized SerpApi key with 422", async () => {
+    const empty = await POST(configRequest({ serpApiKey: "   " }));
     expect(empty.status).toBe(422);
-    const oversized = await POST(configRequest({ socialCrawlApiKey: "x".repeat(4097) }));
+    const oversized = await POST(configRequest({ serpApiKey: "x".repeat(4097) }));
     expect(oversized.status).toBe(422);
   });
 });
 
-describe("SocialCrawl configuration route", () => {
-  it("reports only whether the SocialCrawl key is configured", async () => {
-    process.env.SOCIALCRAWL_API_KEY = "sc_server_secret";
+describe("SerpApi configuration route", () => {
+  it("reports only whether the SerpApi key is configured", async () => {
+    process.env.SERPAPI_API_KEY = "serp_server_secret";
     const json = await jsonResponse(await GET());
-    expect(json.socialCrawlApiKeyConfigured).toBe(true);
-    expect(json).not.toHaveProperty("socialCrawlApiKey");
-    expect(JSON.stringify(json)).not.toContain("sc_server_secret");
+    expect(json.serpApiKeyConfigured).toBe(true);
+    expect(json).not.toHaveProperty("serpApiKey");
+    expect(JSON.stringify(json)).not.toContain("serp_server_secret");
   });
 
-  it("saves a SocialCrawl key, applies it immediately, and never echoes it", async () => {
-    const res = await POST(configRequest({ socialCrawlApiKey: "sc_saved_from_page" }));
+  it("saves a SerpApi key, applies it immediately, and never echoes it", async () => {
+    const res = await POST(configRequest({ serpApiKey: "serp_saved_from_page" }));
     expect(res.status).toBe(200);
-    expect(loadConfig().socialCrawlApiKey).toBe("sc_saved_from_page");
-    expect(readFileSync(envFile, "utf8")).toContain("SOCIALCRAWL_API_KEY=sc_saved_from_page");
+    expect(loadConfig().serpApiKey).toBe("serp_saved_from_page");
+    expect(readFileSync(envFile, "utf8")).toContain("SERPAPI_API_KEY=serp_saved_from_page");
     const json = await jsonResponse(res);
-    expect(json.socialCrawlApiKeyConfigured).toBe(true);
-    expect(JSON.stringify(json)).not.toContain("sc_saved_from_page");
+    expect(json.serpApiKeyConfigured).toBe(true);
+    expect(JSON.stringify(json)).not.toContain("serp_saved_from_page");
   });
 
-  it("clears only the SocialCrawl key and preserves model configuration", async () => {
-    writeFileSync(envFile, "SOCIALCRAWL_API_KEY=sc_old\nMODEL_NAME=keep-me\n", "utf8");
-    setRuntimeSocialCrawlConfig({ apiKey: "sc_old" });
-    const res = await POST(configRequest({ socialCrawlApiKey: null }));
+  it("clears only the SerpApi key and preserves model configuration", async () => {
+    writeFileSync(envFile, "SERPAPI_API_KEY=serp_old\nMODEL_NAME=keep-me\n", "utf8");
+    setRuntimeSerpApiConfig({ apiKey: "serp_old" });
+    const res = await POST(configRequest({ serpApiKey: null }));
     expect(res.status).toBe(200);
-    expect(loadConfig().socialCrawlApiKey).toBeNull();
-    expect(readFileSync(envFile, "utf8")).not.toContain("SOCIALCRAWL_API_KEY");
+    expect(loadConfig().serpApiKey).toBeNull();
+    expect(readFileSync(envFile, "utf8")).not.toContain("SERPAPI_API_KEY");
     expect(readFileSync(envFile, "utf8")).toContain("MODEL_NAME=keep-me");
+  });
+
+  it("rejects the removed SocialCrawl setting", async () => {
+    const res = await POST(configRequest({ socialCrawlApiKey: "legacy" }));
+    expect(res.status).toBe(422);
   });
 });

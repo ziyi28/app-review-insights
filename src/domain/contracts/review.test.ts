@@ -15,7 +15,12 @@ describe("review contracts", () => {
     expect(raw.rating).toBe(5);
   });
 
-  it("accepts the SocialCrawl app-store source value", () => {
+  it("accepts the SerpApi Apple Reviews source value", () => {
+    expect(ReviewSourceSchema.parse("serpapi-apple-reviews")).toBe("serpapi-apple-reviews");
+  });
+
+  // Legacy cached replay compatibility only; not an active source.
+  it("accepts the SocialCrawl app-store source value for legacy replay", () => {
     expect(ReviewSourceSchema.parse("socialcrawl-app-store")).toBe("socialcrawl-app-store");
   });
 
