@@ -50,10 +50,32 @@ const SUFFICIENT_FINDING: Finding = {
   limitations: [],
 };
 
+const STRONG_SUFFICIENT_FINDING: Finding = {
+  ...SUFFICIENT_FINDING,
+  id: "finding-3",
+  supportingReviewIds: Array.from({ length: 40 }, (_, i) => `s${i}`),
+  supportingSampleCount: 40,
+  confidence: { level: "high", method: "deterministic-v1", reasons: [] },
+  evidenceSufficiency: {
+    status: "sufficient",
+    corpusReviewCount: 100,
+    supportRatio: 0.4,
+    reasons: [],
+  },
+};
+
+const PLANNING_FACTORS = {
+  severity: "high",
+  userImpact: "high",
+  implementationScope: "medium",
+  dependencyRequirementIds: [] as string[],
+  rationale: "Supported user impact and bounded implementation scope",
+};
+
 const PLANNING_RESPONSE = {
   title: "Release plan",
   overview: "Address pricing complaints",
-  versions: [{ id: "ver-1", name: "1.0.0", summary: "Pricing", requirementIds: ["req-1"] }],
+  versions: [{ id: "ver-1", name: "1.0.0", summary: "Pricing", rationale: "Ships the pricing fixes first", requirementIds: ["req-1"] }],
   requirements: [
     {
       id: "req-1",
@@ -63,6 +85,7 @@ const PLANNING_RESPONSE = {
       priority: "P1",
       acceptanceCriteria: ["annual plan is selectable"],
       versionId: "ver-1",
+      planningFactors: PLANNING_FACTORS,
     },
   ],
   assumptions: [{ id: "asm-1", text: "Annual plan converts better", basis: "inferred from pricing complaints" }],
@@ -71,7 +94,13 @@ const PLANNING_RESPONSE = {
 type PlanningResponse = {
   title: string;
   overview: string;
-  versions: { id: string; name: string; summary: string; requirementIds: string[] }[];
+  versions: {
+    id: string;
+    name: string;
+    summary: string;
+    rationale: string;
+    requirementIds: string[];
+  }[];
   requirements: {
     id: string;
     findingIds: string[];
@@ -80,6 +109,13 @@ type PlanningResponse = {
     priority: string;
     acceptanceCriteria: string[];
     versionId: string | null;
+    planningFactors?: {
+      severity: string;
+      userImpact: string;
+      implementationScope: string;
+      dependencyRequirementIds: string[];
+      rationale: string;
+    };
   }[];
   assumptions: { id: string; text: string; basis: string }[];
 };
@@ -123,6 +159,7 @@ describe("runPlanningStage", () => {
             priority: "P2",
             acceptanceCriteria: ["works"],
             versionId: null,
+            planningFactors: PLANNING_FACTORS,
           },
         ],
         assumptions: [],
@@ -144,7 +181,7 @@ describe("runPlanningStage", () => {
     const result = await runPlanningStage(context());
     expect(result.prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
     // The version no longer claims a requirement that does not point to it.
-    expect(result.prd.versions[0].requirementIds).not.toContain("req-1");
+    expect(result.prd.versions).toHaveLength(0);
     expect(result.warnings.some((w) => w.code === "INSUFFICIENT_EVIDENCE_PRIORITY_DOWNGRADED")).toBe(true);
   });
 
@@ -152,7 +189,7 @@ describe("runPlanningStage", () => {
     const planningResponse: PlanningResponse = {
       title: "Release plan",
       overview: "Address timer and pricing",
-      versions: [{ id: "ver-1", name: "1.0.0", summary: "Fixes", requirementIds: ["req-1"] }],
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "Fixes", rationale: "x", requirementIds: ["req-1"] }],
       requirements: [
         {
           id: "req-1",
@@ -163,6 +200,7 @@ describe("runPlanningStage", () => {
           priority: "P1",
           acceptanceCriteria: ["annual plan is selectable"],
           versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
         },
       ],
       assumptions: [],
@@ -172,29 +210,169 @@ describe("runPlanningStage", () => {
     expect(result.warnings.some((w) => w.code === "INSUFFICIENT_EVIDENCE_PRIORITY_DOWNGRADED")).toBe(false);
   });
 
-  it("keeps dropping a requirement with no valid finding links rather than downgrading it", async () => {
-    const ctx = context(
-      {},
-      {
-        title: "x",
-        overview: "y",
-        versions: [],
-        requirements: [
-          {
-            id: "req-1",
-            findingIds: ["ghost-finding"],
-            title: "Idea without evidence",
-            description: "no finding backs this",
-            priority: "P2",
-            acceptanceCriteria: ["works"],
-            versionId: null,
-          },
-        ],
-        assumptions: [],
-      },
-    );
-    const result = await runPlanningStage(ctx);
-    expect(result.prd.requirements).toHaveLength(0);
-    expect(result.warnings.some((w) => w.code === "UNSUPPORTED_REQUIREMENT")).toBe(true);
+  it("caps a model P0 to P1 when a factor is missing", async () => {
+    // finding-2 is sufficient but low-confidence; model requests P0.
+    const planningResponse: PlanningResponse = {
+      title: "Release plan",
+      overview: "Timer fixes",
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "Fixes", rationale: "x", requirementIds: ["req-1"] }],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-2"],
+          title: "Fix timer loss",
+          description: "Preserve timer state",
+          priority: "P0",
+          acceptanceCriteria: ["timer persists"],
+          versionId: "ver-1",
+          planningFactors: { ...PLANNING_FACTORS, severity: "high" },
+        },
+      ],
+      assumptions: [],
+    };
+    const result = await runPlanningStage(context({}, planningResponse, [SUFFICIENT_FINDING]));
+    expect(result.prd.requirements[0].priority).toBe("P1");
+    expect(result.warnings.some((w) => w.code === "PLANNING_PRIORITY_CAPPED")).toBe(true);
+  });
+
+  it("keeps P0 only when all four strong factors hold", async () => {
+    const planningResponse: PlanningResponse = {
+      title: "Release plan",
+      overview: "Critical fixes",
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "Fixes", rationale: "x", requirementIds: ["req-1"] }],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-3"],
+          title: "Fix crash on launch",
+          description: "App crashes for most users",
+          priority: "P0",
+          acceptanceCriteria: ["app launches"],
+          versionId: "ver-1",
+          planningFactors: { ...PLANNING_FACTORS, severity: "critical" },
+        },
+      ],
+      assumptions: [],
+    };
+    const result = await runPlanningStage(context({}, planningResponse, [STRONG_SUFFICIENT_FINDING]));
+    expect(result.prd.requirements[0].priority).toBe("P0");
+    expect(result.prd.requirements[0].planningFactors).toMatchObject({
+      severity: "critical",
+      evidenceStrength: "high",
+      confidence: "high",
+      userImpact: "high",
+    });
+  });
+
+  it("drops unknown and self dependencies with a warning", async () => {
+    const planningResponse: PlanningResponse = {
+      title: "Release plan",
+      overview: "x",
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "x", rationale: "x", requirementIds: ["req-1", "req-2"] }],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-3"],
+          title: "A",
+          description: "d",
+          priority: "P1",
+          acceptanceCriteria: ["a"],
+          versionId: "ver-1",
+          planningFactors: { ...PLANNING_FACTORS, dependencyRequirementIds: ["req-2", "req-1", "ghost"] },
+        },
+        {
+          id: "req-2",
+          findingIds: ["finding-3"],
+          title: "B",
+          description: "d",
+          priority: "P1",
+          acceptanceCriteria: ["b"],
+          versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
+        },
+      ],
+      assumptions: [],
+    };
+    const result = await runPlanningStage(context({}, planningResponse, [STRONG_SUFFICIENT_FINDING]));
+    expect(result.prd.requirements[0].planningFactors!.dependencyRequirementIds).toEqual(["req-2"]);
+    expect(result.warnings.some((w) => w.code === "PLANNING_DEPENDENCY_DROPPED")).toBe(true);
+  });
+
+  it("keeps one version from one version and two versions from two versions", async () => {
+    const one = await runPlanningStage(context());
+    expect(one.prd.versions).toHaveLength(0); // req-1 dropped (insufficient)
+
+    const two: PlanningResponse = {
+      title: "Release plan",
+      overview: "x",
+      versions: [
+        { id: "ver-1", name: "1.0.0", summary: "First", rationale: "x", requirementIds: ["req-1"] },
+        { id: "ver-2", name: "2.0.0", summary: "Second", rationale: "x", requirementIds: ["req-2"] },
+      ],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-3"],
+          title: "A",
+          description: "d",
+          priority: "P1",
+          acceptanceCriteria: ["a"],
+          versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
+        },
+        {
+          id: "req-2",
+          findingIds: ["finding-3"],
+          title: "B",
+          description: "d",
+          priority: "P1",
+          acceptanceCriteria: ["b"],
+          versionId: "ver-2",
+          planningFactors: PLANNING_FACTORS,
+        },
+      ],
+      assumptions: [],
+    };
+    const twoResult = await runPlanningStage(context({}, two, [STRONG_SUFFICIENT_FINDING]));
+    expect(twoResult.prd.versions.map((v) => v.id)).toEqual(["ver-1", "ver-2"]);
+    expect(twoResult.prd.requirements.map((r) => r.id)).toEqual(["req-1", "req-2"]);
+  });
+
+  it("deletes empty versions", async () => {
+    const empty: PlanningResponse = {
+      title: "Release plan",
+      overview: "x",
+      versions: [
+        { id: "ver-1", name: "1.0.0", summary: "Ships", rationale: "x", requirementIds: ["req-1"] },
+        { id: "ver-2", name: "2.0.0", summary: "Empty", rationale: "x", requirementIds: [] },
+      ],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-3"],
+          title: "A",
+          description: "d",
+          priority: "P1",
+          acceptanceCriteria: ["a"],
+          versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
+        },
+      ],
+      assumptions: [],
+    };
+    const result = await runPlanningStage(context({}, empty, [STRONG_SUFFICIENT_FINDING]));
+    expect(result.prd.versions.map((v) => v.id)).toEqual(["ver-1"]);
+  });
+
+  it("exposes versionPlan decisions that match the final requirements", async () => {
+    const result = await runPlanningStage(context());
+    expect(result.versionPlan.decisions).toHaveLength(result.prd.requirements.length);
+    for (const decision of result.versionPlan.decisions) {
+      const requirement = result.prd.requirements.find((r) => r.id === decision.requirementId);
+      expect(requirement).toBeDefined();
+      expect(decision.priority).toBe(requirement!.priority);
+      expect(decision.versionId).toBe(requirement!.versionId);
+      expect(decision.planningFactors).toBeDefined();
+    }
   });
 });

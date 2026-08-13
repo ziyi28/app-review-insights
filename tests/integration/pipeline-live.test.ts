@@ -89,9 +89,24 @@ async function buildScript(): Promise<string[]> {
     JSON.stringify({
       title: "Release plan",
       overview: "Improve workout experience",
-      versions: [{ id: "ver-1", name: "1.0.0", summary: "Content", requirementIds: ["req-1"] }],
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "Content", rationale: "Ships the variety improvements first", requirementIds: ["req-1"] }],
       requirements: [
-        { id: "req-1", findingIds: ["finding-1"], title: "Add workout variety", description: "more workouts", priority: "P1", acceptanceCriteria: ["new workouts available"], versionId: "ver-1" },
+        {
+          id: "req-1",
+          findingIds: ["finding-1"],
+          title: "Add workout variety",
+          description: "more workouts",
+          priority: "P1",
+          acceptanceCriteria: ["new workouts available"],
+          versionId: "ver-1",
+          planningFactors: {
+            severity: "high",
+            userImpact: "high",
+            implementationScope: "medium",
+            dependencyRequirementIds: [],
+            rationale: "Supported user impact and bounded implementation scope",
+          },
+        },
       ],
       assumptions: [],
     }),
@@ -428,7 +443,9 @@ describe("executeRun (live pipeline)", () => {
     };
     expect(prd.findings[0].evidenceSufficiency.status).toBe("insufficient");
     expect(prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
-    expect(prd.versions[0].requirementIds).not.toContain("req-1");
+    // The version that only claimed the downgraded requirement is deleted:
+    // an empty version cannot survive normalization.
+    expect(prd.versions).toHaveLength(0);
   });
 
   it("short-circuits with insufficient-evidence when no findings survive", async () => {

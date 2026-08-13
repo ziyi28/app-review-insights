@@ -140,10 +140,10 @@ function scriptedModelResponse(body: { messages?: { role: string; content: strin
   if (last.includes("acceptanceCriteria")) {
     return JSON.stringify({
       title: "Release plan", overview: "Improve experience",
-      versions: [{ id: "ver-1", name: "1.0.0", summary: "Content + pricing", requirementIds: ["req-1", "req-2"] }],
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "Content + pricing", rationale: "Ships the highest-impact improvements first", requirementIds: ["req-1", "req-2"] }],
       requirements: [
-        { id: "req-1", findingIds: ["finding-1"], title: "Add workout variety", description: "more workouts", priority: "P1", acceptanceCriteria: ["new workouts listed"], versionId: "ver-1" },
-        { id: "req-2", findingIds: ["finding-2"], title: "Offer annual plan", description: "cheaper option", priority: "P1", acceptanceCriteria: ["annual plan selectable"], versionId: "ver-1" },
+        { id: "req-1", findingIds: ["finding-1"], title: "Add workout variety", description: "more workouts", priority: "P1", acceptanceCriteria: ["new workouts listed"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "medium", dependencyRequirementIds: [], rationale: "Supported user impact and bounded implementation scope" } },
+        { id: "req-2", findingIds: ["finding-2"], title: "Offer annual plan", description: "cheaper option", priority: "P1", acceptanceCriteria: ["annual plan selectable"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact with small implementation scope" } },
       ],
       assumptions: [],
     });
