@@ -11,11 +11,23 @@ import { StageRail } from "./stage-rail";
 import { EventDrawer } from "./event-drawer";
 import { LiveProgress } from "./live-progress";
 import { SettingsPanel } from "./settings-panel";
+import { HistoryPanel } from "./history-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
 import { ProvenanceBadge } from "./provenance-badge";
 
 type Tab = "overview" | "raw" | "cleaned" | "topics" | "findings" | "plan" | "tests" | "traceability";
+
+// Stage order for auto-advancing the tab as artifacts land. When a run is in
+// flight and the user has not taken over by clicking a tab, the UI follows the
+// newest artifact to its tab so results appear without manual clicks.
+const AUTO_ADVANCE_ORDER: { key: keyof ArtifactCache; tab: Tab }[] = [
+  { key: "topics", tab: "topics" },
+  { key: "findings", tab: "findings" },
+  { key: "prd", tab: "plan" },
+  { key: "tests", tab: "tests" },
+  { key: "traceability", tab: "traceability" },
+];
 
 const TABS: { id: Tab; labelKey: keyof Dictionary }[] = [
   { id: "overview", labelKey: "overview" },
@@ -50,9 +62,16 @@ export function Workbench() {
   useEffect(() => {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
-  const { events, running, error, droppedEvents, start, reset } = useRunStream();
+  const { events, running, error, droppedEvents, start, reset, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  // Auto-advance bookkeeping: which artifact keys we already jumped to, and
+  // whether the user has manually chosen a tab (which stops auto-advancing for
+  // the rest of the run).
+  const autoJumpedKeys = useRef<Set<keyof ArtifactCache>>(new Set());
+  const userNavigated = useRef(false);
 
   const runId = useMemo(() => events.find((e) => e.type === "run.accepted")?.runId ?? null, [events]);
 
@@ -108,6 +127,8 @@ export function Workbench() {
     loadedArtifacts.current.clear();
     runTerminatedRef.current = false;
     flushedAfterTerminationRef.current = false;
+    autoJumpedKeys.current.clear();
+    userNavigated.current = false;
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -164,6 +185,20 @@ export function Workbench() {
     }
   }, [events]);
 
+  // Auto-advance the active tab to the newest artifact as it lands, so a live
+  // run shows results without manual clicking. Stops the moment the user picks
+  // a tab themselves (userNavigated) or once a key has already been followed.
+  useEffect(() => {
+    if (userNavigated.current) return;
+    for (const { key, tab: target } of AUTO_ADVANCE_ORDER) {
+      if (cache[key] !== undefined && !autoJumpedKeys.current.has(key)) {
+        autoJumpedKeys.current.add(key);
+        setTab(target);
+        break;
+      }
+    }
+  }, [cache]);
+
   const cleanedReviews = useMemo(() => {
     const prepared = cache.cleaned as { reviews?: NormalizedReview[] } | undefined;
     if (!prepared?.reviews) return [] as NormalizedReview[];
@@ -197,6 +232,8 @@ export function Workbench() {
     seenRunId.current = null;
     setCache({ runId: null });
     setTab("overview");
+    autoJumpedKeys.current.clear();
+    userNavigated.current = false;
   };
 
   return (
@@ -207,12 +244,26 @@ export function Workbench() {
         <span style={{ flex: 1 }} />
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
         <button onClick={handleNewRun}>{t.newRun}</button>
+        <button onClick={() => setHistoryOpen(true)}>{t.history}</button>
         <button onClick={() => setSettingsOpen(true)}>{t.settings}</button>
         <select value={uiLocale} onChange={(e) => setUiLocale(e.target.value as Locale)} aria-label={t.language}>
           <option value="en">English</option>
           <option value="zh-CN">中文</option>
         </select>
         <SettingsPanel t={t} open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+        <HistoryPanel
+          t={t}
+          open={historyOpen}
+          onClose={() => setHistoryOpen(false)}
+          onView={(runId) => {
+            setHistoryOpen(false);
+            void loadHistory(runId);
+          }}
+          onReplay={(runId) => {
+            setHistoryOpen(false);
+            void start({ protocolVersion: "1", mode: "cached-replay", sourceRunId: runId });
+          }}
+        />
       </header>
 
       {/* Left: stage rail */}
@@ -243,7 +294,10 @@ export function Workbench() {
               {TABS.map((tabDef) => (
                 <button
                   key={tabDef.id}
-                  onClick={() => setTab(tabDef.id)}
+                  onClick={() => {
+                    userNavigated.current = true;
+                    setTab(tabDef.id);
+                  }}
                   style={{ padding: "6px 12px", borderRadius: "6px", border: tab === tabDef.id ? "1px solid var(--accent)" : "1px solid var(--border)", background: tab === tabDef.id ? "var(--bg-elevated)" : "transparent" }}
                 >
                   {t[tabDef.labelKey]}

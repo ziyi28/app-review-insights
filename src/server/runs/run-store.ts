@@ -26,6 +26,10 @@ export type RunManifest = {
   executionMode: "live" | "import" | "cached-replay";
   createdAt: string;
   updatedAt: string;
+  /** The analysis goal the user entered; persisted so the history list can
+   *  show what each run was about. Optional because pre-existing manifests
+   *  predate this field. */
+  goal?: string;
   stages: Record<string, { status: string; startedAt?: string; finishedAt?: string; attempt?: number }>;
   artifacts: Record<string, { attempt: number; file: string }>;
   limitations: { code: string; message: string }[];
