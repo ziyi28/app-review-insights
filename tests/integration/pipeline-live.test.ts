@@ -141,6 +141,8 @@ describe("executeRun (live pipeline)", () => {
     const manifest = await store.readManifest(runId);
     expect(manifest.status).toBe("completed");
     expect(manifest.canReplay).toBe(true);
+    // The analysis goal is persisted so the history list can show it.
+    expect(manifest.goal).toBe("Understand why users love it");
 
     const prd = (await store.readArtifact(runId, "prd", 1)) as { requirements: unknown[] };
     expect(prd.requirements).toHaveLength(1);
