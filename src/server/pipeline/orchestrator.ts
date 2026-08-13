@@ -148,9 +148,13 @@ export async function executeRun(
       canReplay: false,
     });
 
-    // Source
+    // Source. The collect phase can take tens of seconds (Apple RSS pages are
+    // fetched ≥500ms apart), so announce it — the UI has nothing else to show
+    // until the first model stage (scope) starts.
     await startStage("source");
+    await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: deps.source.kind === "apple-rss" ? "collecting app reviews…" : "parsing imported reviews…" } });
     const source = await collectSource(deps.source, deps);
+    await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: `collected ${source.rawReviews.length} reviews` } });
     limitations.push(...source.limitations);
     for (const l of source.limitations) {
       await publisher.publish({ type: "limitation.reported", runId, stage: "source", data: l });
@@ -167,11 +171,13 @@ export async function executeRun(
 
     // Prepare
     await startStage("prepare");
+    await publisher.publish({ type: "stage.progress", runId, stage: "prepare", data: { message: "cleaning and normalizing reviews…" } });
     const prepared =
       deps.source.kind === "apple-rss"
         ? prepareReviews({ kind: "apple-rss", reviews: source.rawReviews, rawRefs: source.rawRefs, limitations: source.limitations })
         : prepareReviews({ kind: "import", parse: deps.source.parse });
     reviews = prepared.reviews;
+    await publisher.publish({ type: "stage.progress", runId, stage: "prepare", data: { message: `prepared ${reviews.length} reviews for analysis` } });
     limitations.push(...prepared.limitations);
     await publishArtifact("cleaned-reviews", 1, prepared);
     await endStage("prepare");
