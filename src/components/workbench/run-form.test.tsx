@@ -8,7 +8,7 @@ const t = getDictionary("en");
 
 function previewSummary(
   overrides: Partial<
-    Record<"liveCount" | "stableCount" | "stableAvailable" | "provider" | "cached" | "creditsUsed", number | boolean | string | null> & {
+    Record<"liveCount" | "stableCount" | "stableAvailable" | "provider" | "searchCount", number | boolean | string | null> & {
       limitations?: { code: string; message: string }[];
     }
   > = {},
@@ -16,9 +16,8 @@ function previewSummary(
   const liveCount = (overrides.liveCount ?? 2) as number;
   const stableCount = (overrides.stableCount ?? 0) as number;
   const stableAvailable = (overrides.stableAvailable ?? stableCount > 0) as boolean;
-  const provider = (overrides.provider ?? "apple-rss") as "socialcrawl" | "apple-rss";
-  const cached = (overrides.cached ?? null) as boolean | null;
-  const creditsUsed = (overrides.creditsUsed ?? null) as number | null;
+  const provider = (overrides.provider ?? "apple-rss") as "serpapi" | "apple-rss";
+  const searchCount = (overrides.searchCount ?? (provider === "serpapi" ? 1 : 0)) as number;
   return {
     protocolVersion: "1",
     previewId: "preview-test",
@@ -28,17 +27,17 @@ function previewSummary(
     expiresAt: "2026-08-12T00:30:00.000Z",
     live: {
       provider,
-      forcedRefresh: provider === "socialcrawl",
-      cached,
+      forcedRefresh: provider === "serpapi",
+      cached: false,
       collectedAt: "2026-08-12T00:00:00.000Z",
       status: liveCount > 0 ? "complete" : "suspect-empty",
       reviewCount: liveCount,
-      pageCount: provider === "socialcrawl" ? 0 : 1,
+      pageCount: provider === "serpapi" ? 1 : 1,
       requestCount: 1,
       dateRange: { earliest: null, latest: null },
       limitations: (overrides.limitations as { code: string; message: string }[] | undefined) ?? [],
-      creditsUsed,
-      requestId: provider === "socialcrawl" ? "req_test" : null,
+      searchCount,
+      searchId: provider === "serpapi" ? "search_page_1" : null,
     },
     stable: {
       available: stableAvailable,
@@ -49,11 +48,6 @@ function previewSummary(
     },
     recommendedSelection: stableCount > liveCount ? "stable" : liveCount > 0 ? "live" : stableAvailable ? "stable" : null,
   };
-}
-
-/** Builds a limitation entry for preview summaries. */
-function limit(code: string): { code: string; message: string } {
-  return { code, message: code };
 }
 
 function stubFetch(preview: unknown) {
@@ -185,8 +179,8 @@ describe("RunForm", () => {
     expect(screen.queryByText(t.goalTooShort)).not.toBeInTheDocument();
   });
 
-  it("shows a forced-fresh 500-review SocialCrawl sample", async () => {
-    stubFetch(previewSummary({ provider: "socialcrawl", liveCount: 500, cached: false, creditsUsed: 5 }));
+  it("shows forced-fresh SerpApi reviews and the number of searches", async () => {
+    stubFetch(previewSummary({ provider: "serpapi", liveCount: 500, searchCount: 2 }));
     const user = userEvent.setup();
     const onStart = vi.fn();
     render(<RunForm t={t} onStart={onStart} />);
@@ -194,25 +188,26 @@ describe("RunForm", () => {
     await user.click(screen.getByRole("button", { name: t.checkSample }));
 
     expect(screen.getByText(`500 ${t.freshReviews}`)).toBeVisible();
-    expect(screen.getByText(t.socialCrawlFresh)).toBeVisible();
-    expect(screen.getByText(`${t.creditsUsed}: 5`)).toBeVisible();
+    expect(screen.getByText(t.serpApiFresh)).toBeVisible();
+    expect(screen.getByText(`${t.searchesUsed}: 2`)).toBeVisible();
     expect(screen.getByRole("button", { name: t.analyzeFresh })).toBeEnabled();
   });
 
-  it("labels RSS as a fallback and never as SocialCrawl fresh data", async () => {
-    stubFetch(previewSummary({ provider: "apple-rss", liveCount: 50, limitations: [limit("SOCIALCRAWL_CREDITS_EXHAUSTED")] }));
+  it("shows the actual sanitized fallback reason instead of a fixed credits message", async () => {
+    stubFetch(previewSummary({ provider: "apple-rss", liveCount: 50, limitations: [{ code: "SERPAPI_UPSTREAM_FAILED", message: "SerpApi request failed (HTTP 503)" }] }));
     const user = userEvent.setup();
     render(<RunForm t={t} onStart={vi.fn()} />);
     await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");
     await user.click(screen.getByRole("button", { name: t.checkSample }));
 
     expect(await screen.findByText(t.appleRssFallback)).toBeVisible();
-    expect(screen.getByText(/SocialCrawl credits unavailable/)).toBeInTheDocument();
-    expect(screen.queryByText(t.socialCrawlFresh)).not.toBeInTheDocument();
+    expect(screen.getByText(/HTTP 503/)).toBeVisible();
+    expect(screen.queryByText(/credits unavailable/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(t.serpApiFresh)).not.toBeInTheDocument();
   });
 
   it("keeps local history separate from the live provider", async () => {
-    stubFetch(previewSummary({ provider: "socialcrawl", liveCount: 50, stableCount: 500, stableAvailable: true }));
+    stubFetch(previewSummary({ provider: "serpapi", liveCount: 50, stableCount: 500, stableAvailable: true }));
     const user = userEvent.setup();
     render(<RunForm t={t} onStart={vi.fn()} />);
     await user.type(screen.getByLabelText(t.goal), "了解用户对付费订阅的主要痛点");

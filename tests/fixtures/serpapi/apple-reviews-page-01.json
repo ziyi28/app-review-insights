@@ -1,0 +1,46 @@
+{
+  "search_metadata": {
+    "id": "search_page_1",
+    "status": "Success",
+    "created_at": "2026-08-13 12:00:00 UTC",
+    "processed_at": "2026-08-13 12:00:01 UTC"
+  },
+  "search_parameters": {
+    "engine": "apple_reviews",
+    "product_id": "839285684",
+    "country": "us",
+    "sort": "mostrecent",
+    "page": "1"
+  },
+  "search_information": {
+    "total_page_count": 2,
+    "reviews_results_state": "Results for exact ID number.",
+    "results_count": 2
+  },
+  "reviews": [
+    {
+      "position": 1,
+      "id": "14412891541",
+      "title": "amazing!!!",
+      "text": "really good and easy to follow",
+      "rating": 4,
+      "review_date": "Aug 11, 2026",
+      "reviewed_version": "Version 8.4.29",
+      "author": { "name": "reviewer-one", "author_id": "1001" }
+    },
+    {
+      "position": 2,
+      "id": "14411802642",
+      "title": "Timer issue",
+      "text": "The timer resets after backgrounding.",
+      "rating": 1,
+      "review_date": "10 August 2026",
+      "reviewed_version": "Version 8.5.0",
+      "author": { "name": "reviewer-two", "author_id": "1002" }
+    }
+  ],
+  "serpapi_pagination": {
+    "current": "https://serpapi.com/search.json?engine=apple_reviews&page=1&product_id=839285684",
+    "next": "https://serpapi.com/search.json?engine=apple_reviews&page=2&product_id=839285684"
+  }
+}

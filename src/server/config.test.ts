@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, writeFileSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSocialCrawlConfig, resetRuntimeSocialCrawlConfig, isSocialCrawlConfigured, readEnvLocal, persistEnvLocal, envLocalPath } from "./config";
+import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSerpApiConfig, resetRuntimeSerpApiConfig, isSerpApiConfigured, readEnvLocal, persistEnvLocal, envLocalPath } from "./config";
 
 const saved = { ...process.env };
 
@@ -22,17 +22,17 @@ beforeEach(() => {
   delete process.env.APPLE_RSS_PAGE_DELAY_MS;
   delete process.env.REPLAY_EVENT_DELAY_MS;
   delete process.env.ENV_LOCAL_FILE;
-  delete process.env.SOCIALCRAWL_API_KEY;
-  delete process.env.SOCIALCRAWL_BASE_URL;
-  delete process.env.SOCIALCRAWL_TIMEOUT_MS;
+  delete process.env.SERPAPI_API_KEY;
+  delete process.env.SERPAPI_BASE_URL;
+  delete process.env.SERPAPI_TIMEOUT_MS;
   // Reset the module-level runtime overrides so state never leaks between cases.
   resetRuntimeModelConfig();
-  resetRuntimeSocialCrawlConfig();
+  resetRuntimeSerpApiConfig();
 });
 
 afterEach(() => {
   process.env = saved;
-  resetRuntimeSocialCrawlConfig();
+  resetRuntimeSerpApiConfig();
 });
 
 describe("loadConfig", () => {
@@ -154,37 +154,42 @@ describe("runtime model overrides", () => {
   });
 });
 
-describe("SocialCrawl configuration", () => {
-  it("keeps SocialCrawl server-only and disabled without a key", () => {
+describe("SerpApi configuration", () => {
+  it("keeps SerpApi server-only and disabled without a key", () => {
     const cfg = loadConfig();
-    expect(cfg.socialCrawlApiKey).toBeNull();
-    expect(cfg.socialCrawlBaseUrl).toBe("https://www.socialcrawl.dev");
-    expect(cfg.socialCrawlTimeoutMs).toBe(60_000);
-    expect(isSocialCrawlConfigured(cfg)).toBe(false);
+    expect(cfg.serpApiKey).toBeNull();
+    expect(cfg.serpApiBaseUrl).toBe("https://serpapi.com");
+    expect(cfg.serpApiTimeoutMs).toBe(60_000);
+    expect(isSerpApiConfigured(cfg)).toBe(false);
   });
 
-  it("loads a trimmed SocialCrawl key and allows only a loopback test override", () => {
-    process.env.SOCIALCRAWL_API_KEY = " sc_test_only ";
-    process.env.SOCIALCRAWL_BASE_URL = "http://127.0.0.1:39876";
-    process.env.SOCIALCRAWL_TIMEOUT_MS = "90000";
+  it("loads a trimmed SerpApi key and allows only a loopback test override", () => {
+    process.env.SERPAPI_API_KEY = " serp_test_only ";
+    process.env.SERPAPI_BASE_URL = "http://127.0.0.1:39876";
     const cfg = loadConfig();
-    expect(cfg.socialCrawlApiKey).toBe("sc_test_only");
-    expect(cfg.socialCrawlBaseUrl).toBe("http://127.0.0.1:39876");
-    expect(cfg.socialCrawlTimeoutMs).toBe(90_000);
-    expect(isSocialCrawlConfigured(cfg)).toBe(true);
+    expect(cfg.serpApiKey).toBe("serp_test_only");
+    expect(cfg.serpApiBaseUrl).toBe("http://127.0.0.1:39876");
+    expect(isSerpApiConfigured(cfg)).toBe(true);
   });
 
-  it("rejects a non-official remote SocialCrawl base URL", () => {
-    process.env.SOCIALCRAWL_BASE_URL = "https://collector.example.com";
-    expect(loadConfig().socialCrawlBaseUrl).toBe("https://www.socialcrawl.dev");
+  it("rejects a non-official remote SerpApi base URL", () => {
+    process.env.SERPAPI_BASE_URL = "https://collector.example.com";
+    expect(loadConfig().serpApiBaseUrl).toBe("https://serpapi.com");
   });
 
-  it("applies and clears a SocialCrawl runtime key without restart", () => {
-    process.env.SOCIALCRAWL_API_KEY = "sc_from_env";
-    setRuntimeSocialCrawlConfig({ apiKey: "sc_from_page" });
-    expect(loadConfig().socialCrawlApiKey).toBe("sc_from_page");
-    setRuntimeSocialCrawlConfig({ apiKey: null });
-    expect(loadConfig().socialCrawlApiKey).toBeNull();
+  it("applies and clears a SerpApi runtime key without restart", () => {
+    process.env.SERPAPI_API_KEY = "serp_from_env";
+    setRuntimeSerpApiConfig({ apiKey: "serp_from_page" });
+    expect(loadConfig().serpApiKey).toBe("serp_from_page");
+    setRuntimeSerpApiConfig({ apiKey: null });
+    expect(loadConfig().serpApiKey).toBeNull();
+  });
+
+  it("ignores legacy SocialCrawl environment variables", () => {
+    process.env.SOCIALCRAWL_API_KEY = "legacy-secret";
+    process.env.SOCIALCRAWL_BASE_URL = "https://www.socialcrawl.dev";
+    process.env.SOCIALCRAWL_TIMEOUT_MS = "60000";
+    expect(loadConfig().serpApiKey).toBeNull();
   });
 });
 

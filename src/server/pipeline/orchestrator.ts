@@ -26,10 +26,16 @@ export type ImportParseShape = {
   evidence: { fileName: string; mediaType: "application/json" | "text/csv"; byteLength: number; sha256: string; schemaVersion: string | null };
 };
 
-/** Provider-aware source summary persisted as the `source-evidence` artifact. */
+/**
+ * Provider-aware source summary persisted as the `source-evidence` artifact.
+ * `provider: "socialcrawl"` is legacy read-only compatibility for old cached
+ * artifacts; it is never produced by new previews or runs. `searchCount` and
+ * `searchId` are the live SerpApi search cost/provenance; `creditsUsed` and
+ * `requestId` remain only as optional legacy fields when reading old artifacts.
+ */
 export type AppStoreReviewSourceSummary = {
   kind: "app-store-reviews";
-  provider: "socialcrawl" | "apple-rss";
+  provider: "serpapi" | "apple-rss" | "socialcrawl";
   appId: string;
   storefront: "US";
   status: "complete" | "suspect-empty" | "partial" | "failed";
@@ -41,8 +47,10 @@ export type AppStoreReviewSourceSummary = {
   forcedRefresh: boolean;
   providerCached: boolean | null;
   requestCount: number;
-  requestId: string | null;
-  creditsUsed: number | null;
+  searchCount: number;
+  searchId: string | null;
+  creditsUsed?: number | null;
+  requestId?: string | null;
 };
 
 /** A pre-collected live dataset taken from a preview snapshot. */

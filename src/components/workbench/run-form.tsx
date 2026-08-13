@@ -16,7 +16,7 @@ type SourcePreviewSummary = {
   createdAt: string;
   expiresAt: string;
   live: {
-    provider: "socialcrawl" | "apple-rss";
+    provider: "serpapi" | "apple-rss";
     forcedRefresh: boolean;
     cached: boolean | null;
     collectedAt: string;
@@ -26,8 +26,8 @@ type SourcePreviewSummary = {
     requestCount: number;
     dateRange: { earliest: string | null; latest: string | null };
     limitations: { code: string; message: string }[];
-    creditsUsed: number | null;
-    requestId: string | null;
+    searchCount: number;
+    searchId: string | null;
   };
   stable: {
     available: boolean;
@@ -156,19 +156,19 @@ export function RunForm({ t, onStart }: RunFormProps) {
   const liveDisabled = preview !== null && preview !== "loading" && preview.live.reviewCount === 0;
   const stableDisabled = preview !== null && preview !== "loading" && !preview.stable.available;
 
-  // Honest provider label: forced-fresh SocialCrawl, provider-cached
-  // SocialCrawl, or an explicit Apple RSS fallback.
+  // Honest provider label: forced-fresh SerpApi, or an explicit Apple RSS
+  // fallback.
   const providerLabel =
-    preview !== null && preview !== "loading" && preview.live.provider === "socialcrawl"
-      ? preview.live.cached
-        ? t.socialCrawlCached
-        : t.socialCrawlFresh
+    preview !== null && preview !== "loading" && preview.live.provider === "serpapi"
+      ? t.serpApiFresh
       : t.appleRssFallback;
 
-  // Map stable error codes to user-facing text without echoing upstream bodies.
+  // The sanitized server-side fallback reason: the first SERPAPI_* limitation's
+  // message (already stripped of any raw upstream text). Never a fixed credits
+  // message.
   const fallbackReason =
     preview !== null && preview !== "loading"
-      ? preview.live.limitations.find((l) => l.code.startsWith("SOCIALCRAWL_"))
+      ? preview.live.limitations.find((l) => l.code.startsWith("SERPAPI_"))
       : undefined;
 
   return (
@@ -210,11 +210,11 @@ export function RunForm({ t, onStart }: RunFormProps) {
                 {preview.live.collectedAt ? (
                   <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>{new Date(preview.live.collectedAt).toLocaleString()}</p>
                 ) : null}
-                {preview.live.provider === "socialcrawl" && preview.live.creditsUsed !== null && typeof preview.live.creditsUsed === "number" ? (
-                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>{t.creditsUsed}: {preview.live.creditsUsed}</p>
+                {preview.live.provider === "serpapi" && preview.live.searchCount > 0 ? (
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>{t.searchesUsed}: {preview.live.searchCount}</p>
                 ) : null}
                 {fallbackReason ? (
-                  <p style={{ fontSize: "12px", color: "var(--warn)", margin: "2px 0" }}>{t.appleRssFallback} · SocialCrawl credits unavailable</p>
+                  <p style={{ fontSize: "12px", color: "var(--warn)", margin: "2px 0" }}>{fallbackReason.message}</p>
                 ) : null}
                 <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "4px 0" }}>{t.freshnessCaveat}</p>
                 {liveDisabled ? (

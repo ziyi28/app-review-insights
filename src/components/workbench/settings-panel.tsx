@@ -14,22 +14,22 @@ type ConfigState = {
   modelName: string;
   jsonMode: "prompt" | "json_object";
   apiKeyConfigured: boolean;
-  socialCrawlApiKeyConfigured: boolean;
+  serpApiKeyConfigured: boolean;
 };
 
 /**
  * Modal settings panel for configuring the model connection and the server-only
- * SocialCrawl key from the UI. On open it loads the current non-secret status
+ * SerpApi key from the UI. On open it loads the current non-secret status
  * from GET /api/config; saving POSTs the changed fields to /api/config, which
  * applies the override in-process and persists it to the git-ignored
  * `.env.local`. Neither API key is ever returned to the client — the form only
- * shows a "configured" flag and a "clear" action, and the SocialCrawl input is
+ * shows a "configured" flag and a "clear" action, and the SerpApi input is
  * always blank (no prefilled secret, no reveal).
  */
 export function SettingsPanel({ t, open, onClose }: SettingsPanelProps) {
-  const [config, setConfig] = useState<ConfigState>({ modelBaseUrl: "", modelName: "", jsonMode: "prompt", apiKeyConfigured: false, socialCrawlApiKeyConfigured: false });
+  const [config, setConfig] = useState<ConfigState>({ modelBaseUrl: "", modelName: "", jsonMode: "prompt", apiKeyConfigured: false, serpApiKeyConfigured: false });
   const [apiKey, setApiKey] = useState("");
-  const [socialCrawlApiKey, setSocialCrawlApiKey] = useState("");
+  const [serpApiKey, setSerpApiKey] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,7 +43,7 @@ export function SettingsPanel({ t, open, onClose }: SettingsPanelProps) {
       setError(null);
       setSaved(false);
       setApiKey("");
-      setSocialCrawlApiKey("");
+      setSerpApiKey("");
       try {
         const res = await fetch("/api/config", { cache: "no-store" });
         const json = await res.json();
@@ -53,7 +53,7 @@ export function SettingsPanel({ t, open, onClose }: SettingsPanelProps) {
           modelName: (json.modelName as string) ?? "",
           jsonMode: json.jsonMode === "json_object" ? "json_object" : "prompt",
           apiKeyConfigured: Boolean(json.modelApiKeyConfigured),
-          socialCrawlApiKeyConfigured: Boolean(json.socialCrawlApiKeyConfigured),
+          serpApiKeyConfigured: Boolean(json.serpApiKeyConfigured),
         });
       } catch {
         if (!cancelled) setError(t.configApplyError);
@@ -78,8 +78,8 @@ export function SettingsPanel({ t, open, onClose }: SettingsPanelProps) {
     if (apiKey.trim()) {
       body.modelApiKey = apiKey.trim();
     }
-    if (socialCrawlApiKey.trim()) {
-      body.socialCrawlApiKey = socialCrawlApiKey.trim();
+    if (serpApiKey.trim()) {
+      body.serpApiKey = serpApiKey.trim();
     }
     try {
       const res = await fetch("/api/config", {
@@ -90,14 +90,14 @@ export function SettingsPanel({ t, open, onClose }: SettingsPanelProps) {
       if (!res.ok) {
         throw new Error(t.configApplyError);
       }
-      const json = (await res.json()) as { socialCrawlApiKeyConfigured?: boolean };
+      const json = (await res.json()) as { serpApiKeyConfigured?: boolean };
       setSaved(true);
       setApiKey("");
-      setSocialCrawlApiKey("");
+      setSerpApiKey("");
       setConfig((c) => ({
         ...c,
         apiKeyConfigured: Boolean(apiKey.trim()) || c.apiKeyConfigured,
-        socialCrawlApiKeyConfigured: json.socialCrawlApiKeyConfigured ?? c.socialCrawlApiKeyConfigured,
+        serpApiKeyConfigured: json.serpApiKeyConfigured ?? c.serpApiKeyConfigured,
       }));
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -106,19 +106,19 @@ export function SettingsPanel({ t, open, onClose }: SettingsPanelProps) {
     }
   };
 
-  const handleClearSocialCrawlKey = async () => {
+  const handleClearSerpApiKey = async () => {
     setSaving(true);
     setError(null);
     try {
       const res = await fetch("/api/config", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ socialCrawlApiKey: null }),
+        body: JSON.stringify({ serpApiKey: null }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const json = (await res.json()) as { socialCrawlApiKeyConfigured?: boolean };
-      setSocialCrawlApiKey("");
-      setConfig((c) => ({ ...c, socialCrawlApiKeyConfigured: Boolean(json.socialCrawlApiKeyConfigured) }));
+      const json = (await res.json()) as { serpApiKeyConfigured?: boolean };
+      setSerpApiKey("");
+      setConfig((c) => ({ ...c, serpApiKeyConfigured: Boolean(json.serpApiKeyConfigured) }));
       setSaved(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -191,26 +191,26 @@ export function SettingsPanel({ t, open, onClose }: SettingsPanelProps) {
         </select>
 
         <h4 style={{ margin: "12px 0 0" }}>{t.dataSourceSettings}</h4>
-        <label htmlFor="settings-socialcrawl-api-key">{t.socialCrawlApiKey}</label>
-        <p id="settings-socialcrawl-api-key-hint" style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>{t.socialCrawlApiKeyHint}</p>
+        <label htmlFor="settings-serpapi-api-key">{t.serpApiKey}</label>
+        <p id="settings-serpapi-api-key-hint" style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>{t.serpApiKeyHint}</p>
         <div style={{ display: "flex", gap: "6px" }}>
           <input
-            id="settings-socialcrawl-api-key"
-            aria-describedby="settings-socialcrawl-api-key-hint"
+            id="settings-serpapi-api-key"
+            aria-describedby="settings-serpapi-api-key-hint"
             type="password"
             autoComplete="off"
-            value={socialCrawlApiKey}
-            onChange={(event) => setSocialCrawlApiKey(event.target.value)}
-            placeholder={config.socialCrawlApiKeyConfigured ? t.apiKeyPlaceholder : ""}
+            value={serpApiKey}
+            onChange={(event) => setSerpApiKey(event.target.value)}
+            placeholder={config.serpApiKeyConfigured ? t.apiKeyPlaceholder : ""}
             style={fieldStyle}
           />
-          {config.socialCrawlApiKeyConfigured ? (
-            <button type="button" onClick={() => handleClearSocialCrawlKey()} disabled={saving} style={{ flexShrink: 0 }}>
-              {t.socialCrawlApiKeyClear}
+          {config.serpApiKeyConfigured ? (
+            <button type="button" onClick={() => handleClearSerpApiKey()} disabled={saving} style={{ flexShrink: 0 }}>
+              {t.serpApiKeyClear}
             </button>
           ) : null}
         </div>
-        {config.socialCrawlApiKeyConfigured ? <span style={{ color: "var(--accent)", fontSize: "12px" }}>{t.socialCrawlApiKeyConfigured}</span> : null}
+        {config.serpApiKeyConfigured ? <span style={{ color: "var(--accent)", fontSize: "12px" }}>{t.serpApiKeyConfigured}</span> : null}
 
         {error ? <p style={{ color: "var(--danger)", margin: 0, fontSize: "13px" }}>{error}</p> : null}
         {saved ? <p style={{ color: "var(--accent)", margin: 0, fontSize: "13px" }}>{t.saved}</p> : null}

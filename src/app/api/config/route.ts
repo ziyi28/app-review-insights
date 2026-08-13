@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, setRuntimeSocialCrawlConfig, persistEnvLocal, isSocialCrawlConfigured, type RuntimeModelConfig } from "@/server/config";
+import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, setRuntimeSerpApiConfig, persistEnvLocal, isSerpApiConfigured, type RuntimeModelConfig } from "@/server/config";
 import { ConfigUpdateSchema } from "@/domain/contracts/config";
 
 export const runtime = "nodejs";
@@ -9,7 +9,7 @@ function configStatus(cfg: ReturnType<typeof loadConfig>) {
   return {
     modelConfigured: isModelConfigured(cfg),
     modelApiKeyConfigured: isModelApiKeyConfigured(cfg),
-    socialCrawlApiKeyConfigured: isSocialCrawlConfigured(cfg),
+    serpApiKeyConfigured: isSerpApiConfigured(cfg),
     modelName: cfg.modelName,
     modelBaseUrl: cfg.modelBaseUrl,
     jsonMode: cfg.modelJsonMode,
@@ -67,9 +67,9 @@ export async function POST(req: Request) {
   }
   setRuntimeModelConfig(runtime);
 
-  if (update.socialCrawlApiKey !== undefined) {
-    persistEnvLocal("SOCIALCRAWL_API_KEY", update.socialCrawlApiKey);
-    setRuntimeSocialCrawlConfig({ apiKey: update.socialCrawlApiKey });
+  if (update.serpApiKey !== undefined) {
+    persistEnvLocal("SERPAPI_API_KEY", update.serpApiKey);
+    setRuntimeSerpApiConfig({ apiKey: update.serpApiKey });
   }
 
   return NextResponse.json(configStatus(loadConfig()), { headers: { "cache-control": "no-store" } });

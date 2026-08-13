@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { getUpstreamState, setSocialCrawlMode, resetCounters } from "./upstream-server";
+import { getUpstreamState, setSerpApiMode, resetCounters } from "./upstream-server";
 
 // A live preview first merges its collected reviews into the isolated cache,
 // so the stable sample card is usable in the very same response. Clicking
@@ -7,7 +7,7 @@ import { getUpstreamState, setSocialCrawlMode, resetCounters } from "./upstream-
 // local-history provenance without depending on another E2E file running
 // first.
 test("stable sample analysis uses the live-merged cache and reports local history", async ({ page }) => {
-  setSocialCrawlMode("live");
+  setSerpApiMode("live");
   resetCounters();
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /App Review Planner/i })).toBeVisible();
@@ -32,7 +32,7 @@ test("stable sample analysis uses the live-merged cache and reports local histor
   await expect(page.locator("footer").getByText(/run.completed/)).toBeVisible({ timeout: 20_000 });
 
   // Header badge shows the local-history source, never the fresh-fetch label.
-  await expect(page.getByText(/SocialCrawl \/ US App Store · Local history/i)).toBeVisible();
+  await expect(page.getByText(/SerpApi \/ US App Store · Local history/i)).toBeVisible();
 
   // Overview limitation reports LOCAL_HISTORY_SELECTED (scoped to the Overview
   // panel; the event log JSON also carries it).
@@ -40,31 +40,31 @@ test("stable sample analysis uses the live-merged cache and reports local histor
   const overviewLimitation = page.getByText(/LOCAL_HISTORY_SELECTED/i).first();
   await expect(overviewLimitation).toBeVisible({ timeout: 10_000 });
 
-  // The stable selection re-uses the frozen preview: no second SocialCrawl call.
-  expect(getUpstreamState().socialCrawlRequests).toBe(1);
+  // The stable selection re-uses the frozen preview: no second SerpApi call.
+  expect(getUpstreamState().serpApiRequests).toBe(1);
 
   // Traceability passes.
   await page.getByRole("button", { name: /Traceability/i }).click();
   await expect(page.getByText(/Completed/)).toBeVisible();
 });
 
-test("falls back to Apple RSS when SocialCrawl is out of credits", async ({ page }) => {
-  // The stub serves a 402 INSUFFICIENT_CREDITS envelope; the preview must fall
-  // back to RSS and label the live card as such, never as SocialCrawl fresh data.
+test("falls back to Apple RSS when SerpApi is rate-limited", async ({ page }) => {
+  // The stub serves a 429 quota envelope; the preview must fall back to RSS and
+  // label the live card as such, never as SerpApi fresh data.
   resetCounters();
-  setSocialCrawlMode("fallback");
+  setSerpApiMode("fallback");
   await page.goto("/");
   await page.getByLabel(/Analysis goal/i).fill("Understand why users love the app and what problems they have");
   const previewPromise = page.waitForResponse("**/api/source-previews");
   await page.getByRole("button", { name: /Check review sample/i }).click();
   expect((await previewPromise).status()).toBe(200);
 
-  // One SocialCrawl attempt happened, then RSS produced the sample.
+  // One SerpApi attempt happened, then RSS produced the sample.
   await expect(page.getByText(/Apple RSS fallback/i).first()).toBeVisible();
-  await expect(page.getByText(/SocialCrawl · fresh fetch/i)).toHaveCount(0);
+  await expect(page.getByText(/SerpApi · forced fresh/i)).toHaveCount(0);
 
   const state = getUpstreamState();
-  expect(state.socialCrawlRequests).toBe(1);
+  expect(state.serpApiRequests).toBe(1);
   // RSS may paginate (page 1 + empty page 2) so at least one request happened;
   // the important assertion is that RSS was actually used for the fallback.
   expect(state.rssRequests).toBeGreaterThanOrEqual(1);

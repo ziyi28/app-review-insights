@@ -91,10 +91,10 @@ export type Dictionary = {
   apiKeyClear: string;
   configApplyError: string;
   dataSourceSettings: string;
-  socialCrawlApiKey: string;
-  socialCrawlApiKeyHint: string;
-  socialCrawlApiKeyConfigured: string;
-  socialCrawlApiKeyClear: string;
+  serpApiKey: string;
+  serpApiKeyHint: string;
+  serpApiKeyConfigured: string;
+  serpApiKeyClear: string;
   checkSample: string;
   checkingSample: string;
   sampleCheckFailed: string;
@@ -117,15 +117,14 @@ export type Dictionary = {
   supportRatio: string;
   freshReviews: string;
   localHistoryReviews: string;
-  socialCrawlFresh: string;
-  socialCrawlCached: string;
+  serpApiFresh: string;
   appleRssFallback: string;
-  creditsUsed: string;
+  searchesUsed: string;
   analyzeFresh: string;
   analyzeHistory: string;
   freshnessCaveat: string;
-  sourceSocialCrawl: string;
-  sourceSocialCrawlHistory: string;
+  sourceSerpApi: string;
+  sourceSerpApiHistory: string;
   sourceRssFallback: string;
   sourceRssHistory: string;
   requirementId: string;
@@ -250,10 +249,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     apiKeyClear: "Clear key",
     configApplyError: "Failed to save settings",
     dataSourceSettings: "Data collection platform",
-    socialCrawlApiKey: "SocialCrawl API Key",
-    socialCrawlApiKeyHint: "Stored locally and used only by the server for live App Store reviews.",
-    socialCrawlApiKeyConfigured: "SocialCrawl configured",
-    socialCrawlApiKeyClear: "Clear SocialCrawl Key",
+    serpApiKey: "SerpApi API Key",
+    serpApiKeyHint: "Stored locally and used only by the server for forced-fresh live App Store reviews.",
+    serpApiKeyConfigured: "SerpApi configured",
+    serpApiKeyClear: "Clear SerpApi Key",
     checkSample: "Check review sample",
     checkingSample: "Checking review sample…",
     sampleCheckFailed: "Could not check the review sample.",
@@ -276,15 +275,14 @@ export const dictionaries: Record<Locale, Dictionary> = {
     supportRatio: "support ratio",
     freshReviews: "fresh reviews",
     localHistoryReviews: "local-history reviews",
-    socialCrawlFresh: "SocialCrawl · fresh fetch",
-    socialCrawlCached: "SocialCrawl · provider cache",
+    serpApiFresh: "SerpApi · forced fresh",
     appleRssFallback: "Apple RSS fallback",
-    creditsUsed: "Credits used",
+    searchesUsed: "SerpApi searches",
     analyzeFresh: "Analyze fresh sample",
     analyzeHistory: "Analyze local history",
     freshnessCaveat: "Fresh fetch requested; App Store publication may still be delayed.",
-    sourceSocialCrawl: "SocialCrawl / US App Store",
-    sourceSocialCrawlHistory: "SocialCrawl / US App Store · Local history",
+    sourceSerpApi: "SerpApi / US App Store",
+    sourceSerpApiHistory: "SerpApi / US App Store · Local history",
     sourceRssFallback: "Apple RSS fallback / US App Store",
     sourceRssHistory: "Apple RSS fallback / US App Store · Local history",
     requirementId: "Requirement",
@@ -407,10 +405,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     apiKeyClear: "清除 Key",
     configApplyError: "保存设置失败",
     dataSourceSettings: "数据采集平台",
-    socialCrawlApiKey: "SocialCrawl API Key",
-    socialCrawlApiKeyHint: "仅保存在本机，并由服务端用于实时采集 App Store 评论。",
-    socialCrawlApiKeyConfigured: "SocialCrawl 已配置",
-    socialCrawlApiKeyClear: "清除 SocialCrawl Key",
+    serpApiKey: "SerpApi API Key",
+    serpApiKeyHint: "仅保存在本机，并由服务端用于强制实时采集 App Store 评论。",
+    serpApiKeyConfigured: "SerpApi 已配置",
+    serpApiKeyClear: "清除 SerpApi Key",
     checkSample: "检查评论样本",
     checkingSample: "正在检查评论样本…",
     sampleCheckFailed: "无法检查评论样本。",
@@ -433,15 +431,14 @@ export const dictionaries: Record<Locale, Dictionary> = {
     supportRatio: "支持占比",
     freshReviews: "条最新采集评论",
     localHistoryReviews: "条本地历史评论",
-    socialCrawlFresh: "SocialCrawl · 强制刷新",
-    socialCrawlCached: "SocialCrawl · 服务商缓存",
+    serpApiFresh: "SerpApi · 强制实时采集",
     appleRssFallback: "Apple RSS 降级采集",
-    creditsUsed: "本次使用 credits",
+    searchesUsed: "本次 SerpApi searches",
     analyzeFresh: "分析最新样本",
     analyzeHistory: "分析本地历史样本",
     freshnessCaveat: "已请求强制刷新；App Store 评论发布本身仍可能有延迟。",
-    sourceSocialCrawl: "SocialCrawl / 美国区 App Store",
-    sourceSocialCrawlHistory: "SocialCrawl / 美国区 App Store · 本地历史",
+    sourceSerpApi: "SerpApi / 美国区 App Store",
+    sourceSerpApiHistory: "SerpApi / 美国区 App Store · 本地历史",
     sourceRssFallback: "Apple RSS 降级采集 / 美国区 App Store",
     sourceRssHistory: "Apple RSS 降级采集 / 美国区 App Store · 本地历史",
     requirementId: "需求",
