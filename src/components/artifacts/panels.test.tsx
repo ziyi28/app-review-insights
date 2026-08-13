@@ -64,6 +64,8 @@ describe("FindingsPanel", () => {
   const sufficientFinding: Finding = {
     id: "finding-1",
     topicIds: ["topic-1"],
+    focusAreaIds: [],
+    sourceFindingIds: [],
     title: "Pricing complaints",
     summary: "Users dislike the subscription cost",
     supportingReviewIds: ["review-1", "review-2"],

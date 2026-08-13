@@ -210,7 +210,13 @@ export function ArtifactPhaseSelector({ revised, phase, onSelect, t }: { revised
   );
 }
 
-export function FinalDeliverablesPanel({ finalPrd, report, manifest, t }: { finalPrd: Prd | null; report: TraceabilityReport | null; manifest: RunManifest | null; t: Dictionary }) {
+type GoalCoveragePanelShape = {
+  valid: boolean;
+  retried: boolean;
+  items: { focusAreaId: string; label: string; status: "covered" | "unsupported" | "uncovered"; findingIds: string[]; requirementIds: string[] }[];
+};
+
+export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverage, t }: { finalPrd: Prd | null; report: TraceabilityReport | null; manifest: RunManifest | null; goalCoverage?: GoalCoveragePanelShape | null; t: Dictionary }) {
   const usage = manifest?.modelUsage as Record<string, unknown> | undefined;
   const attempts = typeof usage?.attempts === "number" ? usage.attempts : typeof usage?.calls === "number" ? usage.calls : 0;
   const retries = typeof usage?.retries === "number" ? usage.retries : 0;
@@ -219,6 +225,27 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, t }: { fina
 
   return (
     <div style={{ display: "grid", gap: "10px" }}>
+      {goalCoverage ? (
+        <div className="card">
+          <h4 style={{ margin: 0 }}>
+            {t.goalCoverage} {goalCoverage.valid ? <ProvenanceBadge kind="computed" label={t.goalCoverageCovered} /> : <ProvenanceBadge kind="conflict" label={t.goalCoverageGap} />}
+          </h4>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "6px", marginTop: "6px" }}>
+            {goalCoverage.items.map((item) => (
+              <div key={item.focusAreaId} style={{ padding: "8px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--bg-panel)" }}>
+                <div style={{ fontSize: "13px", fontWeight: 600 }}>{item.label}</div>
+                <ProvenanceBadge
+                  kind={item.status === "covered" ? "computed" : item.status === "uncovered" ? "conflict" : "limitation"}
+                  label={item.status === "covered" ? t.goalCoverageCovered : item.status === "uncovered" ? t.goalCoverageUncovered : t.goalCoverageUnsupported}
+                />
+                <div className="muted" style={{ fontSize: "12px", marginTop: "4px" }}>
+                  {t.findingId}: {item.findingIds.length} · {t.requirementId}: {item.requirementIds.length}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "8px" }}>
         {[
           { k: `${t.versionPlan}`, v: finalPrd?.versions.length ?? 0 },

@@ -6,6 +6,9 @@ export const FindingOutputSchema = z.object({
     z.object({
       id: z.string().regex(/^finding-/),
       topicIds: z.array(z.string()).default([]),
+      // The goal dimensions this finding serves. Unknown ids are stripped
+      // deterministically by the normalizer.
+      focusAreaIds: z.array(z.string()).default([]),
       title: z.string().min(1).max(500),
       summary: z.string().min(1).max(5_000),
       supportingReviewIds: z.array(z.string()).min(1),
@@ -33,23 +36,27 @@ RULES
 - Distinguish what is supported by evidence (summary) from what is uncertain or
   limited (uncertainties, limitations).
 - Do not invent requirements or solutions here.
+- "focusAreas" lists the goal dimensions the user asked to cover. When a
+  finding serves one of them, reference its exact id in "focusAreaIds". Prefer
+  findings that serve a goal dimension.
 - Return AT MOST 4 findings, the highest-signal ones. Excess findings are
   discarded deterministically by the pipeline, so return only what matters.`;
 
 export const findingsPrompt: PromptDefinition<FindingOutput> = {
   id: "findings",
-  version: "findings@2",
+  version: "findings@3",
   system: SYSTEM,
   buildUser: (context: unknown) => {
-    const c = context as { reviews: unknown; topics: unknown; goal: string; outputLocale: string };
+    const c = context as { reviews: unknown; topics: unknown; goal: string; focusAreas: unknown; outputLocale: string };
     return JSON.stringify(
       {
         goal: c.goal,
+        focusAreas: c.focusAreas,
         reviews: c.reviews,
         topics: c.topics,
         outputLocale: c.outputLocale,
         instruction:
-          'Return JSON: {"findings":[{ "id":"finding-<n>", "topicIds":[...], "title":"...", "summary":"...", "supportingReviewIds":[...], "evidenceExcerpts":[{"reviewId":"...","excerpt":"exact substring"}], "conflictingReviewIds":[...], "uncertainties":[...], "limitations":[...] }]} — at most 4 findings.',
+          'Return JSON: {"findings":[{ "id":"finding-<n>", "topicIds":[...], "focusAreaIds":[...], "title":"...", "summary":"...", "supportingReviewIds":[...], "evidenceExcerpts":[{"reviewId":"...","excerpt":"exact substring"}], "conflictingReviewIds":[...], "uncertainties":[...], "limitations":[...] }]} — at most 4 findings.',
       },
       null,
       2,

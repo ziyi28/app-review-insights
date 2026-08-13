@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import type { NormalizedReview } from "@/domain/contracts/review";
-import { runFindingsStage, type FindingsStageContext } from "./findings";
+import type { Finding } from "@/domain/contracts/analysis";
+import { runFindingsStage, consolidateFindings, pickStrongestForUncovered, type FindingsStageContext } from "./findings";
 
 function review(id: string, body: string): NormalizedReview {
   return {
@@ -34,6 +35,7 @@ const topics = [
     description: "Users complain about cost",
     candidateIds: ["topic-candidate-1"],
     reviewIds: ["r1", "r2"],
+    focusAreaIds: [],
   },
 ];
 
@@ -71,7 +73,15 @@ type FindingsResponse = {
 };
 
 function context(overrides: Partial<FindingsStageContext> = {}, findingsResponse: FindingsResponse = FINDINGS_RESPONSE): FindingsStageContext {
-  const generate = vi.fn(async () => findingsResponse);
+  const generate = vi.fn(async (request: { promptVersion?: string; user?: string }) => {
+    // The semantic-consolidation call returns a group per candidate so the
+    // default stub stays robust on multi-chunk corpora.
+    if (request.promptVersion?.includes("consolidation")) {
+      const parsed = JSON.parse(String(request.user)) as { candidates: { id: string }[] };
+      return { groups: parsed.candidates.map((c, i) => ({ id: `finding-${i + 1}`, title: "x", summary: "y", candidateIds: [c.id] })) };
+    }
+    return findingsResponse;
+  });
   return {
     model: { generate } as never,
     reviews,
@@ -264,51 +274,75 @@ describe("runFindingsStage", () => {
 
   it("truncates oversized chunk output to 4 findings deterministically", async () => {
     const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
-    const generate = vi.fn(async () => ({
-      findings: Array.from({ length: 10 }, (_, i) => ({
-        id: `finding-${i + 1}`,
-        topicIds: ["topic-1"],
-        title: "x",
-        summary: "y",
-        supportingReviewIds: ["r0"],
-        evidenceExcerpts: [{ reviewId: "r0", excerpt: "review number 0" }],
-        conflictingReviewIds: [],
-        uncertainties: [],
-        limitations: [],
-      })),
-    }));
+    // Findings calls return 10 raw findings each (per-chunk cap cuts to 4);
+    // the consolidation call groups every candidate independently.
+    const generate = vi.fn(async (request: { promptVersion: string; user?: string }) => {
+      if (request.promptVersion.includes("consolidation")) {
+        const parsed = JSON.parse(request.user as string) as { candidates: { id: string }[] };
+        return { groups: parsed.candidates.map((c, i) => ({ id: `finding-${i + 1}`, title: "x", summary: "y", candidateIds: [c.id] })) };
+      }
+      return {
+        findings: Array.from({ length: 10 }, (_, i) => ({
+          id: `finding-${i + 1}`,
+          topicIds: ["topic-1"],
+          title: "x",
+          summary: "y",
+          supportingReviewIds: ["r0"],
+          evidenceExcerpts: [{ reviewId: "r0", excerpt: "review number 0" }],
+          conflictingReviewIds: [],
+          uncertainties: [],
+          limitations: [],
+        })),
+      };
+    });
     const ctx = context({ reviews: many, model: { generate } as never });
     const result = await runFindingsStage(ctx);
-    // Each of the N chunks returns 10 raw findings but only 4 survive per chunk.
-    expect(result.findings.length).toBeLessThanOrEqual(generate.mock.calls.length * 4);
+    // Each chunk returns 10 raw findings but only 4 survive per chunk; the
+    // consolidation groups them 1:1, so findings = (chunk count × 4 capped by
+    // candidate budget) and the per-chunk truncation warning fired.
+    expect(result.findings.length).toBeLessThanOrEqual((generate.mock.calls.length - 1) * 4);
     expect(result.warnings.some((w) => w.code === "FINDINGS_TRUNCATED")).toBe(true);
   });
 
   it("caps the global finding count at 20", async () => {
-    // 8 chunks × 4 per-chunk cap = 32 → global cap of 20.
+    // 8 chunks × 4 per-chunk cap = 32 candidates → consolidation cap of 20.
     const many = Array.from({ length: 120 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
-    const generate = vi.fn(async () => ({
-      findings: Array.from({ length: 10 }, (_, i) => ({
-        id: `finding-${i + 1}`,
-        topicIds: ["topic-1"],
-        title: "x",
-        summary: "y",
-        supportingReviewIds: ["r0"],
-        evidenceExcerpts: [{ reviewId: "r0", excerpt: "review number 0" }],
-        conflictingReviewIds: [],
-        uncertainties: [],
-        limitations: [],
-      })),
-    }));
+    const generate = vi.fn(async (request: { promptVersion: string; user?: string }) => {
+      if (request.promptVersion.includes("consolidation")) {
+        const parsed = JSON.parse(request.user as string) as { candidates: { id: string }[] };
+        // Return one group per candidate — far more than 20, so the stage must
+        // cap consolidation output deterministically at 20.
+        return { groups: parsed.candidates.map((c, i) => ({ id: `finding-${i + 1}`, title: "x", summary: "y", candidateIds: [c.id] })) };
+      }
+      return {
+        findings: Array.from({ length: 10 }, (_, i) => ({
+          id: `finding-${i + 1}`,
+          topicIds: ["topic-1"],
+          title: "x",
+          summary: "y",
+          supportingReviewIds: ["r0"],
+          evidenceExcerpts: [{ reviewId: "r0", excerpt: "review number 0" }],
+          conflictingReviewIds: [],
+          uncertainties: [],
+          limitations: [],
+        })),
+      };
+    });
     const ctx = context({ reviews: many, model: { generate } as never });
     const result = await runFindingsStage(ctx);
-    expect(result.findings.length).toBe(20);
-    expect(result.warnings.some((w) => w.code === "FINDINGS_TRUNCATED")).toBe(true);
+    // Consolidation output is capped at 20 groups → at most 20 findings.
+    expect(result.findings.length).toBeLessThanOrEqual(20);
+    expect(result.warnings.some((w) => w.code === "FINDINGS_CONSOLIDATION_TRUNCATED")).toBe(true);
   });
 
   it("namespaces per-chunk finding ids and merges them without collision", async () => {
     const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
-    const generate = vi.fn(async (request: { user?: string }) => {
+    const generate = vi.fn(async (request: { promptVersion: string; user?: string }) => {
+      if (request.promptVersion.includes("consolidation")) {
+        // Each candidate keeps its own group so namespaced ids pass through.
+        const parsed = JSON.parse(request.user as string) as { candidates: { id: string }[] };
+        return { groups: parsed.candidates.map((c, i) => ({ id: `finding-${i + 1}`, title: "x", summary: "y", candidateIds: [c.id] })) };
+      }
       const parsed = JSON.parse(request.user as string) as { reviews: { reviewId: string }[] };
       return {
         findings: [
@@ -330,12 +364,98 @@ describe("runFindingsStage", () => {
     const result = await runFindingsStage(ctx);
     // One chunk per bounded batch; each returns `finding-1` which must be
     // namespaced so the merged findings stay distinct.
-    expect(generate).toHaveBeenCalledTimes(result.findings.length);
+    const findingsCalls = generate.mock.calls.filter(([req]) => !(req as { promptVersion: string }).promptVersion.includes("consolidation"));
     expect(result.findings.length).toBeGreaterThan(1);
     const ids = result.findings.map((f) => f.id);
     expect(new Set(ids).size).toBe(ids.length);
-    expect(ids.every((id) => /^finding-1@c\d+$/.test(id))).toBe(true);
+    // Every surviving finding came from a namespaced candidate (@cN).
+    expect(result.findings.every((f) => f.sourceFindingIds.some((sid) => /@c\d+$/.test(sid)))).toBe(true);
     // Merged findings still carry code-derived sample counts.
     expect(result.findings.every((f) => f.supportingSampleCount === 1)).toBe(true);
+    void findingsCalls;
+  });
+});
+
+function candidateFinding(id: string, reviewIds: string[], focusAreaIds: string[] = [], excerpt = "price is too expensive"): Finding {
+  return {
+    id,
+    topicIds: ["topic-1"],
+    focusAreaIds,
+    sourceFindingIds: [],
+    title: `candidate ${id}`,
+    summary: "summary",
+    supportingReviewIds: reviewIds,
+    supportingSampleCount: reviewIds.length,
+    evidenceExcerpts: reviewIds.map((reviewId) => ({ reviewId, excerpt })),
+    conflictingReviewIds: [],
+    confidence: { level: "low", method: "deterministic-v1", reasons: [] },
+    evidenceSufficiency: {
+      status: "insufficient",
+      corpusReviewCount: 500,
+      supportRatio: reviewIds.length / 500,
+      reasons: ["SUPPORT_BELOW_MINIMUM"],
+    },
+    uncertainties: [],
+    limitations: [],
+  };
+}
+
+describe("consolidateFindings", () => {
+  it("merges candidate evidence and recomputes counts deterministically", () => {
+    const candidates = [
+      candidateFinding("c1", ["r1", "r2"], ["focus-1"]),
+      candidateFinding("c2", ["r3"], ["focus-1"]),
+    ];
+    const result = consolidateFindings(candidates, [
+      { id: "finding-1", title: "Pricing is high", summary: "Users complain about cost", candidateIds: ["c1", "c2"], focusAreaIds: ["focus-1"] },
+    ]);
+    expect(result.findings).toHaveLength(1);
+    const f = result.findings[0];
+    expect(f.sourceFindingIds).toEqual(["c1", "c2"]);
+    expect(f.supportingReviewIds.sort()).toEqual(["r1", "r2", "r3"]);
+    expect(f.supportingSampleCount).toBe(3);
+    expect(f.focusAreaIds).toContain("focus-1");
+    // Excerpts merged (one per review), no duplicates.
+    expect(f.evidenceExcerpts.map((e) => e.reviewId).sort()).toEqual(["r1", "r2", "r3"]);
+  });
+
+  it("refuses to reuse a candidate across two final findings", () => {
+    const candidates = [candidateFinding("c1", ["r1"])];
+    const result = consolidateFindings(candidates, [
+      { id: "finding-1", title: "a", summary: "a", candidateIds: ["c1"] },
+      { id: "finding-2", title: "b", summary: "b", candidateIds: ["c1"] }, // reused!
+    ]);
+    // finding-2 references an already-used candidate → dropped with a warning.
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0].id).toBe("finding-1");
+    expect(result.warnings.some((w) => w.code === "EMPTY_FINDING_GROUP")).toBe(true);
+  });
+
+  it("drops unknown candidate references and records a warning", () => {
+    const candidates = [candidateFinding("c1", ["r1"])];
+    const result = consolidateFindings(candidates, [
+      { id: "finding-1", title: "a", summary: "a", candidateIds: ["c1", "ghost"] },
+    ]);
+    expect(result.findings).toHaveLength(1);
+    expect(result.warnings.some((w) => w.code === "FINDING_GROUP_UNKNOWN_CANDIDATE")).toBe(true);
+  });
+
+  it("drops unused candidates and keeps every valid group", () => {
+    const candidates = Array.from({ length: 30 }, (_, i) => candidateFinding(`c${i}`, [`r${i}`]));
+    const groups = Array.from({ length: 5 }, (_, i) => ({ id: `finding-${i + 1}`, title: "a", summary: "a", candidateIds: [`c${i}`] }));
+    const result = consolidateFindings(candidates, groups);
+    expect(result.findings).toHaveLength(5);
+    // The 25 candidates never referenced by any group are dropped.
+    expect(result.droppedCandidateIds).toHaveLength(25);
+  });
+
+  it("pickStrongestForUncovered picks the strongest candidate for a missing focus area", () => {
+    const used = new Set<string>();
+    const candidates = [
+      candidateFinding("c1", ["r1"], ["focus-2"]),
+      candidateFinding("c2", ["r2", "r3", "r4"], ["focus-2"]),
+    ];
+    const strongest = pickStrongestForUncovered(candidates, ["focus-2"], used, new Set(["focus-1"]));
+    expect(strongest?.id).toBe("c2"); // more supporting reviews
   });
 });

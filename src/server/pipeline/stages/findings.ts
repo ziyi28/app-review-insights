@@ -3,16 +3,24 @@ import type { NormalizedReview } from "@/domain/contracts/review";
 import { isExactExcerpt } from "@/domain/analysis/evidence";
 import { computeConfidence, type SourceStatus } from "@/domain/analysis/confidence";
 import { assessEvidenceSufficiency } from "@/domain/analysis/sufficiency";
-import { FindingOutputSchema, findingsPrompt, type FindingOutput } from "@/server/model/prompts/prompts";
+import {
+  FindingConsolidationOutputSchema,
+  FindingOutputSchema,
+  findingsConsolidationPrompt,
+  findingsPrompt,
+  type FindingOutput,
+} from "@/server/model/prompts/prompts";
 import { chunkByBodyBudget, mapWithConcurrency } from "../batching";
 import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type FindingsStageContext = {
   model: StageModelClient;
   reviews: NormalizedReview[];
-  topics: { id: string; label: string; description: string; candidateIds: string[]; reviewIds: string[] }[];
+  topics: { id: string; label: string; description: string; candidateIds: string[]; reviewIds: string[]; focusAreaIds: string[] }[];
   outputLocale: string;
   goal: string;
+  /** Structured goal dimensions from the scope stage. */
+  focusAreas?: { id: string; label: string }[];
   sourceStatus: SourceStatus;
   /** Live progress callback; invoked with a human-readable message while the
    *  model call is in flight so the UI can show feedback. */
@@ -25,9 +33,21 @@ export type FindingsStageResult = {
   findings: Finding[];
   warnings: { code: string; message: string }[];
   insufficientEvidence: boolean;
+  /** Audit trail of the semantic consolidation step. */
+  consolidationAudit?: {
+    candidateCount: number;
+    consolidatedCount: number;
+    finalCount: number;
+    groups: { findingId: string; sourceFindingIds: string[] }[];
+    droppedCandidateIds: string[];
+    addedForCoverage: string[];
+  };
 };
 
-export type FindingNormalizeContext = Pick<FindingsStageContext, "reviews" | "topics" | "sourceStatus">;
+export type FindingNormalizeContext = Pick<FindingsStageContext, "reviews" | "topics" | "sourceStatus"> & {
+  /** Allowed goal-dimension ids. When present, unknown focusAreaIds are stripped. */
+  allowedFocusAreaIds?: Set<string>;
+};
 
 /**
  * No finding, or every surviving finding short of the evidentiary bar, means
@@ -58,8 +78,15 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
 
   const findings: Finding[] = [];
   for (const f of output.findings) {
-    // Validate topic links.
-    const validTopicIds = f.topicIds.filter((id) => allowedTopicIds.has(id));
+    // Validate topic links. `?? []` guards direct-object stubs that bypass
+    // schema defaults.
+    const validTopicIds = (f.topicIds ?? []).filter((id) => allowedTopicIds.has(id));
+
+    // Validate goal-dimension links; unknown ids are stripped by code, never
+    // trusted from the model.
+    const validFocusAreaIds = ctx.allowedFocusAreaIds
+      ? (f.focusAreaIds ?? []).filter((id) => ctx.allowedFocusAreaIds!.has(id))
+      : (f.focusAreaIds ?? []);
 
     // Validate supporting citations; normalize any source-id reference to the
     // stable reviewId so the downstream ledger is consistent.
@@ -106,6 +133,8 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
     findings.push({
       id: f.id,
       topicIds: validTopicIds,
+      focusAreaIds: validFocusAreaIds,
+      sourceFindingIds: [],
       title: f.title,
       summary: f.summary,
       supportingReviewIds,
@@ -144,20 +173,150 @@ type SlimReview = { reviewId: string; sourceReviewId: string; rating: number; bo
 // Topics are trimmed to the same essentials the model reasons over: id, label
 // and description. The candidate/review id lists are pipeline bookkeeping, not
 // signal, and dropping them shrinks every findings prompt on a many-topic run.
-type SlimTopic = { id: string; label: string; description: string };
+type SlimTopic = { id: string; label: string; description: string; focusAreaIds: string[] };
 
 // Model output is bounded so a large corpus never yields unbounded findings:
-// at most 4 findings survive per chunk, at most 20 globally. Excess output is
-// truncated deterministically with a warning — never retried.
+// at most 4 findings survive per chunk, at most 60 candidates reach semantic
+// consolidation, and at most 20 canonical findings survive globally. A single
+// consolidation call may output at most 20 groups. Excess output is truncated
+// deterministically with a warning — never retried.
 const MAX_FINDINGS_PER_CHUNK = 4;
+// Number of candidates admitted to the semantic consolidation stage. A regular
+// 500-review corpus produces about 14 chunks × 4 = 56 candidates, so 60 keeps
+// every candidate eligible; the cap only bites on pathological oversized
+// corpora.
+const MAX_CONSOLIDATION_CANDIDATES = 60;
 const MAX_FINDINGS_TOTAL = 20;
+
+function candidateById(candidates: Finding[]): Map<string, Finding> {
+  return new Map(candidates.map((c) => [c.id, c]));
+}
+
+/**
+ * Merges normalized finding candidates into canonical findings by semantic
+ * group. The model returns groups referencing existing candidate ids only; the
+ * code then merges evidence (supporting review ids, excerpts, topics, focus
+ * areas) deterministically, recomputes counts/confidence/sufficiency, and
+ * refuses to reuse a candidate in more than one final finding.
+ */
+export function consolidateFindings(
+  candidates: Finding[],
+  groups: { id: string; title: string; summary: string; candidateIds: string[]; focusAreaIds?: string[] }[],
+): { findings: Finding[]; warnings: { code: string; message: string }[]; usedCandidateIds: Set<string>; droppedCandidateIds: string[] } {
+  const warnings: { code: string; message: string }[] = [];
+  const index = candidateById(candidates);
+  const used = new Set<string>();
+  const droppedCandidateIds: string[] = [];
+  const findings: Finding[] = [];
+
+  for (const g of groups) {
+    // A group must reference at least one existing, not-yet-used candidate.
+    // `?? []` guards direct-object stubs that bypass schema defaults.
+    const candidateIds = g.candidateIds ?? [];
+    const fresh = candidateIds.filter((id) => index.has(id) && !used.has(id));
+    if (fresh.length === 0) {
+      warnings.push({ code: "EMPTY_FINDING_GROUP", message: `dropped ${g.id} (no valid unused candidates)` });
+      continue;
+    }
+    // Warn about unknown/duplicate candidate references (never silently drop).
+    const unknown = candidateIds.filter((id) => !index.has(id) || used.has(id));
+    if (unknown.length > 0) {
+      warnings.push({
+        code: "FINDING_GROUP_UNKNOWN_CANDIDATE",
+        message: `${g.id} referenced ${unknown.length} unknown or already-used candidate(s); dropped deterministically`,
+      });
+    }
+    for (const id of fresh) used.add(id);
+
+    // Merge evidence deterministically: union of supporting reviews, excerpts,
+    // topics, focus areas and conflicting reviews; all counts recomputed.
+    const members = fresh.map((id) => index.get(id)!);
+    const supportingReviewIds = [...new Set(members.flatMap((m) => m.supportingReviewIds))];
+    const topicIds = [...new Set(members.flatMap((m) => m.topicIds))];
+    const focusAreaIds = [...new Set([...members.flatMap((m) => m.focusAreaIds), ...(g.focusAreaIds ?? [])])];
+    const conflictingReviewIds = [...new Set(members.flatMap((m) => m.conflictingReviewIds))];
+    // Merge excerpts, preferring any exact excerpt that already survived
+    // validation; dedupe by reviewId.
+    const excerptByReview = new Map<string, string>();
+    for (const m of members) {
+      for (const e of m.evidenceExcerpts) {
+        if (!excerptByReview.has(e.reviewId)) excerptByReview.set(e.reviewId, e.excerpt);
+      }
+    }
+    const evidenceExcerpts = [...excerptByReview.entries()].map(([reviewId, excerpt]) => ({ reviewId, excerpt }));
+    const hasConflict = conflictingReviewIds.length > 0;
+    const confidence = computeConfidence({ supportCount: supportingReviewIds.length, sourceStatus: "complete", hasConflict });
+    const evidenceSufficiency = assessEvidenceSufficiency({
+      supportCount: supportingReviewIds.length,
+      corpusCount: Math.max(...members.map((m) => m.evidenceSufficiency.corpusReviewCount)),
+      conflictCount: new Set(conflictingReviewIds).size,
+      sourceStatus: "complete",
+    });
+
+    findings.push({
+      id: g.id,
+      topicIds,
+      focusAreaIds,
+      sourceFindingIds: [...fresh],
+      title: g.title,
+      summary: g.summary,
+      supportingReviewIds,
+      supportingSampleCount: supportingReviewIds.length,
+      evidenceExcerpts,
+      conflictingReviewIds,
+      confidence,
+      evidenceSufficiency,
+      uncertainties: members.flatMap((m) => m.uncertainties),
+      limitations: members.flatMap((m) => m.limitations),
+    });
+  }
+
+  // Candidates that ended up in no group are dropped (they are subsumed or
+  // rejected by the model). Anything never referenced is silently discarded.
+  for (const c of candidates) {
+    if (!used.has(c.id)) droppedCandidateIds.push(c.id);
+  }
+
+  return { findings, warnings, usedCandidateIds: used, droppedCandidateIds };
+}
+
+/**
+ * Picks one candidate per focus area that is not already represented in the
+ * consolidated findings, ranked by evidence signal. Used to close goal-coverage
+ * gaps when consolidation under-covered a dimension.
+ */
+export function pickStrongestForUncovered(
+  candidates: Finding[],
+  focusAreaIds: string[],
+  usedCandidateIds: Set<string>,
+  consolidatedFocusAreaIds: Set<string>,
+): Finding | null {
+  const open = focusAreaIds.filter((id) => !consolidatedFocusAreaIds.has(id));
+  if (open.length === 0) return null;
+  const rank = (f: Finding) => f.supportingReviewIds.length + f.evidenceExcerpts.length;
+  let best: Finding | null = null;
+  let bestScore = -1;
+  for (const c of candidates) {
+    if (usedCandidateIds.has(c.id)) continue;
+    if (!open.some((id) => c.focusAreaIds.includes(id))) continue;
+    const score = rank(c);
+    if (score > bestScore) {
+      bestScore = score;
+      best = c;
+    }
+  }
+  return best;
+}
 
 /**
  * Generates evidence-grounded findings. Reviews are slimmed down, split into
  * size-bounded chunks, and analyzed per-chunk in parallel; each chunk's output
  * is passed through the shared deterministic normalizer (see normalizeFindings)
  * against the full review set, then findings are id-namespaced per chunk to
- * avoid cross-chunk collisions and merged.
+ * avoid cross-chunk collisions. A bounded set of up to MAX_CONSOLIDATION_CANDIDATES
+ * then goes through ONE semantic consolidation call (findings.consolidation@1)
+ * which merges duplicates and normalizes titles; a coverage backfill adds the
+ * strongest candidate for any goal dimension the consolidation left out.
  */
 export async function runFindingsStage(ctx: FindingsStageContext): Promise<FindingsStageResult> {
   const warnings: { code: string; message: string }[] = [];
@@ -167,7 +326,9 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
     rating: r.rating,
     bodyNormalized: r.bodyNormalized,
   }));
-  const slimTopics: SlimTopic[] = ctx.topics.map((t) => ({ id: t.id, label: t.label, description: t.description }));
+  const slimTopics: SlimTopic[] = ctx.topics.map((t) => ({ id: t.id, label: t.label, description: t.description, focusAreaIds: t.focusAreaIds }));
+  const allowedFocusAreaIds = new Set(ctx.focusAreas?.map((a) => a.id) ?? []);
+  const focusAreas = ctx.focusAreas ?? [];
 
   const chunks = chunkByBodyBudget(slimReviews, FINDINGS_CHUNK_CHAR_BUDGET);
   const perChunk = await mapWithConcurrency(chunks, ctx.maxConcurrency ?? DEFAULT_FINDINGS_CONCURRENCY, async (chunk, chunkIndex) => {
@@ -176,7 +337,7 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
       stage: "findings",
       promptVersion: findingsPrompt.version,
       system: findingsPrompt.system,
-      user: findingsPrompt.buildUser({ reviews: chunk, topics: slimTopics, goal: ctx.goal, outputLocale: ctx.outputLocale }),
+      user: findingsPrompt.buildUser({ reviews: chunk, topics: slimTopics, goal: ctx.goal, focusAreas, outputLocale: ctx.outputLocale }),
       schema: FindingOutputSchema,
       onProgress: modelProgressRelay(ctx.onProgress),
     });
@@ -192,7 +353,7 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
     // Normalize against the full review set: the model saw only this chunk, so
     // any review it cites resolves here and its excerpt is still verified as an
     // exact substring of the normalized body.
-    const result = normalizeFindings(output, { reviews: ctx.reviews, topics: ctx.topics, sourceStatus: ctx.sourceStatus });
+    const result = normalizeFindings(output, { reviews: ctx.reviews, topics: ctx.topics, sourceStatus: ctx.sourceStatus, allowedFocusAreaIds });
     return { chunkIndex, result };
   });
 
@@ -200,19 +361,103 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
   // both emit `finding-1` and collide. For a single chunk the ids pass through
   // unchanged so the small-corpus path is identical to before chunking.
   const namespaceIds = chunks.length > 1;
-  const findings: Finding[] = [];
+  const candidates: Finding[] = [];
   for (const { chunkIndex, result } of perChunk) {
     warnings.push(...result.warnings);
-    for (const f of result.findings) findings.push(namespaceIds ? { ...f, id: `${f.id}@c${chunkIndex}` } : f);
-  }
-  // Global cap: keep only the first MAX_FINDINGS_TOTAL surviving findings.
-  if (findings.length > MAX_FINDINGS_TOTAL) {
-    warnings.push({
-      code: "FINDINGS_TRUNCATED",
-      message: `kept first ${MAX_FINDINGS_TOTAL} of ${findings.length} findings; excess dropped deterministically`,
-    });
-    findings.length = MAX_FINDINGS_TOTAL;
+    for (const f of result.findings) candidates.push(namespaceIds ? { ...f, id: `${f.id}@c${chunkIndex}` } : f);
   }
 
-  return { findings, warnings, insufficientEvidence: isInsufficientEvidence(findings) };
+  let consolidationAudit: FindingsStageResult["consolidationAudit"];
+  let finalFindings: Finding[];
+  if (candidates.length === 0) {
+    finalFindings = [];
+  } else if (candidates.length === 1) {
+    // No consolidation needed for a single candidate.
+    finalFindings = candidates;
+  } else {
+    // Cap the candidate set entering consolidation. Excess is dropped with a
+    // warning — never retried.
+    let consolidatedCandidates = candidates;
+    if (candidates.length > MAX_CONSOLIDATION_CANDIDATES) {
+      warnings.push({
+        code: "FINDINGS_CONSOLIDATION_CANDIDATES_TRUNCATED",
+        message: `kept ${MAX_CONSOLIDATION_CANDIDATES} of ${candidates.length} finding candidates for consolidation; excess dropped deterministically`,
+      });
+      consolidatedCandidates = candidates.slice(0, MAX_CONSOLIDATION_CANDIDATES);
+    }
+    ctx.onProgress?.(`consolidating ${consolidatedCandidates.length} candidate findings`);
+    const consolidation = await ctx.model.generate({
+      stage: "findings-consolidation",
+      promptVersion: findingsConsolidationPrompt.version,
+      system: findingsConsolidationPrompt.system,
+      user: findingsConsolidationPrompt.buildUser({ candidates: consolidatedCandidates, focusAreas, outputLocale: ctx.outputLocale }),
+      schema: FindingConsolidationOutputSchema,
+      onProgress: modelProgressRelay(ctx.onProgress),
+    });
+    // Cap the consolidation output at 20 groups deterministically.
+    const groups = consolidation.groups.slice(0, MAX_FINDINGS_TOTAL);
+    if (groups.length < consolidation.groups.length) {
+      warnings.push({
+        code: "FINDINGS_CONSOLIDATION_TRUNCATED",
+        message: `consolidation returned ${consolidation.groups.length} groups; kept first ${MAX_FINDINGS_TOTAL} deterministically`,
+      });
+    }
+    const merged = consolidateFindings(consolidatedCandidates, groups);
+    warnings.push(...merged.warnings);
+
+    // Goal-coverage backfill: if a focus area has evidence but the
+    // consolidation left it out, add the strongest candidate for it. When at
+    // the cap, replace the lowest-ranked duplicate that does not uniquely
+    // cover a dimension.
+    const findings = merged.findings;
+    const coveredFocus = new Set<string>();
+    for (const f of findings) for (const id of f.focusAreaIds) coveredFocus.add(id);
+    const used = new Set(merged.usedCandidateIds);
+    const addedForCoverage: string[] = [];
+    for (const area of focusAreas) {
+      if (coveredFocus.has(area.id)) continue;
+      const strongest = pickStrongestForUncovered(consolidatedCandidates, [area.id], used, coveredFocus);
+      if (!strongest) continue;
+      if (findings.length >= MAX_FINDINGS_TOTAL) {
+        // Replace the lowest-ranked duplicate that does not uniquely cover a
+        // dimension. Recompute ranks from the final list.
+        const rank = (f: Finding) => f.supportingReviewIds.length;
+        const replaceable = findings
+          .filter((f) => !f.focusAreaIds.some((id) => focusAreas.some((a) => a.id === id) && f.focusAreaIds.length === 1))
+          .sort((a, b) => rank(a) - rank(b));
+        const victim = replaceable[0];
+        if (!victim) continue;
+        const victimIdx = findings.findIndex((f) => f.id === victim.id);
+        findings[victimIdx] = { ...strongest, id: victim.id };
+        used.add(strongest.id);
+        addedForCoverage.push(victim.id);
+      } else {
+        findings.push(strongest);
+        used.add(strongest.id);
+        addedForCoverage.push(strongest.id);
+      }
+      for (const id of strongest.focusAreaIds) coveredFocus.add(id);
+    }
+
+    finalFindings = findings;
+    consolidationAudit = {
+      candidateCount: consolidatedCandidates.length,
+      consolidatedCount: merged.findings.length,
+      finalCount: finalFindings.length,
+      groups: merged.findings.map((f) => ({ findingId: f.id, sourceFindingIds: f.sourceFindingIds })),
+      droppedCandidateIds: merged.droppedCandidateIds,
+      addedForCoverage,
+    };
+  }
+
+  // Global cap: keep only the first MAX_FINDINGS_TOTAL surviving findings.
+  if (finalFindings.length > MAX_FINDINGS_TOTAL) {
+    warnings.push({
+      code: "FINDINGS_TRUNCATED",
+      message: `kept first ${MAX_FINDINGS_TOTAL} of ${finalFindings.length} findings; excess dropped deterministically`,
+    });
+    finalFindings.length = MAX_FINDINGS_TOTAL;
+  }
+
+  return { findings: finalFindings, warnings, insufficientEvidence: isInsufficientEvidence(finalFindings), consolidationAudit };
 }

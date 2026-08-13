@@ -166,6 +166,11 @@ export type Dictionary = {
   sampleAnalyzed: string;
   sampleOf: string;
   sampleStratified: string;
+  goalCoverage: string;
+  goalCoverageCovered: string;
+  goalCoverageUncovered: string;
+  goalCoverageUnsupported: string;
+  goalCoverageGap: string;
   wizardStepSource: string;
   wizardStepConfigure: string;
   wizardStepConfirm: string;
@@ -357,6 +362,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     sampleAnalyzed: "Analyzed",
     sampleOf: "of scope-matching reviews",
     sampleStratified: "stratified sample",
+    goalCoverage: "Goal Coverage",
+    goalCoverageCovered: "Covered",
+    goalCoverageUncovered: "Uncovered",
+    goalCoverageUnsupported: "Unsupported",
+    goalCoverageGap: "Coverage gap",
     wizardStepSource: "Choose a source",
     wizardStepConfigure: "Configure input",
     wizardStepConfirm: "Confirm & start",
@@ -546,6 +556,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     sampleAnalyzed: "已分析",
     sampleOf: "条范围匹配评论",
     sampleStratified: "分层样本",
+    goalCoverage: "目标覆盖",
+    goalCoverageCovered: "已覆盖",
+    goalCoverageUncovered: "未覆盖",
+    goalCoverageUnsupported: "无充分证据",
+    goalCoverageGap: "覆盖缺口",
     wizardStepSource: "选择数据来源",
     wizardStepConfigure: "配置输入",
     wizardStepConfirm: "确认并开始",

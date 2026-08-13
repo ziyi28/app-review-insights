@@ -71,6 +71,12 @@ type AnalysisSampleArtifact = {
   layers: { rating: number; language: string; candidates: number; selected: number }[];
 };
 
+type GoalCoverageArtifact = {
+  valid: boolean;
+  retried: boolean;
+  items: { focusAreaId: string; label: string; status: "covered" | "unsupported" | "uncovered"; findingIds: string[]; requirementIds: string[] }[];
+};
+
 type ArtifactCache = {
   runId: string | null;
   scope?: unknown;
@@ -82,11 +88,12 @@ type ArtifactCache = {
   topics?: { topics: { id: string; label: string; description: string; reviewIds: string[] }[] };
   findings?: { findings: Finding[] };
   evidenceValidation?: unknown;
+  goalCoverage?: GoalCoverageArtifact;
   versionPlan?: VersionPlanArtifact;
   prd?: Prd;
   tests?: { tests: Prd["tests"] };
   traceability?: { valid: boolean; violations: { code: string; message: string }[] };
-  finalReport?: { prd?: Prd; report?: { valid: boolean; violations: { code: string; message: string }[] }; limitations?: unknown[] };
+  finalReport?: { prd?: Prd; report?: { valid: boolean; violations: { code: string; message: string }[] }; limitations?: unknown[]; goalCoverage?: GoalCoverageArtifact };
 };
 
 type ConfigStatus = { modelConfigured: boolean; serpApiConfigured: boolean };
@@ -179,6 +186,7 @@ export function Workbench() {
       "topics": "topics",
       "findings": "findings",
       "evidence-validation": "evidenceValidation",
+      "goal-coverage": "goalCoverage",
       "version-plan": "versionPlan",
       "prd": "prd",
       "tests": "tests",
@@ -469,6 +477,27 @@ export function Workbench() {
                       </p>
                     </div>
                   ) : null}
+                  {cache.goalCoverage ? (
+                    <div className="card">
+                      <h4 style={{ margin: 0 }}>
+                        {t.goalCoverage} {cache.goalCoverage.valid ? <ProvenanceBadge kind="computed" label={t.goalCoverageCovered} /> : <ProvenanceBadge kind="conflict" label={t.goalCoverageGap} />}
+                      </h4>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "6px", marginTop: "6px" }}>
+                        {cache.goalCoverage.items.map((item) => (
+                          <div key={item.focusAreaId} style={{ padding: "8px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--bg-panel)" }}>
+                            <div style={{ fontSize: "13px", fontWeight: 600 }}>{item.label}</div>
+                            <ProvenanceBadge
+                              kind={item.status === "covered" ? "computed" : item.status === "uncovered" ? "conflict" : "limitation"}
+                              label={item.status === "covered" ? t.goalCoverageCovered : item.status === "uncovered" ? t.goalCoverageUncovered : t.goalCoverageUnsupported}
+                            />
+                            <div className="muted" style={{ fontSize: "12px", marginTop: "4px" }}>
+                              {t.findingId}: {item.findingIds.length} · {t.requirementId}: {item.requirementIds.length}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                   {(() => {
                     const cleaning = (cache.cleaned as { cleaning?: { unicodeNormalizedCount: number; whitespaceCollapsedCount: number; caseFoldedCount: number; exactDuplicateRemovedCount: number; identityConflictCount: number; keptShortUniqueCount: number; languageLabels: { tag: string; count: number }[] } } | undefined)?.cleaning;
                     if (!cleaning) return null;
@@ -534,7 +563,7 @@ export function Workbench() {
                   <TraceabilityPanel report={activeTrace} t={t} />
                 </>
               ) : null}
-              {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} t={t} /> : null}
+              {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} goalCoverage={cache.goalCoverage} t={t} /> : null}
               {tab === "diagnostics" ? <RunLogPanel events={events} t={t} /> : null}
             </div>
           </main>

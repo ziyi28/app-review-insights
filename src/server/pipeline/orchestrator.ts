@@ -1,14 +1,14 @@
 import type { NormalizedReview, RawReview } from "@/domain/contracts/review";
-import type { Prd } from "@/domain/contracts/analysis";
+import type { FocusArea, Prd } from "@/domain/contracts/analysis";
 import type { Limitation } from "@/server/sources/apple-rss-collector";
 import { prepareReviews } from "@/domain/reviews/prepare";
-import { sampleReviews } from "@/domain/reviews/sample";
 import { validateTraceability } from "@/domain/traceability/validate";
 import { buildEvidenceValidationReport } from "@/domain/analysis/evidence-validation";
+import { computeGoalCoverage } from "@/domain/analysis/goal-coverage";
 import { runScopeStage } from "./stages/scope";
 import { runTopicsStage } from "./stages/topics";
 import { runFindingsStage, normalizeFindings } from "./stages/findings";
-import { runPlanningStage, normalizePlanningOutput } from "./stages/planning";
+import { runPlanningWithCoverage, normalizePlanningOutput } from "./stages/planning";
 import { runTestsStage, normalizeTestsOutput } from "./stages/tests";
 import { runRevisionStage } from "./stages/revision";
 import type { FindingOutput, PlanningOutput, TestsOutput } from "@/server/model/prompts/prompts";
@@ -288,7 +288,9 @@ export async function executeRun(
       return;
     }
 
-    // Scope
+    // Scope. The goal is also split into structured focusAreas that downstream
+    // stages map findings/requirements back to, so the plan demonstrably covers
+    // the goal the user asked for.
     await startStage("scope");
     const scope = await runScopeStage({
       model: deps.model,
@@ -298,12 +300,15 @@ export async function executeRun(
       outputLocale,
       onProgress: onStageProgress("scope"),
     });
+    const focusAreas: FocusArea[] = scope.focusAreas;
     for (const l of scope.explicitLimitations) {
       limitations.push({ code: "SCOPE_LIMITATION", message: l, stage: "scope" });
     }
     // Apply the model-interpreted scope so later stages only analyze the
-    // reviews the user's goal asked for.
+    // reviews the user's goal asked for. The FULL scoped set enters the model
+    // stages — sampling was removed so no scope-matching review is left out.
     const scoped = applyScope(corpus, scope.filters);
+    const analysisReviews = scoped;
     if (scoped.length === 0) {
       limitations.push({
         code: "SCOPE_EMPTY",
@@ -320,25 +325,6 @@ export async function executeRun(
       return;
     }
 
-    // Analysis sample: after scope filtering, cap the model corpus at a
-    // representative stratified sample. The full scoped set stays available for
-    // stats and the Raw/Cleaned tabs; only the selected sample is sent to the
-    // model stages and validated against by traceability. Sampling is a single
-    // deterministic operation, so a corpus at or below the limit is untouched
-    // (applied=false) and needs no artifact or limitation.
-    const sample = sampleReviews(scoped);
-    const analysisReviews = sample.selected;
-    if (sample.applied) {
-      await publishArtifact("analysis-sample", 1, sample.artifact);
-      const limitation: Limitation = {
-        code: "ANALYSIS_SAMPLE_APPLIED",
-        message: `Analyzed ${sample.artifact.selectedCount} of ${sample.artifact.eligibleCount} scope-matching reviews (representative stratified sample of ${sample.artifact.limit})`,
-        stage: "scope",
-      };
-      limitations.push(limitation);
-      await publisher.publish({ type: "limitation.reported", runId, stage: "scope", data: limitation });
-    }
-
     // Topics
     await startStage("topics");
     const topics = await runTopicsStage({
@@ -346,6 +332,7 @@ export async function executeRun(
       reviews: analysisReviews,
       outputLocale,
       goal,
+      focusAreas,
       sourceStatus: sourceStatusOf(limitations),
       onProgress: onStageProgress("topics"),
     });
@@ -365,12 +352,19 @@ export async function executeRun(
       topics: topics.topics,
       outputLocale,
       goal,
+      focusAreas,
       sourceStatus: sourceStatusOf(limitations),
       onProgress: onStageProgress("findings"),
     });
     for (const w of findingsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "findings", data: w });
     await publishArtifact("findings", 1, findingsResult);
     await endStage("findings");
+
+    // Goal-coverage artifact: published once the planning stage has produced a
+    // plan so every goal dimension maps to finding/requirement coverage. Set to
+    // null when the run never reaches planning (insufficient-evidence guardrail
+    // below) — the artifact is still published so the UI can render "no plan".
+    let goalCoverageArtifact: ReturnType<typeof computeGoalCoverage> | null = null;
 
     // Evidence validation: a deterministic audit of the findings result that
     // persists counts and per-finding evidence verdicts as an artifact. It runs
@@ -411,12 +405,39 @@ export async function executeRun(
       return;
     }
 
-    // Planning
+    // Planning with goal-coverage validation. When a goal dimension has
+    // sufficient findings but no requirement, exactly one coverage-repair call
+    // runs; a non-monotonic repair (losing existing coverage) is rejected.
     await startStage("planning");
-    const planning = await runPlanningStage({ model: deps.model, findings: findingsResult.findings, outputLocale, goal, onProgress: onStageProgress("planning") });
+    const planning = await runPlanningWithCoverage({ model: deps.model, findings: findingsResult.findings, outputLocale, goal, focusAreas, onProgress: onStageProgress("planning") });
     for (const w of planning.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "planning", data: w });
     await publishArtifact("version-plan", 1, planning.versionPlan);
     await publishArtifact("prd", 1, planning.prd);
+    goalCoverageArtifact = planning.goalCoverage;
+    await publishArtifact("goal-coverage", 1, planning.goalCoverage);
+    // Goal-coverage limitations: a dimension with sufficient evidence that is
+    // still uncovered after the repair becomes a limitation (never a fabricated
+    // success); a dimension with no sufficient evidence is unsupported, which
+    // is legitimate and recorded as a limitation too.
+    for (const item of planning.goalCoverage.items) {
+      if (item.status === "uncovered") {
+        const limitation: Limitation = {
+          code: "GOAL_AREA_UNCOVERED",
+          message: `Goal dimension "${item.label}" has sufficient findings but no requirement after repair`,
+          stage: "planning",
+        };
+        limitations.push(limitation);
+        await publisher.publish({ type: "limitation.reported", runId, stage: "planning", data: limitation });
+      } else if (item.status === "unsupported") {
+        const limitation: Limitation = {
+          code: "GOAL_AREA_UNSUPPORTED",
+          message: `Goal dimension "${item.label}" has no findings with sufficient evidence`,
+          stage: "planning",
+        };
+        limitations.push(limitation);
+        await publisher.publish({ type: "limitation.reported", runId, stage: "planning", data: limitation });
+      }
+    }
     await endStage("planning");
 
     // Tests
@@ -495,6 +516,26 @@ export async function executeRun(
       const revisedPrd: Prd = revisedTestsResult.prd;
       report = validateTraceability(revisedPrd, analysisReviews.map((r) => r.reviewId), reviewMap);
       prd = revisedPrd;
+      // Goal coverage is recomputed against the revised plan. The revision's
+      // findings are raw model output that carries no focusAreaIds, so the
+      // ids are mapped back from the initial findings by id to keep the
+      // coverage ledger consistent.
+      if (focusAreas.length > 0) {
+        const focusAreaByFinding = new Map<string, string[]>();
+        for (const f of findingsResult.findings) {
+          if (f.focusAreaIds.length > 0) focusAreaByFinding.set(f.id, f.focusAreaIds);
+        }
+        const revisedWithFocus = {
+          ...revisedFindingsResult,
+          findings: revisedFindingsResult.findings.map((f) => ({
+            ...f,
+            focusAreaIds: f.focusAreaIds.length > 0 ? f.focusAreaIds : (focusAreaByFinding.get(f.id) ?? []),
+          })),
+        };
+        prd = { ...prd, findings: revisedWithFocus.findings };
+        goalCoverageArtifact = computeGoalCoverage(focusAreas, prd.findings, prd.requirements, planning.goalCoverage.retried);
+      }
+      if (goalCoverageArtifact) prd = { ...prd, goalCoverage: goalCoverageArtifact };
       // Publish the revised artifacts as attempt-02 so consumers never see a
       // stale pre-revision PRD/tests/traceability next to a valid run. The
       // evidence-validation audit is re-run against the revised findings; no
@@ -502,6 +543,7 @@ export async function executeRun(
       const revisedEvidenceReport = buildEvidenceValidationReport(revisedFindingsResult);
       await publishArtifact("evidence-validation", 2, revisedEvidenceReport);
       await publishArtifact("version-plan", 2, revisedPlanning.versionPlan);
+      if (goalCoverageArtifact) await publishArtifact("goal-coverage", 2, goalCoverageArtifact);
       await publishArtifact("prd", 2, prd);
       await publishArtifact("tests", 2, { tests: prd.tests, prd, warnings: [] });
       await publishArtifact("traceability", 2, report);
@@ -519,8 +561,10 @@ export async function executeRun(
 
     // Final report. A run whose traceability is still invalid after one
     // constrained revision is a FAILED run (manifest status failed, terminal
-    // run.failed event) — never a "completed" success.
-    await publishArtifact("final-report", 1, { prd, report, limitations });
+    // run.failed event) — never a "completed" success. goalCoverage is carried
+    // both on the prd bundle and at the report top level (optional, old runs
+    // lack it).
+    await publishArtifact("final-report", 1, { prd, report, limitations, goalCoverage: goalCoverageArtifact });
     if (report.valid) {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "valid", limitations } });
       await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);

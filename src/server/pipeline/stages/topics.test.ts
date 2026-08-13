@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import type { NormalizedReview } from "@/domain/contracts/review";
-import { runTopicsStage, type TopicsStageContext } from "./topics";
+import { runTopicsStage, selectTopicCandidates, type TopicsStageContext, type TopicCandidateT } from "./topics";
 
 function review(id: string, body: string): NormalizedReview {
   return {
@@ -293,5 +293,57 @@ describe("runTopicsStage", () => {
     expect(result.topics).toHaveLength(1);
     expect(result.topics[0].label).toBe("Pricing concerns");
     expect(result.topics[0].candidateIds).toEqual(["topic-candidate-1@c0", "topic-candidate-2@c0"]);
+  });
+});
+
+function sel(id: string, focusAreaIds: string[] = [], n = 1, chunk = "0"): TopicCandidateT {
+  return { id: `${id}@c${chunk}`, label: id, description: "d", supportingReviewIds: Array.from({ length: n }, (_, i) => `r-${id}-${i}`), quote: "x", focusAreaIds };
+}
+
+describe("selectTopicCandidates", () => {
+  it("keeps at least one candidate per focus area even when it ranks low by evidence", () => {
+    const candidates = [
+      sel("high", [], 50, "0"), // strong but no focus area
+      sel("focus", ["focus-1"], 1, "1"), // weak but serves focus-1
+      sel("mid", [], 20, "0"),
+    ];
+    const { selected, dropped } = selectTopicCandidates(candidates, ["focus-1"], 2);
+    expect(selected.map((c) => c.id)).toContain("focus@c1");
+    expect(selected).toHaveLength(2);
+    // dropped still contains the unselected candidates (not silently lost).
+    expect(dropped.length + selected.length).toBe(3);
+  });
+
+  it("fills the remaining quota round-robin across chunks instead of truncating the tail batch", () => {
+    // Four candidates of the SAME theme label spanning two chunks. After the
+    // one-per-theme seat is taken, the round-robin must fill from BOTH chunks,
+    // not just keep the first batch's candidates.
+    const candidates = [
+      sel("theme", [], 1, "0"),
+      sel("theme", [], 1, "0"),
+      sel("theme", [], 1, "0"),
+      sel("theme", [], 1, "1"),
+    ];
+    const { selected, dropped } = selectTopicCandidates(candidates, [], 3);
+    expect(selected).toHaveLength(3);
+    // Both chunks survive the quota fill (not only chunk 0).
+    expect(selected.some((c) => c.id.endsWith("@c0"))).toBe(true);
+    expect(selected.some((c) => c.id.endsWith("@c1"))).toBe(true);
+    expect(dropped).toHaveLength(1);
+  });
+
+  it("fills remaining quota by evidence signal, keeping one per distinct theme", () => {
+    // Three distinct themes, cap 2: one seat per theme takes weak and strong
+    // (distinct labels), leaving mid out — theme diversity beats raw evidence.
+    const candidates = [
+      sel("weak", [], 1, "0"),
+      sel("strong", [], 50, "0"),
+      sel("mid", [], 20, "0"),
+    ];
+    const { selected } = selectTopicCandidates(candidates, [], 2);
+    expect(selected).toHaveLength(2);
+    expect(new Set(selected.map((c) => c.id.split("@")[0])).size).toBe(2);
+    // The strongest candidate is always kept.
+    expect(selected.some((c) => c.id === "strong@c0")).toBe(true);
   });
 });

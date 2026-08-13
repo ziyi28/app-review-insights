@@ -37,6 +37,8 @@ function makePrd(): Prd {
       {
         id: "finding-1",
         topicIds: ["topic-1"],
+        focusAreaIds: [],
+        sourceFindingIds: [],
         title: "Pricing",
         summary: "cost complaints",
         supportingReviewIds: ["r1", "r2"],

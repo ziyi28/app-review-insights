@@ -5,6 +5,8 @@ import { derivePlanningFactors, priorityWithinFactorCap } from "./factors";
 const SUFFICIENT_FINDING: Finding = {
   id: "finding-1",
   topicIds: ["topic-1"],
+  focusAreaIds: [],
+  sourceFindingIds: [],
   title: "Pricing complaints",
   summary: "Users dislike the subscription cost",
   supportingReviewIds: ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8"],

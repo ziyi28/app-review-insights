@@ -46,6 +46,10 @@ into an executable release plan and PRD.
 
 RULES
 - Every requirement MUST reference at least one finding by its ID.
+- "focusAreas" lists the goal dimensions the user asked to cover. Every
+  dimension that has a finding with sufficient evidence MUST produce at least
+  one requirement. A dimension left with findings but no requirement is a
+  coverage gap your plan must not leave behind.
 - Do not invent requirements that have no finding behind them; instead put such
   ideas into the separate "assumptions" list.
 - Decide each requirement's priority and target version by weighing the seven
@@ -65,13 +69,14 @@ RULES
 
 export const planningPrompt: PromptDefinition<PlanningOutput> = {
   id: "planning",
-  version: "planning@2",
+  version: "planning@3",
   system: SYSTEM,
   buildUser: (context: unknown) => {
-    const c = context as { findings: unknown; goal: string; outputLocale: string };
+    const c = context as { findings: unknown; goal: string; focusAreas: unknown; outputLocale: string };
     return JSON.stringify(
       {
         goal: c.goal,
+        focusAreas: c.focusAreas,
         findings: c.findings,
         outputLocale: c.outputLocale,
         instruction:

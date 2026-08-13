@@ -1,6 +1,7 @@
-import type { Assumption, Finding, Prd, Requirement, VersionPlanArtifact } from "@/domain/contracts/analysis";
-import { planningPrompt, PlanningOutputSchema, type PlanningOutput } from "@/server/model/prompts/prompts";
+import type { Assumption, Finding, FocusArea, GoalCoverageReport, Prd, Requirement, VersionPlanArtifact } from "@/domain/contracts/analysis";
+import { planningPrompt, PlanningOutputSchema, type PlanningOutput, coverageRepairPrompt, CoverageRepairOutputSchema } from "@/server/model/prompts/prompts";
 import { derivePlanningFactors, priorityWithinFactorCap } from "@/domain/planning/factors";
+import { computeGoalCoverage, uncoveredFocusAreaIds, repairIsMonotonic } from "@/domain/analysis/goal-coverage";
 import { modelProgressRelay, type StageModelClient } from "../dependencies";
 import { reviewIdsForFindings } from "@/domain/traceability/evidence-sources";
 
@@ -9,6 +10,8 @@ export type PlanningStageContext = {
   findings: Finding[];
   outputLocale: "en" | "zh-CN";
   goal: string;
+  /** Structured goal dimensions from the scope stage. */
+  focusAreas?: FocusArea[];
   /** Live progress callback; invoked with a human-readable message while the
    *  model call is in flight so the UI can show feedback. */
   onProgress?: (message: string) => void;
@@ -18,6 +21,10 @@ export type PlanningStageResult = {
   prd: Prd;
   versionPlan: VersionPlanArtifact;
   warnings: { code: string; message: string }[];
+};
+
+export type PlanningWithCoverageResult = PlanningStageResult & {
+  goalCoverage: GoalCoverageReport;
 };
 
 /**
@@ -172,6 +179,15 @@ export function normalizePlanningOutput(
   return { prd, versionPlan, warnings };
 }
 
+function attachCoverage(
+  result: PlanningStageResult,
+  focusAreas: FocusArea[],
+  retried: boolean,
+): PlanningWithCoverageResult {
+  const goalCoverage = computeGoalCoverage(focusAreas, result.prd.findings, result.prd.requirements, retried);
+  return { ...result, prd: { ...result.prd, goalCoverage }, goalCoverage };
+}
+
 /**
  * Turns grounded findings into a version plan and PRD via the model.
  */
@@ -181,10 +197,59 @@ export async function runPlanningStage(ctx: PlanningStageContext): Promise<Plann
     stage: "planning",
     promptVersion: planningPrompt.version,
     system: planningPrompt.system,
-    user: planningPrompt.buildUser({ findings: ctx.findings, goal: ctx.goal, outputLocale: ctx.outputLocale }),
+    user: planningPrompt.buildUser({ findings: ctx.findings, goal: ctx.goal, focusAreas: ctx.focusAreas ?? [], outputLocale: ctx.outputLocale }),
     schema: PlanningOutputSchema,
     onProgress: modelProgressRelay(ctx.onProgress),
   });
 
   return normalizePlanningOutput(output, ctx.findings, ctx.outputLocale);
+}
+
+/**
+ * Runs the planning stage with goal-coverage validation and a single bounded
+ * coverage-repair retry. When a goal dimension has sufficient findings but no
+ * requirement (uncovered), exactly one repair call runs and its output is
+ * accepted only if it is monotonic: it must not lose any already-covered area
+ * and must close at least one uncovered area. The final prd carries the
+ * goalCoverage report, and the result reports whether a repair ran.
+ */
+export async function runPlanningWithCoverage(ctx: PlanningStageContext): Promise<PlanningWithCoverageResult> {
+  const focusAreas = ctx.focusAreas ?? [];
+  const base = await runPlanningStage(ctx);
+  const initialCoverage = computeGoalCoverage(focusAreas, base.prd.findings, base.prd.requirements, false);
+
+  if (focusAreas.length === 0 || initialCoverage.valid) {
+    return attachCoverage(base, focusAreas, false);
+  }
+
+  const missing = uncoveredFocusAreaIds(initialCoverage);
+  if (missing.length === 0) {
+    return attachCoverage(base, focusAreas, false);
+  }
+
+  ctx.onProgress?.(`repairing goal coverage for ${missing.length} uncovered dimension(s)`);
+  const repairOutput = await ctx.model.generate({
+    stage: "planning",
+    promptVersion: coverageRepairPrompt.version,
+    system: coverageRepairPrompt.system,
+    user: coverageRepairPrompt.buildUser({
+      goal: ctx.goal,
+      focusAreas,
+      findings: ctx.findings,
+      currentRequirements: base.prd.requirements,
+      missingFocusAreaIds: missing,
+      outputLocale: ctx.outputLocale,
+    }),
+    schema: CoverageRepairOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
+  });
+
+  const repaired = normalizePlanningOutput(repairOutput as unknown as PlanningOutput, ctx.findings, ctx.outputLocale);
+  const repairedCoverage = computeGoalCoverage(focusAreas, repaired.prd.findings, repaired.prd.requirements, true);
+
+  if (repairIsMonotonic(initialCoverage, repairedCoverage)) {
+    return attachCoverage(repaired, focusAreas, true);
+  }
+  // Non-monotonic repair is rejected: keep the first plan and its coverage.
+  return attachCoverage(base, focusAreas, false);
 }

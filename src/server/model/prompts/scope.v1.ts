@@ -1,6 +1,11 @@
 import { z } from "zod";
 import type { PromptDefinition } from "./registry";
 
+export const FocusAreaOutputSchema = z.object({
+  id: z.string().regex(/^focus-/).min(1),
+  label: z.string().min(1).max(200),
+});
+
 export const ScopeOutputSchema = z.object({
   interpretation: z.string().min(1),
   filters: z
@@ -13,6 +18,10 @@ export const ScopeOutputSchema = z.object({
     })
     .partial(),
   explicitLimitations: z.array(z.string()).default([]),
+  // Structured goal dimensions the user explicitly asked to cover, split out
+  // of the goal so downstream stages can prove each dimension got covered.
+  // At most 8; the stage normalizes/truncates deterministically.
+  focusAreas: z.array(FocusAreaOutputSchema).default([]),
 });
 export type ScopeOutput = z.infer<typeof ScopeOutputSchema>;
 
@@ -27,11 +36,16 @@ RULES
 - If a filter the goal seems to want is not supported by the data, record it in
   explicitLimitations instead of guessing.
 - The interpretation must restate the goal and what can actually be answered
-  with the given data.`;
+  with the given data.
+- "focusAreas" splits the goal into the concrete dimensions the user asked to
+  cover (e.g. "cost concerns", "conversion", "usability", "a specific version").
+  Only split out dimensions the user explicitly mentioned; do not invent
+  dimensions. Return AT MOST 8, the most important ones. Excess areas are
+  discarded deterministically by the pipeline.`;
 
 export const scopePrompt: PromptDefinition<ScopeOutput> = {
   id: "scope",
-  version: "scope@1",
+  version: "scope@2",
   system: SYSTEM,
   buildUser: (context: unknown) => {
     const c = context as { goal: string; stats: unknown; sourceLimitations: unknown };
@@ -41,7 +55,7 @@ export const scopePrompt: PromptDefinition<ScopeOutput> = {
         stats: c.stats,
         sourceLimitations: c.sourceLimitations,
         instruction:
-          'Return ONLY a JSON object with exactly these keys: "interpretation" (string), "filters" (object with keys "rating" array of ints, "versions" array of strings, "languages" array of strings, "minDate" string|null, "maxDate" string|null), "explicitLimitations" (array of strings). Do not add any other keys.',
+          'Return ONLY a JSON object with exactly these keys: "interpretation" (string), "filters" (object with keys "rating" array of ints, "versions" array of strings, "languages" array of strings, "minDate" string|null, "maxDate" string|null), "explicitLimitations" (array of strings), "focusAreas" (array of { "id":"focus-<n>", "label":"..." }). Do not add any other keys.',
       },
       null,
       2,

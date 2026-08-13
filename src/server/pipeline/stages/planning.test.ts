@@ -1,11 +1,13 @@
 import { describe, it, expect, vi } from "vitest";
-import type { Finding } from "@/domain/contracts/analysis";
-import { runPlanningStage, type PlanningStageContext } from "./planning";
+import type { Finding, FocusArea } from "@/domain/contracts/analysis";
+import { runPlanningStage, runPlanningWithCoverage, type PlanningStageContext } from "./planning";
 
 const findings: Finding[] = [
   {
     id: "finding-1",
     topicIds: ["topic-1"],
+    focusAreaIds: [],
+    sourceFindingIds: [],
     title: "Subscription too expensive",
     summary: "Users say the paid plan costs too much",
     supportingReviewIds: ["r1", "r2"],
@@ -30,6 +32,8 @@ const findings: Finding[] = [
 const SUFFICIENT_FINDING: Finding = {
   id: "finding-2",
   topicIds: ["topic-1"],
+  focusAreaIds: [],
+  sourceFindingIds: [],
   title: "Timer state loss",
   summary: "Users lose timer progress",
   supportingReviewIds: ["r8", "r9"],
@@ -412,5 +416,172 @@ describe("runPlanningStage", () => {
       expect(decision.versionId).toBe(requirement!.versionId);
       expect(decision.planningFactors).toBeDefined();
     }
+  });
+});
+
+// A sufficient finding mapped to focus-1 so goal-coverage has something real
+// to cover. Built as a standalone fixture (not derived from the insufficient
+// `findings` above).
+const COVERABLE_FINDING: Finding = {
+  id: "finding-cover",
+  topicIds: ["topic-1"],
+  focusAreaIds: ["focus-1"],
+  sourceFindingIds: [],
+  title: "Pricing is too high",
+  summary: "Many users report the cost is prohibitive",
+  supportingReviewIds: ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10"],
+  supportingSampleCount: 10,
+  evidenceExcerpts: [{ reviewId: "r1", excerpt: "too expensive" }],
+  conflictingReviewIds: [],
+  confidence: { level: "high", method: "deterministic-v1", reasons: [] },
+  evidenceSufficiency: {
+    status: "sufficient",
+    corpusReviewCount: 100,
+    supportRatio: 0.1,
+    reasons: [],
+  },
+  uncertainties: [],
+  limitations: [],
+};
+
+const FOCUS_AREAS: FocusArea[] = [{ id: "focus-1", label: "Pricing" }];
+
+function coverageContext(
+  overrides: Partial<PlanningStageContext> = {},
+  planningResponse: PlanningResponse = PLANNING_RESPONSE,
+  findingsOverride: Finding[] = [COVERABLE_FINDING],
+): PlanningStageContext {
+  const generate = vi.fn(async () => planningResponse);
+  return {
+    model: { generate } as never,
+    findings: findingsOverride,
+    outputLocale: "en",
+    goal: "Understand pricing complaints",
+    focusAreas: FOCUS_AREAS,
+    ...overrides,
+  };
+}
+
+describe("runPlanningWithCoverage", () => {
+  it("does not retry when every covered focus area already has a requirement", async () => {
+    const planningResponse: PlanningResponse = {
+      ...PLANNING_RESPONSE,
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-cover"],
+          title: "Lower price",
+          description: "Add annual plan",
+          priority: "P1",
+          acceptanceCriteria: ["annual plan selectable"],
+          versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
+        },
+      ],
+    };
+    const ctx = coverageContext({}, planningResponse);
+    const result = await runPlanningWithCoverage(ctx);
+    expect(result.goalCoverage.retried).toBe(false);
+    expect(result.goalCoverage.valid).toBe(true);
+    expect(result.goalCoverage.items[0]).toMatchObject({ focusAreaId: "focus-1", status: "covered" });
+    // Exactly one planning call (no repair).
+    expect(ctx.model.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not retry for an unsupported area and records it as unsupported", async () => {
+    // The finding is insufficient, so focus-1 has no sufficient evidence.
+    const ctx = coverageContext({}, PLANNING_RESPONSE, [findings[0]]);
+    const result = await runPlanningWithCoverage(ctx);
+    expect(result.goalCoverage.retried).toBe(false);
+    expect(result.goalCoverage.valid).toBe(true); // unsupported is not a gap
+    expect(result.goalCoverage.items[0]).toMatchObject({ focusAreaId: "focus-1", status: "unsupported" });
+    expect(ctx.model.generate).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries exactly once when a covered area has no requirement, and adopts the repair", async () => {
+    // First plan omits any requirement for the covered finding-cover.
+    const emptyPlan: PlanningResponse = {
+      title: "Release plan",
+      overview: "o",
+      versions: [],
+      requirements: [],
+      assumptions: [],
+    };
+    // Repair plan adds the missing requirement.
+    const repairPlan: PlanningResponse = {
+      title: "Release plan",
+      overview: "o",
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "s", rationale: "r", requirementIds: ["req-1"] }],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-cover"],
+          title: "Lower price",
+          description: "Add annual plan",
+          priority: "P1",
+          acceptanceCriteria: ["annual plan selectable"],
+          versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
+        },
+      ],
+      assumptions: [],
+    };
+    // First call (base planning) returns the empty plan; the repair call
+    // returns the plan that closes the gap.
+    const generate = vi.fn()
+      .mockResolvedValueOnce(emptyPlan)
+      .mockResolvedValueOnce(repairPlan);
+    const ctx = coverageContext({ model: { generate } as never }, emptyPlan);
+    const result = await runPlanningWithCoverage(ctx);
+    expect(result.goalCoverage.retried).toBe(true);
+    expect(result.goalCoverage.valid).toBe(true);
+    expect(result.goalCoverage.items[0]).toMatchObject({ focusAreaId: "focus-1", status: "covered" });
+    // Exactly two calls: planning + coverage-repair.
+    expect(generate).toHaveBeenCalledTimes(2);
+  });
+
+  it("rejects a non-monotonic repair that loses existing coverage", async () => {
+    // A second coverable finding for focus-2, and a base plan that only covers
+    // focus-1 → focus-2 is uncovered, triggering the repair. The repair returns
+    // the same base plan (no improvement) so it is rejected.
+    const cover2 = { ...COVERABLE_FINDING, id: "finding-cover2", focusAreaIds: ["focus-2"], supportingReviewIds: ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"] };
+    const areas2: FocusArea[] = [{ id: "focus-1", label: "Pricing" }, { id: "focus-2", label: "Trial" }];
+    const basePlan: PlanningResponse = {
+      title: "Release plan",
+      overview: "o",
+      versions: [{ id: "ver-1", name: "1.0.0", summary: "s", rationale: "r", requirementIds: ["req-1"] }],
+      requirements: [
+        {
+          id: "req-1",
+          findingIds: ["finding-cover"],
+          title: "Lower price",
+          description: "d",
+          priority: "P1",
+          acceptanceCriteria: ["c"],
+          versionId: "ver-1",
+          planningFactors: PLANNING_FACTORS,
+        },
+      ],
+      assumptions: [],
+    };
+    // Repair drops focus-2's requirement entirely (non-monotonic: focus-1 was
+    // covered before, stays covered; focus-2 is still uncovered after). Since
+    // focus-2's finding is in the findings list, base coverage has focus-2 as
+    // UNCOVERED, triggering the repair. The repair still leaves it uncovered →
+    // rejected (no improvement).
+    const repairDrops: PlanningResponse = { ...basePlan };
+    const generate = vi.fn(async () => repairDrops);
+    const ctx: PlanningStageContext = {
+      model: { generate } as never,
+      findings: [COVERABLE_FINDING, cover2],
+      outputLocale: "en",
+      goal: "Understand pricing and trial",
+      focusAreas: areas2,
+    };
+    const result = await runPlanningWithCoverage(ctx);
+    // The repair did not close the gap and did not lose coverage, but it also
+    // made no progress → rejected, keeping the base plan (retried=false).
+    expect(result.goalCoverage.retried).toBe(false);
+    expect(result.goalCoverage.valid).toBe(false); // focus-2 still uncovered
   });
 });

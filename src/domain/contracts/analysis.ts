@@ -56,11 +56,56 @@ export const EvidenceSufficiencySchema = z.object({
 });
 export type EvidenceSufficiency = z.infer<typeof EvidenceSufficiencySchema>;
 
+/** A structured focus dimension split out of the user's analysis goal by the
+ *  scope stage (scope@2). Each area is a concrete dimension the goal asked to
+ *  be covered; downstream stages map findings/requirements back to it so the
+ *  plan demonstrably covers the requested goal. */
+export const FocusAreaSchema = z.object({
+  id: z.string().regex(/^focus-/).min(1),
+  label: z.string().min(1).max(200),
+});
+export type FocusArea = z.infer<typeof FocusAreaSchema>;
+
+/** Coverage status of one goal dimension after planning. */
+export const GoalCoverageStatusSchema = z.enum(["covered", "unsupported", "uncovered"]);
+export type GoalCoverageStatus = z.infer<typeof GoalCoverageStatusSchema>;
+
+/** Per-dimension coverage detail. `findingIds` is the set of sufficient
+ *  findings mapped to the dimension; `requirementIds` is the set of
+ *  requirements that reference those findings. `covered` = the dimension has a
+ *  sufficient finding AND at least one requirement; `unsupported` = no
+ *  sufficient finding (nothing to plan); `uncovered` = sufficient findings
+ *  exist but no requirement was produced for them. */
+export const GoalCoverageItemSchema = z.object({
+  focusAreaId: z.string().min(1),
+  label: z.string().min(1).max(200),
+  status: GoalCoverageStatusSchema,
+  findingIds: z.array(z.string()).default([]),
+  requirementIds: z.array(z.string()).default([]),
+});
+export type GoalCoverageItem = z.infer<typeof GoalCoverageItemSchema>;
+
+/** Deterministic audit of goal coverage across the plan. `valid` is true when
+ *  no dimension with sufficient evidence is left without a requirement;
+ *  `retried` records whether a coverage-repair planning call ran. */
+export const GoalCoverageReportSchema = z.object({
+  valid: z.boolean(),
+  retried: z.boolean(),
+  items: z.array(GoalCoverageItemSchema),
+});
+export type GoalCoverageReport = z.infer<typeof GoalCoverageReportSchema>;
+
 /** A model-generated, evidence-grounded finding. */
 export const FindingSchema = z
   .object({
     id: z.string().regex(/^finding-/).min(1),
     topicIds: z.array(z.string()).default([]),
+    // The goal dimensions this finding maps to. Missing on old cached runs,
+    // where it parses to an empty array (legacy-compatible).
+    focusAreaIds: z.array(z.string()).default([]),
+    // Candidate ids merged into this finding by the semantic consolidation
+    // stage. Empty for findings that were never consolidated.
+    sourceFindingIds: z.array(z.string()).default([]),
     title: z.string().min(1).max(500),
     summary: z.string().min(1).max(5_000),
     supportingReviewIds: z.array(z.string()).min(1),
@@ -165,5 +210,7 @@ export const PrdSchema = z.object({
   versions: z.array(VersionPlanSchema),
   tests: z.array(TestCaseSchema),
   assumptions: z.array(AssumptionSchema).default([]),
+  // Optional so old cached runs without goal coverage stay readable.
+  goalCoverage: GoalCoverageReportSchema.optional(),
 });
 export type Prd = z.infer<typeof PrdSchema>;

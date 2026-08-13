@@ -184,4 +184,45 @@ describe("FinalDeliverablesPanel", () => {
     render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={legacy} t={t} />);
     expect(screen.getAllByText("6")).not.toHaveLength(0);
   });
+
+  it("renders goal coverage items with covered/unsupported statuses", () => {
+    const coverage = {
+      valid: false,
+      retried: true,
+      items: [
+        { focusAreaId: "focus-1", label: "Pricing", status: "covered" as const, findingIds: ["finding-1"], requirementIds: ["req-1"] },
+        { focusAreaId: "focus-2", label: "Trial", status: "unsupported" as const, findingIds: [], requirementIds: [] },
+        { focusAreaId: "focus-3", label: "Usability", status: "uncovered" as const, findingIds: ["finding-3"], requirementIds: [] },
+      ],
+    };
+    render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={manifest} goalCoverage={coverage} t={t} />);
+    expect(screen.getByText(t.goalCoverage)).toBeInTheDocument();
+    expect(screen.getByText("Pricing")).toBeInTheDocument();
+    expect(screen.getByText("Trial")).toBeInTheDocument();
+    expect(screen.getByText("Usability")).toBeInTheDocument();
+    // covered / unsupported / uncovered labels each render.
+    expect(screen.getAllByText(t.goalCoverageCovered).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(t.goalCoverageUnsupported).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(t.goalCoverageUncovered).length).toBeGreaterThan(0);
+    // invalid report shows the coverage-gap badge.
+    expect(screen.getByText(t.goalCoverageGap)).toBeInTheDocument();
+  });
+
+  it("renders goal coverage labels in Chinese", () => {
+    const tZh = getDictionary("zh-CN");
+    const coverage = {
+      valid: true,
+      retried: false,
+      items: [{ focusAreaId: "focus-1", label: "价格", status: "covered" as const, findingIds: ["finding-1"], requirementIds: ["req-1"] }],
+    };
+    render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={manifest} goalCoverage={coverage} t={tZh} />);
+    expect(screen.getByText(tZh.goalCoverage)).toBeInTheDocument();
+    expect(screen.getByText("价格")).toBeInTheDocument();
+    expect(screen.getAllByText(tZh.goalCoverageCovered).length).toBeGreaterThan(0);
+  });
+
+  it("does not render the goal-coverage section for legacy runs without it", () => {
+    render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={manifest} t={t} />);
+    expect(screen.queryByText(t.goalCoverage)).not.toBeInTheDocument();
+  });
 });
