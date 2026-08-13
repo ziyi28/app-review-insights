@@ -3,6 +3,7 @@
 import type { Dictionary } from "@/i18n";
 import type { Finding, Requirement, TestCase } from "@/domain/contracts/analysis";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
+import { findingIdsForRequirements, priorityForRequirements } from "@/domain/traceability/evidence-sources";
 
 export function TopicsPanel({ topics, t }: { topics: { id: string; label: string; description: string; reviewIds: string[] }[]; t: Dictionary }) {
   if (!topics.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
@@ -31,11 +32,26 @@ export function FindingsPanel({ findings, t }: { findings: Finding[]; t: Diction
             <h4 style={{ margin: 0 }}>{f.title}</h4>
             <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
             <ProvenanceBadge kind="computed" label={`${t.confidence}: ${f.confidence.level}`} />
+            {/* Legacy cached findings predate the sufficiency verdict; only
+                new artifacts carry it. */}
+            {f.evidenceSufficiency ? (
+              <ProvenanceBadge
+                kind={f.evidenceSufficiency.status === "sufficient" ? "computed" : "conflict"}
+                label={f.evidenceSufficiency.status === "sufficient" ? t.evidenceSufficient : t.evidenceInsufficient}
+              />
+            ) : null}
           </div>
           <p style={{ margin: "0 0 6px" }}>{f.summary}</p>
           <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
             {t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}: {f.supportingReviewIds.slice(0, 5).join(", ")}
           </p>
+          {f.evidenceSufficiency ? (
+            <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+              {t.evidenceStrength}: <strong>{f.supportingSampleCount}</strong> / {f.evidenceSufficiency.corpusReviewCount} · {t.supportRatio}{" "}
+              {f.evidenceSufficiency.supportRatio.toFixed(4)}
+              {f.evidenceSufficiency.reasons.length > 0 ? ` · ${f.evidenceSufficiency.reasons.join(", ")}` : ""}
+            </p>
+          ) : null}
           {f.evidenceExcerpts.length > 0 ? (
             <ul style={{ margin: "4px 0", paddingLeft: "20px" }}>
               {f.evidenceExcerpts.slice(0, 3).map((e, i) => (
@@ -112,29 +128,48 @@ export function RequirementsPanel({ requirements, versions, assumptions, t }: { 
   );
 }
 
-export function TestsPanel({ tests, t }: { tests: TestCase[]; t: Dictionary }) {
+export function TestsPanel({
+  tests,
+  requirements,
+  t,
+}: {
+  tests: TestCase[];
+  requirements: Requirement[];
+  t: Dictionary;
+}) {
   if (!tests.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
   return (
     <div style={{ display: "grid", gap: "10px" }}>
-      {tests.map((test) => (
-        <div key={test.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <h4 style={{ margin: 0 }}>{test.id}</h4>
-            <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
+      {tests.map((test) => {
+        // Legacy cached artifacts predate the direct Finding/Priority contract;
+        // derive the missing fields from the requirements at the display edge
+        // without mutating the bundled fixture.
+        const findingIds = test.findingIds ?? findingIdsForRequirements(test.requirementIds, requirements);
+        const priority = test.priority ?? priorityForRequirements(test.requirementIds, requirements) ?? "P2";
+        return (
+          <div key={test.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <h4 style={{ margin: 0 }}>{test.id}</h4>
+              <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
+              <ProvenanceBadge kind="computed" label={`${t.priority}: ${priority}`} />
+            </div>
+            <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+              {t.requirementId}: {test.requirementIds.join(", ")} · {t.findingId}: {findingIds.join(", ")} · {t.reviewId}: {test.sourceReviewIds.slice(0, 4).join(", ")}
+            </p>
+            <p style={{ margin: "4px 0", fontSize: "13px" }}>
+              <strong>{t.precondition}:</strong> {test.precondition || "—"}
+            </p>
+            <ol style={{ margin: "4px 0", fontSize: "13px", paddingLeft: "20px" }}>
+              {test.steps.map((s, i) => (
+                <li key={i}>{s}</li>
+              ))}
+            </ol>
+            <p style={{ margin: 0, fontSize: "13px" }}>
+              <strong>{t.expected}:</strong> {test.expectedResult}
+            </p>
           </div>
-          <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
-            {t.reviewId}: {test.sourceReviewIds.slice(0, 4).join(", ")}
-          </p>
-          <ol style={{ margin: "4px 0", fontSize: "13px", paddingLeft: "20px" }}>
-            {test.steps.map((s, i) => (
-              <li key={i}>{s}</li>
-            ))}
-          </ol>
-          <p style={{ margin: 0, fontSize: "13px" }}>
-            <strong>{t.expected}:</strong> {test.expectedResult}
-          </p>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

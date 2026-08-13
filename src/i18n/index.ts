@@ -105,6 +105,14 @@ export type Dictionary = {
   recheck: string;
   useImportInstead: string;
   notChecked: string;
+  evidenceStrength: string;
+  evidenceSufficient: string;
+  evidenceInsufficient: string;
+  supportRatio: string;
+  requirementId: string;
+  findingId: string;
+  priority: string;
+  precondition: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -213,6 +221,14 @@ export const dictionaries: Record<Locale, Dictionary> = {
     recheck: "Re-check",
     useImportInstead: "Use Import instead",
     notChecked: "Not yet checked",
+    evidenceStrength: "Evidence strength",
+    evidenceSufficient: "Sufficient Evidence",
+    evidenceInsufficient: "Insufficient Evidence",
+    supportRatio: "support ratio",
+    requirementId: "Requirement",
+    findingId: "Finding",
+    priority: "Priority",
+    precondition: "Precondition",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -319,6 +335,14 @@ export const dictionaries: Record<Locale, Dictionary> = {
     recheck: "重新检查",
     useImportInstead: "改用导入",
     notChecked: "尚未检查",
+    evidenceStrength: "证据强度",
+    evidenceSufficient: "证据充分",
+    evidenceInsufficient: "证据不足",
+    supportRatio: "支持占比",
+    requirementId: "需求",
+    findingId: "发现",
+    priority: "优先级",
+    precondition: "前置条件",
   },
 };
 

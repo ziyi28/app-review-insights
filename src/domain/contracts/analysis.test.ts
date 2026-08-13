@@ -108,11 +108,13 @@ describe("analysis contracts", () => {
       TestCaseSchema.parse({
         id: "test-1",
         requirementIds: [],
+        findingIds: ["finding-1"],
         sourceReviewIds: ["review-1"],
         testType: "manual",
         precondition: "",
         steps: ["step"],
         expectedResult: "ok",
+        priority: "P1",
       }),
     ).toThrow();
   });
@@ -122,13 +124,44 @@ describe("analysis contracts", () => {
       TestCaseSchema.parse({
         id: "test-1",
         requirementIds: ["req-1"],
+        findingIds: ["finding-1"],
         sourceReviewIds: [],
         testType: "manual",
         precondition: "",
         steps: ["step"],
         expectedResult: "ok",
+        priority: "P1",
       }),
     ).toThrow();
+  });
+
+  it("requires direct finding links and priority on a test case", () => {
+    const parsed = TestCaseSchema.safeParse({
+      id: "test-1",
+      requirementIds: ["req-1"],
+      sourceReviewIds: ["review-1"],
+      testType: "manual",
+      precondition: "signed in",
+      steps: ["step"],
+      expectedResult: "ok",
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("round-trips direct finding links and priority on a test case", () => {
+    const test = TestCaseSchema.parse({
+      id: "test-1",
+      requirementIds: ["req-1"],
+      findingIds: ["finding-1"],
+      sourceReviewIds: ["review-1"],
+      testType: "manual",
+      precondition: "signed in",
+      steps: ["step"],
+      expectedResult: "ok",
+      priority: "P1",
+    });
+    expect(test.findingIds).toEqual(["finding-1"]);
+    expect(test.priority).toBe("P1");
   });
 
   it("round-trips a full prd bundle", () => {
@@ -156,11 +189,13 @@ describe("analysis contracts", () => {
         {
           id: "test-1",
           requirementIds: ["req-1"],
+          findingIds: ["finding-1"],
           sourceReviewIds: ["review-1"],
           testType: "manual",
           precondition: "",
           steps: ["step"],
           expectedResult: "ok",
+          priority: "P1",
         },
       ],
       assumptions: [AssumptionSchema.parse({ id: "asm-1", text: "x", basis: "y" })],

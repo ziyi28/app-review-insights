@@ -347,7 +347,9 @@ export function Workbench() {
               {tab === "topics" ? <TopicsPanel topics={cache.topics?.topics ?? []} t={t} /> : null}
               {tab === "findings" ? <FindingsPanel findings={cache.findings?.findings ?? []} t={t} /> : null}
               {tab === "plan" ? <RequirementsPanel requirements={planPrd?.requirements ?? []} versions={planPrd?.versions ?? []} assumptions={planPrd?.assumptions ?? []} t={t} /> : null}
-              {tab === "tests" ? <TestsPanel tests={testCases} t={t} /> : null}
+              {tab === "tests" ? (
+                <TestsPanel tests={testCases} requirements={planPrd?.requirements ?? []} t={t} />
+              ) : null}
               {tab === "traceability" ? <TraceabilityPanel report={traceReport} t={t} /> : null}
             </div>
           </>
