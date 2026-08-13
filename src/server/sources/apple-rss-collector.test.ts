@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { collectAppleReviews, type CollectorDeps } from "./apple-rss-collector";
+import { buildPageUrl, collectAppleReviews, type CollectorDeps } from "./apple-rss-collector";
 
 function fixture(name: string): string {
   return readFileSync(path.join(process.cwd(), "tests", "fixtures", "apple", name), "utf8");
@@ -30,14 +30,42 @@ function depsFor(urlToBody: Record<string, string>): CollectorDeps {
 }
 
 describe("collectAppleReviews", () => {
+  it("uses Apple's case-sensitive sortBy segment when building page URLs", () => {
+    expect(buildPageUrl("https://itunes.apple.com/us/rss/customerreviews", 1, "839285684")).toBe(
+      "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json",
+    );
+  });
+
+  it("uses App Store-compatible request headers so the live feed returns reviews", async () => {
+    const page1 = JSON.parse(fixture("page-01.json"));
+    page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+      "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+
+    const deps = depsFor({});
+    deps.fetchFn = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const headers = new Headers(init?.headers);
+      const isCompatibleRequest =
+        String(input).includes("/sortBy=mostRecent/json") &&
+        headers.get("accept") === "application/json" &&
+        headers.get("user-agent")?.startsWith("Mozilla/5.0 ");
+      return makeResponse(isCompatibleRequest ? JSON.stringify(page1) : fixture("empty-feed.json"));
+    }) as unknown as typeof fetch;
+    deps.emptyPageRetryDelaysMs = [];
+
+    const result = await collectAppleReviews(deps);
+
+    expect(result.status).toBe("complete");
+    expect(result.reviews).toHaveLength(2);
+  });
+
   it("collects reviews sequentially across pages until pagination ends", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
-    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
     // Advertise lastPage=2 so the empty page 2 is a natural end, not an
     // abnormally early one.
     const page1 = JSON.parse(fixture("page-01.json"));
     page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
-      "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+      "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: JSON.stringify(page1), [url2]: fixture("empty-feed.json") });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("complete");
@@ -46,7 +74,7 @@ describe("collectAppleReviews", () => {
   });
 
   it("treats an HTTP 200 empty first page as suspect-empty", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("empty-feed.json") });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("suspect-empty");
@@ -55,7 +83,7 @@ describe("collectAppleReviews", () => {
   });
 
   it("treats an HTTP 200 feed with no entry property as suspect-empty", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("empty-feed-no-entry.json") });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("suspect-empty");
@@ -64,7 +92,7 @@ describe("collectAppleReviews", () => {
   });
 
   it("keeps a non-array entry property classified as RSS_NON_JSON", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("malformed-feed.json") });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("failed");
@@ -73,7 +101,7 @@ describe("collectAppleReviews", () => {
   });
 
   it("retries an empty page 1 twice and returns suspect-empty without fetching page 2", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("empty-feed.json") });
     const result = await collectAppleReviews(deps);
     // Original attempt + 2 retries (2s, 5s), never reaching page 2.
@@ -90,7 +118,7 @@ describe("collectAppleReviews", () => {
       if (calls.length === 1) return makeResponse(fixture("empty-feed.json"));
       const page1 = JSON.parse(fixture("page-01.json"));
       page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
-        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
       return makeResponse(JSON.stringify(page1));
     });
     const deps = depsFor({});
@@ -105,8 +133,8 @@ describe("collectAppleReviews", () => {
   });
 
   it("marks partial when an empty page is still before the advertised last page", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
-    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
     // page-01.json advertises lastPage=10; page 2 is empty -> abnormal early end.
     const deps = depsFor({ [url1]: fixture("page-01.json"), [url2]: fixture("empty-feed.json") });
     const result = await collectAppleReviews(deps);
@@ -116,11 +144,11 @@ describe("collectAppleReviews", () => {
   });
 
   it("ends pagination naturally without retrying when page >= lastPage", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
-    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
     const page1 = JSON.parse(fixture("page-01.json"));
     page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
-      "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+      "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: JSON.stringify(page1), [url2]: fixture("empty-feed.json") });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("complete");
@@ -137,7 +165,7 @@ describe("collectAppleReviews", () => {
       // and the collector never requests page 2.
       const page1 = JSON.parse(fixture("page-01.json"));
       page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
-        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
       return makeResponse(JSON.stringify(page1));
     });
     const deps = depsFor({});
@@ -158,7 +186,7 @@ describe("collectAppleReviews", () => {
   });
 
   it("marks partial when page 1 succeeds but page 2 fails", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("page-01.json") });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("partial");
@@ -167,7 +195,7 @@ describe("collectAppleReviews", () => {
   });
 
   it("treats an HTTP 200 non-JSON first page as RSS_NON_JSON failure, not suspect-empty", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: "<html>not a feed</html>" });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("failed");
@@ -176,7 +204,7 @@ describe("collectAppleReviews", () => {
   });
 
   it("treats an HTTP 200 body missing a feed object as RSS_NON_JSON failure", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: JSON.stringify({ not: "a feed" }) });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("failed");
@@ -184,8 +212,8 @@ describe("collectAppleReviews", () => {
   });
 
   it("stops when a page repeats the previous body hash", async () => {
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
-    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("page-01.json"), [url2]: fixture("page-01.json") });
     const result = await collectAppleReviews(deps);
     expect(deps.fetchFn).toHaveBeenCalledTimes(2);
@@ -194,8 +222,8 @@ describe("collectAppleReviews", () => {
 
   it("respects the delay between pages", async () => {
     const page1 = fixture("page-01.json");
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
-    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: page1, [url2]: page1 });
     await collectAppleReviews(deps);
     expect(deps.sleep).toHaveBeenCalled();
@@ -203,7 +231,7 @@ describe("collectAppleReviews", () => {
 
   it("caps at max pages", async () => {
     const page1 = fixture("page-01.json");
-    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: page1 });
     deps.maxPages = 2;
     deps.pageDelayMs = 0;
@@ -213,7 +241,7 @@ describe("collectAppleReviews", () => {
     for (let i = 1; i <= 2; i++) {
       const j = JSON.parse(page1);
       j.feed.entry[0].id.label = `page-${i}-id`;
-      bodies[`https://itunes.apple.com/us/rss/customerreviews/page=${i}/id=839285684/sortby=mostRecent/json`] =
+      bodies[`https://itunes.apple.com/us/rss/customerreviews/page=${i}/id=839285684/sortBy=mostRecent/json`] =
         JSON.stringify(j);
     }
     deps.fetchFn = vi.fn(async (input: RequestInfo | URL) => makeResponse(bodies[String(input)] ?? "<error>"));

@@ -52,7 +52,7 @@
 
 ## 4. 数据来源与限制
 
-- **RSS 端点**：`https://itunes.apple.com/us/rss/customerreviews/page={1..10}/id={appId}/sortby=mostRecent/json`。
+- **RSS 端点**：`https://itunes.apple.com/us/rss/customerreviews/page={1..10}/id={appId}/sortBy=mostRecent/json`。
 - **地区**：仅使用 `/us/` 店面前缀；不依赖省略国家代码的 URL。
 - **可见性**：RSS 无公开 SLA；实际通常只暴露约前 10 页（约 500 条）窗口，不能视为完整历史。
 - **空 feed 语义**：page 1 返回 HTTP 200 但无 entry → 两次可见重试（2s/5s，cache-busting）后仍空 → `suspect-empty`，不得解释为“该 App 没有评论”。
