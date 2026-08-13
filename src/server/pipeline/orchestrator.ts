@@ -26,6 +26,25 @@ export type ImportParseShape = {
   evidence: { fileName: string; mediaType: "application/json" | "text/csv"; byteLength: number; sha256: string; schemaVersion: string | null };
 };
 
+/** Provider-aware source summary persisted as the `source-evidence` artifact. */
+export type AppStoreReviewSourceSummary = {
+  kind: "app-store-reviews";
+  provider: "socialcrawl" | "apple-rss";
+  appId: string;
+  storefront: "US";
+  status: "complete" | "suspect-empty" | "partial" | "failed";
+  selection: "live" | "stable";
+  liveCount: number;
+  stableCount: number;
+  reviewCount: number;
+  collectedAt: string;
+  forcedRefresh: boolean;
+  providerCached: boolean | null;
+  requestCount: number;
+  requestId: string | null;
+  creditsUsed: number | null;
+};
+
 /** A pre-collected live dataset taken from a preview snapshot. */
 export type PreviewSourceShape = {
   previewId: string;
@@ -34,19 +53,9 @@ export type PreviewSourceShape = {
   selection: "live" | "stable";
   reviews: RawReview[];
   rawRefs: string[];
-  /** Source limitations carried from the preview (e.g. RSS_CACHE_AUGMENTED). */
+  /** Source limitations carried from the preview (e.g. LOCAL_HISTORY_SELECTED). */
   limitations: Limitation[];
-  sourceSummary: {
-    kind: "apple-rss";
-    appId: string;
-    status: "complete" | "suspect-empty" | "partial" | "failed";
-    selection: "live" | "stable";
-    liveCount: number;
-    stableCount: number;
-    pages: number;
-    requestCount: number;
-    reviewCount: number;
-  };
+  sourceSummary: AppStoreReviewSourceSummary;
 };
 
 export type ExecuteDeps = {
@@ -221,7 +230,7 @@ export async function executeRun(
     const prepared =
       deps.source.kind === "import"
         ? prepareReviews({ kind: "import", parse: deps.source.parse })
-        : prepareReviews({ kind: "apple-rss", reviews: source.rawReviews, rawRefs: source.rawRefs, limitations: source.limitations });
+        : prepareReviews({ kind: "collected", reviews: source.rawReviews, rawRefs: source.rawRefs, limitations: source.limitations });
     reviews = prepared.reviews;
     await publisher.publish({ type: "stage.progress", runId, stage: "prepare", data: { message: `prepared ${reviews.length} reviews for analysis` } });
     limitations.push(...prepared.limitations);

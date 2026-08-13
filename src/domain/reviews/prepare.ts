@@ -1,5 +1,5 @@
 import type { NormalizedReview, RawReview } from "@/domain/contracts/review";
-import type { Limitation } from "@/server/sources/apple-rss-collector";
+import type { Limitation } from "@/server/sources/source-types";
 import type { ImportParseResult } from "@/server/sources/import-parser";
 import { dedupeReviews } from "./dedupe";
 import { computeStats, type ReviewStats } from "./stats";
@@ -18,7 +18,7 @@ type SourceBundle = {
   warnings: string[];
 };
 
-function bundleFromApple(
+function bundleFromCollected(
   reviews: RawReview[],
   rawRefs: string[],
   limitations: Limitation[],
@@ -40,18 +40,19 @@ function bundleFromImport(parse: ImportParseResult): SourceBundle {
 }
 
 /**
- * Builds the prepared review corpus from a source outcome. Source limitations
- * (suspect-empty, partial, import errors) propagate verbatim so downstream
- * findings, PRD and tests inherit the data caveats.
+ * Builds the prepared review corpus from a source outcome. The "collected"
+ * branch is provider-neutral: it carries reviews from Apple RSS or SocialCrawl
+ * alike, so source limitations (suspect-empty, partial, import errors)
+ * propagate verbatim for downstream findings, PRD and tests to inherit.
  */
 export function prepareReviews(
   input:
-    | { kind: "apple-rss"; reviews: RawReview[]; rawRefs: string[]; limitations: Limitation[] }
+    | { kind: "collected"; reviews: RawReview[]; rawRefs: string[]; limitations: Limitation[] }
     | { kind: "import"; parse: ImportParseResult },
 ): PreparedReviews {
   const bundle =
-    input.kind === "apple-rss"
-      ? bundleFromApple(input.reviews, input.rawRefs, input.limitations)
+    input.kind === "collected"
+      ? bundleFromCollected(input.reviews, input.rawRefs, input.limitations)
       : bundleFromImport(input.parse);
 
   const deduped = dedupeReviews(bundle.rawReviews, bundle.rawRefs);
