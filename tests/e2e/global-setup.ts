@@ -4,8 +4,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 // Test-only persistence directories, isolated from real `data/` state so E2E
-// runs never read or write a live app's runs/cache/previews.
-const TEST_ONLY_DIRS = ["runs-e2e", "source-cache-e2e", "source-previews-e2e"];
+// runs never read or write a live app's runs/cache/previews. `config-e2e` holds
+// the settings-page .env.local used by the isolated E2E process.
+const TEST_ONLY_DIRS = ["runs-e2e", "source-cache-e2e", "source-previews-e2e", "config-e2e"];
 
 /**
  * Safely removes the three test-only directories. Each path is resolved against

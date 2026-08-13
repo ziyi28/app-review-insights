@@ -18,8 +18,8 @@ test("cached replay of the bundled fixture never calls upstream", async ({ page 
   await expect(page.locator("footer").getByText(/run.completed/)).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText(/Cached Replay/i).first()).toBeVisible();
 
-  // Replay must not have hit Apple RSS or the model endpoint again.
-  expect(getUpstreamState()).toEqual({ rssRequests: 0, modelRequests: 0 });
+  // Replay must not have hit SocialCrawl, Apple RSS, or the model endpoint again.
+  expect(getUpstreamState()).toEqual({ socialCrawlRequests: 0, rssRequests: 0, modelRequests: 0 });
 
   // Final Deliverables tab shows counts and the legacy fallback: the bundled
   // fixture predates the P1 planning factors, so Version Plan reports it.

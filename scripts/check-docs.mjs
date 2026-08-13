@@ -4,18 +4,60 @@ import process from "node:process";
 
 const root = process.cwd();
 
-const REQUIRED_README = [
-  "Quick Start",
-  "Data Sources and Limitations",
-  "Model Provider and Configuration",
-  "Prompt and Hallucination Controls",
-  "Import Format",
-  "Traceability Rules",
-  "Cached Replay and Data Authenticity",
-  "Failure Handling",
-  "Testing",
-  "Privacy and Security",
-];
+const README_FILES = {
+  "README.md": {
+    sections: [
+      "快速开始",
+      "数据来源与限制",
+      "模型提供方与配置",
+      "提示词与幻觉控制",
+      "导入格式",
+      "追溯规则",
+      "缓存回放与数据真实性",
+      "失败处理",
+      "测试",
+      "隐私与安全",
+    ],
+    capabilities: [
+      "证据验证",
+      "版本规划",
+      "草稿 / 终稿",
+      "3 次尝试",
+      "中国区 App Store",
+      "SocialCrawl",
+      "Apple RSS 降级采集",
+      "SOCIALCRAWL_API_KEY",
+      "depth=500",
+      "no-cache",
+    ],
+  },
+  "README.en.md": {
+    sections: [
+      "Quick Start",
+      "Data Sources and Limitations",
+      "Model Provider and Configuration",
+      "Prompt and Hallucination Controls",
+      "Import Format",
+      "Traceability Rules",
+      "Cached Replay and Data Authenticity",
+      "Failure Handling",
+      "Testing",
+      "Privacy and Security",
+    ],
+    capabilities: [
+      "Evidence Validation",
+      "Version Planning",
+      "Draft/Final",
+      "3 attempts",
+      "China App Store",
+      "SocialCrawl",
+      "Apple RSS fallback",
+      "SOCIALCRAWL_API_KEY",
+      "depth=500",
+      "no-cache",
+    ],
+  },
+};
 
 const REQUIRED_DOCS = [
   "docs/import-format.md",
@@ -34,16 +76,6 @@ const REQUIRED_FIXTURES = [
   "fixtures/demo-runs/run-workout-for-women-us/artifacts/final-report.attempt-01.json",
 ];
 
-// P1 capability facts the docs must keep stating. A doc drift that drops one
-// of these is a failed check even if every other section stays intact.
-const REQUIRED_CAPABILITIES = [
-  "Evidence Validation",
-  "Version Planning",
-  "Draft/Final",
-  "3 attempts",
-  "China App Store",
-];
-
 // Sentences that contradict the bounded visible retry model; their reappearance
 // means the docs drifted back to the old "never auto-retry" claim.
 const FORBIDDEN_STATEMENTS = [
@@ -53,22 +85,29 @@ const FORBIDDEN_STATEMENTS = [
 
 let failed = false;
 
-const readme = readFileSync(path.join(root, "README.md"), "utf8");
-for (const heading of REQUIRED_README) {
-  if (!readme.includes(`## ${heading}`)) {
-    console.error(`README missing section: ## ${heading}`);
-    failed = true;
+const readmeContents = new Map();
+for (const [file, { sections, capabilities }] of Object.entries(README_FILES)) {
+  const readme = readFileSync(path.join(root, file), "utf8");
+  readmeContents.set(file, readme);
+  for (const heading of sections) {
+    if (!readme.includes(`## ${heading}`)) {
+      console.error(`${file} missing section: ## ${heading}`);
+      failed = true;
+    }
+  }
+  for (const token of capabilities) {
+    if (!readme.includes(token)) {
+      console.error(`${file} missing capability token: ${token}`);
+      failed = true;
+    }
   }
 }
-
-for (const token of REQUIRED_CAPABILITIES) {
-  if (!readme.includes(token)) {
-    console.error(`README missing P1 capability token: ${token}`);
-    failed = true;
-  }
-}
+const readme = readmeContents.get("README.en.md");
 const modelAnalysis = readFileSync(path.join(root, "docs/model-analysis.md"), "utf8");
-for (const token of REQUIRED_CAPABILITIES) {
+// model-analysis.md documents the analysis pipeline; it does not need the
+// SocialCrawl acquisition tokens, only the original P1 capability set.
+const P1_CAPABILITIES = ["Evidence Validation", "Version Planning", "Draft/Final", "3 attempts", "China App Store"];
+for (const token of P1_CAPABILITIES) {
   if (!modelAnalysis.includes(token)) {
     console.error(`docs/model-analysis.md missing P1 capability token: ${token}`);
     failed = true;
@@ -93,9 +132,26 @@ for (const f of [...REQUIRED_DOCS, ...REQUIRED_SCRIPTS, ...REQUIRED_FIXTURES]) {
 }
 
 // No secrets must be present anywhere tracked. If a key is supplied via the
-// environment, verify it does not leak into tracked files.
-const secret = process.env.MODEL_API_KEY?.trim();
-if (secret) {
+// environment or the git-ignored `.env.local`, verify it does not leak into
+// tracked files. The value itself is never printed.
+function localEnvValue(name) {
+  if (!existsSync(".env.local")) return undefined;
+  const line = readFileSync(".env.local", "utf8")
+    .split(/\r?\n/)
+    .find((entry) => entry.trim().startsWith(`${name}=`));
+  if (!line) return undefined;
+  const raw = line.slice(line.indexOf("=") + 1).trim();
+  return raw.startsWith('"') && raw.endsWith('"')
+    ? raw.slice(1, -1).replace(/\\"/g, '"').replace(/\\\\/g, "\\")
+    : raw;
+}
+
+const configuredSecrets = [
+  process.env.MODEL_API_KEY?.trim() || localEnvValue("MODEL_API_KEY"),
+  process.env.SOCIALCRAWL_API_KEY?.trim() || localEnvValue("SOCIALCRAWL_API_KEY"),
+].filter((value) => value && value.length >= 12);
+
+for (const secret of configuredSecrets) {
   const { execSync } = await import("node:child_process");
   const tracked = execSync("git ls-files", { cwd: root, encoding: "utf8" });
   const files = tracked.split("\n").filter(Boolean);

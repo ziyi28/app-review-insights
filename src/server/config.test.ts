@@ -233,4 +233,12 @@ describe("env.local read/persist", () => {
   it("defaults envLocalPath to the cwd .env.local when ENV_LOCAL_FILE is unset", () => {
     expect(envLocalPath()).toBe(path.resolve(process.cwd(), ".env.local"));
   });
+
+  it("creates the parent directory when persisting to a nested ENV_LOCAL_FILE", () => {
+    const nested = path.join(mkdtempSync(path.join(tmpdir(), "cfgenv-")), "nested", "dir", ".env.local");
+    process.env.ENV_LOCAL_FILE = nested;
+    persistEnvLocal("MODEL_NAME", "model-x");
+    expect(readEnvLocal()).toEqual({ MODEL_NAME: "model-x" });
+    rmSync(path.dirname(path.dirname(path.dirname(nested))), { recursive: true, force: true });
+  });
 });
