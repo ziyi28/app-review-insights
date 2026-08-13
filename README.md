@@ -190,8 +190,14 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
 
 - Distinct error codes for network / HTTP / timeout / non-JSON / schema
   violations, surfaced as `run.failed` events with stage and error preserved.
-- The only retries are the bounded, visible RSS page-1 retries described under
-  Data Sources; model calls are not auto-retried. The operator re-runs.
+- Model calls are retried a bounded number of times: an initial attempt plus
+  up to 2 retries with 1s/2s backoff. Only transient failures retry — 5xx,
+  network errors, per-call timeouts, and non-JSON/truncated responses. 4xx,
+  schema violations, and client disconnects fail immediately. Every retry
+  surfaces as a `stage.progress` message (e.g. `model retry 2/3 in 1s
+  (MODEL_HTTP_ERROR)`), and the run manifest's `modelUsage` records
+  `attempts`, `retries`, and `retryReasons` (never the response body or key).
+  RSS also retries the first page a bounded number of times (see Data Sources).
 - Without a model, import/live analysis still runs the deterministic stages
   (collect/import, clean, dedupe, stats) and completes with a
   `MODEL_NOT_CONFIGURED` limitation; catalog and cached replay always work.
@@ -243,5 +249,6 @@ fixtures/demo-runs/      real, replayable snapshot
 ## Non-goals
 
 No accounts, collaboration, cloud deployment, background queues, databases, or
-App Store Connect private API. Fuzzy/embedding dedupe and multi-round model
-retries are intentionally out of scope.
+App Store Connect private API. Fuzzy/embedding dedupe and unbounded or semantic
+self-correction model retries are intentionally out of scope (transport-level
+retries are bounded and visible, see Failure Handling).

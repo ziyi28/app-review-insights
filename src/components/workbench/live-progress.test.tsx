@@ -77,4 +77,26 @@ describe("LiveProgress", () => {
     render(<LiveProgress events={events} running t={t} />);
     expect(screen.getByText(/model generation in progress \(137s\)/)).toBeInTheDocument();
   });
+
+  it("keeps a retry warning visible even when a heartbeat arrives after it", () => {
+    const events = [
+      event({ type: "stage.started", sequence: 1, data: { stage: "topics" } }),
+      event({ type: "stage.progress", sequence: 2, data: { message: "model retry 2/3 in 1s (MODEL_HTTP_ERROR)" } }),
+      event({ type: "stage.progress", sequence: 3, data: { message: "model generation in progress (10s)" } }),
+    ];
+    render(<LiveProgress events={events} running t={t} />);
+    expect(screen.getByText(/model retry 2\/3 in 1s \(MODEL_HTTP_ERROR\)/)).toBeInTheDocument();
+    expect(screen.queryByText(/model generation in progress \(10s\)/)).not.toBeInTheDocument();
+  });
+
+  it("clears the retry warning once a new specific message arrives", () => {
+    const events = [
+      event({ type: "stage.started", sequence: 1, data: { stage: "topics" } }),
+      event({ type: "stage.progress", sequence: 2, data: { message: "model retry 2/3 in 1s (MODEL_HTTP_ERROR)" } }),
+      event({ type: "stage.progress", sequence: 3, data: { message: "analyzing review batch 1 of 2" } }),
+    ];
+    render(<LiveProgress events={events} running t={t} />);
+    expect(screen.getByText(/analyzing review batch 1 of 2/)).toBeInTheDocument();
+    expect(screen.queryByText(/model retry 2\/3/)).not.toBeInTheDocument();
+  });
 });
