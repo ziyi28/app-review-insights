@@ -9,6 +9,8 @@ export type RunStreamState = {
   running: boolean;
   error: string | null;
   lastEvent: RunEvent | null;
+  /** Count of streamed lines that failed the event schema and were dropped. */
+  droppedEvents: number;
 };
 
 export type RunStreamActions = {
@@ -28,6 +30,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
   const [events, setEvents] = useState<RunEvent[]>([]);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [droppedEvents, setDroppedEvents] = useState(0);
   const aborter = useRef<AbortController | null>(null);
   const generation = useRef(0);
 
@@ -38,6 +41,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     setEvents([]);
     setRunning(false);
     setError(null);
+    setDroppedEvents(0);
   }, []);
 
   const start = useCallback(async (body: unknown) => {
@@ -48,6 +52,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     setEvents([]);
     setRunning(true);
     setError(null);
+    setDroppedEvents(0);
 
     try {
       const res = await fetch("/api/runs", {
@@ -64,9 +69,15 @@ export function useRunStream(): RunStreamState & RunStreamActions {
 
       const received: RunEvent[] = [];
       await parseNdjsonStream(res.body, (evt) => {
-        // Drop any event that does not conform to the event protocol.
+        // Drop any event that does not conform to the event protocol. A dropped
+        // first event would otherwise leave the UI blank forever with no signal,
+        // so surface the drop instead of swallowing it silently.
         const parsed = RunEventSchema.safeParse(evt);
-        if (!parsed.success) return;
+        if (!parsed.success) {
+          setDroppedEvents((n) => n + 1);
+          console.warn("[useRunStream] dropped non-conforming event", parsed.error.issues[0]?.message);
+          return;
+        }
         if (gen !== generation.current) return; // stale request
         received.push(parsed.data);
         setEvents([...received]);
@@ -79,5 +90,5 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     }
   }, []);
 
-  return { events, running, error, lastEvent: events.at(-1) ?? null, start, reset };
+  return { events, running, error, lastEvent: events.at(-1) ?? null, droppedEvents, start, reset };
 }
