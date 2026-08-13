@@ -56,51 +56,48 @@ function writeSnapshot(preview: SourcePreview): void {
   writeFileSync(path.join(dir, `${preview.previewId}.json`), JSON.stringify(preview), "utf8");
 }
 
-/** A SocialCrawl-backed preview snapshot (forced fresh, 2 reviews). */
-function socialSnapshot(): SourcePreview {
+/** A SerpApi-backed preview snapshot (forced fresh, 2 reviews). */
+function serpSnapshot(): SourcePreview {
   const now = new Date().toISOString();
   const reviews: RawReview[] = [
-    { sourceReviewId: "review-1", source: "socialcrawl-app-store", title: "Useful", body: "The guided workout is clear.", rating: 5, version: "8.2.0", updatedAt: "2026-08-12T00:00:00.000Z" },
-    { sourceReviewId: "review-2", source: "socialcrawl-app-store", title: "Timer issue", body: "The timer resets after backgrounding.", rating: 1, version: "8.2.0", updatedAt: "2026-08-11T00:00:00.000Z" },
+    { sourceReviewId: "review-1", source: "serpapi-apple-reviews", title: "Useful", body: "The guided workout is clear.", rating: 5, version: "8.2.0", updatedAt: "2026-08-12T00:00:00.000Z" },
+    { sourceReviewId: "review-2", source: "serpapi-apple-reviews", title: "Timer issue", body: "The timer resets after backgrounding.", rating: 1, version: "8.2.0", updatedAt: "2026-08-11T00:00:00.000Z" },
   ];
   return {
     protocolVersion: "1",
-    previewId: "preview-social",
+    previewId: "preview-serp",
     appId: "839285684",
     canonicalUrl: "https://apps.apple.com/us/app/x/id839285684",
     createdAt: now,
     expiresAt: new Date(new Date(now).getTime() + 30 * 60 * 1000).toISOString(),
     live: {
-      provider: "socialcrawl",
+      provider: "serpapi",
       forcedRefresh: true,
       cached: false,
       collectedAt: now,
       status: "complete",
       reviewCount: 2,
-      pageCount: 0,
+      pageCount: 1,
       requestCount: 1,
       dateRange: { earliest: "2026-08-11T00:00:00.000Z", latest: "2026-08-12T00:00:00.000Z" },
       limitations: [],
       evidence: {
-        provider: "socialcrawl",
-        endpoint: "/v1/app_store/app-reviews",
-        country: "US",
-        language: "en",
-        requestedDepth: 500,
-        sortBy: "most_recent",
-        forcedRefresh: true,
-        cached: false,
-        requestId: "req_test",
-        creditsUsed: 5,
+        provider: "serpapi",
+        endpoint: "/search.json",
+        engine: "apple_reviews",
+        country: "us",
+        sort: "mostrecent",
+        noCache: true,
         startedAt: now,
         finishedAt: now,
         httpStatus: 200,
-        attemptCount: 1,
-        providerDropped: 0,
+        requestCount: 1,
+        pagesFetched: 1,
+        searchIds: ["search_page_1"],
         parserDropped: 0,
       },
       reviews,
-      rawRefs: reviews.map((r) => `socialcrawl:req_test#review:${r.sourceReviewId}`),
+      rawRefs: reviews.map((r) => `serpapi:search_page_1#review:${r.sourceReviewId}`),
     },
     stable: { available: false, reviewCount: 0, cacheUpdatedAt: null, dateRange: { earliest: null, latest: null }, bootstrapRunId: null, reviews: [] },
     recommendedSelection: "live",
@@ -224,14 +221,14 @@ describe("POST /api/runs preview-backed live", () => {
     expect(body.title).toContain("unavailable");
   });
 
-  it("persists SocialCrawl provider provenance without leaking the key", async () => {
-    writeSnapshot(socialSnapshot());
+  it("persists SerpApi provider provenance without leaking the key", async () => {
+    writeSnapshot(serpSnapshot());
     // No model configured: the deterministic source/prepare stages still run,
     // the source-evidence artifact is still written, and the run completes with
     // MODEL_NOT_CONFIGURED — exactly what this provenance test needs.
     delete process.env.MODEL_BASE_URL;
     delete process.env.MODEL_NAME;
-    const res = await POST(analyzeRequest("preview-social", "live"));
+    const res = await POST(analyzeRequest("preview-serp", "live"));
     expect(res.status).toBe(200);
     // Drain the NDJSON stream: the pipeline runs inside the stream and only
     // completes (writing artifacts) when the stream closes.
@@ -254,16 +251,16 @@ describe("POST /api/runs preview-backed live", () => {
     expect(text).toContain("run.completed");
     expect(sourceEvidence).toMatchObject({
       kind: "app-store-reviews",
-      provider: "socialcrawl",
+      provider: "serpapi",
       appId: "839285684",
       storefront: "US",
       selection: "live",
       reviewCount: 2,
       forcedRefresh: true,
       providerCached: false,
-      requestId: "req_test",
-      creditsUsed: 5,
+      searchCount: 1,
+      searchId: "search_page_1",
     });
-    expect(JSON.stringify(sourceEvidence)).not.toContain("sc_");
+    expect(JSON.stringify(sourceEvidence)).not.toContain("serp_");
   });
 });

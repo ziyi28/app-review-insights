@@ -4,17 +4,24 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { POST } from "./route";
 import { readPreview } from "@/server/sources/source-preview";
-import { resetRuntimeSocialCrawlConfig } from "@/server/config";
+import { resetRuntimeSerpApiConfig } from "@/server/config";
 
 function fixture(name: string): string {
   return readFileSync(path.join(process.cwd(), "tests", "fixtures", "apple", name), "utf8");
 }
 
-function socialFixture(): string {
-  return readFileSync(path.join(process.cwd(), "tests", "fixtures", "socialcrawl", "app-reviews.json"), "utf8");
+function serpFixture(): string {
+  return readFileSync(path.join(process.cwd(), "tests", "fixtures", "serpapi", "apple-reviews-page-01.json"), "utf8");
 }
 
-function socialEnvelope(body: unknown): Response {
+/** The route test wants a single-page response: strip `next` so collection ends. */
+function serpFixtureSinglePage(): string {
+  const body = JSON.parse(serpFixture()) as { serpapi_pagination?: Record<string, unknown> };
+  delete body.serpapi_pagination;
+  return JSON.stringify(body);
+}
+
+function serpEnvelope(body: unknown): Response {
   return new Response(JSON.stringify(body), { status: 200, headers: { "content-type": "application/json" } });
 }
 
@@ -28,15 +35,15 @@ beforeEach(() => {
   process.env.SOURCE_CACHE_DIR = path.join(baseDir, "cache");
   process.env.SOURCE_PREVIEWS_DIR = path.join(baseDir, "previews");
   process.env.APPLE_RSS_PAGE_DELAY_MS = "0";
-  delete process.env.SOCIALCRAWL_API_KEY;
-  delete process.env.SOCIALCRAWL_BASE_URL;
-  resetRuntimeSocialCrawlConfig();
+  delete process.env.SERPAPI_API_KEY;
+  delete process.env.SERPAPI_BASE_URL;
+  resetRuntimeSerpApiConfig();
 });
 
 afterEach(() => {
   process.env = saved;
   vi.unstubAllGlobals();
-  resetRuntimeSocialCrawlConfig();
+  resetRuntimeSerpApiConfig();
   rmSync(baseDir, { recursive: true, force: true });
 });
 
@@ -119,45 +126,44 @@ describe("POST /api/source-previews", () => {
     expect(res.headers.get("cache-control")).toBe("no-store");
   });
 
-  it("uses SocialCrawl when a key is configured and sends the exact wire contract", async () => {
-    process.env.SOCIALCRAWL_API_KEY = "sc_route_test";
+  it("uses SerpApi when a key is configured and sends the exact wire contract", async () => {
+    process.env.SERPAPI_API_KEY = "serp_route_test";
     let capturedUrl = "";
-    let capturedHeaders = new Headers();
-    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       capturedUrl = String(input);
-      capturedHeaders = new Headers(init?.headers);
-      return socialEnvelope(JSON.parse(socialFixture()));
+      return serpEnvelope(JSON.parse(serpFixtureSinglePage()));
     });
     vi.stubGlobal("fetch", fetchMock);
 
     const res = await POST(validBody());
     expect(res.status).toBe(200);
     const json = (await res.clone().json()) as { live: Record<string, unknown>; previewId: string };
-    expect(json.live.provider).toBe("socialcrawl");
+    expect(json.live.provider).toBe("serpapi");
     expect(json.live.reviewCount).toBe(2);
-    expect(json.live.creditsUsed).toBe(5);
-    expect(json.live.requestId).toBe("req_fixture");
+    expect(json.live.searchCount).toBe(1);
+    expect(json.live.searchId).toBe("search_page_1");
 
     const url = new URL(capturedUrl);
-    expect(url.searchParams.get("app_id")).toBe("839285684");
-    expect(url.searchParams.get("country")).toBe("US");
-    expect(url.searchParams.get("language")).toBe("en");
-    expect(url.searchParams.get("depth")).toBe("500");
-    expect(url.searchParams.get("sort_by")).toBe("most_recent");
-    expect(capturedHeaders?.get("cache-control")).toBe("no-cache");
-    expect(capturedHeaders?.get("x-api-key")).toBe("sc_route_test");
-    expect(capturedHeaders?.get("idempotency-key")).toBe(json.previewId);
-    // The key must never leak into the public response or the snapshot.
-    expect(JSON.stringify(await res.clone().json())).not.toContain("sc_route_test");
-    expect(JSON.stringify(await readPreview(process.env.SOURCE_PREVIEWS_DIR!, json.previewId))).not.toContain("sc_route_test");
+    expect(url.searchParams.get("engine")).toBe("apple_reviews");
+    expect(url.searchParams.get("product_id")).toBe("839285684");
+    expect(url.searchParams.get("country")).toBe("us");
+    expect(url.searchParams.get("sort")).toBe("mostrecent");
+    expect(url.searchParams.get("page")).toBe("1");
+    expect(url.searchParams.get("no_cache")).toBe("true");
+    expect(url.searchParams.get("api_key")).toBe("serp_route_test");
+    // The key must never leak into the public response, the request URL in the
+    // public response, or the snapshot.
+    expect(JSON.stringify(await res.clone().json())).not.toContain("serp_route_test");
+    expect(JSON.stringify(await res.clone().json())).not.toContain("/search.json");
+    expect(JSON.stringify(await readPreview(process.env.SOURCE_PREVIEWS_DIR!, json.previewId))).not.toContain("serp_route_test");
   });
 
-  it("uses SocialCrawl for a China page URL with country=US", async () => {
-    process.env.SOCIALCRAWL_API_KEY = "sc_route_test";
+  it("uses SerpApi for a China page URL with country=us", async () => {
+    process.env.SERPAPI_API_KEY = "serp_route_test";
     let capturedUrl = "";
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       capturedUrl = String(input);
-      return socialEnvelope(JSON.parse(socialFixture()));
+      return serpEnvelope(JSON.parse(serpFixtureSinglePage()));
     });
     vi.stubGlobal("fetch", fetchMock);
     const res = await POST(new Request("http://localhost/api/source-previews", {
@@ -166,6 +172,6 @@ describe("POST /api/source-previews", () => {
       body: JSON.stringify({ protocolVersion: "1", appStoreUrl: "https://apps.apple.com/cn/app/workout-for-women-home-gym/id839285684" }),
     }));
     expect(res.status).toBe(200);
-    expect(new URL(capturedUrl).searchParams.get("country")).toBe("US");
+    expect(new URL(capturedUrl).searchParams.get("country")).toBe("us");
   });
 });

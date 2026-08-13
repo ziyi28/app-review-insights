@@ -60,7 +60,7 @@ function deps(overrides: Partial<SerpApiCollectorDeps>): SerpApiCollectorDeps {
 
 describe("collectSerpApiReviews", () => {
   it("requests forced-fresh US reviews and returns normalized reviews", async () => {
-    const fetchFn = vi.fn(async () => jsonResponse(JSON.parse(fixture("apple-reviews-page-01.json")))) as unknown as typeof fetch;
+    const fetchFn = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(async () => jsonResponse(JSON.parse(fixture("apple-reviews-page-01.json"))));
     const result = await collectSerpApiReviews(deps({ fetchFn }));
 
     const requested = new URL(String(fetchFn.mock.calls[0][0]));
@@ -210,12 +210,12 @@ describe("collectSerpApiReviews", () => {
 
   it("caps pagination at 500 reviews and never exceeds 20 pages", async () => {
     const pageSize = 30;
-    const fetchFn = vi.fn(async (input: RequestInfo | URL) => {
+    const fetchFn = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(async (input: RequestInfo | URL) => {
       const url = new URL(String(input));
       const page = Number(url.searchParams.get("page"));
       const items = Array.from({ length: pageSize }, (_, i) => reviewItem(`p${page}-${i}`));
       return jsonResponse(serpPage(items, { hasNext: true, page, searchId: `search_page_${page}` }));
-    }) as unknown as typeof fetch;
+    });
 
     const result = await collectSerpApiReviews(deps({ fetchFn }));
     expect(result.reviews).toHaveLength(SERPAPI_REVIEW_LIMIT);
