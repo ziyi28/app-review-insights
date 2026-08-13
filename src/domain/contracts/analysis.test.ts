@@ -18,12 +18,50 @@ describe("analysis contracts", () => {
     evidenceExcerpts: [{ reviewId: "review-1", excerpt: "too expensive" }],
     conflictingReviewIds: [],
     confidence: { level: "low", method: "deterministic-v1", reasons: ["small sample"] },
+    evidenceSufficiency: {
+      status: "insufficient",
+      corpusReviewCount: 3000,
+      supportRatio: 2 / 3000,
+      reasons: ["SUPPORT_BELOW_MINIMUM"],
+    },
     uncertainties: [],
     limitations: [],
   };
 
   it("accepts a finding with supporting evidence", () => {
     expect(FindingSchema.parse(validFinding).supportingSampleCount).toBe(2);
+  });
+
+  it("rejects a finding with a bad sufficiency status", () => {
+    expect(() =>
+      FindingSchema.parse({
+        ...validFinding,
+        evidenceSufficiency: { status: "enough", corpusReviewCount: 100, supportRatio: 0.5, reasons: [] },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a finding with an out-of-range support ratio", () => {
+    expect(() =>
+      FindingSchema.parse({
+        ...validFinding,
+        evidenceSufficiency: { status: "sufficient", corpusReviewCount: 100, supportRatio: 1.5, reasons: [] },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a finding with an unknown sufficiency reason", () => {
+    expect(() =>
+      FindingSchema.parse({
+        ...validFinding,
+        evidenceSufficiency: {
+          status: "insufficient",
+          corpusReviewCount: 100,
+          supportRatio: 0.01,
+          reasons: ["UNKNOWN_REASON"],
+        },
+      }),
+    ).toThrow();
   });
 
   it("rejects a finding without supporting reviews", () => {

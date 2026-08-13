@@ -17,6 +17,20 @@ export const ConfidenceSchema = z.object({
 });
 export type Confidence = z.infer<typeof ConfidenceSchema>;
 
+/** Deterministic verdict on whether the evidence supports a broad or critical claim. */
+export const EvidenceSufficiencySchema = z.object({
+  status: z.enum(["sufficient", "insufficient"]),
+  corpusReviewCount: z.number().int().min(0),
+  supportRatio: z.number().min(0).max(1),
+  reasons: z.array(z.enum([
+    "SUPPORT_BELOW_MINIMUM",
+    "SUPPORT_RATIO_BELOW_MINIMUM",
+    "SOURCE_NOT_COMPLETE",
+    "CONFLICT_NOT_MINOR",
+  ])).default([]),
+});
+export type EvidenceSufficiency = z.infer<typeof EvidenceSufficiencySchema>;
+
 /** A model-generated, evidence-grounded finding. */
 export const FindingSchema = z
   .object({
@@ -29,6 +43,7 @@ export const FindingSchema = z
     evidenceExcerpts: z.array(EvidenceExcerptSchema).default([]),
     conflictingReviewIds: z.array(z.string()).default([]),
     confidence: ConfidenceSchema,
+    evidenceSufficiency: EvidenceSufficiencySchema,
     uncertainties: z.array(z.string()).default([]),
     limitations: z.array(z.string()).default([]),
   })
