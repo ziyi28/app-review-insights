@@ -51,11 +51,18 @@ const TABS: { id: Tab; labelKey: keyof Dictionary }[] = [
   { id: "deliverables", labelKey: "finalDeliverables" },
 ];
 
+type SourceEvidence = {
+  kind: "app-store-reviews" | "apple-rss" | "import";
+  provider?: "socialcrawl" | "apple-rss";
+  selection?: "live" | "stable";
+};
+
 type ArtifactCache = {
   runId: string | null;
   scope?: unknown;
   cleaned?: { reviews: unknown[]; stats?: unknown };
   stats?: unknown;
+  sourceEvidence?: SourceEvidence;
   topicCandidates?: { candidates: { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string }[] };
   topics?: { topics: { id: string; label: string; description: string; reviewIds: string[] }[] };
   findings?: { findings: Finding[] };
@@ -90,15 +97,22 @@ export function Workbench() {
 
   const runId = useMemo(() => events.find((e) => e.type === "run.accepted")?.runId ?? null, [events]);
 
-  // Source provenance: prefer the structured event data (limitation codes)
-  // over the deliveryMode fallback, so Imported / Partial / Suspect Empty are
-  // never mislabeled as Live.
+  // Source provenance: prefer the structured source-evidence artifact, then the
+  // event/limitation signals, over the deliveryMode fallback — so Imported /
+  // Partial / Suspect Empty and the SocialCrawl provider are never mislabeled.
   const sourceBadge = useMemo(() => {
     const last = events.at(-1);
     if (last?.deliveryMode === "cached-replay") return { kind: "limitation" as const, label: t.cachedReplay };
+    const evidence = cache.sourceEvidence;
+    if (evidence?.kind === "app-store-reviews" && evidence.provider === "socialcrawl") {
+      return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceSocialCrawlHistory : t.sourceSocialCrawl };
+    }
+    if (evidence?.kind === "app-store-reviews" && evidence.provider === "apple-rss") {
+      return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceRssHistory : t.sourceRssFallback };
+    }
     const texts = events.map((e) => JSON.stringify(e.data ?? {}));
     // A stable sample augmented by the review cache is a hybrid source.
-    if (texts.some((s) => s.includes("RSS_CACHE_AUGMENTED"))) return { kind: "source" as const, label: t.sourceLiveCache };
+    if (texts.some((s) => s.includes("LOCAL_HISTORY_SELECTED") || s.includes("RSS_CACHE_AUGMENTED"))) return { kind: "source" as const, label: t.sourceLiveCache };
     if (texts.some((s) => s.includes("RSS_SUSPECT_EMPTY"))) return { kind: "conflict" as const, label: t.sourceSuspectEmpty };
     if (texts.some((s) => s.includes("IMPORT_ERROR") || s.includes("RSS_PARTIAL") || s.includes("RSS_UNSTABLE_PAGINATION"))) return { kind: "conflict" as const, label: t.sourcePartial };
     // If a limitation.reported carries no import/partial marker but the run
@@ -107,7 +121,7 @@ export function Workbench() {
       return { kind: "source" as const, label: t.sourceImported };
     }
     return { kind: "source" as const, label: t.sourceLive };
-  }, [events, t]);
+  }, [events, cache.sourceEvidence, t]);
 
   // Load artifacts as they become available via the event stream.
   const artifactNameToKey = useMemo(() => {
@@ -115,6 +129,7 @@ export function Workbench() {
       "scope": "scope",
       "cleaned-reviews": "cleaned",
       "stats": "stats",
+      "source-evidence": "sourceEvidence",
       "topic-candidates": "topicCandidates",
       "topics": "topics",
       "findings": "findings",

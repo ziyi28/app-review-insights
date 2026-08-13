@@ -115,6 +115,19 @@ export type Dictionary = {
   evidenceSufficient: string;
   evidenceInsufficient: string;
   supportRatio: string;
+  freshReviews: string;
+  localHistoryReviews: string;
+  socialCrawlFresh: string;
+  socialCrawlCached: string;
+  appleRssFallback: string;
+  creditsUsed: string;
+  analyzeFresh: string;
+  analyzeHistory: string;
+  freshnessCaveat: string;
+  sourceSocialCrawl: string;
+  sourceSocialCrawlHistory: string;
+  sourceRssFallback: string;
+  sourceRssHistory: string;
   requirementId: string;
   findingId: string;
   priority: string;
@@ -261,6 +274,19 @@ export const dictionaries: Record<Locale, Dictionary> = {
     evidenceSufficient: "Sufficient Evidence",
     evidenceInsufficient: "Insufficient Evidence",
     supportRatio: "support ratio",
+    freshReviews: "fresh reviews",
+    localHistoryReviews: "local-history reviews",
+    socialCrawlFresh: "SocialCrawl · fresh fetch",
+    socialCrawlCached: "SocialCrawl · provider cache",
+    appleRssFallback: "Apple RSS fallback",
+    creditsUsed: "Credits used",
+    analyzeFresh: "Analyze fresh sample",
+    analyzeHistory: "Analyze local history",
+    freshnessCaveat: "Fresh fetch requested; App Store publication may still be delayed.",
+    sourceSocialCrawl: "SocialCrawl / US App Store",
+    sourceSocialCrawlHistory: "SocialCrawl / US App Store · Local history",
+    sourceRssFallback: "Apple RSS fallback / US App Store",
+    sourceRssHistory: "Apple RSS fallback / US App Store · Local history",
     requirementId: "Requirement",
     findingId: "Finding",
     priority: "Priority",
@@ -405,6 +431,19 @@ export const dictionaries: Record<Locale, Dictionary> = {
     evidenceSufficient: "证据充分",
     evidenceInsufficient: "证据不足",
     supportRatio: "支持占比",
+    freshReviews: "条最新采集评论",
+    localHistoryReviews: "条本地历史评论",
+    socialCrawlFresh: "SocialCrawl · 强制刷新",
+    socialCrawlCached: "SocialCrawl · 服务商缓存",
+    appleRssFallback: "Apple RSS 降级采集",
+    creditsUsed: "本次使用 credits",
+    analyzeFresh: "分析最新样本",
+    analyzeHistory: "分析本地历史样本",
+    freshnessCaveat: "已请求强制刷新；App Store 评论发布本身仍可能有延迟。",
+    sourceSocialCrawl: "SocialCrawl / 美国区 App Store",
+    sourceSocialCrawlHistory: "SocialCrawl / 美国区 App Store · 本地历史",
+    sourceRssFallback: "Apple RSS 降级采集 / 美国区 App Store",
+    sourceRssHistory: "Apple RSS 降级采集 / 美国区 App Store · 本地历史",
     requirementId: "需求",
     findingId: "发现",
     priority: "优先级",

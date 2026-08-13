@@ -16,12 +16,18 @@ type SourcePreviewSummary = {
   createdAt: string;
   expiresAt: string;
   live: {
+    provider: "socialcrawl" | "apple-rss";
+    forcedRefresh: boolean;
+    cached: boolean | null;
+    collectedAt: string;
     status: string;
     reviewCount: number;
     pageCount: number;
     requestCount: number;
     dateRange: { earliest: string | null; latest: string | null };
     limitations: { code: string; message: string }[];
+    creditsUsed: number | null;
+    requestId: string | null;
   };
   stable: {
     available: boolean;
@@ -150,6 +156,21 @@ export function RunForm({ t, onStart }: RunFormProps) {
   const liveDisabled = preview !== null && preview !== "loading" && preview.live.reviewCount === 0;
   const stableDisabled = preview !== null && preview !== "loading" && !preview.stable.available;
 
+  // Honest provider label: forced-fresh SocialCrawl, provider-cached
+  // SocialCrawl, or an explicit Apple RSS fallback.
+  const providerLabel =
+    preview !== null && preview !== "loading" && preview.live.provider === "socialcrawl"
+      ? preview.live.cached
+        ? t.socialCrawlCached
+        : t.socialCrawlFresh
+      : t.appleRssFallback;
+
+  // Map stable error codes to user-facing text without echoing upstream bodies.
+  const fallbackReason =
+    preview !== null && preview !== "loading"
+      ? preview.live.limitations.find((l) => l.code.startsWith("SOCIALCRAWL_"))
+      : undefined;
+
   return (
     <form onSubmit={handleSubmit} style={{ display: "grid", gap: "10px" }}>
       <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
@@ -184,10 +205,18 @@ export function RunForm({ t, onStart }: RunFormProps) {
                     <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "10px", background: "var(--accent)", color: "#fff" }}>{t.recommended}</span>
                   ) : null}
                 </div>
-                <p style={{ fontSize: "13px", margin: "6px 0 2px" }}>{t.liveReviews}: {preview.live.reviewCount}</p>
-                <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>
-                  {preview.live.pageCount} page{preview.live.pageCount === 1 ? "" : "s"} · {preview.live.status}
-                </p>
+                <p style={{ fontSize: "13px", margin: "6px 0 2px" }}>{preview.live.reviewCount} {t.freshReviews}</p>
+                <p style={{ fontSize: "12px", color: "var(--accent)", margin: "2px 0", fontWeight: 600 }}>{providerLabel}</p>
+                {preview.live.collectedAt ? (
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>{new Date(preview.live.collectedAt).toLocaleString()}</p>
+                ) : null}
+                {preview.live.provider === "socialcrawl" && preview.live.creditsUsed !== null && typeof preview.live.creditsUsed === "number" ? (
+                  <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>{t.creditsUsed}: {preview.live.creditsUsed}</p>
+                ) : null}
+                {fallbackReason ? (
+                  <p style={{ fontSize: "12px", color: "var(--warn)", margin: "2px 0" }}>{t.appleRssFallback} · SocialCrawl credits unavailable</p>
+                ) : null}
+                <p style={{ fontSize: "11px", color: "var(--text-muted)", margin: "4px 0" }}>{t.freshnessCaveat}</p>
                 {liveDisabled ? (
                   <p style={{ fontSize: "12px", color: "var(--warn)", margin: "4px 0" }}>{t.noSampleAvailable}</p>
                 ) : (
@@ -196,7 +225,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
                     onClick={() => startWithPreview("live")}
                     style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "6px", background: "var(--accent-strong)", color: "#fff", fontWeight: 600 }}
                   >
-                    {t.chooseLive}
+                    {t.analyzeFresh}
                   </button>
                 )}
               </div>
@@ -209,7 +238,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
                     <span style={{ fontSize: "11px", padding: "2px 6px", borderRadius: "10px", background: "var(--accent)", color: "#fff" }}>{t.recommended}</span>
                   ) : null}
                 </div>
-                <p style={{ fontSize: "13px", margin: "6px 0 2px" }}>{t.stableReviews}: {preview.stable.reviewCount}</p>
+                <p style={{ fontSize: "13px", margin: "6px 0 2px" }}>{preview.stable.reviewCount} {t.localHistoryReviews}</p>
                 <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "2px 0" }}>
                   {t.cacheUpdated}: {preview.stable.cacheUpdatedAt ? new Date(preview.stable.cacheUpdatedAt).toLocaleString() : "—"}
                 </p>
@@ -221,7 +250,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
                     onClick={() => startWithPreview("stable")}
                     style={{ marginTop: "8px", padding: "8px 12px", borderRadius: "6px", background: "var(--accent-strong)", color: "#fff", fontWeight: 600 }}
                   >
-                    {t.chooseStable}
+                    {t.analyzeHistory}
                   </button>
                 )}
               </div>
