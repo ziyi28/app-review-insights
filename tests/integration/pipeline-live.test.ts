@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdtempSync, rmSync, readFileSync } from "node:fs";
+import { mkdtempSync, rmSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { RunStore } from "@/server/runs/run-store";
@@ -204,8 +204,6 @@ describe("executeRun (live pipeline)", () => {
       JSON.stringify({ interpretation: "Pricing focus", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
       JSON.stringify({ topics: [] }),
       JSON.stringify({ findings: [] }),
-      JSON.stringify({ title: "x", overview: "y", versions: [], requirements: [], assumptions: [] }),
-      JSON.stringify({ tests: [] }),
     ]);
     const deps = makeDeps(model);
     deps.fetchFn = (async (input: RequestInfo | URL) => {
@@ -220,8 +218,11 @@ describe("executeRun (live pipeline)", () => {
 
     const manifest = await store.readManifest(runId);
     expect(manifest.limitations.some((l) => l.code === "RSS_PARTIAL")).toBe(true);
-    // Analysis proceeded into model stages despite partial source.
-    expect(model.callIndex).toBe(5);
+    // No findings survived validation -> the run short-circuits after
+    // scope/topics/findings (callIndex === 3); planning/tests never run.
+    expect(model.callIndex).toBe(3);
+    expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
+    expect(manifest.canReplay).toBe(false);
   });
 
   it("marks a feed with no entry property suspect-empty and does not enter model stages", async () => {
@@ -400,5 +401,64 @@ describe("executeRun (live pipeline)", () => {
     expect(manifest.status).toBe("completed");
     expect(manifest.limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")).toBe(true);
     expect(model.callIndex).toBe(0);
+  });
+
+  it("keeps a valid-but-insufficient finding and downgrades its requirement to P2 with no version", async () => {
+    // corpus = 1 review; finding survives with exact excerpt but its evidence
+    // is insufficient (2-support floor not met). The requirement must be
+    // pinned to P2/null by the deterministic guardrail even though the model
+    // returned P1/ver-1, and the version must not claim it.
+    const model = new ScriptedModelClient(await buildScript());
+    const deps = makeDeps(model);
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
+    // planning/tests still run (a finding exists, it is just insufficient),
+    // so the full 6-stage script executes.
+    expect(model.callIndex).toBe(6);
+    const prd = (await store.readArtifact(runId, "prd", 1)) as {
+      requirements: { priority: string; versionId: string | null }[];
+      versions: { requirementIds: string[] }[];
+      findings: { evidenceSufficiency: { status: string } }[];
+    };
+    expect(prd.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
+    expect(prd.versions[0].requirementIds).not.toContain("req-1");
+  });
+
+  it("short-circuits with insufficient-evidence when no findings survive", async () => {
+    const model = new ScriptedModelClient([
+      JSON.stringify({ interpretation: "Pricing focus", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
+      JSON.stringify({ topics: [] }),
+      JSON.stringify({ findings: [] }),
+    ]);
+    const deps = makeDeps(model);
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
+    expect(manifest.canReplay).toBe(false);
+    // Only scope/topics/findings ran.
+    expect(model.callIndex).toBe(3);
+    // No planning/tests artifacts on disk.
+    const artifact = (name: string) => path.join(store.resolveRunDir(runId), "artifacts", `${name}.attempt-01.json`);
+    expect(existsSync(artifact("prd"))).toBe(false);
+    expect(existsSync(artifact("tests"))).toBe(false);
+    // Final report carries null prd/report.
+    const finalReport = (await store.readArtifact(runId, "final-report", 1)) as {
+      prd: unknown;
+      report: unknown;
+    };
+    expect(finalReport.prd).toBeNull();
+    expect(finalReport.report).toBeNull();
   });
 });

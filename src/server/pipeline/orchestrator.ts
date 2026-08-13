@@ -313,8 +313,34 @@ export async function executeRun(
     await publishArtifact("findings", 1, findingsResult);
     await endStage("findings");
 
+    // Evidence guardrail: a run with no surviving findings, or where every
+    // finding is short of the evidentiary bar, cannot support a broad or
+    // critical plan. A run with ZERO findings stops here — no planning/tests
+    // model calls, no PRD/test artifacts, and a final report that cannot be
+    // replayed as a complete analysis. A run that has findings (even if all
+    // are insufficient) still proceeds; the planning stage pins their
+    // requirements to P2 with no target version.
+    const insufficientFindings = findingsResult.findings.filter(
+      (finding) => finding.evidenceSufficiency.status === "insufficient",
+    );
+    if (findingsResult.findings.length === 0 || insufficientFindings.length > 0) {
+      const limitation: Limitation = {
+        code: "INSUFFICIENT_EVIDENCE",
+        message:
+          findingsResult.findings.length === 0
+            ? "No evidence-backed findings survived validation"
+            : `${insufficientFindings.length} of ${findingsResult.findings.length} findings have insufficient evidence for broad or critical claims`,
+        stage: "findings",
+      };
+      limitations.push(limitation);
+      await publisher.publish({ type: "limitation.reported", runId, stage: "findings", data: limitation });
+    }
+
     if (findingsResult.findings.length === 0) {
-      limitations.push({ code: "INSUFFICIENT_EVIDENCE", message: "No evidence-backed findings survived validation", stage: "findings" });
+      await publishArtifact("final-report", 1, { prd: null, report: null, limitations });
+      await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-evidence", limitations } });
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      return;
     }
 
     // Planning
