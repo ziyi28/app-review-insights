@@ -20,4 +20,11 @@ describe("i18n dictionaries", () => {
     expect(dictionaries.en.appStoreUrl).toMatch(/storefront/i);
     expect(dictionaries["zh-CN"].appStoreUrl).toContain("美国区");
   });
+
+  it("provides key P1 workflow labels in Chinese", () => {
+    const zh = dictionaries["zh-CN"];
+    for (const key of ["classification", "evidenceValidation", "finalDeliverables", "draft", "final", "noRevisionRequired", "legacyArtifactUnavailable", "versionRationale", "modelAttempts", "modelRetries", "modelRetryReasons", "factorSeverity", "factorEvidenceStrength", "factorConfidence", "factorUserImpact", "factorFrequency", "factorImplementationScope", "factorDependency"] as const) {
+      expect(zh[key].trim().length).toBeGreaterThan(0);
+    }
+  });
 });

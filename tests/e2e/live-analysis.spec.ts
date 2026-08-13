@@ -32,6 +32,19 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   await page.getByRole("button", { name: /Findings/i }).click();
   await expect(page.getByText(/Loves variety/i)).toBeVisible({ timeout: 10_000 });
 
+  // Classification tab shows the discovered candidates.
+  await page.getByRole("button", { name: /Classification/i }).click();
+  await expect(page.getByText(/Workout quality/i)).toBeVisible({ timeout: 10_000 });
+
+  // Evidence Validation tab shows the audit counts.
+  await page.getByRole("button", { name: /Evidence Validation/i }).click();
+  await expect(page.getByText(/Insufficient Evidence/i).first()).toBeVisible({ timeout: 10_000 });
+
+  // Version Plan tab renders the per-requirement decision (small sample -> no
+  // target release), without fabricating a version.
+  await page.getByRole("button", { name: /Version Plan/i }).click();
+  await expect(page.getByText("req-1", { exact: true }).first()).toBeVisible({ timeout: 10_000 });
+
   // Traceability passes.
   await page.getByRole("button", { name: /Traceability/i }).click();
   await expect(page.getByText(/Completed/)).toBeVisible();
@@ -50,4 +63,9 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   // The guardrail pins the small-sample requirement to P2 (shown as a badge);
   // both test cards carry it, so `.first()` is fine.
   await expect(page.getByText(/Priority:\s*P2/i).first()).toBeVisible();
+
+  // Final Deliverables tab shows counts, traceability status and model usage.
+  await page.getByRole("button", { name: /Final Deliverables/i }).click();
+  await expect(page.getByText(/Test Cases/i).first()).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/Traceability/i).first()).toBeVisible();
 });

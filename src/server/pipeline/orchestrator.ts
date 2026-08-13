@@ -424,7 +424,7 @@ export async function executeRun(
         {
           title: prd.title,
           overview: prd.overview,
-          versions: prd.versions,
+          versions: prd.versions.map((v) => ({ ...v, rationale: v.rationale ?? v.summary })),
           requirements: (revision.requirements as PlanningOutput["requirements"]) ?? [],
           assumptions: (revision.assumptions as PlanningOutput["assumptions"]) ?? [],
         },
