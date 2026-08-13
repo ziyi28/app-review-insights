@@ -1,11 +1,19 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
-import type { Limitation } from "./apple-rss-collector";
+import type { Limitation, CollectionStatus } from "./source-types";
 import { collectAppleReviews, type CollectorDeps, type SourceResult } from "./apple-rss-collector";
+import { collectSocialCrawlReviews, type SocialCrawlEvidence, type SocialCrawlCollectorDeps } from "./socialcrawl-collector";
 import { AppleReviewCacheStore } from "./apple-review-cache";
 
 export const PREVIEW_TTL_MS = 30 * 60 * 1000;
+
+/** Which live provider produced this preview's fresh sample. */
+export type LiveProvider = "socialcrawl" | "apple-rss";
+
+type LiveSourceEvidence =
+  | SocialCrawlEvidence
+  | { provider: "apple-rss"; pageCount: number; requestCount: number };
 
 export type SourcePreview = {
   protocolVersion: "1";
@@ -16,12 +24,18 @@ export type SourcePreview = {
   expiresAt: string;
   /** Full snapshot held server-side; the API response only exposes summaries. */
   live: {
-    status: SourceResult["status"];
+    provider: LiveProvider;
+    forcedRefresh: boolean;
+    cached: boolean | null;
+    collectedAt: string;
+    status: CollectionStatus;
     reviewCount: number;
     pageCount: number;
     requestCount: number;
     dateRange: { earliest: string | null; latest: string | null };
     limitations: Limitation[];
+    /** Secret-free provider metadata (request id, credits used…). */
+    evidence: LiveSourceEvidence;
     /** Full live reviews, never sent to the browser. */
     reviews: RawReview[];
     rawRefs: string[];
@@ -43,7 +57,9 @@ export type PreviewInput = {
   appId: string;
   canonicalUrl: string;
   now: string;
-  collector: CollectorDeps;
+  /** SocialCrawl deps, or null when the key is not configured. */
+  socialCrawlCollector: SocialCrawlCollectorDeps | null;
+  rssCollector: CollectorDeps;
   /** Root where preview snapshots are stored. */
   previewsDir: string;
   /** Root where the review cache lives. */
@@ -58,21 +74,63 @@ export function buildPreviewSnapshot(input: PreviewInput): Promise<SourcePreview
 }
 
 export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview> {
-  const { previewId, appId, canonicalUrl, now, collector, previewsDir, cacheDir, historyRoots, runsDir } = input;
+  const { previewId, appId, canonicalUrl, now, socialCrawlCollector, rssCollector, previewsDir, cacheDir, historyRoots, runsDir } = input;
   const createdAt = now;
   const expiresAt = new Date(new Date(createdAt).getTime() + PREVIEW_TTL_MS).toISOString();
 
-  const liveResult = await collectAppleReviews(collector);
-  const live: SourcePreview["live"] = {
-    status: liveResult.status,
-    reviewCount: liveResult.reviews.length,
-    pageCount: liveResult.pages.length,
-    requestCount: liveResult.pages.reduce((n, p) => n + p.attempt, 0),
-    dateRange: dateRangeOf(liveResult.reviews),
-    limitations: liveResult.limitations,
-    reviews: liveResult.reviews,
-    rawRefs: liveResult.rawRefs,
-  };
+  // One live provider per preview: SocialCrawl when configured and it returns
+  // valid reviews; otherwise an explicit RSS fallback. A partial SocialCrawl
+  // result is kept as-is and never mixed with RSS reviews.
+  const social = socialCrawlCollector ? await collectSocialCrawlReviews(socialCrawlCollector) : null;
+  const useSocial = social !== null && social.reviews.length > 0;
+  const rss = useSocial ? null : await collectAppleReviews(rssCollector);
+  const selected = useSocial ? social : rss!;
+
+  const limitations: Limitation[] = [];
+  if (social === null) {
+    limitations.push({
+      code: "SOCIALCRAWL_NOT_CONFIGURED",
+      message: "SocialCrawl is not configured; falling back to Apple RSS",
+      stage: "source",
+    });
+  } else if (!useSocial) {
+    // Preserve every SocialCrawl limitation before the RSS fallback reason.
+    limitations.push(...social.limitations);
+  }
+  limitations.push(...selected.limitations);
+
+  const isSocial = useSocial;
+  const live: SourcePreview["live"] = isSocial
+    ? {
+        provider: "socialcrawl",
+        forcedRefresh: true,
+        cached: social!.evidence.cached,
+        collectedAt: now,
+        status: social!.status,
+        reviewCount: social!.reviews.length,
+        pageCount: 0,
+        requestCount: social!.evidence.attemptCount,
+        dateRange: dateRangeOf(social!.reviews),
+        limitations,
+        evidence: social!.evidence,
+        reviews: social!.reviews,
+        rawRefs: social!.rawRefs,
+      }
+    : {
+        provider: "apple-rss",
+        forcedRefresh: false,
+        cached: null,
+        collectedAt: now,
+        status: rss!.status,
+        reviewCount: rss!.reviews.length,
+        pageCount: rss!.pages.length,
+        requestCount: rss!.pages.reduce((n, p) => n + p.attempt, 0),
+        dateRange: dateRangeOf(rss!.reviews),
+        limitations,
+        evidence: { provider: "apple-rss", pageCount: rss!.pages.length, requestCount: rss!.pages.reduce((n, p) => n + p.attempt, 0) },
+        reviews: rss!.reviews,
+        rawRefs: rss!.rawRefs,
+      };
 
   const cacheStore = new AppleReviewCacheStore(cacheDir);
   // Empty or partial live results must never clear the cache.

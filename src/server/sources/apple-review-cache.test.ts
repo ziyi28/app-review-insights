@@ -117,6 +117,30 @@ describe("AppleReviewCacheStore", () => {
     }
   });
 
+  it("bootstraps from a completed SocialCrawl run and still accepts legacy RSS runs", async () => {
+    const runsDir = mkdtempSync(path.join(tmpdir(), "review-cache-runs-"));
+    try {
+      await seedRun(runsDir, "run-social", { appId: "839285684", status: "complete", reviews: [normalized("s1", "2026-08-12T00:00:00Z")], createdAt: "2026-08-12T00:00:00.000Z" });
+      await seedRun(runsDir, "run-rss", { appId: "839285684", status: "complete", reviews: [normalized("r1", "2026-08-01T00:00:00Z")], createdAt: "2026-08-01T00:00:00.000Z" });
+      // The SocialCrawl run records a provider-aware source summary.
+      const rs = new RunStore(runsDir);
+      await rs.writeArtifact("run-social", "source-evidence", 1, {
+        kind: "app-store-reviews",
+        provider: "socialcrawl",
+        appId: "839285684",
+        status: "complete",
+        reviewCount: 1,
+      });
+
+      const cache = await store.bootstrapFromHistory("us", "839285684", { roots: [runsDir], runsDir });
+      expect(cache).not.toBeNull();
+      expect(cache?.bootstrapRunId).toBe("run-social");
+      expect(cache?.reviews).toHaveLength(1);
+    } finally {
+      rmSync(runsDir, { recursive: true, force: true });
+    }
+  });
+
   it("skips runs whose source status is not complete", async () => {
     const runsDir = mkdtempSync(path.join(tmpdir(), "review-cache-runs-"));
     try {
