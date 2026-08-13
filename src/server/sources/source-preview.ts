@@ -3,16 +3,16 @@ import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
 import type { Limitation, CollectionStatus } from "./source-types";
 import { collectAppleReviews, type CollectorDeps, type SourceResult } from "./apple-rss-collector";
-import { collectSocialCrawlReviews, type SocialCrawlEvidence, type SocialCrawlCollectorDeps } from "./socialcrawl-collector";
+import { collectSerpApiReviews, type SerpApiEvidence, type SerpApiCollectorDeps } from "./serpapi-collector";
 import { AppleReviewCacheStore } from "./apple-review-cache";
 
 export const PREVIEW_TTL_MS = 30 * 60 * 1000;
 
 /** Which live provider produced this preview's fresh sample. */
-export type LiveProvider = "socialcrawl" | "apple-rss";
+export type LiveProvider = "serpapi" | "apple-rss";
 
 type LiveSourceEvidence =
-  | SocialCrawlEvidence
+  | SerpApiEvidence
   | { provider: "apple-rss"; pageCount: number; requestCount: number };
 
 export type SourcePreview = {
@@ -57,8 +57,8 @@ export type PreviewInput = {
   appId: string;
   canonicalUrl: string;
   now: string;
-  /** SocialCrawl deps, or null when the key is not configured. */
-  socialCrawlCollector: SocialCrawlCollectorDeps | null;
+  /** SerpApi deps, or null when the key is not configured. */
+  serpApiCollector: SerpApiCollectorDeps | null;
   rssCollector: CollectorDeps;
   /** Root where preview snapshots are stored. */
   previewsDir: string;
@@ -74,47 +74,47 @@ export function buildPreviewSnapshot(input: PreviewInput): Promise<SourcePreview
 }
 
 export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview> {
-  const { previewId, appId, canonicalUrl, now, socialCrawlCollector, rssCollector, previewsDir, cacheDir, historyRoots, runsDir } = input;
+  const { previewId, appId, canonicalUrl, now, serpApiCollector, rssCollector, previewsDir, cacheDir, historyRoots, runsDir } = input;
   const createdAt = now;
   const expiresAt = new Date(new Date(createdAt).getTime() + PREVIEW_TTL_MS).toISOString();
 
-  // One live provider per preview: SocialCrawl when configured and it returns
-  // valid reviews; otherwise an explicit RSS fallback. A partial SocialCrawl
-  // result is kept as-is and never mixed with RSS reviews.
-  const social = socialCrawlCollector ? await collectSocialCrawlReviews(socialCrawlCollector) : null;
-  const useSocial = social !== null && social.reviews.length > 0;
-  const rss = useSocial ? null : await collectAppleReviews(rssCollector);
-  const selected = useSocial ? social : rss!;
+  // One live provider per preview: SerpApi when configured and it returns
+  // valid reviews; otherwise an explicit live Apple RSS fallback. A partial
+  // SerpApi result is kept as-is and never mixed with RSS reviews.
+  const serp = serpApiCollector ? await collectSerpApiReviews(serpApiCollector) : null;
+  const useSerp = serp !== null && serp.reviews.length > 0;
+  const rss = useSerp ? null : await collectAppleReviews(rssCollector);
+  const selected = useSerp ? serp : rss!;
 
   const limitations: Limitation[] = [];
-  if (social === null) {
+  if (serp === null) {
     limitations.push({
-      code: "SOCIALCRAWL_NOT_CONFIGURED",
-      message: "SocialCrawl is not configured; falling back to Apple RSS",
+      code: "SERPAPI_NOT_CONFIGURED",
+      message: "SerpApi is not configured; falling back to Apple RSS",
       stage: "source",
     });
-  } else if (!useSocial) {
-    // Preserve every SocialCrawl limitation before the RSS fallback reason.
-    limitations.push(...social.limitations);
+  } else if (!useSerp) {
+    // Preserve every SerpApi limitation (auth failure, quota, upstream, empty)
+    // before the RSS fallback reason.
+    limitations.push(...serp.limitations);
   }
   limitations.push(...selected.limitations);
 
-  const isSocial = useSocial;
-  const live: SourcePreview["live"] = isSocial
+  const live: SourcePreview["live"] = useSerp
     ? {
-        provider: "socialcrawl",
+        provider: "serpapi",
         forcedRefresh: true,
-        cached: social!.evidence.cached,
+        cached: false,
         collectedAt: now,
-        status: social!.status,
-        reviewCount: social!.reviews.length,
-        pageCount: 0,
-        requestCount: social!.evidence.attemptCount,
-        dateRange: dateRangeOf(social!.reviews),
+        status: serp!.status,
+        reviewCount: serp!.reviews.length,
+        pageCount: serp!.evidence.pagesFetched,
+        requestCount: serp!.evidence.requestCount,
+        dateRange: dateRangeOf(serp!.reviews),
         limitations,
-        evidence: social!.evidence,
-        reviews: social!.reviews,
-        rawRefs: social!.rawRefs,
+        evidence: serp!.evidence,
+        reviews: serp!.reviews,
+        rawRefs: serp!.rawRefs,
       }
     : {
         provider: "apple-rss",

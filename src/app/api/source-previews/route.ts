@@ -56,18 +56,16 @@ export async function POST(req: Request) {
     appId,
     canonicalUrl,
     now,
-    // SocialCrawl deps are built only when a key is configured; otherwise the
+    // SerpApi deps are built only when a key is configured; otherwise the
     // preview dispatches straight to the RSS fallback.
-    socialCrawlCollector: cfg.socialCrawlApiKey
+    serpApiCollector: cfg.serpApiKey
       ? {
           fetchFn: fetch,
-          sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
           now: () => new Date().toISOString(),
-          baseUrl: cfg.socialCrawlBaseUrl,
-          apiKey: cfg.socialCrawlApiKey,
+          baseUrl: cfg.serpApiBaseUrl,
+          apiKey: cfg.serpApiKey,
           appId,
-          timeoutMs: cfg.socialCrawlTimeoutMs,
-          idempotencyKey: previewId,
+          timeoutMs: cfg.serpApiTimeoutMs,
           signal: req.signal,
         }
       : null,
@@ -113,8 +111,8 @@ function toPublicPreview(preview: SourcePreview) {
       requestCount: preview.live.requestCount,
       dateRange: preview.live.dateRange,
       limitations: preview.live.limitations,
-      creditsUsed: "creditsUsed" in preview.live.evidence ? preview.live.evidence.creditsUsed : null,
-      requestId: "requestId" in preview.live.evidence ? preview.live.evidence.requestId : null,
+      searchCount: "searchIds" in preview.live.evidence ? preview.live.evidence.requestCount : 0,
+      searchId: "searchIds" in preview.live.evidence ? (preview.live.evidence.searchIds.at(-1) ?? null) : null,
     },
     stable: {
       available: preview.stable.available,

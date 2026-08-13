@@ -264,7 +264,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
             stage: "source",
           });
         }
-        const liveLimitations = selected.live.limitations.filter((l) => l.code === "SOCIALCRAWL_NOT_CONFIGURED" || l.code === "SOCIALCRAWL_EMPTY" || l.code === "SOCIALCRAWL_ITEMS_DROPPED" || l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL");
+        const liveLimitations = selected.live.limitations.filter((l) => l.code === "SERPAPI_ITEMS_DROPPED" || l.code === "SERPAPI_PARTIAL" || l.code === "SERPAPI_PAGE_CAP" || l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL");
         const status: "complete" | "suspect-empty" | "partial" | "failed" =
           reviews.length === 0 ? "suspect-empty" : liveLimitations.length > 0 ? "partial" : "complete";
         deps = {
@@ -293,8 +293,8 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
                 forcedRefresh: selected.live.forcedRefresh,
                 providerCached: selected.live.cached,
                 requestCount: selected.live.requestCount,
-                requestId: selected.live.provider === "socialcrawl" && "requestId" in selected.live.evidence ? selected.live.evidence.requestId : null,
-                creditsUsed: selected.live.provider === "socialcrawl" && "creditsUsed" in selected.live.evidence ? selected.live.evidence.creditsUsed : null,
+                searchCount: "searchIds" in selected.live.evidence ? selected.live.evidence.requestCount : 0,
+                searchId: "searchIds" in selected.live.evidence ? (selected.live.evidence.searchIds.at(-1) ?? null) : null,
               },
             },
           },
