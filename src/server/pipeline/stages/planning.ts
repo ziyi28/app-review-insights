@@ -42,15 +42,33 @@ export function normalizePlanningOutput(
       warnings.push({ code: "UNSUPPORTED_REQUIREMENT", message: `dropped ${req.id} (no valid finding links)` });
       continue;
     }
+    // A requirement backed only by insufficient findings cannot claim a broad
+    // or critical priority: it is pinned to P2 and left out of every target
+    // version. This is a deterministic guardrail on the model's semantic
+    // output, mirroring the sufficiency verdict written at findings time.
+    const linkedFindings = validFindingIds.map((id) => findingIndex.get(id)!);
+    const onlyInsufficient = linkedFindings.every((finding) => finding.evidenceSufficiency.status === "insufficient");
+    const priority = onlyInsufficient ? "P2" : req.priority;
+    const versionId = onlyInsufficient
+      ? null
+      : req.versionId && versionIndex.has(req.versionId)
+        ? req.versionId
+        : null;
+    if (priority !== req.priority || versionId !== req.versionId) {
+      warnings.push({
+        code: "INSUFFICIENT_EVIDENCE_PRIORITY_DOWNGRADED",
+        message: `${req.id} downgraded to ${priority}${versionId === null && req.versionId !== null ? " and removed from its target version" : ""} because all linked findings have insufficient evidence`,
+      });
+    }
     requirements.push({
       id: req.id,
       findingIds: validFindingIds,
       title: req.title,
       description: req.description,
       sourceReviewIds: reviewIdsForFindings(validFindingIds, findings),
-      priority: req.priority,
+      priority,
       acceptanceCriteria: req.acceptanceCriteria,
-      versionId: req.versionId && versionIndex.has(req.versionId) ? req.versionId : null,
+      versionId,
     });
   }
 
@@ -64,7 +82,11 @@ export function normalizePlanningOutput(
     id: v.id,
     name: v.name,
     summary: v.summary,
-    requirementIds: v.requirementIds.filter((id) => requirements.some((r) => r.id === id)),
+    // Only requirements that actually target this version may be listed;
+    // downgraded requirements are excluded from the version's scope.
+    requirementIds: v.requirementIds.filter((id) =>
+      requirements.some((r) => r.id === id && r.versionId === v.id),
+    ),
   }));
 
   const prd: Prd = {

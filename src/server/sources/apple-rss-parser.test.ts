@@ -28,6 +28,12 @@ describe("parseAppleRssJson", () => {
     expect(result.warnings).toHaveLength(0);
   });
 
+  it("treats a feed with no entry property as an empty feed", () => {
+    const result = parseAppleRssJson(fixture("empty-feed-no-entry.json"));
+    expect(result.reviews).toHaveLength(0);
+    expect(result.warnings).toHaveLength(0);
+  });
+
   it("warns and skips entries with a missing rating", () => {
     const input = JSON.parse(fixture("page-01.json"));
     delete input.feed.entry[0]["im:rating"];
@@ -48,5 +54,25 @@ describe("parseAppleRssJson", () => {
     const result = parseAppleRssJson(JSON.stringify(input));
     expect(result.reviews).toHaveLength(1);
     expect(result.warnings.some((w) => w.code === "INVALID_RATING")).toBe(true);
+  });
+
+  it("parses the last page number from feed.link[rel=last]", () => {
+    const result = parseAppleRssJson(fixture("page-01.json"));
+    expect(result.lastPage).toBe(10);
+  });
+
+  it("reports null lastPage when the feed has no last link", () => {
+    const result = parseAppleRssJson(fixture("empty-feed.json"));
+    expect(result.lastPage).toBeNull();
+  });
+
+  it("reports null lastPage when the last link has no page number", () => {
+    const result = parseAppleRssJson(fixture("empty-feed-no-entry.json"));
+    expect(result.lastPage).toBeNull();
+  });
+
+  it("treats an invalid-json body as having no last page", () => {
+    const result = parseAppleRssJson("<html>not a feed</html>");
+    expect(result.lastPage).toBeNull();
   });
 });

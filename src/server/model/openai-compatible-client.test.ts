@@ -170,6 +170,52 @@ describe("OpenAiCompatibleClient", () => {
     }
   });
 
+  it("retries a non-JSON response and succeeds", async () => {
+    vi.useFakeTimers();
+    try {
+      const { client, fetchMock } = makeClient();
+      fetchMock
+        .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: "not json at all" } }] })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const pending = client.generate(requestBase());
+      await vi.advanceTimersByTimeAsync(10_000);
+      const result = await pending;
+      expect(result.ok).toBe(true);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+      warn.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("surfaces a non-JSON failure with finish_reason and content after retries are exhausted", async () => {
+    vi.useFakeTimers();
+    try {
+      const { client, fetchMock } = makeClient();
+      fetchMock.mockImplementation(async () =>
+        new Response(JSON.stringify({ choices: [{ message: { content: "truncated output" }, finish_reason: "length" }] })),
+      );
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const pending = client.generate(requestBase());
+      // Attach the rejection handler before advancing so the eventual reject is
+      // observed, not reported as an unhandled rejection.
+      const messagePromise = pending.then(
+        () => "",
+        (err: Error) => err.message,
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+      const message = await messagePromise;
+      expect(message).toMatch(/MODEL_NON_JSON_OUTPUT/);
+      expect(message).toMatch(/finish=length/);
+      expect(message).toContain("truncated output");
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      warn.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("does not retry a 4xx", async () => {
     const { client, fetchMock } = makeClient();
     fetchMock.mockResolvedValue(new Response("bad", { status: 400 }));

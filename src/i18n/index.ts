@@ -89,6 +89,30 @@ export type Dictionary = {
   apiKeyPlaceholder: string;
   apiKeyClear: string;
   configApplyError: string;
+  checkSample: string;
+  checkingSample: string;
+  sampleCheckFailed: string;
+  liveSample: string;
+  stableSample: string;
+  recommended: string;
+  liveReviews: string;
+  stableReviews: string;
+  cacheUpdated: string;
+  chooseLive: string;
+  chooseStable: string;
+  sourceLiveCache: string;
+  noSampleAvailable: string;
+  recheck: string;
+  useImportInstead: string;
+  notChecked: string;
+  evidenceStrength: string;
+  evidenceSufficient: string;
+  evidenceInsufficient: string;
+  supportRatio: string;
+  requirementId: string;
+  findingId: string;
+  priority: string;
+  precondition: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -181,6 +205,30 @@ export const dictionaries: Record<Locale, Dictionary> = {
     apiKeyPlaceholder: "Enter a new key to replace the current one",
     apiKeyClear: "Clear key",
     configApplyError: "Failed to save settings",
+    checkSample: "Check review sample",
+    checkingSample: "Checking review sample…",
+    sampleCheckFailed: "Could not check the review sample.",
+    liveSample: "Live sample",
+    stableSample: "Stable sample",
+    recommended: "Recommended",
+    liveReviews: "Live reviews",
+    stableReviews: "Stable reviews",
+    cacheUpdated: "Cache updated",
+    chooseLive: "Analyze live sample",
+    chooseStable: "Analyze stable sample",
+    sourceLiveCache: "Live + Cache",
+    noSampleAvailable: "No reviews available right now — re-check or import a dataset.",
+    recheck: "Re-check",
+    useImportInstead: "Use Import instead",
+    notChecked: "Not yet checked",
+    evidenceStrength: "Evidence strength",
+    evidenceSufficient: "Sufficient Evidence",
+    evidenceInsufficient: "Insufficient Evidence",
+    supportRatio: "support ratio",
+    requirementId: "Requirement",
+    findingId: "Finding",
+    priority: "Priority",
+    precondition: "Precondition",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -271,6 +319,30 @@ export const dictionaries: Record<Locale, Dictionary> = {
     apiKeyPlaceholder: "输入新 Key 以替换当前 Key",
     apiKeyClear: "清除 Key",
     configApplyError: "保存设置失败",
+    checkSample: "检查评论样本",
+    checkingSample: "正在检查评论样本…",
+    sampleCheckFailed: "无法检查评论样本。",
+    liveSample: "实时样本",
+    stableSample: "稳定样本",
+    recommended: "推荐",
+    liveReviews: "实时评论数",
+    stableReviews: "稳定评论数",
+    cacheUpdated: "缓存更新时间",
+    chooseLive: "分析实时样本",
+    chooseStable: "分析稳定样本",
+    sourceLiveCache: "实时 + 缓存",
+    noSampleAvailable: "当前没有可用评论 — 请重新检查或改用导入。",
+    recheck: "重新检查",
+    useImportInstead: "改用导入",
+    notChecked: "尚未检查",
+    evidenceStrength: "证据强度",
+    evidenceSufficient: "证据充分",
+    evidenceInsufficient: "证据不足",
+    supportRatio: "支持占比",
+    requirementId: "需求",
+    findingId: "发现",
+    priority: "优先级",
+    precondition: "前置条件",
   },
 };
 

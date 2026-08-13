@@ -27,6 +27,9 @@ export default defineConfig({
       MODEL_API_KEY: "test-key",
       MODEL_NAME: "e2e-model",
       RUNS_DIR: "./data/runs-e2e",
+      SOURCE_CACHE_DIR: "./data/source-cache-e2e",
+      SOURCE_PREVIEWS_DIR: "./data/source-previews-e2e",
+      REPLAY_EVENT_DELAY_MS: "0",
     },
   },
   projects: [

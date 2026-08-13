@@ -10,6 +10,11 @@ export const AnalyzeSourceSchema = z.discriminatedUnion("kind", [
       .string()
       .url()
       .refine((u) => u.startsWith("https://"), { message: "must be https" }),
+    // A preview-backed live run: the source data is taken from an existing
+    // preview snapshot instead of re-collecting from Apple. previewId and
+    // reviewSelection must be provided together (validated in the route).
+    previewId: z.string().min(1).max(128).optional(),
+    reviewSelection: z.enum(["live", "stable"]).optional(),
   }),
   z.object({
     kind: z.literal("import"),

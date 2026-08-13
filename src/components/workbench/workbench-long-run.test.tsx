@@ -24,6 +24,20 @@ function event(seq: number, type: string, overrides: Record<string, unknown> = {
   };
 }
 
+function previewResponse() {
+  return {
+    protocolVersion: "1",
+    previewId: "preview-long",
+    appId: "839285684",
+    canonicalUrl: "https://apps.apple.com/us/app/x/id839285684",
+    createdAt: "2026-08-12T00:00:00.000Z",
+    expiresAt: "2026-08-12T00:30:00.000Z",
+    live: { status: "complete", reviewCount: 1, pageCount: 1, requestCount: 1, dateRange: { earliest: null, latest: null }, limitations: [] },
+    stable: { available: false, reviewCount: 0, cacheUpdatedAt: null, dateRange: { earliest: null, latest: null }, bootstrapRunId: null },
+    recommendedSelection: "live",
+  };
+}
+
 const availableArtifacts: Record<string, unknown> = {};
 
 beforeEach(() => {
@@ -39,6 +53,9 @@ beforeEach(() => {
   vi.stubGlobal(
     "fetch",
     vi.fn((url: string, init?: RequestInit) => {
+      if (url.includes("/api/source-previews") && init?.method === "POST") {
+        return Promise.resolve({ ok: true, json: async () => previewResponse() });
+      }
       if (url === "/api/runs" && init?.method === "POST") {
         const initial = [
           event(1, "run.accepted", { runId: "run-long" }),
@@ -87,7 +104,10 @@ describe("Workbench long-running artifact polling", () => {
       fireEvent.change(screen.getByLabelText(tEn.goal), { target: { value: "Understand why users love the app" } });
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.start }));
+      fireEvent.click(screen.getByRole("button", { name: tEn.checkSample }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tEn.chooseLive }));
     });
 
     // Advance WELL past the old attempt ceiling (1000 × 800ms ≈ 13.3min).
@@ -120,7 +140,10 @@ describe("Workbench long-running artifact polling", () => {
       fireEvent.change(screen.getByLabelText(tEn.goal), { target: { value: "Understand why users love the app" } });
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.start }));
+      fireEvent.click(screen.getByRole("button", { name: tEn.checkSample }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tEn.chooseLive }));
     });
 
     // Publish the topics artifact; the UI should follow it to the topics tab

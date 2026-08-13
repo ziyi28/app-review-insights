@@ -22,12 +22,29 @@ function stubConfigFetch() {
   );
 }
 
+function previewResponse() {
+  return {
+    protocolVersion: "1",
+    previewId: "preview-wb",
+    appId: "839285684",
+    canonicalUrl: "https://apps.apple.com/us/app/x/id839285684",
+    createdAt: "2026-08-12T00:00:00.000Z",
+    expiresAt: "2026-08-12T00:30:00.000Z",
+    live: { status: "complete", reviewCount: 1, pageCount: 1, requestCount: 1, dateRange: { earliest: null, latest: null }, limitations: [] },
+    stable: { available: false, reviewCount: 0, cacheUpdatedAt: null, dateRange: { earliest: null, latest: null }, bootstrapRunId: null },
+    recommendedSelection: "live",
+  };
+}
+
 // A live-run POST stream that leads with run.accepted and stays open, so the
 // run is in-flight but the very first event may not have arrived yet.
 function startStreamingPost() {
   vi.stubGlobal(
     "fetch",
     vi.fn((url: string, init?: RequestInit) => {
+      if (url.includes("/api/source-previews") && init?.method === "POST") {
+        return Promise.resolve({ ok: true, json: async () => previewResponse() });
+      }
       if (url === "/api/runs" && init?.method === "POST") {
         return Promise.resolve(
           new Response(
@@ -81,18 +98,21 @@ describe("Workbench settings integration", () => {
     startStreamingPost();
     render(<Workbench />);
 
-    // Start a live run with a valid goal. The stream stays open but emits
-    // nothing yet, so events stays empty.
+    // Check the sample first, then choose the live dataset to start the run.
+    // The stream stays open but emits nothing yet, so events stays empty.
     await act(async () => {
       fireEvent.change(screen.getByLabelText(tEn.goal), { target: { value: "Understand why users love the app" } });
     });
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: tEn.start }));
+      fireEvent.click(screen.getByRole("button", { name: tEn.checkSample }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tEn.chooseLive }));
     });
 
     // The initial form is gone and a "starting" indicator is visible instead of
     // a blank main area.
-    expect(screen.queryByRole("button", { name: tEn.start })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: tEn.checkSample })).not.toBeInTheDocument();
     expect(screen.getByText(tEn.starting)).toBeInTheDocument();
   });
 });

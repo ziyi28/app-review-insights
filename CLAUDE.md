@@ -88,8 +88,12 @@ Layered data flow:
   (Zod), review normalization/dedupe/stats, traceability validation. This is
   what "rules" means in the rules-vs-model split.
 - **`src/server/sources/`** — Apple RSS collector (sequential, ≥500ms apart,
-  max 10 pages, no retries) and JSON/CSV import parser. An HTTP-200 empty feed
-  is `suspect-empty`, never "no reviews".
+  max 10 pages; page-1 empties retried twice at 2s/5s, empty pages before
+  `rel=last` confirmed once then `partial`, repeated pages detected before
+  appending), JSON/CSV import parser, a per-app local review cache
+  (`AppleReviewCacheStore`, `data/source-cache/`), and the preview service
+  (`source-preview.ts`, snapshots under `data/source-previews/` with a 30-min
+  TTL). An HTTP-200 empty feed is `suspect-empty`, never "no reviews".
 - **`src/server/runs/`** — `RunStore` (file snapshot CRUD), `RunCatalog`,
   `Replay`. `data/runs/` is git-ignored; `fixtures/demo-runs/` ships a real,
   privacy-minimized capture.

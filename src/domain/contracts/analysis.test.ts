@@ -18,12 +18,50 @@ describe("analysis contracts", () => {
     evidenceExcerpts: [{ reviewId: "review-1", excerpt: "too expensive" }],
     conflictingReviewIds: [],
     confidence: { level: "low", method: "deterministic-v1", reasons: ["small sample"] },
+    evidenceSufficiency: {
+      status: "insufficient",
+      corpusReviewCount: 3000,
+      supportRatio: 2 / 3000,
+      reasons: ["SUPPORT_BELOW_MINIMUM"],
+    },
     uncertainties: [],
     limitations: [],
   };
 
   it("accepts a finding with supporting evidence", () => {
     expect(FindingSchema.parse(validFinding).supportingSampleCount).toBe(2);
+  });
+
+  it("rejects a finding with a bad sufficiency status", () => {
+    expect(() =>
+      FindingSchema.parse({
+        ...validFinding,
+        evidenceSufficiency: { status: "enough", corpusReviewCount: 100, supportRatio: 0.5, reasons: [] },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a finding with an out-of-range support ratio", () => {
+    expect(() =>
+      FindingSchema.parse({
+        ...validFinding,
+        evidenceSufficiency: { status: "sufficient", corpusReviewCount: 100, supportRatio: 1.5, reasons: [] },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a finding with an unknown sufficiency reason", () => {
+    expect(() =>
+      FindingSchema.parse({
+        ...validFinding,
+        evidenceSufficiency: {
+          status: "insufficient",
+          corpusReviewCount: 100,
+          supportRatio: 0.01,
+          reasons: ["UNKNOWN_REASON"],
+        },
+      }),
+    ).toThrow();
   });
 
   it("rejects a finding without supporting reviews", () => {
@@ -70,11 +108,13 @@ describe("analysis contracts", () => {
       TestCaseSchema.parse({
         id: "test-1",
         requirementIds: [],
+        findingIds: ["finding-1"],
         sourceReviewIds: ["review-1"],
         testType: "manual",
         precondition: "",
         steps: ["step"],
         expectedResult: "ok",
+        priority: "P1",
       }),
     ).toThrow();
   });
@@ -84,13 +124,44 @@ describe("analysis contracts", () => {
       TestCaseSchema.parse({
         id: "test-1",
         requirementIds: ["req-1"],
+        findingIds: ["finding-1"],
         sourceReviewIds: [],
         testType: "manual",
         precondition: "",
         steps: ["step"],
         expectedResult: "ok",
+        priority: "P1",
       }),
     ).toThrow();
+  });
+
+  it("requires direct finding links and priority on a test case", () => {
+    const parsed = TestCaseSchema.safeParse({
+      id: "test-1",
+      requirementIds: ["req-1"],
+      sourceReviewIds: ["review-1"],
+      testType: "manual",
+      precondition: "signed in",
+      steps: ["step"],
+      expectedResult: "ok",
+    });
+    expect(parsed.success).toBe(false);
+  });
+
+  it("round-trips direct finding links and priority on a test case", () => {
+    const test = TestCaseSchema.parse({
+      id: "test-1",
+      requirementIds: ["req-1"],
+      findingIds: ["finding-1"],
+      sourceReviewIds: ["review-1"],
+      testType: "manual",
+      precondition: "signed in",
+      steps: ["step"],
+      expectedResult: "ok",
+      priority: "P1",
+    });
+    expect(test.findingIds).toEqual(["finding-1"]);
+    expect(test.priority).toBe("P1");
   });
 
   it("round-trips a full prd bundle", () => {
@@ -118,11 +189,13 @@ describe("analysis contracts", () => {
         {
           id: "test-1",
           requirementIds: ["req-1"],
+          findingIds: ["finding-1"],
           sourceReviewIds: ["review-1"],
           testType: "manual",
           precondition: "",
           steps: ["step"],
           expectedResult: "ok",
+          priority: "P1",
         },
       ],
       assumptions: [AssumptionSchema.parse({ id: "asm-1", text: "x", basis: "y" })],

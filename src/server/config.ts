@@ -47,6 +47,10 @@ export type ServerConfig = {
   /** Hard deadline for a single model call (ms); the run aborts when exceeded. */
   modelTimeoutMs: number;
   runsDir: string;
+  /** Local review cache root for the Apple RSS source (git-ignored). */
+  sourceCacheDir: string;
+  /** Root where preview snapshots are stored (git-ignored). */
+  sourcePreviewsDir: string;
   appleRssBaseUrl: string;
   appleRssPageDelayMs: number;
   appleRssMaxPages: number;
@@ -63,6 +67,8 @@ function intFromEnv(name: string, fallback: number): number {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const jsonMode = env.MODEL_JSON_MODE === "json_object" ? "json_object" : "prompt";
   const runsDir = env.RUNS_DIR ? path.resolve(env.RUNS_DIR) : path.resolve(process.cwd(), "data", "runs");
+  const sourceCacheDir = env.SOURCE_CACHE_DIR ? path.resolve(env.SOURCE_CACHE_DIR) : path.resolve(process.cwd(), "data", "source-cache");
+  const sourcePreviewsDir = env.SOURCE_PREVIEWS_DIR ? path.resolve(env.SOURCE_PREVIEWS_DIR) : path.resolve(process.cwd(), "data", "source-previews");
   // Runtime overrides (set from the settings panel) take precedence over the
   // process environment, which was frozen from `.env.local` at startup.
   const modelBaseUrl = runtimeModelConfig.modelBaseUrl !== undefined ? runtimeModelConfig.modelBaseUrl : (env.MODEL_BASE_URL?.trim() || null);
@@ -78,6 +84,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
     // 300s default, floored at 10s so a 0/negative env cannot abort instantly.
     modelTimeoutMs: Math.max(10_000, intFromEnv("MODEL_TIMEOUT_MS", 300_000)),
     runsDir,
+    sourceCacheDir,
+    sourcePreviewsDir,
     appleRssBaseUrl: env.APPLE_RSS_BASE_URL?.trim() || "https://itunes.apple.com/us/rss/customerreviews",
     // Rate-limit discipline: never more than 10 pages and never faster than
     // 500ms apart, so a misconfigured APPLE_RSS_* env cannot hammer Apple.

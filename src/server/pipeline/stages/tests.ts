@@ -2,6 +2,7 @@ import type { Prd, Requirement, TestCase } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { testsPrompt, TestsOutputSchema, type TestsOutput } from "@/server/model/prompts/prompts";
 import { modelProgressRelay, type StageModelClient } from "../dependencies";
+import { findingIdsForRequirements, priorityForRequirements } from "@/domain/traceability/evidence-sources";
 
 export type TestsStageContext = {
   model: StageModelClient;
@@ -71,11 +72,16 @@ export function normalizeTestsOutput(
     tests.push({
       id: t.id,
       requirementIds: validReqs,
+      // Direct Finding links and priority are deterministic application-code
+      // fields derived from the requirement graph, never trusted from the
+      // model (the tests prompt output contract does not carry them).
+      findingIds: findingIdsForRequirements(validReqs, requirements),
       sourceReviewIds: [...new Set(validReviews.map(toReviewId))],
       testType: t.testType,
       precondition: t.precondition,
       steps: t.steps,
       expectedResult: t.expectedResult,
+      priority: priorityForRequirements(validReqs, requirements) ?? "P2",
     });
   }
 
