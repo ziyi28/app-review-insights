@@ -34,12 +34,53 @@ const REQUIRED_FIXTURES = [
   "fixtures/demo-runs/run-workout-for-women-us/artifacts/final-report.attempt-01.json",
 ];
 
+// P1 capability facts the docs must keep stating. A doc drift that drops one
+// of these is a failed check even if every other section stays intact.
+const REQUIRED_CAPABILITIES = [
+  "Evidence Validation",
+  "Version Planning",
+  "Draft/Final",
+  "3 attempts",
+  "China App Store",
+];
+
+// Sentences that contradict the bounded visible retry model; their reappearance
+// means the docs drifted back to the old "never auto-retry" claim.
+const FORBIDDEN_STATEMENTS = [
+  "model calls are not auto-retried",
+  "No automatic retries",
+];
+
 let failed = false;
 
 const readme = readFileSync(path.join(root, "README.md"), "utf8");
 for (const heading of REQUIRED_README) {
   if (!readme.includes(`## ${heading}`)) {
     console.error(`README missing section: ## ${heading}`);
+    failed = true;
+  }
+}
+
+for (const token of REQUIRED_CAPABILITIES) {
+  if (!readme.includes(token)) {
+    console.error(`README missing P1 capability token: ${token}`);
+    failed = true;
+  }
+}
+const modelAnalysis = readFileSync(path.join(root, "docs/model-analysis.md"), "utf8");
+for (const token of REQUIRED_CAPABILITIES) {
+  if (!modelAnalysis.includes(token)) {
+    console.error(`docs/model-analysis.md missing P1 capability token: ${token}`);
+    failed = true;
+  }
+}
+for (const sentence of FORBIDDEN_STATEMENTS) {
+  if (readme.includes(sentence)) {
+    console.error(`README contains forbidden no-retry statement: ${sentence}`);
+    failed = true;
+  }
+  if (modelAnalysis.includes(sentence)) {
+    console.error(`docs/model-analysis.md contains forbidden no-retry statement: ${sentence}`);
     failed = true;
   }
 }
