@@ -3,8 +3,12 @@ import type { NormalizedReview } from "@/domain/contracts/review";
 export type ReviewStats = {
   rawCount: number;
   includedCount: number;
+  /** Reviews excluded from analysis (exact duplicates). */
+  excludedCount: number;
   duplicateCount: number;
   identityConflictCount: number;
+  /** Reviews whose body changed under normalization (Unicode/whitespace/case). */
+  normalizedChangedCount: number;
   ratingDistribution: Record<number, number>;
   versionDistribution: Record<string, number>;
   languageDistribution: Record<string, number>;
@@ -34,8 +38,10 @@ export function computeStats(reviews: NormalizedReview[]): ReviewStats {
   return {
     rawCount: reviews.length,
     includedCount: included.length,
+    excludedCount: reviews.filter((r) => !r.includedInAnalysis).length,
     duplicateCount: reviews.filter((r) => r.dedupeStatus === "duplicate").length,
     identityConflictCount: reviews.filter((r) => r.dedupeStatus === "identity-conflict").length,
+    normalizedChangedCount: reviews.filter((r) => r.bodyOriginal !== r.bodyNormalized).length,
     ratingDistribution,
     versionDistribution,
     languageDistribution,

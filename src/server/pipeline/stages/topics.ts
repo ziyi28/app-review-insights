@@ -31,22 +31,17 @@ export type TopicStageResult = {
 // failing the whole stage.
 const CHUNK_CHAR_BUDGET = 8_000;
 const DEFAULT_MAX_CONCURRENCY = 3;
-// Consolidation inputs can balloon to tens of KB for a large corpus (e.g. 51
-// candidates ≈ 36KB), which the provider rejects with a 500. Splitting the
-// candidates into fixed-size groups keeps each consolidation call small enough
-// to succeed; the per-group results are then merged deterministically by code.
-const CONSOLIDATION_CANDIDATE_BUDGET = 15;
-const DEFAULT_CONSOLIDATION_CONCURRENCY = 2;
+// Model work is bounded so a large corpus never produces unbounded prompts or
+// candidates: each discovery call returns at most 6 validated candidates, at
+// most 36 candidates reach consolidation globally, and the (now single)
+// consolidation call returns at most 20 canonical topics. Excess model output
+// is truncated deterministically with a warning — never retried.
+const MAX_CANDIDATES_PER_DISCOVERY_CALL = 6;
+const MAX_CANDIDATES_TOTAL = 36;
+const MAX_TOPICS = 20;
 
 function candidateById(candidates: { id: string }[]): Map<string, { id: string }> {
   return new Map(candidates.map((c) => [c.id, c]));
-}
-
-/** Splits an array into fixed-size groups (last group may be smaller). */
-function groupBySize<T>(items: T[], size: number): T[][] {
-  const groups: T[][] = [];
-  for (let i = 0; i < items.length; i += size) groups.push(items.slice(i, i + size));
-  return groups;
 }
 
 /**
@@ -65,7 +60,18 @@ export async function runTopicsStage(ctx: TopicsStageContext): Promise<TopicStag
   }
   const candidates: { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string }[] = [];
 
-  const chunks = chunkByBodyBudget(ctx.reviews, CHUNK_CHAR_BUDGET);
+  // The model only needs the review id (stable + source), rating and normalized
+  // body it must quote exactly. Stripping the original body/title/rawRef (and
+  // the rest) removes redundant input while keeping exact-excerpt validation
+  // intact (it runs against the full ctx.reviews, not the slim copy).
+  const slimReviews: { reviewId: string; sourceReviewId: string; rating: number; bodyNormalized: string }[] = ctx.reviews.map((r) => ({
+    reviewId: r.reviewId,
+    sourceReviewId: r.sourceReviewId,
+    rating: r.rating,
+    bodyNormalized: r.bodyNormalized,
+  }));
+
+  const chunks = chunkByBodyBudget(slimReviews, CHUNK_CHAR_BUDGET);
   // Discovery batches run in parallel (bounded by maxConcurrency) because a
   // large corpus would otherwise spend one batch's full model latency per
   // chunk sequentially. Results are validated after all calls settle so the
@@ -84,7 +90,12 @@ export async function runTopicsStage(ctx: TopicsStageContext): Promise<TopicStag
   });
 
   for (const { chunkIndex, discovery } of discovered) {
+    let keptInChunk = 0;
     for (const c of discovery.topics) {
+      if (keptInChunk >= MAX_CANDIDATES_PER_DISCOVERY_CALL) {
+        warnings.push({ code: "TOPIC_CANDIDATES_TRUNCATED", message: `discovery batch ${chunkIndex + 1} exceeded ${MAX_CANDIDATES_PER_DISCOVERY_CALL} candidates; extra dropped deterministically` });
+        break;
+      }
       // Validate: every cited review exists and the quote is an exact substring.
       const cited = c.supportingReviewIds.every((id) => reviewMap.has(id));
       const quoted = c.quote && c.supportingReviewIds.some((id) => {
@@ -98,55 +109,60 @@ export async function runTopicsStage(ctx: TopicsStageContext): Promise<TopicStag
       // Namespace the candidate id by chunk so two chunks returning the same
       // local id cannot collide and silently merge unrelated evidence.
       candidates.push({ ...c, id: `${c.id}@c${chunkIndex}` });
+      keptInChunk += 1;
     }
+  }
+  // Global cap: keep only the first MAX_CANDIDATES_TOTAL validated candidates
+  // (in discovery-batch order, which is deterministic). Excess is dropped with
+  // a warning rather than triggering a model retry.
+  if (candidates.length > MAX_CANDIDATES_TOTAL) {
+    warnings.push({
+      code: "TOPIC_CANDIDATES_TRUNCATED",
+      message: `kept first ${MAX_CANDIDATES_TOTAL} of ${candidates.length} discovered candidates; excess dropped deterministically`,
+    });
+    candidates.length = MAX_CANDIDATES_TOTAL;
   }
 
   if (candidates.length === 0) {
     return { topics: [], candidates, warnings };
   }
 
-  // Consolidate in fixed-size groups so a large candidate set never produces a
-  // single oversized prompt (the provider rejects it with a 500). Each group
-  // runs its own consolidation call in parallel; the per-group topics are then
-  // merged by code. A candidate belongs to exactly one group, so merging on the
-  // candidate id never duplicates evidence across groups.
-  const candidateGroups = groupBySize(candidates, CONSOLIDATION_CANDIDATE_BUDGET);
-  const consolidations = await mapWithConcurrency(
-    candidateGroups,
-    DEFAULT_CONSOLIDATION_CONCURRENCY,
-    async (group, groupIndex) => {
-      ctx.onProgress?.(`consolidating topic candidates ${groupIndex * CONSOLIDATION_CANDIDATE_BUDGET + 1}-${groupIndex * CONSOLIDATION_CANDIDATE_BUDGET + group.length} of ${candidates.length}`);
-      const result = await ctx.model.generate({
-        stage: "topic-consolidation",
-        promptVersion: topicConsolidationPrompt.version,
-        system: topicConsolidationPrompt.system,
-        user: topicConsolidationPrompt.buildUser({ candidates: group, outputLocale: ctx.outputLocale }),
-        schema: TopicConsolidationOutputSchema,
-        onProgress: modelProgressRelay(ctx.onProgress),
-      });
-      return { groupIndex, result };
-    },
-  );
+  // A single consolidation call over the (bounded) candidate set keeps the
+  // prompt small and is one call instead of several — the per-call budget that
+  // once split candidates across groups is now enforced by the caps above.
+  ctx.onProgress?.(`consolidating ${candidates.length} topic candidates`);
+  const consolidation = await ctx.model.generate({
+    stage: "topic-consolidation",
+    promptVersion: topicConsolidationPrompt.version,
+    system: topicConsolidationPrompt.system,
+    user: topicConsolidationPrompt.buildUser({ candidates, outputLocale: ctx.outputLocale }),
+    schema: TopicConsolidationOutputSchema,
+    onProgress: modelProgressRelay(ctx.onProgress),
+  });
 
   const candidateIndex = candidateById(candidates);
   const topics: { id: string; label: string; description: string; candidateIds: string[]; reviewIds: string[] }[] = [];
-  // Merge per-group topics deterministically: topics with the same normalized
-  // label across groups are the same theme, so their candidateIds are joined.
+  // Merge returned topics deterministically: topics with the same normalized
+  // label are the same theme, so their candidateIds are joined.
   const byLabel = new Map<string, { label: string; description: string; candidateIds: string[] }>();
-  for (const { result } of consolidations) {
-    for (const t of result.topics) {
-      const validCandidateIds = t.candidateIds.filter((id) => candidateIndex.has(id));
-      if (validCandidateIds.length === 0) {
-        warnings.push({ code: "EMPTY_TOPIC", message: `dropped ${t.id} (no valid candidates)` });
-        continue;
-      }
-      const key = t.label.trim().toLowerCase();
-      const existing = byLabel.get(key);
-      if (existing) {
-        existing.candidateIds = [...new Set([...existing.candidateIds, ...validCandidateIds])];
-      } else {
-        byLabel.set(key, { label: t.label, description: t.description, candidateIds: [...validCandidateIds] });
-      }
+  let consumed = 0;
+  for (const t of consolidation.topics) {
+    if (consumed >= MAX_TOPICS) {
+      warnings.push({ code: "TOPICS_TRUNCATED", message: `kept first ${MAX_TOPICS} topics; excess dropped deterministically` });
+      break;
+    }
+    const validCandidateIds = t.candidateIds.filter((id) => candidateIndex.has(id));
+    if (validCandidateIds.length === 0) {
+      warnings.push({ code: "EMPTY_TOPIC", message: `dropped ${t.id} (no valid candidates)` });
+      continue;
+    }
+    consumed += 1;
+    const key = t.label.trim().toLowerCase();
+    const existing = byLabel.get(key);
+    if (existing) {
+      existing.candidateIds = [...new Set([...existing.candidateIds, ...validCandidateIds])];
+    } else {
+      byLabel.set(key, { label: t.label, description: t.description, candidateIds: [...validCandidateIds] });
     }
   }
   let topicSeq = 0;

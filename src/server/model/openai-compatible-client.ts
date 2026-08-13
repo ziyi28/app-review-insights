@@ -16,7 +16,10 @@ export type ModelClientDeps = {
 };
 
 const TEMPERATURE = 0.1;
-const PROGRESS_INTERVAL_MS = 2000;
+// Heartbeats are a low-noise "still working" signal, not a progress meter; a
+// 10s interval keeps long model calls responsive to the UI without emitting a
+// stream event every 2 seconds for a call that may run for minutes.
+const PROGRESS_INTERVAL_MS = 10_000;
 // A single long model call (topic discovery can take 100-200s) occasionally
 // fails with a transient provider 5xx. Retrying a bounded number of times with
 // backoff keeps one flaky call from failing the whole (potentially 25-minute)

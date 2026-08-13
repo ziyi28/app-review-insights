@@ -1,12 +1,14 @@
 import type { NormalizedReview, RawReview } from "@/domain/contracts/review";
 import type { Limitation } from "@/server/sources/source-types";
 import type { ImportParseResult } from "@/server/sources/import-parser";
+import { computeCleaningDetails, type CleaningDetails } from "./cleaning";
 import { dedupeReviews } from "./dedupe";
 import { computeStats, type ReviewStats } from "./stats";
 
 export type PreparedReviews = {
   reviews: NormalizedReview[];
   stats: ReviewStats;
+  cleaning: CleaningDetails;
   limitations: Limitation[];
   warnings: string[];
 };
@@ -57,10 +59,12 @@ export function prepareReviews(
 
   const deduped = dedupeReviews(bundle.rawReviews, bundle.rawRefs);
   const stats = computeStats(deduped.reviews);
+  const cleaning = computeCleaningDetails(deduped.reviews);
 
   return {
     reviews: deduped.reviews,
     stats,
+    cleaning,
     limitations: bundle.limitations,
     warnings: bundle.warnings,
   };

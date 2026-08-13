@@ -46,6 +46,16 @@ describe("computeStats", () => {
     expect(stats.languageDistribution["zh"]).toBe(1);
   });
 
+  it("counts excluded and normalization-changed reviews", () => {
+    const stats = computeStats([
+      review({ includedInAnalysis: false, bodyOriginal: "Hello World", bodyNormalized: "hello world" }),
+      review({ includedInAnalysis: true, bodyOriginal: "same", bodyNormalized: "same" }),
+      review({ includedInAnalysis: true, bodyOriginal: "RAW BODY", bodyNormalized: "raw body" }),
+    ]);
+    expect(stats.excludedCount).toBe(1);
+    expect(stats.normalizedChangedCount).toBe(2);
+  });
+
   it("computes a date range from included reviews", () => {
     const stats = computeStats([
       review({ updatedAt: "2026-07-01T10:00:00Z" }),

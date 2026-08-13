@@ -2,6 +2,7 @@ import type { NormalizedReview, RawReview } from "@/domain/contracts/review";
 import type { Prd } from "@/domain/contracts/analysis";
 import type { Limitation } from "@/server/sources/apple-rss-collector";
 import { prepareReviews } from "@/domain/reviews/prepare";
+import { sampleReviews } from "@/domain/reviews/sample";
 import { validateTraceability } from "@/domain/traceability/validate";
 import { buildEvidenceValidationReport } from "@/domain/analysis/evidence-validation";
 import { runScopeStage } from "./stages/scope";
@@ -164,8 +165,12 @@ export async function executeRun(
     await publisher.publish({ type: "stage.started", runId, stage: stage as never, data: { stage } });
   };
   const endStage = async (stage: string) => {
-    stages[stage] = { ...stages[stage], status: "completed", finishedAt: new Date().toISOString() };
-    await publisher.publish({ type: "stage.completed", runId, stage: stage as never, data: { stage } });
+    const finishedAt = new Date().toISOString();
+    const started = stages[stage]?.startedAt;
+    const durationMs =
+      started != null ? Math.max(0, new Date(finishedAt).getTime() - new Date(started).getTime()) : undefined;
+    stages[stage] = { ...stages[stage], status: "completed", finishedAt };
+    await publisher.publish({ type: "stage.completed", runId, stage: stage as never, data: { stage, durationMs } });
   };
   // Forwards a stage's live progress message into a streamed stage.progress
   // event so the UI can show what the model is doing instead of a silent wait.
@@ -228,7 +233,7 @@ export async function executeRun(
     if (source.status === "failed") {
       limitations.push({ code: "SOURCE_FAILED", message: "Source collection failed; no reviews could be analyzed", stage: "source" });
       await publisher.publish({ type: "run.failed", runId, data: { error: "source collection failed" } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
       return;
     }
 
@@ -240,7 +245,19 @@ export async function executeRun(
         ? prepareReviews({ kind: "import", parse: deps.source.parse })
         : prepareReviews({ kind: "collected", reviews: source.rawReviews, rawRefs: source.rawRefs, limitations: source.limitations });
     reviews = prepared.reviews;
-    await publisher.publish({ type: "stage.progress", runId, stage: "prepare", data: { message: `prepared ${reviews.length} reviews for analysis` } });
+    const cleanedIn = prepared.stats.includedCount;
+    const cleanedDup = prepared.stats.duplicateCount;
+    await publisher.publish({
+      type: "stage.progress",
+      runId,
+      stage: "prepare",
+      data: {
+        message:
+          cleanedDup > 0
+            ? `cleaned ${prepared.stats.rawCount} → ${cleanedIn} reviews kept, ${cleanedDup} exact duplicates excluded`
+            : `cleaned ${prepared.stats.rawCount} → ${cleanedIn} reviews kept (no duplicates found)`,
+      },
+    });
     limitations.push(...prepared.limitations);
     await publishArtifact("cleaned-reviews", 1, prepared);
     await publishArtifact("stats", 1, prepared.stats);
@@ -256,7 +273,7 @@ export async function executeRun(
         stage: "scope",
       });
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "model-not-configured", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
       return;
     }
 
@@ -267,7 +284,7 @@ export async function executeRun(
     if (corpus.length === 0) {
       // Suspect-empty / no analyzable reviews: do not enter model stages.
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-data", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
       return;
     }
 
@@ -299,15 +316,34 @@ export async function executeRun(
 
     if (scoped.length === 0) {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-data", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
       return;
+    }
+
+    // Analysis sample: after scope filtering, cap the model corpus at a
+    // representative stratified sample. The full scoped set stays available for
+    // stats and the Raw/Cleaned tabs; only the selected sample is sent to the
+    // model stages and validated against by traceability. Sampling is a single
+    // deterministic operation, so a corpus at or below the limit is untouched
+    // (applied=false) and needs no artifact or limitation.
+    const sample = sampleReviews(scoped);
+    const analysisReviews = sample.selected;
+    if (sample.applied) {
+      await publishArtifact("analysis-sample", 1, sample.artifact);
+      const limitation: Limitation = {
+        code: "ANALYSIS_SAMPLE_APPLIED",
+        message: `Analyzed ${sample.artifact.selectedCount} of ${sample.artifact.eligibleCount} scope-matching reviews (representative stratified sample of ${sample.artifact.limit})`,
+        stage: "scope",
+      };
+      limitations.push(limitation);
+      await publisher.publish({ type: "limitation.reported", runId, stage: "scope", data: limitation });
     }
 
     // Topics
     await startStage("topics");
     const topics = await runTopicsStage({
       model: deps.model,
-      reviews: scoped,
+      reviews: analysisReviews,
       outputLocale,
       goal,
       sourceStatus: sourceStatusOf(limitations),
@@ -325,7 +361,7 @@ export async function executeRun(
     await startStage("findings");
     const findingsResult = await runFindingsStage({
       model: deps.model,
-      reviews: scoped,
+      reviews: analysisReviews,
       topics: topics.topics,
       outputLocale,
       goal,
@@ -371,7 +407,7 @@ export async function executeRun(
     if (findingsResult.findings.length === 0) {
       await publishArtifact("final-report", 1, { prd: null, report: null, limitations });
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-evidence", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
       return;
     }
 
@@ -385,7 +421,7 @@ export async function executeRun(
 
     // Tests
     await startStage("tests");
-    const testsResult = await runTestsStage({ model: deps.model, requirements: planning.prd.requirements, outputLocale, prd: planning.prd, reviews: scoped, onProgress: onStageProgress("tests") });
+    const testsResult = await runTestsStage({ model: deps.model, requirements: planning.prd.requirements, outputLocale, prd: planning.prd, reviews: analysisReviews, onProgress: onStageProgress("tests") });
     for (const w of testsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "tests", data: w });
     prd = testsResult.prd;
     await publishArtifact("tests", 1, testsResult);
@@ -393,8 +429,8 @@ export async function executeRun(
 
     // Traceability
     await startStage("traceability");
-    const reviewMap = new Map(scoped.map((r) => [r.reviewId, r]));
-    let report = validateTraceability(prd, scoped.map((r) => r.reviewId), reviewMap);
+    const reviewMap = new Map(analysisReviews.map((r) => [r.reviewId, r]));
+    let report = validateTraceability(prd, analysisReviews.map((r) => r.reviewId), reviewMap);
     await publishArtifact("traceability", 1, report);
 
     if (!report.valid) {
@@ -410,7 +446,7 @@ export async function executeRun(
         findings: Object.fromEntries(prd.findings.map((f) => [f.id, f.supportingReviewIds])),
         requirements: Object.fromEntries(prd.requirements.map((r) => [r.id, r.sourceReviewIds])),
       };
-      const allowedReviewIds = [...new Set(scoped.map((r) => r.reviewId))];
+      const allowedReviewIds = [...new Set(analysisReviews.map((r) => r.reviewId))];
       const revision = await runRevisionStage({
         model: deps.model,
         violations: report.violations,
@@ -434,7 +470,7 @@ export async function executeRun(
       // always recomputed by code, never trusted from the model.
       const revisedFindingsResult = normalizeFindings(
         { findings: (revision.findings as FindingOutput["findings"]) ?? [] },
-        { reviews: scoped, topics: topics.topics, sourceStatus: sourceStatusOf(limitations) },
+        { reviews: analysisReviews, topics: topics.topics, sourceStatus: sourceStatusOf(limitations) },
       );
       for (const w of revisedFindingsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "revision", data: w });
       const revisedPlanning = normalizePlanningOutput(
@@ -452,12 +488,12 @@ export async function executeRun(
       const revisedTestsResult = normalizeTestsOutput(
         { tests: (revision.tests as TestsOutput["tests"]) ?? [] },
         revisedPlanning.prd.requirements,
-        scoped,
+        analysisReviews,
         revisedPlanning.prd,
       );
       for (const w of revisedTestsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "revision", data: w });
       const revisedPrd: Prd = revisedTestsResult.prd;
-      report = validateTraceability(revisedPrd, scoped.map((r) => r.reviewId), reviewMap);
+      report = validateTraceability(revisedPrd, analysisReviews.map((r) => r.reviewId), reviewMap);
       prd = revisedPrd;
       // Publish the revised artifacts as attempt-02 so consumers never see a
       // stale pre-revision PRD/tests/traceability next to a valid run. The
@@ -487,16 +523,16 @@ export async function executeRun(
     await publishArtifact("final-report", 1, { prd, report, limitations });
     if (report.valid) {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "valid", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model);
+      await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
     } else {
       await publisher.publish({ type: "run.failed", runId, data: { outcome: "invalid-after-revision", limitations } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     limitations.push({ code: "PIPELINE_ERROR", message, stage: "pipeline" });
     await publisher.publish({ type: "run.failed", runId, data: { error: message } });
-    await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+    await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
   }
 }
 
@@ -557,13 +593,16 @@ async function finalizeManifest(
   store: RunStore,
   goal: string,
   model?: unknown,
+  createdAt?: string,
 ): Promise<void> {
   await store.writeManifest(runId, {
     runId,
     status,
     executionMode,
     goal,
-    createdAt: new Date().toISOString(),
+    // The run's true start time is captured at executeRun entry; the manifest
+    // must never reset it (a stale createdAt makes total run duration wrong).
+    createdAt: createdAt ?? new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     stages,
     artifacts,

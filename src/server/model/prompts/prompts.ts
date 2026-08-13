@@ -1,7 +1,7 @@
 import type { PromptRegistry as PromptRegistryType } from "./registry";
 import { scopePrompt } from "./scope.v1";
-import { topicDiscoveryPrompt, topicConsolidationPrompt } from "./topics.v1";
-import { findingsPrompt } from "./findings.v1";
+import { topicDiscoveryPrompt, topicConsolidationPrompt } from "./topics.v2";
+import { findingsPrompt } from "./findings.v2";
 import { planningPrompt } from "./planning.v2";
 import { testsPrompt } from "./tests.v1";
 import { revisionPrompt } from "./revision.v1";
@@ -17,8 +17,8 @@ export const PromptRegistry: PromptRegistryType = {
 };
 
 export * from "./scope.v1";
-export * from "./topics.v1";
-export * from "./findings.v1";
+export * from "./topics.v2";
+export * from "./findings.v2";
 export * from "./planning.v2";
 export * from "./tests.v1";
 export * from "./revision.v1";

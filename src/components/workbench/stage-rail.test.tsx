@@ -54,4 +54,37 @@ describe("StageRail", () => {
     const item = screen.getByText("Revision").closest("li");
     expect(item).toHaveTextContent("✓");
   });
+
+  it("shows elapsed duration on completed stages from the completed event", () => {
+    const ev = (type: RunEvent["type"], stage?: string, ts = "2026-08-12T00:00:00Z", data: unknown = {}): RunEvent => ({
+      ...event(type, stage),
+      timestamp: ts,
+      data,
+    });
+    const events = [
+      ev("stage.started", "topics", "2026-08-12T00:00:00Z"),
+      ev("stage.completed", "topics", "2026-08-12T00:01:35Z", { stage: "topics", durationMs: 95_000 }),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    const item = screen.getByText("Topics").closest("li");
+    expect(item).toHaveTextContent("✓ 1m 35s");
+  });
+
+  it("shows live elapsed time and batch count for the running stage", () => {
+    const ev = (type: RunEvent["type"], stage?: string, ts = "2026-08-12T00:00:00Z", data: unknown = {}): RunEvent => ({
+      ...event(type, stage),
+      timestamp: ts,
+      data,
+    });
+    const events = [
+      ev("stage.started", "topics", "2026-08-12T00:00:00Z"),
+      ev("stage.progress", "topics", "2026-08-12T00:00:30Z", { message: "analyzing review batch 2 of 5 in parallel" }),
+      // The newest event timestamp is the "now" used for the running stage.
+      ev("stage.progress", "topics", "2026-08-12T00:02:00Z", { message: "generating findings" }),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    const item = screen.getByText("Topics").closest("li");
+    expect(item).toHaveTextContent("2m");
+    expect(item).toHaveTextContent("batch 2/5");
+  });
 });

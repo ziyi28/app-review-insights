@@ -57,11 +57,21 @@ type SourceEvidence = {
   selection?: "live" | "stable";
 };
 
+type AnalysisSampleArtifact = {
+  strategy: string;
+  eligibleCount: number;
+  selectedCount: number;
+  limit: number;
+  selectedReviewIds: string[];
+  layers: { rating: number; language: string; candidates: number; selected: number }[];
+};
+
 type ArtifactCache = {
   runId: string | null;
   scope?: unknown;
-  cleaned?: { reviews: unknown[]; stats?: unknown };
+  cleaned?: { reviews: unknown[]; stats?: unknown; cleaning?: unknown };
   stats?: unknown;
+  analysisSample?: AnalysisSampleArtifact;
   sourceEvidence?: SourceEvidence;
   topicCandidates?: { candidates: { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string }[] };
   topics?: { topics: { id: string; label: string; description: string; reviewIds: string[] }[] };
@@ -134,6 +144,7 @@ export function Workbench() {
       "scope": "scope",
       "cleaned-reviews": "cleaned",
       "stats": "stats",
+      "analysis-sample": "analysisSample",
       "source-evidence": "sourceEvidence",
       "topic-candidates": "topicCandidates",
       "topics": "topics",
@@ -385,6 +396,34 @@ export function Workbench() {
                       ))}
                     </div>
                   ) : null}
+                  {cache.analysisSample ? (
+                    <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
+                      <h4>
+                        {t.sampleAnalyzed}: {cache.analysisSample.selectedCount} {t.sampleOf} {cache.analysisSample.eligibleCount}
+                      </h4>
+                      <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "4px 0" }}>
+                        {t.sampleStratified} · {cache.analysisSample.strategy}
+                      </p>
+                    </div>
+                  ) : null}
+                  {(() => {
+                    const cleaning = (cache.cleaned as { cleaning?: { unicodeNormalizedCount: number; whitespaceCollapsedCount: number; caseFoldedCount: number; exactDuplicateRemovedCount: number; identityConflictCount: number; keptShortUniqueCount: number; languageLabels: { tag: string; count: number }[] } } | undefined)?.cleaning;
+                    if (!cleaning) return null;
+                    return (
+                      <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
+                        <h4>{t.cleaningUnicode}</h4>
+                        <p style={{ fontSize: "13px", margin: "4px 0", color: "var(--text-muted)" }}>
+                          {cleaning.unicodeNormalizedCount} {t.cleaningUnicode} · {cleaning.whitespaceCollapsedCount} {t.cleaningWhitespace} · {cleaning.caseFoldedCount} {t.cleaningCaseFolded}
+                        </p>
+                        <p style={{ fontSize: "13px", margin: "4px 0", color: "var(--text-muted)" }}>
+                          {t.cleaningExactDuplicates}: {cleaning.exactDuplicateRemovedCount} · {t.cleaningIdentityConflicts}: {cleaning.identityConflictCount} · {t.cleaningShortKept}: {cleaning.keptShortUniqueCount}
+                        </p>
+                        <p style={{ fontSize: "12px", margin: "4px 0", color: "var(--text-muted)" }}>
+                          {t.cleaningLanguages}: {cleaning.languageLabels.map((l) => `${l.tag} ${l.count}`).join(" · ")}
+                        </p>
+                      </div>
+                    );
+                  })()}
                   {cache.finalReport ? (
                     <div style={{ padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
                       <h4>{t.limitations}</h4>

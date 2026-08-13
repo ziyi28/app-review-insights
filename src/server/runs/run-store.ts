@@ -9,6 +9,7 @@ export const ARTIFACT_NAMES = [
   "raw-reviews",
   "cleaned-reviews",
   "stats",
+  "analysis-sample",
   "topic-candidates",
   "topics",
   "findings",

@@ -30,9 +30,9 @@ describe("prompt registry", () => {
 
   it("has versioned prompt ids matching file versions", () => {
     expect(PromptRegistry["scope"].version).toBe("scope@1");
-    expect(PromptRegistry["topic-discovery"].version).toBe("topics.discovery@1");
-    expect(PromptRegistry["topic-consolidation"].version).toBe("topics.consolidation@1");
-    expect(PromptRegistry["findings"].version).toBe("findings@1");
+    expect(PromptRegistry["topic-discovery"].version).toBe("topics.discovery@2");
+    expect(PromptRegistry["topic-consolidation"].version).toBe("topics.consolidation@2");
+    expect(PromptRegistry["findings"].version).toBe("findings@2");
     expect(PromptRegistry["planning"].version).toBe("planning@2");
     expect(PromptRegistry["tests"].version).toBe("tests@1");
     expect(PromptRegistry["revision"].version).toBe("revision@1");

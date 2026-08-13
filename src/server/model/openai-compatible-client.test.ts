@@ -293,4 +293,42 @@ describe("OpenAiCompatibleClient", () => {
     await client.generate({ ...requestBase(), onProgress });
     expect(onProgress).not.toHaveBeenCalled();
   });
+
+  it("defaults to a 10s heartbeat interval for long calls", async () => {
+    const fetchMock = vi.fn(async () => {
+      await new Promise((r) => setTimeout(r, 15));
+      return new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] }));
+    });
+    // No progressIntervalMs override: the default (10s) must be used, so a call
+    // finishing in ~15ms resolves before the first tick and emits no heartbeat.
+    const client = new OpenAiCompatibleClient({
+      baseUrl: "https://example.com/v1",
+      apiKey: "key",
+      model: "model-x",
+      jsonMode: "prompt",
+      fetchFn: fetchMock as unknown as typeof fetch,
+    });
+    const onProgress = vi.fn();
+    await client.generate({ ...requestBase(), onProgress });
+    expect(onProgress).not.toHaveBeenCalled();
+  });
+
+  it("keeps retry notifications immediate regardless of the heartbeat interval", async () => {
+    const fetchMock = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("fetch failed"))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+    const client = new OpenAiCompatibleClient({
+      baseUrl: "https://example.com/v1",
+      apiKey: "key",
+      model: "model-x",
+      jsonMode: "prompt",
+      fetchFn: fetchMock as unknown as typeof fetch,
+      // A long heartbeat interval must never delay the retry notification.
+      progressIntervalMs: 10_000,
+    });
+    const onProgress = vi.fn();
+    await client.generate({ ...requestBase(), onProgress });
+    expect(onProgress).toHaveBeenCalledWith(expect.objectContaining({ kind: "retry" }));
+  });
 });

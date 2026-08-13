@@ -54,7 +54,7 @@ const CONSOLIDATION_RESPONSE = {
 
 function context(overrides: Partial<TopicsStageContext> = {}, discoveryResponse = DISCOVERY_RESPONSE): TopicsStageContext {
   const generate = vi.fn(async (request: { promptVersion: string }) =>
-    request.promptVersion === "topics.consolidation@1" ? CONSOLIDATION_RESPONSE : discoveryResponse,
+    request.promptVersion.includes("consolidation") ? CONSOLIDATION_RESPONSE : discoveryResponse,
   );
   return {
     model: { generate } as never,
@@ -78,7 +78,7 @@ describe("runTopicsStage", () => {
     const ctx = context(
       {},
       {
-        topics: [{ id: "topic-candidate-1", label: "x", description: "y", supportingReviewIds: ["r1"], quote: "never said" }],
+        topics: [{ id: "topic-candidate-1", label: "x", description: "y", supportingReviewIds: ["r0"], quote: "never said" }],
       },
     );
     const result = await runTopicsStage(ctx);
@@ -133,6 +133,26 @@ describe("runTopicsStage", () => {
     expect(msgs.some((m) => m.includes("2 of"))).toBe(true);
     expect(msgs.some((m) => /\(\d+ reviews\)/.test(m))).toBe(true);
     expect(msgs.some((m) => m.includes("in parallel"))).toBe(true);
+    // Consolidation is now a single call over the bounded candidate set.
+    expect(msgs.some((m) => /consolidating \d+ topic candidates/.test(m))).toBe(true);
+  });
+
+  it("sends only the slim review fields to discovery", async () => {
+    let fedKeys: string[][] = [];
+    const generate = vi.fn(async (request: { promptVersion: string; user?: string }) => {
+      if (request.promptVersion.includes("consolidation")) return { topics: [] };
+      if (request.promptVersion.includes("discovery")) {
+        const parsed = JSON.parse(request.user as string) as { reviews: { [k: string]: unknown }[] };
+        fedKeys = parsed.reviews.map((r) => Object.keys(r).sort());
+      }
+      return DISCOVERY_RESPONSE;
+    });
+    const ctx = context({ model: { generate } as never });
+    await runTopicsStage(ctx);
+    expect(fedKeys.length).toBeGreaterThan(0);
+    for (const keys of fedKeys) {
+      expect(keys).toEqual(["bodyNormalized", "rating", "reviewId", "sourceReviewId"]);
+    }
   });
 
   it("calls discovery once per chunk", async () => {
@@ -166,77 +186,112 @@ describe("runTopicsStage", () => {
     expect(maxActive).toBeLessThanOrEqual(2);
   });
 
-  it("splits a large candidate set into small consolidation calls", async () => {
-    // A corpus large enough to produce many candidates across chunks: 30
-    // reviews with ~500-char bodies → 2 chunks → 2 discovery calls, each
-    // returning 10 candidates = 20 candidates > the 15-per-call budget.
-    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
-    const discoveryForChunk = {
+  it("keeps only the first 6 candidates per discovery call", async () => {
+    const overflow = {
       topics: Array.from({ length: 10 }, (_, i) => ({
         id: `topic-candidate-${i + 1}`,
         label: `candidate ${i + 1}`,
         description: "d",
-        supportingReviewIds: [many[0].reviewId],
+        supportingReviewIds: ["r1"],
+        quote: "price is too expensive",
+      })),
+    };
+    const ctx = context({}, overflow);
+    const result = await runTopicsStage(ctx);
+    expect(result.candidates).toHaveLength(6);
+    expect(result.candidates.map((c) => c.id)).toEqual(
+      ["topic-candidate-1", "topic-candidate-2", "topic-candidate-3", "topic-candidate-4", "topic-candidate-5", "topic-candidate-6"].map((id) => `${id}@c0`),
+    );
+    expect(result.warnings.some((w) => w.code === "TOPIC_CANDIDATES_TRUNCATED")).toBe(true);
+  });
+
+  it("caps the global candidate set at 36 before a single consolidation call", async () => {
+    // 120 reviews → 8 discovery chunks, each capped at 6 candidates → 48 > 36.
+    const many = Array.from({ length: 120 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const overflowChunk = {
+      topics: Array.from({ length: 20 }, (_, i) => ({
+        id: `topic-candidate-${i + 1}`,
+        label: `candidate ${i + 1}`,
+        description: "d",
+        supportingReviewIds: ["r0"],
         quote: "review number 0",
       })),
     };
-    const fedCounts: number[] = [];
-    const generate = vi.fn(async (request: { promptVersion: string; user?: unknown }) => {
-      if (request.promptVersion === "topics.consolidation@1") {
-        const parsed = JSON.parse(request.user as string) as { candidates: unknown[] };
-        fedCounts.push(parsed.candidates.length);
+    let consCalls = 0;
+    const generate = vi.fn(async (request: { promptVersion: string }) => {
+      if (request.promptVersion.includes("consolidation")) {
+        consCalls += 1;
         return { topics: [] };
       }
-      return discoveryForChunk;
+      return overflowChunk;
     });
     const ctx = context({ reviews: many, model: { generate } as never });
     const result = await runTopicsStage(ctx);
-    // 20 candidates / 15 budget = 2 consolidation calls, each fed at most 15.
-    expect(fedCounts).toHaveLength(2);
-    expect(fedCounts[0]).toBe(15);
-    expect(fedCounts[1]).toBe(5);
-    expect(result.topics).toHaveLength(0); // groups returned no topics
+    expect(result.candidates).toHaveLength(36);
+    // Exactly one consolidation call over the bounded candidate set.
+    expect(consCalls).toBe(1);
+    expect(result.warnings.some((w) => w.code === "TOPIC_CANDIDATES_TRUNCATED")).toBe(true);
   });
 
-  it("merges topics with the same label across consolidation groups", async () => {
-    // 30 reviews → 2 chunks → 20 candidates → 2 consolidation groups. Group 0
-    // gets candidates @c0 (10) + @c1 (5); group 1 gets @c1 (5) + @c2 (10).
-    // Both groups return a "Pricing" topic citing candidates they actually
-    // hold; the code merge joins them into one topic.
-    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
-    const discoveryForChunk = {
-      topics: Array.from({ length: 10 }, (_, i) => ({
+  it("caps the number of consolidated topics at 20", async () => {
+    const many = Array.from({ length: 120 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const overflowChunk = {
+      topics: Array.from({ length: 20 }, (_, i) => ({
         id: `topic-candidate-${i + 1}`,
         label: `candidate ${i + 1}`,
         description: "d",
-        supportingReviewIds: [many[0].reviewId],
+        supportingReviewIds: ["r0"],
         quote: "review number 0",
       })),
     };
-    let consGroup = 0;
+    // 8 chunks × 6 capped candidates = 36, ids `topic-candidate-1..6@c0..c5`.
     const generate = vi.fn(async (request: { promptVersion: string }) => {
-      if (request.promptVersion === "topics.consolidation@1") {
-        const group = consGroup++;
-        // Group 0 holds @c0 (10) + @c1 (5); group 1 holds @c1 (5) + @c2 (10).
-        // Cite distinct candidates that each group actually owns.
-        const ids = group === 0 ? ["topic-candidate-1@c0", "topic-candidate-2@c0"] : ["topic-candidate-6@c1", "topic-candidate-7@c1"];
+      if (request.promptVersion.includes("consolidation")) {
+        return {
+          topics: Array.from({ length: 30 }, (_, i) => ({
+            id: `topic-${i + 1}`,
+            label: `topic ${i + 1}`,
+            description: "d",
+            candidateIds: [`topic-candidate-${(i % 6) + 1}@c${i % 6}`],
+          })),
+        };
+      }
+      return overflowChunk;
+    });
+    const ctx = context({ reviews: many, model: { generate } as never });
+    const result = await runTopicsStage(ctx);
+    expect(result.topics.length).toBeLessThanOrEqual(20);
+    expect(result.warnings.some((w) => w.code === "TOPICS_TRUNCATED")).toBe(true);
+  });
+
+  it("merges topics with the same label within the single consolidation call", async () => {
+    // Two consolidation topics share the same normalized label and reference
+    // distinct validated candidates; code merges them into one.
+    const many = Array.from({ length: 120 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const overflowChunk = {
+      topics: Array.from({ length: 20 }, (_, i) => ({
+        id: `topic-candidate-${i + 1}`,
+        label: `candidate ${i + 1}`,
+        description: "d",
+        supportingReviewIds: ["r0"],
+        quote: "review number 0",
+      })),
+    };
+    const generate = vi.fn(async (request: { promptVersion: string }) => {
+      if (request.promptVersion.includes("consolidation")) {
         return {
           topics: [
-            {
-              id: "topic-1",
-              label: "Pricing concerns",
-              description: "users complain about cost",
-              candidateIds: ids,
-            },
+            { id: "topic-1", label: "Pricing concerns", description: "d", candidateIds: ["topic-candidate-1@c0"] },
+            { id: "topic-2", label: "pricing concerns", description: "d", candidateIds: ["topic-candidate-2@c0"] },
           ],
         };
       }
-      return discoveryForChunk;
+      return overflowChunk;
     });
     const ctx = context({ reviews: many, model: { generate } as never });
     const result = await runTopicsStage(ctx);
     expect(result.topics).toHaveLength(1);
     expect(result.topics[0].label).toBe("Pricing concerns");
-    expect(result.topics[0].candidateIds).toEqual(["topic-candidate-1@c0", "topic-candidate-2@c0", "topic-candidate-6@c1", "topic-candidate-7@c1"]);
+    expect(result.topics[0].candidateIds).toEqual(["topic-candidate-1@c0", "topic-candidate-2@c0"]);
   });
 });

@@ -141,6 +141,17 @@ const DEFAULT_FINDINGS_CONCURRENCY = 3;
 // full ctx.reviews, not the slim copy).
 type SlimReview = { reviewId: string; sourceReviewId: string; rating: number; bodyNormalized: string };
 
+// Topics are trimmed to the same essentials the model reasons over: id, label
+// and description. The candidate/review id lists are pipeline bookkeeping, not
+// signal, and dropping them shrinks every findings prompt on a many-topic run.
+type SlimTopic = { id: string; label: string; description: string };
+
+// Model output is bounded so a large corpus never yields unbounded findings:
+// at most 4 findings survive per chunk, at most 20 globally. Excess output is
+// truncated deterministically with a warning — never retried.
+const MAX_FINDINGS_PER_CHUNK = 4;
+const MAX_FINDINGS_TOTAL = 20;
+
 /**
  * Generates evidence-grounded findings. Reviews are slimmed down, split into
  * size-bounded chunks, and analyzed per-chunk in parallel; each chunk's output
@@ -156,6 +167,7 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
     rating: r.rating,
     bodyNormalized: r.bodyNormalized,
   }));
+  const slimTopics: SlimTopic[] = ctx.topics.map((t) => ({ id: t.id, label: t.label, description: t.description }));
 
   const chunks = chunkByBodyBudget(slimReviews, FINDINGS_CHUNK_CHAR_BUDGET);
   const perChunk = await mapWithConcurrency(chunks, ctx.maxConcurrency ?? DEFAULT_FINDINGS_CONCURRENCY, async (chunk, chunkIndex) => {
@@ -164,10 +176,19 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
       stage: "findings",
       promptVersion: findingsPrompt.version,
       system: findingsPrompt.system,
-      user: findingsPrompt.buildUser({ reviews: chunk, topics: ctx.topics, goal: ctx.goal, outputLocale: ctx.outputLocale }),
+      user: findingsPrompt.buildUser({ reviews: chunk, topics: slimTopics, goal: ctx.goal, outputLocale: ctx.outputLocale }),
       schema: FindingOutputSchema,
       onProgress: modelProgressRelay(ctx.onProgress),
     });
+    // Truncate this chunk's raw output to the per-chunk cap before any
+    // normalization: excess findings are dropped deterministically, not retried.
+    if (output.findings.length > MAX_FINDINGS_PER_CHUNK) {
+      warnings.push({
+        code: "FINDINGS_TRUNCATED",
+        message: `batch ${chunkIndex + 1} returned ${output.findings.length} findings; kept first ${MAX_FINDINGS_PER_CHUNK} deterministically`,
+      });
+      output.findings.length = MAX_FINDINGS_PER_CHUNK;
+    }
     // Normalize against the full review set: the model saw only this chunk, so
     // any review it cites resolves here and its excerpt is still verified as an
     // exact substring of the normalized body.
@@ -183,6 +204,14 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
   for (const { chunkIndex, result } of perChunk) {
     warnings.push(...result.warnings);
     for (const f of result.findings) findings.push(namespaceIds ? { ...f, id: `${f.id}@c${chunkIndex}` } : f);
+  }
+  // Global cap: keep only the first MAX_FINDINGS_TOTAL surviving findings.
+  if (findings.length > MAX_FINDINGS_TOTAL) {
+    warnings.push({
+      code: "FINDINGS_TRUNCATED",
+      message: `kept first ${MAX_FINDINGS_TOTAL} of ${findings.length} findings; excess dropped deterministically`,
+    });
+    findings.length = MAX_FINDINGS_TOTAL;
   }
 
   return { findings, warnings, insufficientEvidence: isInsufficientEvidence(findings) };

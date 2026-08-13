@@ -262,6 +262,50 @@ describe("runFindingsStage", () => {
     expect(seenReviewIds).toEqual(many.map((r) => r.reviewId));
   });
 
+  it("truncates oversized chunk output to 4 findings deterministically", async () => {
+    const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const generate = vi.fn(async () => ({
+      findings: Array.from({ length: 10 }, (_, i) => ({
+        id: `finding-${i + 1}`,
+        topicIds: ["topic-1"],
+        title: "x",
+        summary: "y",
+        supportingReviewIds: ["r0"],
+        evidenceExcerpts: [{ reviewId: "r0", excerpt: "review number 0" }],
+        conflictingReviewIds: [],
+        uncertainties: [],
+        limitations: [],
+      })),
+    }));
+    const ctx = context({ reviews: many, model: { generate } as never });
+    const result = await runFindingsStage(ctx);
+    // Each of the N chunks returns 10 raw findings but only 4 survive per chunk.
+    expect(result.findings.length).toBeLessThanOrEqual(generate.mock.calls.length * 4);
+    expect(result.warnings.some((w) => w.code === "FINDINGS_TRUNCATED")).toBe(true);
+  });
+
+  it("caps the global finding count at 20", async () => {
+    // 8 chunks × 4 per-chunk cap = 32 → global cap of 20.
+    const many = Array.from({ length: 120 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const generate = vi.fn(async () => ({
+      findings: Array.from({ length: 10 }, (_, i) => ({
+        id: `finding-${i + 1}`,
+        topicIds: ["topic-1"],
+        title: "x",
+        summary: "y",
+        supportingReviewIds: ["r0"],
+        evidenceExcerpts: [{ reviewId: "r0", excerpt: "review number 0" }],
+        conflictingReviewIds: [],
+        uncertainties: [],
+        limitations: [],
+      })),
+    }));
+    const ctx = context({ reviews: many, model: { generate } as never });
+    const result = await runFindingsStage(ctx);
+    expect(result.findings.length).toBe(20);
+    expect(result.warnings.some((w) => w.code === "FINDINGS_TRUNCATED")).toBe(true);
+  });
+
   it("namespaces per-chunk finding ids and merges them without collision", async () => {
     const many = Array.from({ length: 30 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
     const generate = vi.fn(async (request: { user?: string }) => {

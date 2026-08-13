@@ -155,6 +155,17 @@ export type Dictionary = {
   diagnosticsWarning: string;
   diagnosticsValidation: string;
   diagnosticsRevision: string;
+  stageBatch: string;
+  cleaningUnicode: string;
+  cleaningWhitespace: string;
+  cleaningCaseFolded: string;
+  cleaningLanguages: string;
+  cleaningExactDuplicates: string;
+  cleaningIdentityConflicts: string;
+  cleaningShortKept: string;
+  sampleAnalyzed: string;
+  sampleOf: string;
+  sampleStratified: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -313,6 +324,17 @@ export const dictionaries: Record<Locale, Dictionary> = {
     diagnosticsWarning: "Warnings",
     diagnosticsValidation: "Validation",
     diagnosticsRevision: "Revision",
+    stageBatch: "batch",
+    cleaningUnicode: "Unicode normalized",
+    cleaningWhitespace: "whitespace collapsed",
+    cleaningCaseFolded: "case folded",
+    cleaningLanguages: "Language labels",
+    cleaningExactDuplicates: "exact duplicates removed",
+    cleaningIdentityConflicts: "identity conflicts",
+    cleaningShortKept: "short unique reviews kept",
+    sampleAnalyzed: "Analyzed",
+    sampleOf: "of scope-matching reviews",
+    sampleStratified: "stratified sample",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -469,6 +491,17 @@ export const dictionaries: Record<Locale, Dictionary> = {
     diagnosticsWarning: "警告",
     diagnosticsValidation: "校验",
     diagnosticsRevision: "修订",
+    stageBatch: "批次",
+    cleaningUnicode: "Unicode 规范化",
+    cleaningWhitespace: "空白折叠",
+    cleaningCaseFolded: "大小写折叠",
+    cleaningLanguages: "语言标记",
+    cleaningExactDuplicates: "精确重复已排除",
+    cleaningIdentityConflicts: "身份冲突",
+    cleaningShortKept: "保留的独立短评",
+    sampleAnalyzed: "已分析",
+    sampleOf: "条范围匹配评论",
+    sampleStratified: "分层样本",
   },
 };
 
