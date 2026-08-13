@@ -3,7 +3,8 @@ import { z } from "zod";
 /** Where a raw review came from. */
 export const ReviewSourceSchema = z.enum([
   "apple-rss",
-  "socialcrawl-app-store",
+  "serpapi-apple-reviews",
+  "socialcrawl-app-store", // legacy cached replay only
   "json-import",
   "csv-import",
 ]);
