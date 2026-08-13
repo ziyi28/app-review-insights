@@ -3,6 +3,7 @@ import type { Prd } from "@/domain/contracts/analysis";
 import type { Limitation } from "@/server/sources/apple-rss-collector";
 import { prepareReviews } from "@/domain/reviews/prepare";
 import { validateTraceability } from "@/domain/traceability/validate";
+import { buildEvidenceValidationReport } from "@/domain/analysis/evidence-validation";
 import { runScopeStage } from "./stages/scope";
 import { runTopicsStage } from "./stages/topics";
 import { runFindingsStage, normalizeFindings } from "./stages/findings";
@@ -225,6 +226,7 @@ export async function executeRun(
     await publisher.publish({ type: "stage.progress", runId, stage: "prepare", data: { message: `prepared ${reviews.length} reviews for analysis` } });
     limitations.push(...prepared.limitations);
     await publishArtifact("cleaned-reviews", 1, prepared);
+    await publishArtifact("stats", 1, prepared.stats);
     await endStage("prepare");
 
     // Without a configured model, deterministic stages (collect/import, clean,
@@ -295,7 +297,11 @@ export async function executeRun(
       onProgress: onStageProgress("topics"),
     });
     for (const w of topics.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "topics", data: w });
-    await publishArtifact("topics", 1, topics);
+    await publishArtifact("topic-candidates", 1, {
+      candidates: topics.candidates,
+      warnings: topics.warnings,
+    });
+    await publishArtifact("topics", 1, { topics: topics.topics, warnings: topics.warnings });
     await endStage("topics");
 
     // Findings
@@ -312,6 +318,15 @@ export async function executeRun(
     for (const w of findingsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "findings", data: w });
     await publishArtifact("findings", 1, findingsResult);
     await endStage("findings");
+
+    // Evidence validation: a deterministic audit of the findings result that
+    // persists counts and per-finding evidence verdicts as an artifact. It runs
+    // before any insufficient-evidence short-circuit so every completed run has
+    // the audit available regardless of what the guardrail decides next.
+    await startStage("evidence-validation");
+    const evidenceReport = buildEvidenceValidationReport(findingsResult);
+    await publishArtifact("evidence-validation", 1, evidenceReport);
+    await endStage("evidence-validation");
 
     // Evidence guardrail: a run with no surviving findings, or where every
     // finding is short of the evidentiary bar, cannot support a broad or
@@ -428,7 +443,11 @@ export async function executeRun(
       report = validateTraceability(revisedPrd, scoped.map((r) => r.reviewId), reviewMap);
       prd = revisedPrd;
       // Publish the revised artifacts as attempt-02 so consumers never see a
-      // stale pre-revision PRD/tests/traceability next to a valid run.
+      // stale pre-revision PRD/tests/traceability next to a valid run. The
+      // evidence-validation audit is re-run against the revised findings; no
+      // fake set of stage started/completed events is emitted for it.
+      const revisedEvidenceReport = buildEvidenceValidationReport(revisedFindingsResult);
+      await publishArtifact("evidence-validation", 2, revisedEvidenceReport);
       await publishArtifact("version-plan", 2, revisedPlanning.versionPlan);
       await publishArtifact("prd", 2, prd);
       await publishArtifact("tests", 2, { tests: prd.tests, prd, warnings: [] });

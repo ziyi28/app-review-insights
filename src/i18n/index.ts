@@ -28,6 +28,7 @@ export type Dictionary = {
   stagePrepare: string;
   stageTopics: string;
   stageFindings: string;
+  stageEvidenceValidation: string;
   stagePlanning: string;
   stageTests: string;
   stageTraceability: string;
@@ -144,6 +145,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     stagePrepare: "Prepare",
     stageTopics: "Topics",
     stageFindings: "Findings",
+    stageEvidenceValidation: "Evidence Validation",
     stagePlanning: "Planning",
     stageTests: "Tests",
     stageTraceability: "Traceability",
@@ -258,6 +260,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     stagePrepare: "清洗",
     stageTopics: "主题",
     stageFindings: "发现",
+    stageEvidenceValidation: "证据验证",
     stagePlanning: "计划",
     stageTests: "测试",
     stageTraceability: "追溯",

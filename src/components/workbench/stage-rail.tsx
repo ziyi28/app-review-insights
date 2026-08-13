@@ -3,13 +3,14 @@
 import type { Dictionary } from "@/i18n";
 import type { RunEvent } from "@/domain/contracts/events";
 
-const STAGE_ORDER = ["source", "prepare", "scope", "topics", "findings", "planning", "tests", "traceability", "revision"] as const;
+const STAGE_ORDER = ["source", "prepare", "scope", "topics", "findings", "evidence-validation", "planning", "tests", "traceability", "revision"] as const;
 export const STAGE_LABELS: Record<(typeof STAGE_ORDER)[number], keyof Dictionary> = {
   source: "stageSource",
   prepare: "stagePrepare",
   scope: "stageScope",
   topics: "stageTopics",
   findings: "stageFindings",
+  "evidence-validation": "stageEvidenceValidation",
   planning: "stagePlanning",
   tests: "stageTests",
   traceability: "stageTraceability",
