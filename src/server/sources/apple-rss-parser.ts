@@ -11,12 +11,33 @@ export type AppleRssParseResult = {
   warnings: ParserWarning[];
   /** Stable entry reference within the page, e.g. "entry-3". */
   rawRefs: string[];
+  /**
+   * Last page number advertised by feed.link[rel=last], or null when absent.
+   * The collector uses it to distinguish a natural pagination end from an
+   * abnormally early empty page.
+   */
+  lastPage: number | null;
 };
 
 function label(v: unknown): string | null {
   if (v && typeof v === "object" && "label" in (v as { label?: unknown })) {
     const l = (v as { label?: unknown }).label;
     if (typeof l === "string") return l;
+  }
+  return null;
+}
+
+function parseLastPage(feed: unknown): number | null {
+  const links = (feed as { link?: unknown }).link;
+  if (!Array.isArray(links)) return null;
+  for (const link of links) {
+    if (!link || typeof link !== "object") continue;
+    const attrs = (link as { attributes?: unknown }).attributes;
+    if (!attrs || typeof attrs !== "object") continue;
+    const a = attrs as { rel?: unknown; href?: unknown };
+    if (a.rel !== "last" || typeof a.href !== "string") continue;
+    const m = a.href.match(/page=(\d+)/);
+    if (m) return Number(m[1]);
   }
   return null;
 }
@@ -35,17 +56,22 @@ export function parseAppleRssJson(body: string): AppleRssParseResult {
   try {
     json = JSON.parse(body);
   } catch {
-    return { reviews, warnings: [{ code: "INVALID_JSON", message: "response body is not valid JSON" }], rawRefs };
+    return { reviews, warnings: [{ code: "INVALID_JSON", message: "response body is not valid JSON" }], rawRefs, lastPage: null };
   }
 
   const feed = (json as { feed?: unknown })?.feed;
   if (!feed || typeof feed !== "object") {
-    return { reviews, warnings: [{ code: "MISSING_FEED", message: "response has no feed object" }], rawRefs };
+    return { reviews, warnings: [{ code: "MISSING_FEED", message: "response has no feed object" }], rawRefs, lastPage: null };
   }
 
-  const entries = (feed as { entry?: unknown }).entry;
+  const feedObject = feed as { entry?: unknown };
+  const lastPage = parseLastPage(feedObject);
+  if (!("entry" in feedObject)) {
+    return { reviews, warnings, rawRefs, lastPage };
+  }
+  const entries = feedObject.entry;
   if (!Array.isArray(entries)) {
-    return { reviews, warnings: [{ code: "MISSING_ENTRIES", message: "feed.entry is not an array" }], rawRefs };
+    return { reviews, warnings: [{ code: "MISSING_ENTRIES", message: "feed.entry is not an array" }], rawRefs, lastPage };
   }
 
   entries.forEach((entryRaw, index) => {
@@ -98,5 +124,5 @@ export function parseAppleRssJson(body: string): AppleRssParseResult {
     rawRefs.push(`entry-${index}`);
   });
 
-  return { reviews, warnings, rawRefs };
+  return { reviews, warnings, rawRefs, lastPage };
 }
