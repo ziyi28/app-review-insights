@@ -83,10 +83,13 @@ a model you can still:
   Reviews RSS. The reason is always surfaced as a limitation and labeled
   **Apple RSS fallback** in the UI; local history is separate and never
   presented as live.
-- **Error strategy:** SocialCrawl transient errors `429 / 500 / 502 / 503` (and
-  `503` with `Retry-After`) are retried at most twice; `400 / 401 / 402 / 404`
-  and a `503` without `Retry-After` are not retried. Partial valid entries keep
-  the valid reviews (`partial`) and are never mixed with RSS reviews.
+- **Error strategy:** SocialCrawl transient errors `429 / 500 / 502 / 504`, plus
+  `503` responses that include `Retry-After`, are retried at most twice;
+  `400 / 401 / 402 / 404` and `503` without `Retry-After` are not retried.
+  `504` covers the `UPSTREAM_ERROR` observed in production, and every retry
+  reuses the same `Idempotency-Key`. If a response contains both valid and
+  malformed items, valid reviews are kept and marked `partial`; RSS reviews
+  are not mixed into that live sample.
 - **Live (fallback path):** Apple Customer Reviews RSS
   (`/us/rss/customerreviews/page={1..10}/id={id}/sortBy=mostRecent/json`),
   fetched sequentially, at least 500 ms apart, max 10 pages, no concurrency.
