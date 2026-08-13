@@ -2,7 +2,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
 import type { Limitation, CollectionStatus } from "./source-types";
-import { collectAppleReviews, type CollectorDeps, type SourceResult } from "./apple-rss-collector";
+import { collectAppleReviews, type CollectorDeps } from "./apple-rss-collector";
 import { collectSerpApiReviews, type SerpApiEvidence, type SerpApiCollectorDeps } from "./serpapi-collector";
 import { AppleReviewCacheStore } from "./apple-review-cache";
 

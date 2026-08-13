@@ -24,12 +24,11 @@ const README_FILES = {
       "草稿 / 终稿",
       "3 次尝试",
       "中国区 App Store",
-      "SocialCrawl",
-      "504",
+      "SerpApi",
+      "SERPAPI_API_KEY",
+      "apple_reviews",
+      "no_cache=true",
       "Apple RSS 降级采集",
-      "SOCIALCRAWL_API_KEY",
-      "depth=500",
-      "no-cache",
     ],
   },
   "README.en.md": {
@@ -51,12 +50,11 @@ const README_FILES = {
       "Draft/Final",
       "3 attempts",
       "China App Store",
-      "SocialCrawl",
-      "504",
+      "SerpApi",
+      "SERPAPI_API_KEY",
+      "apple_reviews",
+      "no_cache=true",
       "Apple RSS fallback",
-      "SOCIALCRAWL_API_KEY",
-      "depth=500",
-      "no-cache",
     ],
   },
 };
@@ -107,7 +105,7 @@ for (const [file, { sections, capabilities }] of Object.entries(README_FILES)) {
 const readme = readmeContents.get("README.en.md");
 const modelAnalysis = readFileSync(path.join(root, "docs/model-analysis.md"), "utf8");
 // model-analysis.md documents the analysis pipeline; it does not need the
-// SocialCrawl acquisition tokens, only the original P1 capability set.
+// SerpApi acquisition tokens, only the original P1 capability set.
 const P1_CAPABILITIES = ["Evidence Validation", "Version Planning", "Draft/Final", "3 attempts", "China App Store"];
 for (const token of P1_CAPABILITIES) {
   if (!modelAnalysis.includes(token)) {
@@ -150,7 +148,7 @@ function localEnvValue(name) {
 
 const configuredSecrets = [
   process.env.MODEL_API_KEY?.trim() || localEnvValue("MODEL_API_KEY"),
-  process.env.SOCIALCRAWL_API_KEY?.trim() || localEnvValue("SOCIALCRAWL_API_KEY"),
+  process.env.SERPAPI_API_KEY?.trim() || localEnvValue("SERPAPI_API_KEY"),
 ].filter((value) => value && value.length >= 12);
 
 for (const secret of configuredSecrets) {
