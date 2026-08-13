@@ -123,6 +123,48 @@ describe("collectSocialCrawlReviews", () => {
     expect(fetchFn.mock.calls.map(([, init]) => new Headers(init?.headers).get("idempotency-key"))).toEqual(["preview-1", "preview-1"]);
   });
 
+  it("retries an observed 504 UPSTREAM_ERROR and reuses the idempotency key", async () => {
+    const fetchFn = vi.fn()
+      .mockResolvedValueOnce(errorResponse(504, "UPSTREAM_ERROR"))
+      .mockResolvedValueOnce(jsonResponse(successEnvelope([reviewItem("ok")])));
+    const sleep = vi.fn(async () => {});
+
+    const result = await collectSocialCrawlReviews(
+      deps({ fetchFn: fetchFn as typeof fetch, sleep }),
+    );
+
+    expect(result.status).toBe("complete");
+    expect(result.reviews.map((review) => review.sourceReviewId)).toEqual(["ok"]);
+    expect(fetchFn).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledWith(1000);
+    expect(
+      fetchFn.mock.calls.map(([, init]) =>
+        new Headers(init?.headers).get("idempotency-key"),
+      ),
+    ).toEqual(["preview-1", "preview-1"]);
+    expect(result.evidence.attemptCount).toBe(2);
+  });
+
+  it("fails explicitly after exhausting 504 UPSTREAM_ERROR retries", async () => {
+    const fetchFn = vi.fn(async () => errorResponse(504, "UPSTREAM_ERROR"));
+    const sleep = vi.fn(async () => {});
+
+    const result = await collectSocialCrawlReviews(
+      deps({ fetchFn: fetchFn as unknown as typeof fetch, sleep, maxRetries: 2 }),
+    );
+
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+    expect(sleep.mock.calls.map(([ms]) => ms)).toEqual([1000, 2000]);
+    expect(result.status).toBe("failed");
+    expect(result.evidence.httpStatus).toBe(504);
+    expect(result.evidence.attemptCount).toBe(3);
+    expect(result.limitations).toContainEqual({
+      code: "SOCIALCRAWL_UPSTREAM_FAILED",
+      message: "SocialCrawl request failed (HTTP 504); type=UPSTREAM_ERROR",
+      stage: "source",
+    });
+  });
+
   it("retries 500 and 502 with bounded backoff", async () => {
     const fetchFn = vi.fn()
       .mockResolvedValueOnce(errorResponse(500, "INTERNAL"))

@@ -78,7 +78,7 @@ const ReviewItemSchema = z.object({
 type SocialCrawlReviewItem = z.infer<typeof ReviewItemSchema>;
 
 const DETERMINISTIC_STATUS = new Set([400, 401, 402, 404]);
-const RETRYABLE_STATUS = new Set([429, 500, 502, 503]);
+const RETRYABLE_STATUS = new Set([429, 500, 502, 503, 504]);
 
 const ERROR_TYPES: Record<string, string> = {
   INVALID_API_KEY: "SOCIALCRAWL_AUTH_FAILED",
@@ -87,6 +87,7 @@ const ERROR_TYPES: Record<string, string> = {
   RATE_LIMITED: "SOCIALCRAWL_RATE_LIMITED",
   INTERNAL: "SOCIALCRAWL_UPSTREAM_FAILED",
   BAD_GATEWAY: "SOCIALCRAWL_UPSTREAM_FAILED",
+  UPSTREAM_ERROR: "SOCIALCRAWL_UPSTREAM_FAILED",
   UNAVAILABLE: "SOCIALCRAWL_UPSTREAM_FAILED",
 };
 
@@ -98,9 +99,9 @@ const MAX_RETRY_SLEEP_MS = 30_000;
  * SocialCrawl. Every request sends `Cache-Control: no-cache` (bypass the
  * provider's shared cache) and a caller-supplied `Idempotency-Key` (reused on
  * retries so one logical preview never double-charges). Only transient
- * `429/500/502/503` are retried, at most twice, honoring a bounded
- * `Retry-After`. Deterministic `400/401/402/404` and a 503 without
- * `Retry-After` are not retried.
+ * `429/500/502/504`, plus a 503 carrying `Retry-After`, are retried, at most
+ * twice, honoring a bounded `Retry-After`. Deterministic `400/401/402/404`
+ * and a 503 without `Retry-After` are not retried.
  *
  * The response envelope is validated strictly; each item is validated
  * individually so a malformed item drops the item (counted as parserDropped)
