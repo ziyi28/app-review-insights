@@ -81,7 +81,11 @@ describe("Workbench long-running artifact polling", () => {
   it("keeps polling for artifacts beyond a fixed attempt ceiling while the run is still running", async () => {
     render(<Workbench />);
 
-    // Start a live run (RunForm is in live mode by default with a prefilled URL).
+    // Start a live run (RunForm is in live mode by default with a prefilled
+    // URL). The analysis goal must be long enough for the Start button to enable.
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(tEn.goal), { target: { value: "Understand why users love the app" } });
+    });
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: tEn.start }));
     });
