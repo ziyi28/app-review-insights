@@ -13,11 +13,11 @@ understanding is required.
 | Clean / dedupe / stats | deterministic | exact dedupe, NFC normalization, aggregates |
 | Scope interpretation | model | maps a free-form goal onto generic filters + limitations |
 | Topic discovery / consolidation | model | dynamic themes, no fixed taxonomy |
-| Findings | model | grounds user problems in specific reviews with excerpts |
-| Version plan / PRD | model | turns findings into requirements, priorities, versions |
-| Test cases | model | links tests to requirements and source reviews |
-| Traceability validation | deterministic | 14 invariants over the review→finding→requirement→test chain |
-| One-shot revision | model | constrained repair of validation violations |
+| Findings | model + deterministic | model grounds user problems in specific reviews with excerpts; code computes sample counts, confidence, and the Evidence Sufficiency verdict |
+| Version plan / PRD | model + deterministic | model turns findings into requirements, priorities, versions; code downgrades insufficient-only requirements to P2 with no target version |
+| Test cases | model + deterministic | model links tests to requirements and source reviews; code derives each test's direct Finding IDs and Priority from the requirement graph |
+| Traceability validation | deterministic | full invariant set over the review→finding→requirement→test chain (including direct Finding/Priority checks on tests) |
+| One-shot revision | model | constrained repair of validation violations; output is re-normalized through the same deterministic rules |
 
 A purely keyword/taxonomy pipeline cannot generalize to unseen apps and
 reviews; a purely generative pipeline cannot be audited. The hybrid is the
@@ -52,8 +52,15 @@ snapshots, or git. `.env.example` documents the shape.
   stats, and the previous stage's *allowed* IDs.
 - Every evidence excerpt must be an exact substring of the cited review's
   normalized body; fabricated excerpts are dropped by code.
-- `supportingSampleCount` and confidence are **computed by code**, never trusted
-  from the model.
+- `supportingSampleCount`, confidence, and the **Evidence Sufficiency** verdict
+  are **computed by code**, never trusted from the model. Sufficiency is a
+  deterministic v1 policy over support count (≥3), corpus ratio (≥1%),
+  source completeness, and conflict ratio (conflicts < support). An
+  `insufficient` finding survives as a limited fact but can never drive a
+  P0/P1 requirement or a target version.
+- Test cases' direct `findingIds` and `priority` are derived by code from the
+  requirement graph and validated the same way; the tests prompt output
+  contract does not carry them.
 - Findings without any valid supporting review are deleted; ideas without a
   finding become separate `assumptions`, never requirements.
 - The traceability validator is deterministic and never invents citations.

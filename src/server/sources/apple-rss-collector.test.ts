@@ -31,10 +31,14 @@ function depsFor(urlToBody: Record<string, string>): CollectorDeps {
 
 describe("collectAppleReviews", () => {
   it("collects reviews sequentially across pages until pagination ends", async () => {
-    const page1 = fixture("page-01.json");
     const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
     const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
-    const deps = depsFor({ [url1]: page1, [url2]: fixture("empty-feed.json") });
+    // Advertise lastPage=2 so the empty page 2 is a natural end, not an
+    // abnormally early one.
+    const page1 = JSON.parse(fixture("page-01.json"));
+    page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+      "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const deps = depsFor({ [url1]: JSON.stringify(page1), [url2]: fixture("empty-feed.json") });
     const result = await collectAppleReviews(deps);
     expect(result.status).toBe("complete");
     expect(result.reviews).toHaveLength(2);
@@ -50,11 +54,99 @@ describe("collectAppleReviews", () => {
     expect(result.limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")).toBe(true);
   });
 
-  it("stops after page 1 with no reviews (suspect-empty) without fetching page 2", async () => {
+  it("treats an HTTP 200 feed with no entry property as suspect-empty", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const deps = depsFor({ [url1]: fixture("empty-feed-no-entry.json") });
+    const result = await collectAppleReviews(deps);
+    expect(result.status).toBe("suspect-empty");
+    expect(result.limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")).toBe(true);
+    expect(result.limitations.some((l) => l.code === "RSS_NON_JSON")).toBe(false);
+  });
+
+  it("keeps a non-array entry property classified as RSS_NON_JSON", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const deps = depsFor({ [url1]: fixture("malformed-feed.json") });
+    const result = await collectAppleReviews(deps);
+    expect(result.status).toBe("failed");
+    expect(result.limitations.some((l) => l.code === "RSS_NON_JSON")).toBe(true);
+    expect(result.limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")).toBe(false);
+  });
+
+  it("retries an empty page 1 twice and returns suspect-empty without fetching page 2", async () => {
     const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("empty-feed.json") });
-    await collectAppleReviews(deps);
-    expect(deps.fetchFn).toHaveBeenCalledTimes(1);
+    const result = await collectAppleReviews(deps);
+    // Original attempt + 2 retries (2s, 5s), never reaching page 2.
+    expect(deps.fetchFn).toHaveBeenCalledTimes(3);
+    expect(result.status).toBe("suspect-empty");
+  });
+
+  it("recovers from an empty page 1 when a retry returns reviews", async () => {
+    const calls: string[] = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      calls.push(String(input));
+      // First attempt empty, retries return real content. Advertise lastPage=1
+      // so pagination ends after the recovered page 1.
+      if (calls.length === 1) return makeResponse(fixture("empty-feed.json"));
+      const page1 = JSON.parse(fixture("page-01.json"));
+      page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+      return makeResponse(JSON.stringify(page1));
+    });
+    const deps = depsFor({});
+    deps.fetchFn = fetchMock as unknown as typeof fetch;
+    deps.emptyPageRetryDelaysMs = [1, 1];
+    const result = await collectAppleReviews(deps);
+    expect(result.status).toBe("complete");
+    expect(result.reviews.length).toBe(2);
+    // The recovered retry carries a cache-busting query param.
+    expect(calls.some((c) => c.includes("_="))).toBe(true);
+    expect(deps.fetchFn).toHaveBeenCalledTimes(2);
+  });
+
+  it("marks partial when an empty page is still before the advertised last page", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    // page-01.json advertises lastPage=10; page 2 is empty -> abnormal early end.
+    const deps = depsFor({ [url1]: fixture("page-01.json"), [url2]: fixture("empty-feed.json") });
+    const result = await collectAppleReviews(deps);
+    expect(result.status).toBe("partial");
+    expect(result.reviews.length).toBeGreaterThan(0);
+    expect(result.limitations.some((l) => l.code === "RSS_UNSTABLE_PAGINATION")).toBe(true);
+  });
+
+  it("ends pagination naturally without retrying when page >= lastPage", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const page1 = JSON.parse(fixture("page-01.json"));
+    page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+      "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortby=mostRecent/json";
+    const deps = depsFor({ [url1]: JSON.stringify(page1), [url2]: fixture("empty-feed.json") });
+    const result = await collectAppleReviews(deps);
+    expect(result.status).toBe("complete");
+    expect(deps.fetchFn).toHaveBeenCalledTimes(2);
+    expect(result.limitations.some((l) => l.code === "RSS_UNSTABLE_PAGINATION")).toBe(false);
+  });
+
+  it("records the attempt number on each page evidence", async () => {
+    const calls: string[] = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      calls.push(String(input));
+      if (calls.length === 1) return makeResponse(fixture("empty-feed.json"));
+      // Advertise lastPage=1 so the recovered page 1 is also the natural end,
+      // and the collector never requests page 2.
+      const page1 = JSON.parse(fixture("page-01.json"));
+      page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortby=mostRecent/json";
+      return makeResponse(JSON.stringify(page1));
+    });
+    const deps = depsFor({});
+    deps.fetchFn = fetchMock as unknown as typeof fetch;
+    deps.emptyPageRetryDelaysMs = [1];
+    const result = await collectAppleReviews(deps);
+    expect(deps.fetchFn).toHaveBeenCalledTimes(2);
+    const attempts = result.pages.map((p) => p.attempt).sort();
+    expect(attempts).toEqual([1, 2]);
   });
 
   it("fails on a first-page network failure without entering model stages", async () => {

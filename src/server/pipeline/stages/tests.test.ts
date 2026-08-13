@@ -94,4 +94,71 @@ describe("runTestsStage", () => {
     const result = await runTestsStage(context());
     expect(result.prd.tests).toHaveLength(1);
   });
+
+  it("derives deduped finding links and the most urgent priority across requirements", async () => {
+    const twoReqs: Requirement[] = [
+      {
+        id: "req-1",
+        findingIds: ["finding-1"],
+        title: "Add annual plan",
+        description: "x",
+        sourceReviewIds: ["r1", "r2"],
+        priority: "P1",
+        acceptanceCriteria: ["a"],
+        versionId: "ver-1",
+      },
+      {
+        id: "req-2",
+        findingIds: ["finding-2", "finding-1"],
+        title: "Show price",
+        description: "y",
+        sourceReviewIds: ["r3"],
+        priority: "P0",
+        acceptanceCriteria: ["b"],
+        versionId: null,
+      },
+    ];
+    const ctx = context(
+      { requirements: twoReqs },
+      {
+        tests: [
+          {
+            id: "test-1",
+            requirementIds: ["req-1", "req-2"],
+            sourceReviewIds: ["r1", "r3"],
+            testType: "manual",
+            precondition: "logged in",
+            steps: ["open pricing"],
+            expectedResult: "price shown",
+          },
+        ],
+      },
+    );
+    const result = await runTestsStage(ctx);
+    // finding-1 appears in both requirements but is deduped; order follows the
+    // requirement list and each requirement's declared finding order.
+    expect(result.tests[0].findingIds).toEqual(["finding-1", "finding-2"]);
+    expect(result.tests[0].priority).toBe("P0");
+  });
+
+  it("falls back to P2 when no linked requirement resolves", async () => {
+    const ctx = context(
+      { requirements: [] },
+      {
+        tests: [
+          {
+            id: "test-1",
+            requirementIds: ["ghost-req"],
+            sourceReviewIds: ["r1"],
+            testType: "manual",
+            precondition: "",
+            steps: ["step"],
+            expectedResult: "ok",
+          },
+        ],
+      },
+    );
+    const result = await runTestsStage(ctx);
+    expect(result.tests).toHaveLength(0);
+  });
 });

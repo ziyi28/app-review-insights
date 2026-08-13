@@ -25,10 +25,34 @@ export type ImportParseShape = {
   evidence: { fileName: string; mediaType: "application/json" | "text/csv"; byteLength: number; sha256: string; schemaVersion: string | null };
 };
 
+/** A pre-collected live dataset taken from a preview snapshot. */
+export type PreviewSourceShape = {
+  previewId: string;
+  appId: string;
+  canonicalUrl: string;
+  selection: "live" | "stable";
+  reviews: RawReview[];
+  rawRefs: string[];
+  /** Source limitations carried from the preview (e.g. RSS_CACHE_AUGMENTED). */
+  limitations: Limitation[];
+  sourceSummary: {
+    kind: "apple-rss";
+    appId: string;
+    status: "complete" | "suspect-empty" | "partial" | "failed";
+    selection: "live" | "stable";
+    liveCount: number;
+    stableCount: number;
+    pages: number;
+    requestCount: number;
+    reviewCount: number;
+  };
+};
+
 export type ExecuteDeps = {
   model: StageModelClient | ScriptedModelClient;
   source:
     | { kind: "apple-rss"; appleRssBaseUrl: string; appId: string; canonicalUrl: string }
+    | { kind: "preview"; data: PreviewSourceShape }
     | { kind: "import"; parse: ImportParseShape };
   fetchFn?: typeof fetch;
   sleep?: (ms: number) => Promise<void>;
@@ -50,6 +74,16 @@ async function collectSource(
   limitations: Limitation[];
   sourceSummary: unknown;
 }> {
+  if (source.kind === "preview") {
+    const data = source.data;
+    return {
+      status: data.sourceSummary.status,
+      rawReviews: data.reviews,
+      rawRefs: data.rawRefs,
+      limitations: data.limitations,
+      sourceSummary: data.sourceSummary,
+    };
+  }
   if (source.kind === "apple-rss") {
     const { collectAppleReviews } = await import("@/server/sources/apple-rss-collector");
     const collectorDeps = {
@@ -153,13 +187,23 @@ export async function executeRun(
     // fetched ≥500ms apart), so announce it — the UI has nothing else to show
     // until the first model stage (scope) starts.
     await startStage("source");
-    await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: deps.source.kind === "apple-rss" ? "collecting app reviews…" : "parsing imported reviews…" } });
+    const sourceStageMessage =
+      deps.source.kind === "apple-rss"
+        ? "collecting app reviews…"
+        : deps.source.kind === "preview"
+          ? "loading selected review sample…"
+          : "parsing imported reviews…";
+    await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: sourceStageMessage } });
     const source = await collectSource(deps.source, deps);
     await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: `collected ${source.rawReviews.length} reviews` } });
     limitations.push(...source.limitations);
     for (const l of source.limitations) {
       await publisher.publish({ type: "limitation.reported", runId, stage: "source", data: l });
     }
+    // Persist the exact reviews that entered this run so downstream rawRefs and
+    // Cached Replay reference run-local immutable artifacts, never the source
+    // cache or a live re-collection.
+    await publishArtifact("raw-reviews", 1, { reviews: source.rawReviews, rawRefs: source.rawRefs });
     await publishArtifact("source-evidence", 1, source.sourceSummary);
     await endStage("source");
 
@@ -174,9 +218,9 @@ export async function executeRun(
     await startStage("prepare");
     await publisher.publish({ type: "stage.progress", runId, stage: "prepare", data: { message: "cleaning and normalizing reviews…" } });
     const prepared =
-      deps.source.kind === "apple-rss"
-        ? prepareReviews({ kind: "apple-rss", reviews: source.rawReviews, rawRefs: source.rawRefs, limitations: source.limitations })
-        : prepareReviews({ kind: "import", parse: deps.source.parse });
+      deps.source.kind === "import"
+        ? prepareReviews({ kind: "import", parse: deps.source.parse })
+        : prepareReviews({ kind: "apple-rss", reviews: source.rawReviews, rawRefs: source.rawRefs, limitations: source.limitations });
     reviews = prepared.reviews;
     await publisher.publish({ type: "stage.progress", runId, stage: "prepare", data: { message: `prepared ${reviews.length} reviews for analysis` } });
     limitations.push(...prepared.limitations);
@@ -269,8 +313,34 @@ export async function executeRun(
     await publishArtifact("findings", 1, findingsResult);
     await endStage("findings");
 
+    // Evidence guardrail: a run with no surviving findings, or where every
+    // finding is short of the evidentiary bar, cannot support a broad or
+    // critical plan. A run with ZERO findings stops here — no planning/tests
+    // model calls, no PRD/test artifacts, and a final report that cannot be
+    // replayed as a complete analysis. A run that has findings (even if all
+    // are insufficient) still proceeds; the planning stage pins their
+    // requirements to P2 with no target version.
+    const insufficientFindings = findingsResult.findings.filter(
+      (finding) => finding.evidenceSufficiency.status === "insufficient",
+    );
+    if (findingsResult.findings.length === 0 || insufficientFindings.length > 0) {
+      const limitation: Limitation = {
+        code: "INSUFFICIENT_EVIDENCE",
+        message:
+          findingsResult.findings.length === 0
+            ? "No evidence-backed findings survived validation"
+            : `${insufficientFindings.length} of ${findingsResult.findings.length} findings have insufficient evidence for broad or critical claims`,
+        stage: "findings",
+      };
+      limitations.push(limitation);
+      await publisher.publish({ type: "limitation.reported", runId, stage: "findings", data: limitation });
+    }
+
     if (findingsResult.findings.length === 0) {
-      limitations.push({ code: "INSUFFICIENT_EVIDENCE", message: "No evidence-backed findings survived validation", stage: "findings" });
+      await publishArtifact("final-report", 1, { prd: null, report: null, limitations });
+      await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-evidence", limitations } });
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model);
+      return;
     }
 
     // Planning
@@ -394,7 +464,7 @@ export async function executeRun(
 
 function sourceStatusOf(limitations: Limitation[]): "complete" | "partial" | "suspect-empty" | "failed" {
   if (limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")) return "suspect-empty";
-  if (limitations.some((l) => l.code === "RSS_PARTIAL" || l.code === "IMPORT_ERROR")) return "partial";
+  if (limitations.some((l) => l.code === "RSS_PARTIAL" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "IMPORT_ERROR")) return "partial";
   if (limitations.some((l) => l.code === "RSS_FETCH_FAILED")) return "failed";
   return "complete";
 }

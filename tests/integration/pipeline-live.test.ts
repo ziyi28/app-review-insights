@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdtempSync, rmSync, readFileSync } from "node:fs";
+import { mkdtempSync, rmSync, readFileSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { RunStore } from "@/server/runs/run-store";
@@ -204,8 +204,6 @@ describe("executeRun (live pipeline)", () => {
       JSON.stringify({ interpretation: "Pricing focus", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
       JSON.stringify({ topics: [] }),
       JSON.stringify({ findings: [] }),
-      JSON.stringify({ title: "x", overview: "y", versions: [], requirements: [], assumptions: [] }),
-      JSON.stringify({ tests: [] }),
     ]);
     const deps = makeDeps(model);
     deps.fetchFn = (async (input: RequestInfo | URL) => {
@@ -220,14 +218,21 @@ describe("executeRun (live pipeline)", () => {
 
     const manifest = await store.readManifest(runId);
     expect(manifest.limitations.some((l) => l.code === "RSS_PARTIAL")).toBe(true);
-    // Analysis proceeded into model stages despite partial source.
-    expect(model.callIndex).toBe(5);
+    // No findings survived validation -> the run short-circuits after
+    // scope/topics/findings (callIndex === 3); planning/tests never run.
+    expect(model.callIndex).toBe(3);
+    expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
+    expect(manifest.canReplay).toBe(false);
   });
 
-  it("marks suspect-empty and does not enter model stages when page 1 is empty", async () => {
+  it("marks a feed with no entry property suspect-empty and does not enter model stages", async () => {
     const model = new ScriptedModelClient([], new Error("MODEL should not be called"));
     const deps = makeDeps(model);
-    deps.fetchFn = (async () => new Response(JSON.stringify({ feed: { entry: [] } }), { status: 200 })) as unknown as typeof fetch;
+    const emptyFeedWithoutEntry = readFileSync(
+      path.join(process.cwd(), "tests", "fixtures", "apple", "empty-feed-no-entry.json"),
+      "utf8",
+    );
+    deps.fetchFn = (async () => new Response(emptyFeedWithoutEntry, { status: 200 })) as unknown as typeof fetch;
     const runId = store.createRunId();
     const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
 
@@ -236,7 +241,6 @@ describe("executeRun (live pipeline)", () => {
     const manifest = await store.readManifest(runId);
     expect(manifest.status).toBe("completed");
     expect(manifest.limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")).toBe(true);
-    // Model must not have been called.
     expect(model.callIndex).toBe(0);
   });
 
@@ -268,5 +272,193 @@ describe("executeRun (live pipeline)", () => {
     expect(manifest.status).toBe("failed");
     expect(manifest.limitations.some((l) => l.code === "RSS_FETCH_FAILED")).toBe(true);
     expect(model.callIndex).toBe(0);
+  });
+
+  it("analyzes a preview-selected live dataset without re-collecting from Apple", async () => {
+    const model = new ScriptedModelClient(await buildScript());
+    const parsed = (await import("@/server/sources/apple-rss-parser")).parseAppleRssJson(PAGE1);
+    const rawReviews = parsed.reviews;
+    const rawRefs = parsed.rawRefs.map((r) => `sources/apple/page-01.json#${r}`);
+    const deps: ExecuteDeps = {
+      model,
+      source: {
+        kind: "preview",
+        data: {
+          previewId: "preview-1",
+          appId: "839285684",
+          canonicalUrl: "https://apps.apple.com/us/app/workout/id839285684",
+          selection: "live",
+          reviews: rawReviews,
+          rawRefs,
+          limitations: [],
+          sourceSummary: {
+            kind: "apple-rss",
+            appId: "839285684",
+            status: "complete",
+            selection: "live",
+            liveCount: 1,
+            stableCount: 0,
+            pages: 1,
+            requestCount: 1,
+            reviewCount: rawReviews.length,
+          },
+        },
+      },
+    };
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand why users love it", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.canReplay).toBe(true);
+    // buildScript yields 6 model calls: scope, topic discovery, consolidation,
+    // findings, planning, tests.
+    expect(model.callIndex).toBe(6);
+    // The selected dataset is persisted as a run-local raw-reviews artifact.
+    const rawArtifact = (await store.readArtifact(runId, "raw-reviews", 1)) as { reviews: unknown[] };
+    expect(rawArtifact.reviews).toHaveLength(1);
+  });
+
+  it("propagates RSS_CACHE_AUGMENTED and keeps RSS_SUSPECT_EMPTY for a stable selection over an empty live", async () => {
+    const model = new ScriptedModelClient(await buildScript());
+    const parsed = (await import("@/server/sources/apple-rss-parser")).parseAppleRssJson(PAGE1);
+    const deps: ExecuteDeps = {
+      model,
+      source: {
+        kind: "preview",
+        data: {
+          previewId: "preview-2",
+          appId: "839285684",
+          canonicalUrl: "https://apps.apple.com/us/app/workout/id839285684",
+          selection: "stable",
+          reviews: parsed.reviews,
+          rawRefs: parsed.reviews.map((r) => `cache:${r.sourceReviewId}`),
+          limitations: [
+            { code: "RSS_CACHE_AUGMENTED", message: "Analysis used the stable cached review sample", stage: "source" },
+            { code: "RSS_SUSPECT_EMPTY", message: "Live collection was empty", stage: "source" },
+          ],
+          sourceSummary: {
+            kind: "apple-rss",
+            appId: "839285684",
+            status: "partial",
+            selection: "stable",
+            liveCount: 0,
+            stableCount: 1,
+            pages: 1,
+            requestCount: 3,
+            reviewCount: 1,
+          },
+        },
+      },
+    };
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.limitations.some((l) => l.code === "RSS_CACHE_AUGMENTED")).toBe(true);
+    expect(manifest.limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")).toBe(true);
+  });
+
+  it("does not enter model stages when a preview's selected dataset is empty", async () => {
+    const model = new ScriptedModelClient([], new Error("MODEL should not be called"));
+    const deps: ExecuteDeps = {
+      model,
+      source: {
+        kind: "preview",
+        data: {
+          previewId: "preview-3",
+          appId: "839285684",
+          canonicalUrl: "https://apps.apple.com/us/app/workout/id839285684",
+          selection: "live",
+          reviews: [],
+          rawRefs: [],
+          limitations: [{ code: "RSS_SUSPECT_EMPTY", message: "empty", stage: "source" }],
+          sourceSummary: {
+            kind: "apple-rss",
+            appId: "839285684",
+            status: "suspect-empty",
+            selection: "live",
+            liveCount: 0,
+            stableCount: 0,
+            pages: 1,
+            requestCount: 3,
+            reviewCount: 0,
+          },
+        },
+      },
+    };
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")).toBe(true);
+    expect(model.callIndex).toBe(0);
+  });
+
+  it("keeps a valid-but-insufficient finding and downgrades its requirement to P2 with no version", async () => {
+    // corpus = 1 review; finding survives with exact excerpt but its evidence
+    // is insufficient (2-support floor not met). The requirement must be
+    // pinned to P2/null by the deterministic guardrail even though the model
+    // returned P1/ver-1, and the version must not claim it.
+    const model = new ScriptedModelClient(await buildScript());
+    const deps = makeDeps(model);
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
+    // planning/tests still run (a finding exists, it is just insufficient),
+    // so the full 6-stage script executes.
+    expect(model.callIndex).toBe(6);
+    const prd = (await store.readArtifact(runId, "prd", 1)) as {
+      requirements: { priority: string; versionId: string | null }[];
+      versions: { requirementIds: string[] }[];
+      findings: { evidenceSufficiency: { status: string } }[];
+    };
+    expect(prd.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
+    expect(prd.versions[0].requirementIds).not.toContain("req-1");
+  });
+
+  it("short-circuits with insufficient-evidence when no findings survive", async () => {
+    const model = new ScriptedModelClient([
+      JSON.stringify({ interpretation: "Pricing focus", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
+      JSON.stringify({ topics: [] }),
+      JSON.stringify({ findings: [] }),
+    ]);
+    const deps = makeDeps(model);
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
+    expect(manifest.canReplay).toBe(false);
+    // Only scope/topics/findings ran.
+    expect(model.callIndex).toBe(3);
+    // No planning/tests artifacts on disk.
+    const artifact = (name: string) => path.join(store.resolveRunDir(runId), "artifacts", `${name}.attempt-01.json`);
+    expect(existsSync(artifact("prd"))).toBe(false);
+    expect(existsSync(artifact("tests"))).toBe(false);
+    // Final report carries null prd/report.
+    const finalReport = (await store.readArtifact(runId, "final-report", 1)) as {
+      prd: unknown;
+      report: unknown;
+    };
+    expect(finalReport.prd).toBeNull();
+    expect(finalReport.report).toBeNull();
   });
 });

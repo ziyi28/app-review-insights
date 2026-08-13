@@ -3,6 +3,9 @@ import { z } from "zod";
 export const ConfidenceLevelSchema = z.enum(["low", "medium", "high"]);
 export type ConfidenceLevel = z.infer<typeof ConfidenceLevelSchema>;
 
+export const PrioritySchema = z.enum(["P0", "P1", "P2"]);
+export type Priority = z.infer<typeof PrioritySchema>;
+
 /** A single verbatim excerpt anchored to a specific review. */
 export const EvidenceExcerptSchema = z.object({
   reviewId: z.string().min(1),
@@ -17,6 +20,20 @@ export const ConfidenceSchema = z.object({
 });
 export type Confidence = z.infer<typeof ConfidenceSchema>;
 
+/** Deterministic verdict on whether the evidence supports a broad or critical claim. */
+export const EvidenceSufficiencySchema = z.object({
+  status: z.enum(["sufficient", "insufficient"]),
+  corpusReviewCount: z.number().int().min(0),
+  supportRatio: z.number().min(0).max(1),
+  reasons: z.array(z.enum([
+    "SUPPORT_BELOW_MINIMUM",
+    "SUPPORT_RATIO_BELOW_MINIMUM",
+    "SOURCE_NOT_COMPLETE",
+    "CONFLICT_NOT_MINOR",
+  ])).default([]),
+});
+export type EvidenceSufficiency = z.infer<typeof EvidenceSufficiencySchema>;
+
 /** A model-generated, evidence-grounded finding. */
 export const FindingSchema = z
   .object({
@@ -29,6 +46,7 @@ export const FindingSchema = z
     evidenceExcerpts: z.array(EvidenceExcerptSchema).default([]),
     conflictingReviewIds: z.array(z.string()).default([]),
     confidence: ConfidenceSchema,
+    evidenceSufficiency: EvidenceSufficiencySchema,
     uncertainties: z.array(z.string()).default([]),
     limitations: z.array(z.string()).default([]),
   })
@@ -61,7 +79,7 @@ export const RequirementSchema = z.object({
   title: z.string().min(1).max(500),
   description: z.string().min(1).max(5_000),
   sourceReviewIds: z.array(z.string()).default([]),
-  priority: z.enum(["P0", "P1", "P2"]).default("P2"),
+  priority: PrioritySchema.default("P2"),
   acceptanceCriteria: z.array(z.string()).min(1),
   versionId: z.string().nullable().default(null),
 });
@@ -83,15 +101,19 @@ export const VersionPlanSchema = z.object({
 });
 export type VersionPlan = z.infer<typeof VersionPlanSchema>;
 
-/** A test case linked to requirements and source reviews. */
+/** A test case linked to requirements, their findings, and source reviews. */
 export const TestCaseSchema = z.object({
   id: z.string().regex(/^test-/).min(1),
   requirementIds: z.array(z.string()).min(1),
+  // Direct Finding links and a priority are deterministic application-code
+  // fields (see traceability/evidence-sources), never trusted from the model.
+  findingIds: z.array(z.string()).min(1),
   sourceReviewIds: z.array(z.string()).min(1),
   testType: z.enum(["manual", "automated"]).default("manual"),
   precondition: z.string().max(2_000).default(""),
   steps: z.array(z.string()).min(1),
   expectedResult: z.string().min(1).max(2_000),
+  priority: PrioritySchema,
 });
 export type TestCase = z.infer<typeof TestCaseSchema>;
 

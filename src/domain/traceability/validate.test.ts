@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
-import type { Prd } from "@/domain/contracts/analysis";
+import type { Prd, Requirement } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { validateTraceability } from "./validate";
+import { findingIdsForRequirements, priorityForRequirements } from "./evidence-sources";
 
 function reviewMap(ids: string[]): Map<string, NormalizedReview> {
   return new Map(
@@ -46,6 +47,12 @@ function makePrd(): Prd {
         ],
         conflictingReviewIds: [],
         confidence: { level: "low", method: "deterministic-v1", reasons: [] },
+        evidenceSufficiency: {
+          status: "sufficient",
+          corpusReviewCount: 100,
+          supportRatio: 0.08,
+          reasons: [],
+        },
         uncertainties: [],
         limitations: [],
       },
@@ -67,16 +74,35 @@ function makePrd(): Prd {
       {
         id: "test-1",
         requirementIds: ["req-1"],
+        findingIds: ["finding-1"],
         sourceReviewIds: ["r1"],
         testType: "manual",
         precondition: "",
         steps: ["step"],
         expectedResult: "ok",
+        priority: "P1",
       },
     ],
     assumptions: [{ id: "asm-1", text: "x", basis: "y" }],
   };
 }
+
+describe("traceability derivation helpers", () => {
+  const reqs: Requirement[] = [
+    { id: "req-1", findingIds: ["finding-1"], title: "a", description: "a", sourceReviewIds: ["r1"], priority: "P1", acceptanceCriteria: ["c"], versionId: null },
+    { id: "req-2", findingIds: ["finding-2", "finding-1"], title: "b", description: "b", sourceReviewIds: ["r2"], priority: "P0", acceptanceCriteria: ["c"], versionId: null },
+  ];
+
+  it("unions direct finding links in stable requirement order, deduped", () => {
+    expect(findingIdsForRequirements(["req-1", "req-2"], reqs)).toEqual(["finding-1", "finding-2"]);
+  });
+
+  it("picks the most urgent priority across linked requirements", () => {
+    expect(priorityForRequirements(["req-1", "req-2"], reqs)).toBe("P0");
+    expect(priorityForRequirements(["req-1"], reqs)).toBe("P1");
+    expect(priorityForRequirements([], reqs)).toBeNull();
+  });
+});
 
 describe("validateTraceability", () => {
   it("passes a fully consistent prd", () => {
@@ -138,5 +164,26 @@ describe("validateTraceability", () => {
     const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "EXCERPT_NOT_EXACT")).toBe(true);
+  });
+
+  it("flags a test whose direct finding ids are not derived from its requirements", () => {
+    const prd = makePrd();
+    prd.tests[0].findingIds = ["finding-2"];
+    const report = validateTraceability(prd, ["r1", "r2"]);
+    expect(report.valid).toBe(false);
+    expect(report.violations.some((v) => v.code === "TEST_FINDING_MISMATCH")).toBe(true);
+  });
+
+  it("flags a test whose priority is not derived from its requirements", () => {
+    const prd = makePrd();
+    prd.tests[0].priority = "P2";
+    const report = validateTraceability(prd, ["r1", "r2"]);
+    expect(report.valid).toBe(false);
+    expect(report.violations.some((v) => v.code === "TEST_PRIORITY_MISMATCH")).toBe(true);
+  });
+
+  it("passes a test whose finding ids and priority match its requirements", () => {
+    const report = validateTraceability(makePrd(), ["r1", "r2"]);
+    expect(report.valid).toBe(true);
   });
 });

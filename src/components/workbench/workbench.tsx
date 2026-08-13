@@ -82,8 +82,10 @@ export function Workbench() {
     const last = events.at(-1);
     if (last?.deliveryMode === "cached-replay") return { kind: "limitation" as const, label: t.cachedReplay };
     const texts = events.map((e) => JSON.stringify(e.data ?? {}));
+    // A stable sample augmented by the review cache is a hybrid source.
+    if (texts.some((s) => s.includes("RSS_CACHE_AUGMENTED"))) return { kind: "source" as const, label: t.sourceLiveCache };
     if (texts.some((s) => s.includes("RSS_SUSPECT_EMPTY"))) return { kind: "conflict" as const, label: t.sourceSuspectEmpty };
-    if (texts.some((s) => s.includes("IMPORT_ERROR") || s.includes("RSS_PARTIAL"))) return { kind: "conflict" as const, label: t.sourcePartial };
+    if (texts.some((s) => s.includes("IMPORT_ERROR") || s.includes("RSS_PARTIAL") || s.includes("RSS_UNSTABLE_PAGINATION"))) return { kind: "conflict" as const, label: t.sourcePartial };
     // If a limitation.reported carries no import/partial marker but the run
     // used an import source, the limitation code list distinguishes it.
     if (texts.some((s) => s.includes('"kind":"import"') || s.includes("IMPORT_") || s.includes("import:"))) {
@@ -345,7 +347,9 @@ export function Workbench() {
               {tab === "topics" ? <TopicsPanel topics={cache.topics?.topics ?? []} t={t} /> : null}
               {tab === "findings" ? <FindingsPanel findings={cache.findings?.findings ?? []} t={t} /> : null}
               {tab === "plan" ? <RequirementsPanel requirements={planPrd?.requirements ?? []} versions={planPrd?.versions ?? []} assumptions={planPrd?.assumptions ?? []} t={t} /> : null}
-              {tab === "tests" ? <TestsPanel tests={testCases} t={t} /> : null}
+              {tab === "tests" ? (
+                <TestsPanel tests={testCases} requirements={planPrd?.requirements ?? []} t={t} />
+              ) : null}
               {tab === "traceability" ? <TraceabilityPanel report={traceReport} t={t} /> : null}
             </div>
           </>

@@ -1,6 +1,7 @@
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { TopicConsolidationOutputSchema, TopicDiscoveryOutputSchema, topicDiscoveryPrompt, topicConsolidationPrompt } from "@/server/model/prompts/prompts";
 import { isExactExcerpt } from "@/domain/analysis/evidence";
+import { chunkByBodyBudget, mapWithConcurrency } from "../batching";
 import { modelProgressRelay, type StageModelClient } from "../dependencies";
 
 export type TopicsStageContext = {
@@ -37,38 +38,6 @@ const DEFAULT_MAX_CONCURRENCY = 3;
 const CONSOLIDATION_CANDIDATE_BUDGET = 15;
 const DEFAULT_CONSOLIDATION_CONCURRENCY = 2;
 
-/** Maps items through `fn` with at most `limit` in flight at once. */
-async function mapWithConcurrency<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
-  const results = new Array<R>(items.length);
-  let next = 0;
-  const workers = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (next < items.length) {
-      const i = next++;
-      results[i] = await fn(items[i], i);
-    }
-  });
-  await Promise.all(workers);
-  return results;
-}
-
-function chunkReviews(reviews: NormalizedReview[]): NormalizedReview[][] {
-  const chunks: NormalizedReview[][] = [];
-  let current: NormalizedReview[] = [];
-  let chars = 0;
-  for (const r of reviews) {
-    const cost = r.bodyNormalized.length + 16;
-    if (current.length > 0 && chars + cost > CHUNK_CHAR_BUDGET) {
-      chunks.push(current);
-      current = [];
-      chars = 0;
-    }
-    current.push(r);
-    chars += cost;
-  }
-  if (current.length > 0) chunks.push(current);
-  return chunks;
-}
-
 function candidateById(candidates: { id: string }[]): Map<string, { id: string }> {
   return new Map(candidates.map((c) => [c.id, c]));
 }
@@ -96,7 +65,7 @@ export async function runTopicsStage(ctx: TopicsStageContext): Promise<TopicStag
   }
   const candidates: { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string }[] = [];
 
-  const chunks = chunkReviews(ctx.reviews);
+  const chunks = chunkByBodyBudget(ctx.reviews, CHUNK_CHAR_BUDGET);
   // Discovery batches run in parallel (bounded by maxConcurrency) because a
   // large corpus would otherwise spend one batch's full model latency per
   // chunk sequentially. Results are validated after all calls settle so the
