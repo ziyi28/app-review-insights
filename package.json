@@ -16,6 +16,7 @@
     "verify": "npm run lint && npm run typecheck && npm run check:docs && npm run test:coverage && npm run build",
     "sample:capture": "tsx scripts/capture-real-run.ts",
     "demo:capture": "tsx scripts/build-real-demo.ts",
+    "canary:serpapi": "tsx scripts/check-serpapi.ts",
     "check:docs": "node scripts/check-docs.mjs"
   },
   "keywords": [],

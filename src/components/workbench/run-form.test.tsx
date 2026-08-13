@@ -50,11 +50,6 @@ function previewSummary(
   };
 }
 
-/** Builds a limitation entry for preview summaries. */
-function limit(code: string): { code: string; message: string } {
-  return { code, message: code };
-}
-
 function stubFetch(preview: unknown) {
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);

@@ -63,38 +63,36 @@ a model you can still:
 
 ## Data Sources and Limitations
 
-- **Primary source (when configured):** [SocialCrawl](https://www.socialcrawl.dev)
-  App Store reviews endpoint `GET /v1/app_store/app-reviews` with the fixed
-  parameters `app_id`, `country=US`, `language=en`, `depth=500`,
-  `sort_by=most_recent`. Authentication uses a server-held `x-api-key` from
-  `SOCIALCRAWL_API_KEY`. Every **Check/Re-check** generates a fresh
-  `Idempotency-Key` (reused across retries of that request) and sends
-  `Cache-Control: no-cache` to bypass SocialCrawl's shared cache; the `cached`
-  signal and collection timestamp remain visible — this does not guarantee zero
-  App Store publication delay. The currently documented cost is 5 credits per
-  successful App Store reviews call (verify provider pricing before adjusting
-  budgets). The application-layer cap is fixed at 500 reviews — SocialCrawl
-  supports up to 600, but this project deliberately does not grow the analysis
-  sample to the provider limit. Configure via **Settings → Data collection
-  platform** or `SOCIALCRAWL_API_KEY` in your local `.env.local`; see below.
-- **Explicit fallback:** when SocialCrawl is unconfigured, returns an
-  auth/credit/parameter error, returns an explicit empty result, fails
-  transiently, or exhausts safe retries, the app falls back to Apple Customer
-  Reviews RSS. The reason is always surfaced as a limitation and labeled
-  **Apple RSS fallback** in the UI; local history is separate and never
-  presented as live.
-- **Error strategy:** SocialCrawl transient errors `429 / 500 / 502 / 504`, plus
-  `503` responses that include `Retry-After`, are retried at most twice;
-  `400 / 401 / 402 / 404` and `503` without `Retry-After` are not retried.
-  `504` covers the `UPSTREAM_ERROR` observed in production, and every retry
-  reuses the same `Idempotency-Key`. If a response contains both valid and
-  malformed items, valid reviews are kept and marked `partial`; RSS reviews
-  are not mixed into that live sample.
+- **Primary source (when configured):** [SerpApi](https://serpapi.com) Apple
+  Reviews engine `GET /search.json` with the fixed parameters
+  `engine=apple_reviews`, `product_id={appId}`, `country=us`, `sort=mostrecent`,
+  `no_cache=true` (forced fresh, bypassing SerpApi's cache). Authentication uses
+  a server-held `api_key` from `SERPAPI_API_KEY`. The `serpapi_pagination.next`
+  URL is never trusted — it only signals "there is a next page", and the next
+  page URL is rebuilt by the app from the trusted base URL. The application-layer
+  cap is fixed at 500 reviews / 20 pages; each page typically returns ~25
+  reviews, so a full 500-review collection usually costs at most ~20 successful
+  searches (actual page count from SerpApi). SerpApi is never auto-retried:
+  repeating a `no_cache=true` request under uncertain network results could
+  create extra successful searches, so the user explicitly re-checks instead.
+  Configure via **Settings → Data collection platform** or `SERPAPI_API_KEY` in
+  your local `.env.local`; see below.
+- **Explicit fallback:** when SerpApi is unconfigured, returns an
+  auth/quota/parameter error, returns an explicit empty result, fails
+  transiently, or times out, the app falls back to Apple Customer Reviews RSS.
+  The reason is always surfaced as a limitation (server-sanitized, no raw
+  upstream text) and labeled **Apple RSS fallback** in the UI; local history is
+  separate and never presented as live.
+- **Partial failures:** RSS fallback happens only when SerpApi's first page
+  yields no valid reviews; once SerpApi has returned valid reviews, a later-page
+  failure marks the result `partial` and keeps the collected pages — RSS reviews
+  are never mixed in.
 - **Live (fallback path):** Apple Customer Reviews RSS
   (`/us/rss/customerreviews/page={1..10}/id={id}/sortBy=mostRecent/json`),
   fetched sequentially, at least 500 ms apart, max 10 pages, no concurrency.
   Each page's raw response, safe headers, timestamps, SHA-256, and HTTP
-  attempt number are preserved.
+  attempt number are preserved. This is a live network source; the local cache
+  is never presented as it.
 - **Bounded, visible retries.** An HTTP 200 empty page 1 is retried twice
   (2s / 5s, cache-busted) before being accepted as `suspect-empty`. A page that
   is empty while `rel=last` still advertises more pages is confirmed once after
@@ -108,14 +106,15 @@ a model you can still:
   marked `suspect-empty` and never reported as "this app has no reviews".
 - **Partial failures** (a page fails after earlier pages succeeded) continue the
   analysis with the collected reviews and propagate the limitation everywhere.
-- **Local review cache & hybrid sources.** Live reviews (whether from SocialCrawl
-  or an RSS fallback) are merged into a local, per-app cache under
+- **Local review cache & hybrid sources.** Live reviews (whether from SerpApi or
+  an RSS fallback) are merged into a local, per-app cache under
   `data/source-cache/` (git-ignored), deduped by review id and capped at the 500
   most recent. A live run first previews the sample — the form's primary action
   is **Check review sample**, which shows a live sample and a stable (cached)
   sample and lets you choose. Choosing the stable sample isolates by App ID,
   dedupes, newest-first, and caps at 500 local-history reviews. Stable samples
-  are never disguised as a complete live collection.
+  are never disguised as a complete live collection, and choosing one is not a
+  fresh fetch.
 - **Import:** provenance of imported data cannot be verified by this app; you
   are responsible for its authenticity and lawful use.
 - **Aggregate ratings** (via iTunes Lookup) are shown only as context; they are
@@ -140,17 +139,18 @@ git-ignored `.env.local` so they survive a restart. The API key is never
 returned to the client — the panel only shows whether one is configured, with
 an option to clear it.
 
-**Data collection platform (SocialCrawl):** save your SocialCrawl API Key in the
+**Data collection platform (SerpApi):** save your SerpApi API Key in the
 password field under **Settings → Data collection platform**, or set
-`SOCIALCRAWL_API_KEY=` directly in your local `.env.local`. Saving/clearing
-applies immediately without a restart. The key is held server-only and used for
-live App Store reviews; it never enters the browser bundle, HTTP responses, logs,
-preview JSON, run snapshots, or git-tracked files — the panel only shows
-"configured / not configured" with no view/copy/masked-tail. Never paste a real
-key into README, `.env.example`, screenshots, or issue text; a key disclosed in
-chat should be rotated in the SocialCrawl console before use. Only loopback
-overrides of `SOCIALCRAWL_BASE_URL` are allowed for tests (production must use
-`https://www.socialcrawl.dev`).
+`SERPAPI_API_KEY=` directly in your local `.env.local`. Saving/clearing applies
+immediately without a restart. The key is held server-only and used for
+forced-fresh live App Store reviews; it never enters the browser bundle, HTTP
+responses, logs, preview JSON, run snapshots, or git-tracked files — the panel
+only shows "configured / not configured" with no view/copy/masked-tail. Never
+paste a real key into README, `.env.example`, screenshots, or issue text; a key
+disclosed in chat should be rotated in the SerpApi console before use. Only
+loopback overrides of `SERPAPI_BASE_URL` are allowed for tests (production must
+use `https://serpapi.com`). The SocialCrawl integration has been removed; old
+replays may still show legacy source provenance.
 
 For the bundled demo fixture the analysis used a DeepSeek-compatible endpoint
 (`deepseek-v4-flash`); that configuration is documented in

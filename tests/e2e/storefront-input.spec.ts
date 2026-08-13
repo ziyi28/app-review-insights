@@ -25,5 +25,6 @@ test("China App Store page input previews against the US storefront", async ({ p
 
   // No invalid-storefront error surfaced in the UI.
   await expect(page.getByText(/US or China/i)).not.toBeVisible();
-  await expect(page.getByText(/Live reviews/i)).toBeVisible();
+  // The live sample card shows the fresh-review count.
+  await expect(page.getByText(/2 fresh reviews/i)).toBeVisible();
 });

@@ -195,7 +195,7 @@ export function readEnvLocal(env: NodeJS.ProcessEnv = process.env): Record<strin
 
 /**
  * Writes a single configuration value into `.env.local` (e.g. MODEL_* or
- * SOCIALCRAWL_API_KEY), preserving the other keys present in the file. Values
+ * SERPAPI_API_KEY), preserving the other keys present in the file. Values
  * with quotes, spaces or `#` are double-quoted; everything else is written
  * bare. The file is git-ignored, so a key never reaches the repository.
  */

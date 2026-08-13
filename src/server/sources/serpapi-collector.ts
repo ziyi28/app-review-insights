@@ -159,7 +159,7 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
     let res: Response;
     try {
       res = await fetchFn(url, { signal: controller.signal });
-    } catch (err) {
+    } catch {
       clearTimeout(timer);
       signal?.removeEventListener("abort", onAbort);
       const timedOut = controller.signal.aborted && !signal?.aborted;
