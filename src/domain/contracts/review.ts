@@ -1,7 +1,12 @@
 import { z } from "zod";
 
 /** Where a raw review came from. */
-export const ReviewSourceSchema = z.enum(["apple-rss", "json-import", "csv-import"]);
+export const ReviewSourceSchema = z.enum([
+  "apple-rss",
+  "socialcrawl-app-store",
+  "json-import",
+  "csv-import",
+]);
 export type ReviewSource = z.infer<typeof ReviewSourceSchema>;
 
 /** Stable dedupe classification after preparation. */

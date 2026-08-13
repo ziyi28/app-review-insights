@@ -1,0 +1,18 @@
+{
+  "success": true,
+  "platform": "app_store",
+  "endpoint": "/v1/app_store/app-reviews",
+  "data": {
+    "items": [
+      { "review": { "id": "review-1", "entity_id": "839285684", "title": "Useful", "text": "The guided workout is clear.", "rating": { "value": 5, "max": 5 }, "author": { "name": "user-1" }, "published_at": "2026-08-12T00:00:00.000Z", "ext": { "appdata": { "version": "8.2.0" } } } },
+      { "review": { "id": "review-2", "entity_id": "839285684", "title": "Timer issue", "text": "The timer resets after backgrounding.", "rating": { "value": 1, "max": 5 }, "author": { "name": "user-2" }, "published_at": "2026-08-11T00:00:00.000Z", "ext": { "appdata": { "version": "8.2.0" } } } }
+    ],
+    "total": 2,
+    "dropped": 0
+  },
+  "credits_used": 5,
+  "credits_remaining": 95,
+  "request_id": "req_fixture",
+  "cached": false,
+  "pagination": { "next_cursor": null, "has_more": false, "page_size": 50 }
+}

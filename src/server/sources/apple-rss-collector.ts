@@ -1,11 +1,10 @@
 import type { RawReview } from "@/domain/contracts/review";
 import { parseAppleRssJson, type AppleRssParseResult } from "./apple-rss-parser";
+import type { Limitation } from "./source-types";
 
-export type Limitation = {
-  code: string;
-  message: string;
-  stage: string;
-};
+// Re-exported so existing consumers keep working; the canonical type lives in
+// source-types.ts and is shared with the SocialCrawl collector.
+export type { Limitation } from "./source-types";
 
 export type PageEvidence = {
   url: string;
@@ -58,7 +57,7 @@ async function sha256(text: string): Promise<string> {
 }
 
 export function buildPageUrl(baseUrl: string, page: number, appId: string): string {
-  return `${baseUrl}/page=${page}/id=${appId}/sortby=mostRecent/json`;
+  return `${baseUrl}/page=${page}/id=${appId}/sortBy=mostRecent/json`;
 }
 
 type FetchOutcome = {
@@ -118,7 +117,13 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
     let res: Response;
     let body: string;
     try {
-      res = await fetchFn(url, { signal: controller.signal, headers: { accept: "application/json" } });
+      res = await fetchFn(url, {
+        signal: controller.signal,
+        headers: {
+          accept: "application/json",
+          "user-agent": "Mozilla/5.0 (compatible; AppReviewPlanner/1.0)",
+        },
+      });
       body = await res.text();
     } finally {
       clearTimeout(timer);
