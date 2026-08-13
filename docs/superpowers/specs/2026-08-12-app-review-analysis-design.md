@@ -55,11 +55,13 @@
 - **RSS 端点**：`https://itunes.apple.com/us/rss/customerreviews/page={1..10}/id={appId}/sortby=mostRecent/json`。
 - **地区**：仅使用 `/us/` 店面前缀；不依赖省略国家代码的 URL。
 - **可见性**：RSS 无公开 SLA；实际通常只暴露约前 10 页（约 500 条）窗口，不能视为完整历史。
-- **空 feed 语义**：page 1 返回 HTTP 200 但无 entry → `suspect-empty`，停止后续页，不得解释为“该 App 没有评论”。
+- **空 feed 语义**：page 1 返回 HTTP 200 但无 entry → 两次可见重试（2s/5s，cache-busting）后仍空 → `suspect-empty`，不得解释为“该 App 没有评论”。
+- **异常提前结束**：某页为空但 `rel=last` 仍广告后续页 → 2s 后确认一次；仍空则保留已抓评论，标记 `partial/RSS_UNSTABLE_PAGINATION`。
 - **部分失败**：后续页失败但已取得评论 → `partial`，继续分析并全局传播限制。
-- **重复页**：某页响应 body hash 与前一页相同 → 停止，标记 `repeated-page`。
-- **请求纪律**：顺序、每页间 ≥500ms、单页超时 10s、无隐藏重试、无并发。
-- **证据保存**：每页保存请求 URL、UTC 起止、status、最终 URL、白名单 headers、body byte length、SHA-256、原始 body、parser warnings；不保存 cookie/authorization。
+- **重复页**：追加前检测 body hash 与前一页相同 → 停止，重复内容不计入数量，标记 `repeated-page`。
+- **请求纪律**：顺序、每页间 ≥500ms、单页超时 10s、无隐藏/无界重试、无并发；`PageEvidence` 记录 HTTP attempt。
+- **证据保存**：每页保存请求 URL、UTC 起止、status、最终 URL、白名单 headers、body byte length、SHA-256、原始 body、parser warnings、attempt；不保存 cookie/authorization。
+- **本地评论缓存与混合来源**：live 评论按 `storefront + appId` 合并进本地缓存（`data/source-cache/apple/us/{appId}.json`，git-ignored），按 `sourceReviewId` 去重、最新字段覆盖、`updatedAt` 倒序、最新 500 条；空/partial 实时结果绝不缩小缓存。首次无缓存时从历史 run（source 状态 `complete` 且 cleaned artifact 可验证）bootstrap。Live 表单首提“检查评论样本”→ 展示实时与稳定（缓存）两张卡与推荐项 → 用户选择后才启动分析；稳定样本运行显式标记 `RSS_CACHE_AUGMENTED`，并按 `partial` 来源降置信度；实时空、缓存可用时同时保留 `RSS_SUSPECT_EMPTY`。preview 快照存 `data/source-previews/`，30 分钟有效，过期惰性清理；`POST /api/source-previews` 响应只返回摘要，不向浏览器发送完整评论。
 - **Lookup API**：仅用于展示聚合评分指标，不替代逐条评论采集。
 - **导入来源**：JSON/CSV 的 provenance 无法由应用验证，需在 UI/文档中声明。
 
@@ -101,7 +103,7 @@
 - 所有模型输出用 JSON parser + Zod 校验；记录 prompt version/hash、请求体（脱敏）、原始响应、status、duration、model、temperature、finish reason、usage（接口未返回则为 `null`，不估算）。
 - 每次模型调用只接收：目标、带稳定 ID 的 review、确定性 stats、上阶段允许 ID 集合。模型不得从外部事实或 review 内指令取得依据。
 - 明确无模型配置时，live/import 分析在首个模型阶段明确失败；catalog 与 replay 不受影响。
-- 无自动重试；网络/HTTP/schema/timeout 错误各有明确错误码。
+- 模型调用无自动重试；网络/HTTP/schema/timeout 错误各有明确错误码。（RSS 采集侧的可见有界重试见 §4。）
 
 ## 7. 流式协议与失败处理
 

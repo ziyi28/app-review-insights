@@ -51,9 +51,15 @@ a model you can still:
 
 - **Live:** Apple Customer Reviews RSS
   (`/us/rss/customerreviews/page={1..10}/id={id}/sortby=mostRecent/json`),
-  fetched sequentially, at least 500 ms apart, max 10 pages, no concurrency,
-  no hidden retries. Each page's raw response, safe headers, timestamps, and
-  SHA-256 are preserved.
+  fetched sequentially, at least 500 ms apart, max 10 pages, no concurrency.
+  Each page's raw response, safe headers, timestamps, SHA-256, and HTTP
+  attempt number are preserved.
+- **Bounded, visible retries.** An HTTP 200 empty page 1 is retried twice
+  (2s / 5s, cache-busted) before being accepted as `suspect-empty`. A page that
+  is empty while `rel=last` still advertises more pages is confirmed once after
+  2s and then reported as `partial` (`RSS_UNSTABLE_PAGINATION`); repeated pages
+  are detected before appending (`RSS_REPEATED_PAGE`). There are no hidden or
+  unbounded retries.
 - **This is a best-effort window, not the full review history.** Apple provides
   no public SLA for this feed; it typically exposes only roughly the most
   recent pages (≤ ~10 × 50 entries).
@@ -61,6 +67,14 @@ a model you can still:
   marked `suspect-empty` and never reported as "this app has no reviews".
 - **Partial failures** (a page fails after earlier pages succeeded) continue the
   analysis with the collected reviews and propagate the limitation everywhere.
+- **Local review cache & hybrid sources.** Live reviews are merged into a local,
+  per-app cache under `data/source-cache/` (git-ignored), deduped by review id
+  and capped at the 500 most recent. A live run first previews the sample — the
+  form's primary action is **Check review sample**, which shows a live sample
+  and a stable (cached) sample and lets you choose. Choosing the stable sample
+  produces a **Live + Cache** run: the run is labeled as cache-augmented and
+  carries both `RSS_CACHE_AUGMENTED` and the live collection's limitation.
+  Stable samples are never disguised as a complete live collection.
 - **Import:** provenance of imported data cannot be verified by this app; you
   are responsible for its authenticity and lawful use.
 - **Aggregate ratings** (via iTunes Lookup) are shown only as context; they are
@@ -154,7 +168,8 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
 
 - Distinct error codes for network / HTTP / timeout / non-JSON / schema
   violations, surfaced as `run.failed` events with stage and error preserved.
-- No automatic retries; the operator re-runs.
+- The only retries are the bounded, visible RSS page-1 retries described under
+  Data Sources; model calls are not auto-retried. The operator re-runs.
 - Without a model, import/live analysis still runs the deterministic stages
   (collect/import, clean, dedupe, stats) and completes with a
   `MODEL_NOT_CONFIGURED` limitation; catalog and cached replay always work.
