@@ -2,6 +2,7 @@ import type { Finding } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import { isExactExcerpt } from "@/domain/analysis/evidence";
 import { computeConfidence, type SourceStatus } from "@/domain/analysis/confidence";
+import { assessEvidenceSufficiency } from "@/domain/analysis/sufficiency";
 import { FindingOutputSchema, findingsPrompt, type FindingOutput } from "@/server/model/prompts/prompts";
 import { chunkByBodyBudget, mapWithConcurrency } from "../batching";
 import { modelProgressRelay, type StageModelClient } from "../dependencies";
@@ -27,6 +28,16 @@ export type FindingsStageResult = {
 };
 
 export type FindingNormalizeContext = Pick<FindingsStageContext, "reviews" | "topics" | "sourceStatus">;
+
+/**
+ * No finding, or every surviving finding short of the evidentiary bar, means
+ * the corpus cannot support a broad or critical conclusion. Shared by the
+ * single-corpus normalizer and the chunked stage so the merged result never
+ * re-derives the policy.
+ */
+function isInsufficientEvidence(findings: Finding[]): boolean {
+  return findings.length === 0 || findings.every((f) => f.evidenceSufficiency.status === "insufficient");
+}
 
 /**
  * Normalizes raw model findings into protocol-valid findings. Every citation
@@ -85,6 +96,12 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
       sourceStatus: ctx.sourceStatus,
       hasConflict,
     });
+    const evidenceSufficiency = assessEvidenceSufficiency({
+      supportCount: supportingReviewIds.length,
+      corpusCount: ctx.reviews.length,
+      conflictCount: new Set(conflictingReviewIds).size,
+      sourceStatus: ctx.sourceStatus,
+    });
 
     findings.push({
       id: f.id,
@@ -96,6 +113,7 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
       evidenceExcerpts: validExcerpts,
       conflictingReviewIds,
       confidence,
+      evidenceSufficiency,
       uncertainties: f.uncertainties,
       limitations: f.limitations,
     });
@@ -104,7 +122,7 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
   return {
     findings,
     warnings,
-    insufficientEvidence: findings.length === 0,
+    insufficientEvidence: isInsufficientEvidence(findings),
   };
 }
 
@@ -167,5 +185,5 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
     for (const f of result.findings) findings.push(namespaceIds ? { ...f, id: `${f.id}@c${chunkIndex}` } : f);
   }
 
-  return { findings, warnings, insufficientEvidence: findings.length === 0 };
+  return { findings, warnings, insufficientEvidence: isInsufficientEvidence(findings) };
 }

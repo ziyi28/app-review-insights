@@ -89,6 +89,75 @@ describe("runFindingsStage", () => {
     expect(result.findings).toHaveLength(1);
     expect(result.findings[0].supportingSampleCount).toBe(2);
     expect(result.findings[0].confidence.level).toBe("low");
+    // 2 supporting reviews in a 3-review corpus clears the ratio floor but not
+    // the absolute minimum, so the deterministic sufficiency assessment is
+    // still insufficient.
+    expect(result.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(result.findings[0].evidenceSufficiency.supportRatio).toBeCloseTo(2 / 3);
+  });
+
+  it("marks a finding insufficient on a large corpus with only two supporting reviews", async () => {
+    // 3000-review corpus, only 2 legitimately supported excerpts -> the
+    // finding survives as a limited fact but its evidence is insufficient for
+    // a broad/critical claim.
+    const corpus = Array.from({ length: 3000 }, (_, i) =>
+      i < 2 ? review(`r${i}`, `timer resets on restart`) : review(`r${i}`, `review body number ${i}`),
+    );
+    const ctx = context(
+      { reviews: corpus },
+      {
+        findings: [
+          {
+            id: "finding-1",
+            topicIds: ["topic-1"],
+            title: "x",
+            summary: "y",
+            supportingReviewIds: ["r0", "r1"],
+            evidenceExcerpts: [
+              { reviewId: "r0", excerpt: "timer resets on restart" },
+              { reviewId: "r1", excerpt: "timer resets on restart" },
+            ],
+            conflictingReviewIds: [],
+            uncertainties: [],
+            limitations: [],
+          },
+        ],
+      },
+    );
+    const result = await runFindingsStage(ctx);
+    expect(result.findings[0].supportingSampleCount).toBe(2);
+    expect(result.findings[0].confidence.level).toBe("low");
+    expect(result.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(result.findings[0].evidenceSufficiency.corpusReviewCount).toBe(3000);
+    expect(result.findings[0].evidenceSufficiency.supportRatio).toBeCloseTo(2 / 3000);
+    expect(result.insufficientEvidence).toBe(true);
+  });
+
+  it("reports insufficientEvidence when every finding is insufficient", async () => {
+    const ctx = context(
+      {},
+      {
+        findings: [
+          {
+            id: "finding-1",
+            topicIds: ["topic-1"],
+            title: "x",
+            summary: "y",
+            // corpus is 3 reviews, both supporting reviews exist but with a
+            // 2-support vs 3000-corpus... here corpus is 3 so 2/3 > 1%.
+            supportingReviewIds: ["r1"],
+            evidenceExcerpts: [{ reviewId: "r1", excerpt: "price is too expensive" }],
+            conflictingReviewIds: ["r2", "r3"],
+            uncertainties: [],
+            limitations: [],
+          },
+        ],
+      },
+    );
+    const result = await runFindingsStage(ctx);
+    // 1 support vs 2 conflicts -> CONFLICT_NOT_MINOR, so insufficient.
+    expect(result.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(result.insufficientEvidence).toBe(true);
   });
 
   it("drops a finding whose cited review does not exist", async () => {
