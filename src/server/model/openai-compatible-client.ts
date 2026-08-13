@@ -26,11 +26,11 @@ const RETRY_BASE_DELAY_MS = 1000;
 
 /**
  * Minimal OpenAI-compatible chat completions client. No provider-specific
- * features. Transient failures (5xx, network errors, per-call timeouts) are
- * retried a bounded number of times with backoff; deterministic failures (4xx,
- * schema/model-output errors) and client disconnects are not retried. If the
- * api key is empty no Authorization header is sent (for local model runtimes).
- * The request snapshot strips the key.
+ * features. Transient failures (5xx, network errors, per-call timeouts,
+ * non-JSON/malformed responses) are retried a bounded number of times with
+ * backoff; deterministic failures (4xx, schema violations) and client
+ * disconnects are not retried. If the api key is empty no Authorization header
+ * is sent (for local model runtimes). The request snapshot strips the key.
  */
 export class OpenAiCompatibleClient {
   private readonly baseUrl: string;
@@ -144,22 +144,30 @@ export class OpenAiCompatibleClient {
     try {
       json = JSON.parse(bodyText);
     } catch {
-      throw new Error("MODEL_INVALID_RESPONSE: response is not JSON");
+      // Upstream returned a non-JSON body (e.g. a proxy error page). A snippet
+      // makes a repeated failure diagnosable; the retry loop treats it as
+      // transient.
+      throw new Error(`MODEL_INVALID_RESPONSE: response is not JSON (${bodyText.slice(0, 200)})`);
     }
 
     const choices = (json as { choices?: unknown[] })?.choices;
     const content = choices?.[0] && typeof choices[0] === "object"
       ? (choices[0] as { message?: { content?: string } }).message?.content
       : undefined;
+    const finishReason = (choices?.[0] as { finish_reason?: string } | undefined)?.finish_reason ?? null;
     if (typeof content !== "string") {
-      throw new Error("MODEL_INVALID_RESPONSE: no message content");
+      throw new Error(`MODEL_INVALID_RESPONSE: no message content (finish=${finishReason ?? "n/a"})`);
     }
 
     let parsed: unknown;
     try {
       parsed = extractJsonObject(content);
     } catch {
-      throw new Error("MODEL_NON_JSON_OUTPUT: model did not return valid JSON");
+      // A truncated or garbled model output. `finish_reason` (e.g. "length")
+      // and a content snippet surface the failure mode; the retry loop treats
+      // it as transient since a long/parallel call can occasionally come back
+      // malformed.
+      throw new Error(`MODEL_NON_JSON_OUTPUT: model did not return valid JSON (finish=${finishReason ?? "n/a"}, content="${content.slice(0, 200)}")`);
     }
 
     const parsedResult = request.schema.safeParse(parsed);
@@ -178,7 +186,7 @@ export class OpenAiCompatibleClient {
       promptVersion: request.promptVersion,
       status: res.status,
       durationMs,
-      finishReason: (choices?.[0] as { finish_reason?: string } | undefined)?.finish_reason ?? null,
+      finishReason,
     };
 
     // Record aggregated usage (never the API key) for the run manifest.
@@ -215,14 +223,17 @@ function safeProviderLabel(baseUrl: string): string | null {
 
 /**
  * True for failures worth retrying: a transient provider 5xx, a network error,
- * or a per-call timeout. Everything else is deterministic and must surface
- * immediately (4xx, malformed/schema-violating model output, client abort).
+ * a per-call timeout, or a non-JSON/malformed response (a truncated or garbled
+ * stream, same class of hiccup as a 5xx). Deterministic failures must surface
+ * immediately (4xx, schema violations, client abort).
  */
 function isTransient(err: Error): boolean {
   const message = err.message;
   if (/^MODEL_HTTP_ERROR: 5\d\d/.test(message)) return true;
   if (/^MODEL_NETWORK_ERROR:/.test(message)) return true;
   if (/^MODEL_REQUEST_TIMEOUT:/.test(message)) return true;
+  if (/^MODEL_INVALID_RESPONSE:/.test(message)) return true;
+  if (/^MODEL_NON_JSON_OUTPUT:/.test(message)) return true;
   return false;
 }
 
