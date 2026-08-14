@@ -109,4 +109,89 @@ describe("HistoryPanel", () => {
       expect(screen.getByText(tEn.historyEmpty)).toBeInTheDocument();
     });
   });
+
+  it("deletes a run after confirmation and reloads the list", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "DELETE") {
+        return { ok: true, status: 204 };
+      }
+      // First GET lists one run; the reload after delete returns an empty list.
+      return {
+        ok: true,
+        json: async () => ({
+          runs:
+            fetchMock.mock.calls.filter((c) => c[1]?.method === "DELETE").length > 0
+              ? []
+              : [{ runId: "run-a", status: "completed", createdAt: "2026-08-12T00:00:00Z", canReplay: true, goal: "Understand pricing" }],
+        }),
+      };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const user = userEvent.setup();
+    render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByText("Understand pricing")).toBeInTheDocument();
+    });
+
+    // The per-card delete button opens an in-row confirmation.
+    await user.click(screen.getByRole("button", { name: tEn.delete }));
+    expect(screen.getByText(tEn.deleteConfirm)).toBeInTheDocument();
+
+    // The confirmation's own delete button is the second "Delete" on the page.
+    await user.click(screen.getAllByRole("button", { name: tEn.delete })[1]);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/api/runs/run-a"), expect.objectContaining({ method: "DELETE" }));
+    });
+    await waitFor(() => {
+      expect(screen.queryByText("Understand pricing")).not.toBeInTheDocument();
+    });
+  });
+
+  it("cancels a delete without calling DELETE", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "DELETE") {
+        return { ok: true, status: 204 };
+      }
+      return { ok: true, json: async () => ({ runs: [{ runId: "run-a", status: "completed", createdAt: "2026-08-12T00:00:00Z", canReplay: true, goal: "Understand pricing" }] }) };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const user = userEvent.setup();
+    render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByText("Understand pricing")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: tEn.delete }));
+    expect(screen.getByText(tEn.deleteConfirm)).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: tEn.cancel }));
+    expect(screen.queryByText(tEn.deleteConfirm)).not.toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ method: "DELETE" }));
+  });
+
+  it("shows an error when deletion fails", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "DELETE") {
+        return { ok: false, status: 500 };
+      }
+      return { ok: true, json: async () => ({ runs: [{ runId: "run-a", status: "completed", createdAt: "2026-08-12T00:00:00Z", canReplay: true, goal: "Understand pricing" }] }) };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const user = userEvent.setup();
+    render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByText("Understand pricing")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByRole("button", { name: tEn.delete }));
+    await user.click(screen.getAllByRole("button", { name: tEn.delete })[1]);
+
+    await waitFor(() => {
+      expect(screen.getByText(tEn.deleteFailed)).toBeInTheDocument();
+    });
+  });
 });

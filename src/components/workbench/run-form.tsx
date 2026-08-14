@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import type { Dictionary, Locale } from "@/i18n";
 import styles from "./run-form.module.css";
 
@@ -10,7 +10,7 @@ export type RunFormProps = {
 };
 
 type Step = 1 | 2 | 3;
-type Mode = "live" | "import" | "replay";
+type Mode = "live" | "import";
 
 type SourcePreviewSummary = {
   protocolVersion: "1";
@@ -53,14 +53,13 @@ const STEP_LABELS: Record<Step, keyof Dictionary> = {
 
 /**
  * Three-step "new run" wizard:
- *   1. choose a data source (live / import / cached replay)
- *   2. configure the input (URL+goal+language, file+goal+language, or a run)
+ *   1. choose a data source (live / import)
+ *   2. configure the input (URL+goal+language, or file+goal+language)
  *   3. confirm — live shows the checked sample and lets the user pick fresh vs
- *      local-history; import confirms the file; replay confirms the run and the
- *      "no network/model" guarantee.
+ *      local-history; import confirms the file.
  *
- * The `onStart` payload shapes are unchanged from the single-form version so the
- * server contract and cached-replay flow are untouched.
+ * Cached replay is intentionally not a wizard source: it is offered from the
+ * history panel, where each completed run already shows its app and goal.
  */
 export function RunForm({ t, onStart }: RunFormProps) {
   const [step, setStep] = useState<Step>(1);
@@ -69,27 +68,11 @@ export function RunForm({ t, onStart }: RunFormProps) {
   const [goal, setGoal] = useState("");
   const [outputLocale, setOutputLocale] = useState<Locale>("zh-CN");
   const [file, setFile] = useState<File | null>(null);
-  const [replayRuns, setReplayRuns] = useState<{ runId: string; createdAt: string }[]>([]);
-  const [sourceRunId, setSourceRunId] = useState<string>("");
 
   // Live-mode preview state: null before checking, "loading" while checking,
   // or a loaded summary after the sample has been checked.
   const [preview, setPreview] = useState<SourcePreviewSummary | null | "loading">(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
-
-  // Load the replay catalog once so users can start a cached run with no model
-  // configured (offline demo) — this is how the bundled real fixture is reached.
-  useEffect(() => {
-    fetch("/api/runs", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((json) => {
-        const runs = (json?.runs ?? []) as { runId: string; canReplay: boolean; createdAt: string }[];
-        const replayable = runs.filter((r) => r.canReplay);
-        setReplayRuns(replayable.map((r) => ({ runId: r.runId, createdAt: r.createdAt })));
-        if (replayable[0]) setSourceRunId(replayable[0].runId);
-      })
-      .catch(() => {});
-  }, []);
 
   const checkSample = useCallback(async () => {
     const targetUrl = url.trim();
@@ -124,7 +107,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
 
   const goalOk = goal.trim().length >= 10;
   // Step 2 can advance only when the mode's required input is filled.
-  const step2Valid = mode === "replay" ? sourceRunId.trim().length > 0 : mode === "import" ? file !== null && goalOk : url.trim().length > 0 && goalOk;
+  const step2Valid = mode === "import" ? file !== null && goalOk : url.trim().length > 0 && goalOk;
 
   const startWithPreview = (selection: "live" | "stable") => {
     if (preview === null || preview === "loading") return;
@@ -163,11 +146,6 @@ export function RunForm({ t, onStart }: RunFormProps) {
       });
     };
     reader.readAsText(file);
-  };
-
-  const startReplay = () => {
-    if (!sourceRunId.trim()) return;
-    onStart({ protocolVersion: "1", mode: "cached-replay", sourceRunId: sourceRunId.trim() });
   };
 
   const handleNext = () => {
@@ -214,7 +192,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
       {step === 1 ? (
         <div className={styles.stepBody}>
           <div role="radiogroup" aria-label={t.wizardStepSource} className={styles.modeGrid}>
-            {(["live", "import", "replay"] as const).map((m) => (
+            {(["live", "import"] as const).map((m) => (
               <button
                 key={m}
                 type="button"
@@ -223,8 +201,8 @@ export function RunForm({ t, onStart }: RunFormProps) {
                 onClick={() => selectMode(m)}
                 className={`${styles.modeCard} ${mode === m ? styles.modeCardSelected : ""}`}
               >
-                <span className={styles.modeTitle}>{m === "live" ? t.liveMode : m === "import" ? t.importMode : t.replayMode}</span>
-                <span className={styles.modeDesc}>{m === "live" ? t.liveModeDesc : m === "import" ? t.importModeDesc : t.replayModeDesc}</span>
+                <span className={styles.modeTitle}>{m === "live" ? t.liveMode : t.importMode}</span>
+                <span className={styles.modeDesc}>{m === "live" ? t.liveModeDesc : t.importModeDesc}</span>
               </button>
             ))}
           </div>
@@ -274,7 +252,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
                 </select>
               </label>
             </>
-          ) : mode === "import" ? (
+          ) : (
             <>
               <label className={styles.label}>
                 {t.importFile}
@@ -304,22 +282,6 @@ export function RunForm({ t, onStart }: RunFormProps) {
                 </select>
               </label>
             </>
-          ) : (
-            <label className={styles.label}>
-              {t.cachedReplay}
-              <select className={styles.input} value={sourceRunId} onChange={(e) => setSourceRunId(e.target.value)}>
-                {replayRuns.length === 0 ? (
-                  <option value="">—</option>
-                ) : (
-                  replayRuns.map((r) => (
-                    <option key={r.runId} value={r.runId}>
-                      {r.runId} ({new Date(r.createdAt).toLocaleString()})
-                    </option>
-                  ))
-                )}
-              </select>
-              {replayRuns.length === 0 ? <p className={styles.hintMuted}>{t.noData}</p> : null}
-            </label>
           )}
         </div>
       ) : null}
@@ -388,7 +350,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
                 </div>
               </div>
             ) : null
-          ) : mode === "import" ? (
+          ) : (
             <div className={styles.confirmBox}>
               <p className={styles.confirmRow}>
                 <span className={styles.muted}>{t.confirmFile}:</span> <strong>{file?.name}</strong>
@@ -400,18 +362,6 @@ export function RunForm({ t, onStart }: RunFormProps) {
                 <span className={styles.muted}>{t.outputLocale}:</span> {outputLocale === "zh-CN" ? "中文" : "English"}
               </p>
               <button type="button" className="btn btn-primary" onClick={startImport}>
-                {t.start}
-              </button>
-            </div>
-          ) : (
-            <div className={styles.confirmBox}>
-              <p className={styles.confirmRow}>
-                <span className={styles.muted}>{t.cachedReplay}:</span> <strong>{sourceRunId}</strong>
-              </p>
-              <p className={styles.confirmRow}>
-                <span className={styles.muted}>{t.replayNoNetwork}</span>
-              </p>
-              <button type="button" className="btn btn-primary" onClick={startReplay}>
                 {t.start}
               </button>
             </div>

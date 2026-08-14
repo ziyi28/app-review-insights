@@ -142,4 +142,14 @@ export class RunStore {
       return [];
     }
   }
+
+  /**
+   * Recursively removes a run directory (manifest, events, artifacts). The run
+   * id is validated by resolveRunDir before removal, so a malicious id cannot
+   * delete anything outside the store root. `force: true` makes deleting an
+   * already-absent directory a no-op.
+   */
+  async deleteRun(runId: string): Promise<void> {
+    await fs.rm(this.resolveRunDir(runId), { recursive: true, force: true });
+  }
 }

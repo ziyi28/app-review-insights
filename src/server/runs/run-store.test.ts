@@ -90,4 +90,22 @@ describe("RunStore", () => {
     expect(manifest.status).toBe("running");
     expect(manifest.updatedAt).toBeTruthy();
   });
+
+  it("deletes a run directory", async () => {
+    const runId = store.createRunId();
+    await store.writeArtifact(runId, "findings", 1, { ok: true });
+    expect(existsSync(store.resolveRunDir(runId))).toBe(true);
+
+    await store.deleteRun(runId);
+    expect(existsSync(store.resolveRunDir(runId))).toBe(false);
+  });
+
+  it("deleteRun is a no-op for a missing directory", async () => {
+    const runId = store.createRunId();
+    await expect(store.deleteRun(runId)).resolves.toBeUndefined();
+  });
+
+  it("deleteRun rejects a path-traversal id", async () => {
+    await expect(store.deleteRun("../evil")).rejects.toThrow(/run id/i);
+  });
 });

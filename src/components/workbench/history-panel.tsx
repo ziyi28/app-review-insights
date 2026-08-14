@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dictionary } from "@/i18n";
 import { useModal } from "./use-modal";
 import styles from "./modal.module.css";
@@ -29,35 +29,56 @@ type HistoryEntry = {
 
 /**
  * Modal listing past runs from GET /api/runs. Each row offers a read-only
- * "view" (loads the persisted events/artifacts) and, for replayable completed
- * runs, a "replay" (re-streams via cached-replay). Runs of any status are
+ * "view" (loads the persisted events/artifacts), a "replay" for replayable
+ * completed runs, a "retry" for interrupted runs, and a "delete" that removes
+ * the run's snapshot after an in-row confirmation. Runs of any status are
  * listed so failures and running jobs are visible too.
  */
 export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: HistoryPanelProps) {
   const [runs, setRuns] = useState<HistoryEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [confirmingRunId, setConfirmingRunId] = useState<string | null>(null);
+  const [deletingRunId, setDeletingRunId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const { onKeyDown } = useModal(open, onClose, containerRef);
 
+  const reload = useCallback(async () => {
+    setError(null);
+    try {
+      const res = await fetch("/api/runs", { cache: "no-store" });
+      const json = (await res.json()) as { runs?: HistoryEntry[] };
+      setRuns(json.runs ?? []);
+    } catch {
+      setError(t.historyLoadFailed);
+    }
+  }, [t]);
+
   useEffect(() => {
     if (!open) return;
-    let cancelled = false;
     void (async () => {
       // Reset inside the async loader so the reset is not a synchronous
       // setState call in the effect body (react-hooks/set-state-in-effect).
-      setError(null);
-      try {
-        const res = await fetch("/api/runs", { cache: "no-store" });
-        const json = (await res.json()) as { runs?: HistoryEntry[] };
-        if (!cancelled) setRuns(json.runs ?? []);
-      } catch {
-        if (!cancelled) setError(t.historyLoadFailed);
-      }
+      setDeleteError(null);
+      setConfirmingRunId(null);
+      await reload();
     })();
-    return () => {
-      cancelled = true;
-    };
-  }, [open, t]);
+  }, [open, reload]);
+
+  const handleDelete = async (runId: string) => {
+    setDeleteError(null);
+    setDeletingRunId(runId);
+    try {
+      const res = await fetch(`/api/runs/${runId}`, { method: "DELETE" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setConfirmingRunId(null);
+      await reload();
+    } catch {
+      setDeleteError(t.deleteFailed);
+    } finally {
+      setDeletingRunId(null);
+    }
+  };
 
   if (!open) return null;
 
@@ -87,6 +108,7 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
         </div>
 
         {error ? <p style={{ color: "var(--danger)", margin: 0 }}>{error}</p> : null}
+        {deleteError ? <p style={{ color: "var(--danger)", margin: 0 }}>{deleteError}</p> : null}
 
         <div style={{ overflowY: "auto", display: "grid", gap: "8px" }}>
           {runs.length === 0 && !error ? <p style={{ color: "var(--text-muted)" }}>{t.historyEmpty}</p> : null}
@@ -124,7 +146,7 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
               ) : null}
 
               <p style={{ margin: 0, fontSize: "13px", color: "var(--text)" }}>{run.goal || <span style={{ color: "var(--text-muted)" }}>—</span>}</p>
-              <div style={{ display: "flex", gap: "8px" }}>
+              <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
                 <button type="button" className="btn btn-secondary" onClick={() => onView(run.runId)}>
                   {t.view}
                 </button>
@@ -138,7 +160,26 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
                     {t.retry}
                   </button>
                 ) : null}
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => setConfirmingRunId(run.runId)}
+                  disabled={run.status === "running" || deletingRunId === run.runId}
+                >
+                  {deletingRunId === run.runId ? "…" : t.delete}
+                </button>
               </div>
+              {confirmingRunId === run.runId ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", borderTop: "1px solid var(--border)", paddingTop: "8px" }}>
+                  <span style={{ fontSize: "13px", color: "var(--danger)", marginRight: "auto" }}>{t.deleteConfirm}</span>
+                  <button type="button" className="btn btn-danger" onClick={() => void handleDelete(run.runId)} disabled={deletingRunId === run.runId}>
+                    {deletingRunId === run.runId ? "…" : t.delete}
+                  </button>
+                  <button type="button" className="btn btn-secondary" onClick={() => setConfirmingRunId(null)} disabled={deletingRunId === run.runId}>
+                    {t.cancel}
+                  </button>
+                </div>
+              ) : null}
             </div>
           ))}
         </div>

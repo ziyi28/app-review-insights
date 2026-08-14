@@ -47,3 +47,30 @@ export async function GET(_req: Request, { params }: { params: Promise<{ runId: 
     return NextResponse.json({ error: "run not found" }, { status: 404, headers: { "cache-control": "no-store" } });
   }
 }
+
+/**
+ * Deletes a run's snapshot directory. Only the runtime store (data/runs) is
+ * deletable; bundled fixtures live in a separate root and are never touched.
+ * A failure to remove (e.g. EPERM on Windows while the directory is being
+ * written) is a conflict, not a server error.
+ */
+export async function DELETE(_req: Request, { params }: { params: Promise<{ runId: string }> }) {
+  const { runId } = await params;
+  const cfg = loadConfig();
+  const store = new RunStore(cfg.runsDir);
+  let runDir: string;
+  try {
+    runDir = store.resolveRunDir(runId);
+  } catch {
+    return NextResponse.json({ error: "run not found" }, { status: 404, headers: { "cache-control": "no-store" } });
+  }
+  if (!store.existsFile(runDir)) {
+    return NextResponse.json({ error: "run not found" }, { status: 404, headers: { "cache-control": "no-store" } });
+  }
+  try {
+    await store.deleteRun(runId);
+  } catch {
+    return NextResponse.json({ error: "run could not be deleted (may still be running)" }, { status: 409, headers: { "cache-control": "no-store" } });
+  }
+  return new NextResponse(null, { status: 204 });
+}

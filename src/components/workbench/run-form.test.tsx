@@ -90,6 +90,8 @@ describe("RunForm", () => {
     try {
       const user = userEvent.setup();
       render(<RunForm t={t} onStart={vi.fn()} />);
+      // Step 1 offers only live and import sources (replay moved to history).
+      expect(screen.getAllByRole("radio")).toHaveLength(2);
       // Step 1 → import mode shows the file input.
       await user.click(screen.getByRole("radio", { name: new RegExp(t.importMode) }));
       expect(screen.getByLabelText(t.importFile)).toBeInTheDocument();
@@ -97,10 +99,6 @@ describe("RunForm", () => {
       await user.click(screen.getByRole("button", { name: t.back }));
       await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
       expect(screen.getByLabelText(t.appStoreUrl)).toBeInTheDocument();
-      // Back again, then replay mode shows the run selector.
-      await user.click(screen.getByRole("button", { name: t.back }));
-      await user.click(screen.getByRole("radio", { name: new RegExp(t.replayMode) }));
-      expect(screen.getByLabelText(new RegExp(t.cachedReplay))).toBeInTheDocument();
     } finally {
       spy.mockRestore();
     }

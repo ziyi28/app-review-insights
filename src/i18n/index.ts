@@ -5,7 +5,6 @@ export type Dictionary = {
   newRun: string;
   liveMode: string;
   importMode: string;
-  replayMode: string;
   appStoreUrl: string;
   goal: string;
   outputLocale: string;
@@ -176,12 +175,10 @@ export type Dictionary = {
   wizardStepConfirm: string;
   liveModeDesc: string;
   importModeDesc: string;
-  replayModeDesc: string;
   useExampleApp: string;
   back: string;
   next: string;
   confirmFile: string;
-  replayNoNetwork: string;
   collectionStatus: string;
   collectionConfigured: string;
   runLog: string;
@@ -198,6 +195,10 @@ export type Dictionary = {
   runFailed: string;
   openInAppStore: string;
   importedFile: string;
+  delete: string;
+  deleteConfirm: string;
+  cancel: string;
+  deleteFailed: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -206,7 +207,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     newRun: "New Run",
     liveMode: "Live",
     importMode: "Import",
-    replayMode: "Cached Replay",
     appStoreUrl: "App Store URL (reviews use the US storefront)",
     goal: "Analysis goal",
     outputLocale: "Output language",
@@ -377,12 +377,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     wizardStepConfirm: "Confirm & start",
     liveModeDesc: "Collect fresh US App Store reviews (SerpApi with Apple RSS fallback)",
     importModeDesc: "Import a local JSON or CSV review file — no live collection",
-    replayModeDesc: "Replay a completed cached run — no network or model calls",
     useExampleApp: "Use example app",
     back: "Back",
     next: "Next",
     confirmFile: "File",
-    replayNoNetwork: "Replay makes no network or model calls",
     collectionStatus: "Collection",
     collectionConfigured: "SerpApi / Apple RSS fallback",
     runLog: "Run Log",
@@ -399,13 +397,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
     runFailed: "Analysis failed",
     openInAppStore: "Open in App Store",
     importedFile: "File",
+    delete: "Delete",
+    deleteConfirm: "Delete this run? This cannot be undone.",
+    cancel: "Cancel",
+    deleteFailed: "Failed to delete the run.",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
     newRun: "新建运行",
     liveMode: "实时采集",
     importMode: "导入",
-    replayMode: "缓存回放",
     appStoreUrl: "App Store 链接（评论统一使用美国区）",
     goal: "分析目标",
     outputLocale: "输出语言",
@@ -576,12 +577,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     wizardStepConfirm: "确认并开始",
     liveModeDesc: "实时采集美国区 App Store 最新评论（SerpApi 主用，Apple RSS 备用）",
     importModeDesc: "导入本地 JSON 或 CSV 评论文件，无需联网采集",
-    replayModeDesc: "回放一次已完成的缓存运行，不调用网络或模型",
     useExampleApp: "使用示例 App",
     back: "上一步",
     next: "下一步",
     confirmFile: "文件",
-    replayNoNetwork: "回放不会调用网络或模型",
     collectionStatus: "采集",
     collectionConfigured: "SerpApi / Apple RSS 备用",
     runLog: "运行日志",
@@ -598,6 +597,10 @@ export const dictionaries: Record<Locale, Dictionary> = {
     runFailed: "分析失败",
     openInAppStore: "在 App Store 中打开",
     importedFile: "导入文件",
+    delete: "删除",
+    deleteConfirm: "确定删除该运行？此操作不可恢复。",
+    cancel: "取消",
+    deleteFailed: "删除失败。",
   },
 };
 
