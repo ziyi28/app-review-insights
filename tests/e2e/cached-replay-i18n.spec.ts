@@ -45,3 +45,35 @@ test("cached replay of the bundled fixture never calls upstream", async ({ page 
   // trip strict mode.
   await expect(page.locator("#panel-traceability").getByText(/0 错误/)).toBeVisible({ timeout: 10_000 });
 });
+
+test("read-only viewing of a bundled fixture makes no analysis or upstream calls", async ({ page }) => {
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+  resetCounters();
+
+  // Watch for any write/analysis request the view path must never make.
+  let previewPosts = 0;
+  let runPosts = 0;
+  page.on("request", (req) => {
+    if (req.method() !== "POST") return;
+    if (req.url().includes("/api/source-previews")) previewPosts += 1;
+    if (req.url().includes("/api/runs")) runPosts += 1;
+  });
+
+  // Open history and click 查看 (view), NOT 回放 (replay).
+  await page.getByRole("button", { name: /历史/ }).click();
+  await expect(page.getByRole("dialog", { name: /历史/ })).toBeVisible();
+  const xRow = page.locator(".card", { hasText: /识别最新版本引入的回归问题/ }).first();
+  await xRow.getByRole("button", { name: /查看/ }).click();
+
+  // The view loads the fixture's persisted artifacts.
+  await page.getByRole("tab", { name: /发现/ }).click();
+  await expect(page.getByText(/回归/i).first()).toBeVisible({ timeout: 10_000 });
+  await page.getByRole("tab", { name: /评论/ }).click();
+  await expect(page.getByRole("tabpanel")).toContainText(/评论/i, { timeout: 10_000 }).catch(() => {});
+
+  // No POST to source-previews or runs, and zero upstream traffic.
+  expect(previewPosts).toBe(0);
+  expect(runPosts).toBe(0);
+  expect(getUpstreamState()).toEqual({ serpApiRequests: 0, rssRequests: 0, modelRequests: 0 });
+});

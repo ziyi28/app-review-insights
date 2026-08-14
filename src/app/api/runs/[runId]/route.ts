@@ -1,3 +1,4 @@
+import path from "node:path";
 import { NextResponse } from "next/server";
 import { RunStore } from "@/server/runs/run-store";
 import { loadConfig } from "@/server/config";
@@ -6,13 +7,29 @@ import { isRunActive } from "@/server/runs/run-executor";
 
 export const runtime = "nodejs";
 
-/** Returns the run manifest for a run id, with backward-compatible fallbacks for older runs. */
+/** Roots searched for a run's manifest: runtime runs first, then bundled fixtures. */
+function runRoots(cfg: ReturnType<typeof loadConfig>): string[] {
+  return [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")];
+}
+
+/**
+ * Returns the run manifest for a run id, with backward-compatible fallbacks for
+ * older runs. Looks in the runtime store first, then the bundled fixture root,
+ * so a built-in demo run is viewable offline exactly like a real run. The store
+ * that actually holds the manifest is used for the artifact fallback so a
+ * fixture's own artifacts are read, never a same-named runtime run's.
+ */
 export async function GET(_req: Request, { params }: { params: Promise<{ runId: string }> }) {
   const { runId } = await params;
   const cfg = loadConfig();
-  const store = new RunStore(cfg.runsDir);
-  try {
-    const manifest = await store.readManifest(runId);
+  for (const root of runRoots(cfg)) {
+    const store = new RunStore(root);
+    let manifest;
+    try {
+      manifest = await store.readManifest(runId);
+    } catch {
+      continue;
+    }
 
     // Backward-compatible fallback for older runs where appName/appUrl/startRequest were not saved
     if (!manifest.appName || !manifest.appUrl || !manifest.startRequest) {
@@ -44,9 +61,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ runId: 
     }
 
     return NextResponse.json(manifest, { headers: { "cache-control": "no-store" } });
-  } catch {
-    return NextResponse.json({ error: "run not found" }, { status: 404, headers: { "cache-control": "no-store" } });
   }
+  return NextResponse.json({ error: "run not found" }, { status: 404, headers: { "cache-control": "no-store" } });
 }
 
 /**
