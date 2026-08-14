@@ -25,9 +25,31 @@ export async function GET() {
   const roots = [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")];
   const catalog = new RunCatalog(roots);
   const runs = await catalog.list();
-  return NextResponse.json(
-    {
-      runs: runs.map((r) => ({
+  const populated = await Promise.all(
+    runs.map(async (r) => {
+      let appName = r.manifest.appName;
+      let appUrl = r.manifest.appUrl;
+      let fileName = r.manifest.fileName;
+
+      // Backward-compatible fallback for runs created before appName/appUrl were persisted in manifest
+      if (!appName && !appUrl && !fileName) {
+        const store = new RunStore(r.root);
+        try {
+          const evidence = (await store.readArtifact(r.runId, "source-evidence", 1)) as
+            | { kind?: string; appId?: string; canonicalUrl?: string; fileName?: string }
+            | undefined;
+          if (evidence?.kind === "app-store-reviews" && evidence.appId) {
+            appUrl = evidence.canonicalUrl || `https://apps.apple.com/us/app/id${evidence.appId}`;
+            appName = extractAppNameFromUrl(appUrl) || `App ${evidence.appId}`;
+          } else if (evidence?.kind === "import" && evidence.fileName) {
+            fileName = evidence.fileName;
+          }
+        } catch {
+          // ignore artifact read error on corrupt or incomplete runs
+        }
+      }
+
+      return {
         runId: r.runId,
         status: r.manifest.status,
         createdAt: r.manifest.createdAt,
@@ -35,10 +57,15 @@ export async function GET() {
         canRetry: Boolean(r.manifest.startRequest && r.manifest.status !== "running"),
         goal: r.manifest.goal,
         executionMode: r.manifest.executionMode,
-        appName: r.manifest.appName,
-        appUrl: r.manifest.appUrl,
-        fileName: r.manifest.fileName,
-      })),
+        appName,
+        appUrl,
+        fileName,
+      };
+    })
+  );
+  return NextResponse.json(
+    {
+      runs: populated,
     },
     { headers: { "cache-control": "no-store" } }
   );
