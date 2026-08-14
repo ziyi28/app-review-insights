@@ -250,6 +250,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
                 liveCount: selected.live.reviewCount,
                 stableCount: selected.stable.reviewCount,
                 reviewCount: reviews.length,
+                reviewLimit: selected.reviewLimit,
                 collectedAt: selected.live.collectedAt,
                 forcedRefresh: selected.live.forcedRefresh,
                 providerCached: selected.live.cached,

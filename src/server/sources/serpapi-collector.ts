@@ -16,6 +16,8 @@ export type SerpApiCollectorDeps = {
   timeoutMs: number;
   signal?: AbortSignal;
   maxPages?: number;
+  /** Upper bound on the collected sample (100/300/500); default 500. */
+  reviewLimit?: number;
 };
 
 /**
@@ -91,6 +93,7 @@ const ERROR_CODE_BY_STATUS: Record<number, string> = {
 export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise<SerpApiCollectionResult> {
   const { fetchFn, now, baseUrl, apiKey, appId, timeoutMs, signal } = deps;
   const maxPages = Math.min(deps.maxPages ?? SERPAPI_MAX_PAGES, SERPAPI_MAX_PAGES);
+  const reviewLimit = Math.min(deps.reviewLimit ?? SERPAPI_REVIEW_LIMIT, SERPAPI_REVIEW_LIMIT);
   const startedAt = now();
   const reviews: RawReview[] = [];
   const rawRefs: string[] = [];
@@ -128,13 +131,13 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
       limitations.push({ code: "SERPAPI_ITEMS_DROPPED", message: `${dropped} SerpApi review(s) were malformed and dropped; valid reviews were kept`, stage: "source" });
     }
 
-    if (reviews.length >= SERPAPI_REVIEW_LIMIT) {
-      if (reviews.length > SERPAPI_REVIEW_LIMIT) {
-        reviews.length = SERPAPI_REVIEW_LIMIT;
-        rawRefs.length = SERPAPI_REVIEW_LIMIT;
+    if (reviews.length >= reviewLimit) {
+      if (reviews.length > reviewLimit) {
+        reviews.length = reviewLimit;
+        rawRefs.length = reviewLimit;
         limitations.push({
           code: "SERPAPI_APP_CAP",
-          message: `SerpApi returned more than ${SERPAPI_REVIEW_LIMIT} reviews; the sample was capped at ${SERPAPI_REVIEW_LIMIT}`,
+          message: `SerpApi returned more than ${reviewLimit} reviews; the sample was capped at ${reviewLimit}`,
           stage: "source",
         });
       }

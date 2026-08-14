@@ -223,6 +223,21 @@ describe("collectSerpApiReviews", () => {
     expect(result.limitations).toContainEqual(expect.objectContaining({ code: "SERPAPI_APP_CAP" }));
   });
 
+  it("stops paginating early at a requested reviewLimit", async () => {
+    const pageSize = 30;
+    const fetchFn = vi.fn<(input: RequestInfo | URL, init?: RequestInit) => Promise<Response>>(async (input: RequestInfo | URL) => {
+      const url = new URL(String(input));
+      const page = Number(url.searchParams.get("page"));
+      const items = Array.from({ length: pageSize }, (_, i) => reviewItem(`p${page}-${i}`));
+      return jsonResponse(serpPage(items, { hasNext: true, page, searchId: `search_page_${page}` }));
+    });
+
+    const result = await collectSerpApiReviews(deps({ fetchFn, reviewLimit: 100 }));
+    expect(result.reviews).toHaveLength(100);
+    // 4 pages of 30 would be needed to reach 100, so it must stop early.
+    expect(fetchFn.mock.calls.length).toBe(4);
+  });
+
   it("stops naturally when a page has no next URL", async () => {
     const fetchFn = vi.fn(async () => jsonResponse(serpPage([reviewItem("r1")], { page: 1 }))) as unknown as typeof fetch;
     const result = await collectSerpApiReviews(deps({ fetchFn }));

@@ -227,6 +227,23 @@ describe("source preview", () => {
     expect(cache?.reviews).toHaveLength(2);
   });
 
+  it("caps both live and stable samples at reviewLimit while the cache keeps more", async () => {
+    // Live returns more than the cap; the preview must defensively truncate.
+    const many = Array.from({ length: 120 }, (_, i) => rssRaw(`live-${i}`, `2026-08-${String((i % 20) + 1).padStart(2, "0")}T00:00:00Z`));
+    mockedCollect.mockResolvedValue(liveResult({ status: "complete", reviews: many, rawRefs: many.map((r) => `ref:${r.sourceReviewId}`) }));
+    // Pre-seed the cache with more than the cap too.
+    const cacheStore = new AppleReviewCacheStore(cacheDir);
+    await cacheStore.mergeLive("us", "839285684", Array.from({ length: 500 }, (_, i) => rssRaw(`stable-${i}`, `2026-08-${String((i % 20) + 1).padStart(2, "0")}T00:00:00Z`)));
+
+    const preview = await runPreviewImpl(makeInput({ reviewLimit: 100 }));
+    expect(preview.reviewLimit).toBe(100);
+    expect(preview.live.reviews).toHaveLength(100);
+    expect(preview.live.rawRefs).toHaveLength(100);
+    expect(preview.stable.reviews).toHaveLength(100);
+    // The cache file itself keeps the full 500 for later larger selections.
+    expect((await cacheStore.readCache("us", "839285684"))?.reviews).toHaveLength(500);
+  });
+
   it("persists the snapshot and reads it back", async () => {
     mockedCollect.mockResolvedValue(liveResult({ status: "complete", reviews: [] }));
     const input = makeInput();

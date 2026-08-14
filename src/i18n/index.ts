@@ -6,6 +6,8 @@ export type Dictionary = {
   liveMode: string;
   importMode: string;
   appStoreUrl: string;
+  reviewLimit: string;
+  reviewLimitHint: string;
   goal: string;
   outputLocale: string;
   start: string;
@@ -213,6 +215,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     liveMode: "Live",
     importMode: "Import",
     appStoreUrl: "App Store URL (reviews use the US storefront)",
+    reviewLimit: "Review count",
+    reviewLimitHint: "More reviews take longer to analyze.",
     goal: "Analysis goal",
     outputLocale: "Output language",
     start: "Start",
@@ -418,6 +422,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     liveMode: "实时采集",
     importMode: "导入",
     appStoreUrl: "App Store 链接（评论统一使用美国区）",
+    reviewLimit: "评论数量",
+    reviewLimitHint: "数量越多，分析时间越长。",
     goal: "分析目标",
     outputLocale: "输出语言",
     start: "开始分析",

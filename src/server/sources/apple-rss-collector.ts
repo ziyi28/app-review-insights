@@ -45,6 +45,8 @@ export type CollectorDeps = {
   emptyPageRetryDelaysMs?: number[];
   /** Delay (ms) before re-confirming a page that is empty but has more pages advertised. */
   unstableConfirmDelayMs?: number;
+  /** Upper bound on the collected sample (100/300/500); default unbounded. */
+  reviewLimit?: number;
 };
 
 const SAFE_HEADERS = ["content-type", "etag", "last-modified", "date", "cache-control"];
@@ -92,6 +94,7 @@ type FetchOutcome = {
  */
 export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceResult> {
   const { fetchFn, sleep, now, baseUrl, appId, maxPages, pageDelayMs, timeoutMs, signal } = deps;
+  const reviewLimit = deps.reviewLimit ?? Number.POSITIVE_INFINITY;
   const emptyRetryDelays = deps.emptyPageRetryDelaysMs ?? [2000, 5000];
   const confirmDelayMs = deps.unstableConfirmDelayMs ?? 2000;
   const reviews: RawReview[] = [];
@@ -328,6 +331,20 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
 
     if (outcome.parsed.reviews.length > 0) {
       appendFrom(outcome);
+      // The requested review cap was reached: truncate exactly and stop
+      // requesting further pages (the same limit the preview applies).
+      if (reviews.length >= reviewLimit) {
+        if (reviews.length > reviewLimit) {
+          reviews.length = reviewLimit;
+          rawRefs.length = reviewLimit;
+          limitations.push({
+            code: "RSS_APP_CAP",
+            message: `Apple RSS returned more than ${reviewLimit} reviews; the sample was capped at ${reviewLimit}`,
+            stage: "source",
+          });
+        }
+        break;
+      }
       // The advertised last page was reached: no need to request more pages.
       if (advertisedLastPage !== null && page >= advertisedLastPage) {
         break;

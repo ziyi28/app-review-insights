@@ -22,6 +22,8 @@ export type SourcePreview = {
   canonicalUrl: string;
   createdAt: string;
   expiresAt: string;
+  /** The selected review cap (100/300/500) this preview was built against. */
+  reviewLimit: number;
   /** Full snapshot held server-side; the API response only exposes summaries. */
   live: {
     provider: LiveProvider;
@@ -57,6 +59,8 @@ export type PreviewInput = {
   appId: string;
   canonicalUrl: string;
   now: string;
+  /** Selected review cap (100/300/500); defaults to 500 for old clients. */
+  reviewLimit?: number;
   /** SerpApi deps, or null when the key is not configured. */
   serpApiCollector: SerpApiCollectorDeps | null;
   rssCollector: CollectorDeps;
@@ -75,15 +79,18 @@ export function buildPreviewSnapshot(input: PreviewInput): Promise<SourcePreview
 
 export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview> {
   const { previewId, appId, canonicalUrl, now, serpApiCollector, rssCollector, previewsDir, cacheDir, historyRoots, runsDir } = input;
+  // 500 is both the historical default and the hard ceiling.
+  const reviewLimit = Math.min(input.reviewLimit ?? 500, 500);
   const createdAt = now;
   const expiresAt = new Date(new Date(createdAt).getTime() + PREVIEW_TTL_MS).toISOString();
 
   // One live provider per preview: SerpApi when configured and it returns
   // valid reviews; otherwise an explicit live Apple RSS fallback. A partial
-  // SerpApi result is kept as-is and never mixed with RSS reviews.
-  const serp = serpApiCollector ? await collectSerpApiReviews(serpApiCollector) : null;
+  // SerpApi result is kept as-is and never mixed with RSS reviews. The same
+  // review cap is threaded to both collectors so they stop paginating early.
+  const serp = serpApiCollector ? await collectSerpApiReviews({ ...serpApiCollector, reviewLimit }) : null;
   const useSerp = serp !== null && serp.reviews.length > 0;
-  const rss = useSerp ? null : await collectAppleReviews(rssCollector);
+  const rss = useSerp ? null : await collectAppleReviews({ ...rssCollector, reviewLimit });
   const selected = useSerp ? serp : rss!;
 
   const limitations: Limitation[] = [];
@@ -100,6 +107,11 @@ export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview
   }
   limitations.push(...selected.limitations);
 
+  // Defensive re-truncation so an abnormal upstream response can never exceed
+  // the selected cap, even when a collector already applied it.
+  const liveReviews = selected.reviews.slice(0, reviewLimit);
+  const liveRawRefs = selected.rawRefs.slice(0, reviewLimit);
+
   const live: SourcePreview["live"] = useSerp
     ? {
         provider: "serpapi",
@@ -107,14 +119,14 @@ export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview
         cached: false,
         collectedAt: now,
         status: serp!.status,
-        reviewCount: serp!.reviews.length,
+        reviewCount: liveReviews.length,
         pageCount: serp!.evidence.pagesFetched,
         requestCount: serp!.evidence.requestCount,
-        dateRange: dateRangeOf(serp!.reviews),
+        dateRange: dateRangeOf(liveReviews),
         limitations,
         evidence: serp!.evidence,
-        reviews: serp!.reviews,
-        rawRefs: serp!.rawRefs,
+        reviews: liveReviews,
+        rawRefs: liveRawRefs,
       }
     : {
         provider: "apple-rss",
@@ -122,14 +134,14 @@ export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview
         cached: null,
         collectedAt: now,
         status: rss!.status,
-        reviewCount: rss!.reviews.length,
+        reviewCount: liveReviews.length,
         pageCount: rss!.pages.length,
         requestCount: rss!.pages.reduce((n, p) => n + p.attempt, 0),
-        dateRange: dateRangeOf(rss!.reviews),
+        dateRange: dateRangeOf(liveReviews),
         limitations,
         evidence: { provider: "apple-rss", pageCount: rss!.pages.length, requestCount: rss!.pages.reduce((n, p) => n + p.attempt, 0) },
-        reviews: rss!.reviews,
-        rawRefs: rss!.rawRefs,
+        reviews: liveReviews,
+        rawRefs: liveRawRefs,
       };
 
   const cacheStore = new AppleReviewCacheStore(cacheDir);
@@ -138,7 +150,9 @@ export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview
     await cacheStore.mergeLive("us", appId, live.reviews);
   }
   const cached = await cacheStore.bootstrapFromHistory("us", appId, { roots: historyRoots, runsDir });
-  const cacheReviews = cached?.reviews ?? [];
+  // Stable sample: take the newest N from the time-descending cache, while the
+  // cache file itself keeps up to 500 reviews for later, larger selections.
+  const cacheReviews = (cached?.reviews ?? []).slice(0, reviewLimit);
   const stable: SourcePreview["stable"] = {
     available: cacheReviews.length > 0,
     reviewCount: cacheReviews.length,
@@ -165,6 +179,7 @@ export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview
     canonicalUrl,
     createdAt,
     expiresAt,
+    reviewLimit,
     live,
     stable,
     recommendedSelection,

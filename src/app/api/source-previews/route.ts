@@ -11,6 +11,8 @@ export const runtime = "nodejs";
 export const SourcePreviewRequestSchema = z.object({
   protocolVersion: z.literal("1"),
   appStoreUrl: z.string().url().refine((u) => u.startsWith("https://"), { message: "must be https" }),
+  // Optional review cap; absent means 500 (legacy clients) for protocol compat.
+  reviewLimit: z.union([z.literal(100), z.literal(300), z.literal(500)]).optional(),
 });
 export type SourcePreviewRequest = z.infer<typeof SourcePreviewRequestSchema>;
 
@@ -51,11 +53,14 @@ export async function POST(req: Request) {
   const previewId = `preview-${randomUUID()}`;
   const now = new Date().toISOString();
 
+  const reviewLimit = parsed.data.reviewLimit ?? 500;
+
   const preview = await buildPreviewSnapshot({
     previewId,
     appId,
     canonicalUrl,
     now,
+    reviewLimit,
     // SerpApi deps are built only when a key is configured; otherwise the
     // preview dispatches straight to the RSS fallback.
     serpApiCollector: cfg.serpApiKey
@@ -100,6 +105,7 @@ function toPublicPreview(preview: SourcePreview) {
     canonicalUrl: preview.canonicalUrl,
     createdAt: preview.createdAt,
     expiresAt: preview.expiresAt,
+    reviewLimit: preview.reviewLimit,
     live: {
       provider: preview.live.provider as LiveProvider,
       forcedRefresh: preview.live.forcedRefresh,

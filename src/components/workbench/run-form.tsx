@@ -68,6 +68,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
   const [goal, setGoal] = useState("");
   const [outputLocale, setOutputLocale] = useState<Locale>("zh-CN");
   const [file, setFile] = useState<File | null>(null);
+  const [reviewLimit, setReviewLimit] = useState<100 | 300 | 500>(100);
 
   // Live-mode preview state: null before checking, "loading" while checking,
   // or a loaded summary after the sample has been checked.
@@ -83,7 +84,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
       const res = await fetch("/api/source-previews", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ protocolVersion: "1", appStoreUrl: targetUrl }),
+        body: JSON.stringify({ protocolVersion: "1", appStoreUrl: targetUrl, reviewLimit }),
       });
       if (!res.ok) {
         const problem = await res.json().catch(() => ({}));
@@ -95,12 +96,20 @@ export function RunForm({ t, onStart }: RunFormProps) {
       setPreview(null);
       setPreviewError(err instanceof Error ? err.message : t.sampleCheckFailed);
     }
-  }, [url, t]);
+  }, [url, reviewLimit, t]);
 
   // A URL change makes the previously checked sample stale: any live run must
   // re-check against the new URL.
   const handleUrlChange = (next: string) => {
     setUrl(next);
+    setPreview(null);
+    setPreviewError(null);
+  };
+
+  // A review-count change makes the previously checked sample stale: the user
+  // must re-check against the new cap before starting.
+  const handleReviewLimitChange = (next: string) => {
+    setReviewLimit(Number(next) as 100 | 300 | 500);
     setPreview(null);
     setPreviewError(null);
   };
@@ -228,6 +237,15 @@ export function RunForm({ t, onStart }: RunFormProps) {
                   {t.useExampleApp}
                 </button>
               </div>
+              <label className={styles.label}>
+                {t.reviewLimit}
+                <select className={styles.input} value={reviewLimit} onChange={(e) => handleReviewLimitChange(e.target.value)}>
+                  <option value={100}>100</option>
+                  <option value={300}>300</option>
+                  <option value={500}>500</option>
+                </select>
+              </label>
+              <p className={styles.hintMuted}>{t.reviewLimitHint}</p>
               <label className={styles.label}>
                 {t.goal}
                 <textarea

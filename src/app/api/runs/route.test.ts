@@ -43,6 +43,7 @@ function snapshot(reviewCount: number, opts: { expiresAt?: string; appId?: strin
     canonicalUrl: "https://apps.apple.com/us/app/x/id839285684",
     createdAt: now,
     expiresAt: opts.expiresAt ?? new Date(new Date(now).getTime() + 30 * 60 * 1000).toISOString(),
+    reviewLimit: 500,
     live: {
       provider: "apple-rss",
       forcedRefresh: false,
@@ -83,6 +84,7 @@ function serpSnapshot(): SourcePreview {
     canonicalUrl: "https://apps.apple.com/us/app/x/id839285684",
     createdAt: now,
     expiresAt: new Date(new Date(now).getTime() + 30 * 60 * 1000).toISOString(),
+    reviewLimit: 500,
     live: {
       provider: "serpapi",
       forcedRefresh: true,

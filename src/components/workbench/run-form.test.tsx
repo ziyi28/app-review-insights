@@ -226,4 +226,44 @@ describe("RunForm", () => {
     expect(await screen.findByText(`50 ${t.freshReviews}`)).toBeVisible();
     expect(screen.getByText(`500 ${t.localHistoryReviews}`)).toBeVisible();
   });
+
+  it("defaults the review count to 100 and sends it with the preview request", async () => {
+    const fetchMock = stubFetch(previewSummary({ liveCount: 2, stableCount: 0 }));
+    const user = userEvent.setup();
+    render(<RunForm t={t} onStart={vi.fn()} />);
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
+
+    expect(await screen.findByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
+    const call = fetchMock.mock.calls.find((c) => String(c[0]).includes("/api/source-previews"));
+    expect(call).toBeDefined();
+    expect(JSON.parse(String((call![1] as RequestInit).body))).toMatchObject({ reviewLimit: 100 });
+  });
+
+  it("sends the chosen review count and invalidates the previous preview on change", async () => {
+    const fetchMock = stubFetch(previewSummary({ liveCount: 2, stableCount: 0 }));
+    const user = userEvent.setup();
+    render(<RunForm t={t} onStart={vi.fn()} />);
+    await navigateToLiveConfirm(user, "了解用户对付费订阅的主要痛点");
+    expect(await screen.findByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
+
+    // Go back to step 2, switch the count, and the stale preview is cleared.
+    await user.click(screen.getByRole("button", { name: t.back }));
+    const select = screen.getByLabelText(t.reviewLimit);
+    await user.selectOptions(select, "300");
+    expect(screen.queryByText(`2 ${t.freshReviews}`)).not.toBeInTheDocument();
+
+    // Re-checking sends the new limit.
+    await user.click(screen.getByRole("button", { name: t.next }));
+    expect(await screen.findByText(`2 ${t.freshReviews}`)).toBeInTheDocument();
+    const calls = fetchMock.mock.calls.filter((c) => String(c[0]).includes("/api/source-previews"));
+    expect(calls).toHaveLength(2);
+    expect(JSON.parse(String((calls[1][1] as RequestInit).body))).toMatchObject({ reviewLimit: 300 });
+  });
+
+  it("does not show the review count control in import mode", async () => {
+    const user = userEvent.setup();
+    render(<RunForm t={t} onStart={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: new RegExp(t.importMode) }));
+    expect(screen.queryByLabelText(t.reviewLimit)).not.toBeInTheDocument();
+  });
 });

@@ -158,6 +158,60 @@ describe("POST /api/source-previews", () => {
     expect(JSON.stringify(await readPreview(process.env.SOURCE_PREVIEWS_DIR!, json.previewId))).not.toContain("serp_route_test");
   });
 
+  it("accepts a reviewLimit and records it in the snapshot", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/page=1/")) return new Response(fixture("page-01.json"), { status: 200, headers: { "content-type": "application/json" } });
+      return new Response(JSON.stringify({ feed: { entry: [] } }), { status: 200 });
+    }));
+    const res = await POST(new Request("http://localhost/api/source-previews", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ protocolVersion: "1", appStoreUrl: "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684", reviewLimit: 300 }),
+    }));
+    expect(res.status).toBe(200);
+    const json = (await res.json()) as { reviewLimit: number; previewId: string };
+    expect(json.reviewLimit).toBe(300);
+    const snapshot = await readPreview(process.env.SOURCE_PREVIEWS_DIR!, json.previewId);
+    expect(snapshot?.reviewLimit).toBe(300);
+  });
+
+  it.each([100, 300, 500])("accepts reviewLimit %i", async (limit) => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/page=1/")) return new Response(fixture("page-01.json"), { status: 200, headers: { "content-type": "application/json" } });
+      return new Response(JSON.stringify({ feed: { entry: [] } }), { status: 200 });
+    }));
+    const res = await POST(new Request("http://localhost/api/source-previews", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ protocolVersion: "1", appStoreUrl: "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684", reviewLimit: limit }),
+    }));
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { reviewLimit: number }).reviewLimit).toBe(limit);
+  });
+
+  it.each([50, 1000, "300"])("rejects invalid reviewLimit %s with 422", async (limit) => {
+    vi.stubGlobal("fetch", vi.fn());
+    const res = await POST(new Request("http://localhost/api/source-previews", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ protocolVersion: "1", appStoreUrl: "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684", reviewLimit: limit }),
+    }));
+    expect(res.status).toBe(422);
+  });
+
+  it("defaults to 500 when reviewLimit is omitted", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/page=1/")) return new Response(fixture("page-01.json"), { status: 200, headers: { "content-type": "application/json" } });
+      return new Response(JSON.stringify({ feed: { entry: [] } }), { status: 200 });
+    }));
+    const res = await POST(validBody());
+    expect(res.status).toBe(200);
+    expect(((await res.json()) as { reviewLimit: number }).reviewLimit).toBe(500);
+  });
+
   it("uses SerpApi for a China page URL with country=us", async () => {
     process.env.SERPAPI_API_KEY = "serp_route_test";
     let capturedUrl = "";

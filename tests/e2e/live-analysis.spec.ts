@@ -85,6 +85,37 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   await expect(page.getByText(/SerpApi \/ 美国区 App Store/)).toBeVisible();
 });
 
+test("selecting a review count sends it with the preview request and starts a live run", async ({ page }) => {
+  setSerpApiMode("live");
+  resetCounters();
+  await page.goto("/");
+  await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+
+  await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /使用示例 App/ }).click();
+
+  // Default is 100; switch to 300 before checking the sample.
+  await expect(page.getByLabel(/评论数量/)).toHaveValue("100");
+  await page.getByLabel(/评论数量/).selectOption("300");
+
+  await page.getByLabel(/分析目标/).fill("了解用户为什么喜欢这个应用以及他们遇到的问题");
+
+  const previewReqPromise = page.waitForRequest((r) => r.url().includes("/api/source-previews") && r.method() === "POST");
+  await page.getByRole("button", { name: /下一步/ }).click();
+  const previewReq = await previewReqPromise;
+  expect(previewReq.postDataJSON()).toMatchObject({ reviewLimit: 300 });
+
+  await expect(page.getByText(/2 条最新采集评论/)).toBeVisible();
+
+  // Starting from the preview must still work with the chosen count.
+  const postPromise = page.waitForResponse("**/api/runs");
+  await page.getByRole("button", { name: /分析最新样本/ }).click();
+  expect((await postPromise).status()).toBe(202);
+
+  await waitForRunComplete(page);
+  await page.getByRole("tab", { name: /概览/ }).click();
+});
+
 test("analyzes a forced-fresh SerpApi preview via the settings page", async ({ page }) => {
   setSerpApiMode("live");
   resetCounters();

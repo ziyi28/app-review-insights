@@ -52,6 +52,8 @@ export type AppStoreReviewSourceSummary = {
   liveCount: number;
   stableCount: number;
   reviewCount: number;
+  /** The selected review cap (100/300/500) this run's preview was built against. */
+  reviewLimit?: number;
   collectedAt: string;
   forcedRefresh: boolean;
   providerCached: boolean | null;

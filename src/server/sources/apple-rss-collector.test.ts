@@ -73,6 +73,54 @@ describe("collectAppleReviews", () => {
     expect(deps.fetchFn).toHaveBeenCalledTimes(2);
   });
 
+  it("stops paginating and truncates exactly at a requested reviewLimit", async () => {
+    // A single page carrying more reviews than the limit (each ~20 chars) and a
+    // rel=last advertising more pages, to prove the collector stops early.
+    const makeEntries = (start: number, count: number) =>
+      Array.from({ length: count }, (_, i) => ({
+        id: { label: String(start + i) },
+        author: { name: { label: `r${start + i}` }, uri: { label: "https://itunes.apple.com/us/reviews?user=x" } },
+        updated: { label: "2026-07-20T18:04:23-07:00" },
+        "im:rating": { label: "5" },
+        "im:version": { label: "3.2.1" },
+        title: { label: `t ${start + i}` },
+        content: { label: `body ${start + i}`, attributes: { type: "text" } },
+        link: { attributes: { rel: "alternate", href: `https://apps.apple.com/us/review?appId=839285684&reviewId=${start + i}` } },
+      }));
+    const page1 = {
+      feed: {
+        entry: makeEntries(0, 40),
+        link: [
+          { attributes: { rel: "self", href: "page=1" } },
+          { attributes: { rel: "last", href: "https://itunes.apple.com/us/rss/customerreviews/page=5/id=839285684/sortBy=mostRecent/json" } },
+        ],
+      },
+    };
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
+    const url3 = "https://itunes.apple.com/us/rss/customerreviews/page=3/id=839285684/sortBy=mostRecent/json";
+    const page2 = { feed: { entry: makeEntries(40, 40), link: [{ attributes: { rel: "last", href: "page=5" } }] } };
+    const page3 = { feed: { entry: makeEntries(80, 30), link: [{ attributes: { rel: "last", href: "page=5" } }] } };
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.startsWith(url1)) return makeResponse(JSON.stringify(page1));
+      if (url.startsWith(url2)) return makeResponse(JSON.stringify(page2));
+      if (url.startsWith(url3)) return makeResponse(JSON.stringify(page3));
+      return makeResponse(JSON.stringify({ feed: { entry: [] } }));
+    });
+    const deps = depsFor({});
+    deps.fetchFn = fetchMock as unknown as typeof fetch;
+    deps.reviewLimit = 100;
+
+    const result = await collectAppleReviews(deps);
+    expect(result.reviews).toHaveLength(100);
+    expect(result.rawRefs).toHaveLength(100);
+    // 40 + 40 + 20 needed to reach 100, so page 3 must be requested, then stop.
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(result.limitations.some((l) => l.code === "RSS_APP_CAP")).toBe(true);
+  });
+
   it("treats an HTTP 200 empty first page as suspect-empty", async () => {
     const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
     const deps = depsFor({ [url1]: fixture("empty-feed.json") });
