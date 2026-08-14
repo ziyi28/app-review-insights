@@ -38,6 +38,7 @@ export type Dictionary = {
   starting: string;
   running: string;
   completed: string;
+  stageSkipped: string;
   interrupted: string;
   reconnecting: string;
   someEventsDropped: string;
@@ -256,6 +257,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     view: "View",
     replay: "Replay",
     completed: "Completed",
+    stageSkipped: "Skipped",
     failed: "Failed",
     errors: "errors",
     limitations: "Limitations",
@@ -463,6 +465,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     view: "查看",
     replay: "回放",
     completed: "已完成",
+    stageSkipped: "已跳过",
     failed: "失败",
     errors: "错误",
     limitations: "限制",

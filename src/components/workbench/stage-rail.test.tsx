@@ -87,4 +87,69 @@ describe("StageRail", () => {
     expect(item).toHaveTextContent("2m");
     expect(item).toHaveTextContent("batch 2/5");
   });
+
+  it("marks unexecuted stages as Skipped after a run.completed event, not waiting", () => {
+    const events = [...eventsThroughEvidence, event("run.completed", undefined)];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    // A stage that never started reads "Skipped" once the run is terminal.
+    const revisionItem = screen.getByText("Revision").closest("li");
+    expect(revisionItem).toHaveTextContent(/skipped/i);
+    expect(revisionItem).not.toHaveTextContent(/enter a url/i);
+    // The stages that did run still read completed.
+    const findingsItem = screen.getByText("Findings").closest("li");
+    expect(findingsItem).toHaveTextContent("✓");
+  });
+
+  it("marks every unstarted downstream stage Skipped on an early insufficient-data completion", () => {
+    // Only source + prepare ran before the run short-circuited.
+    const events = [
+      event("stage.started", "source"),
+      event("stage.completed", "source"),
+      event("stage.started", "prepare"),
+      event("stage.completed", "prepare"),
+      event("run.completed", undefined),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    for (const label of ["Scope", "Topics", "Findings", "Planning", "Tests", "Traceability", "Revision"]) {
+      const item = screen.getByText(label).closest("li");
+      expect(item).toHaveTextContent(/skipped/i);
+    }
+    const sourceItem = screen.getByText("Source").closest("li");
+    expect(sourceItem).toHaveTextContent("✓");
+  });
+
+  it("shows completed stages as completed and unstarted ones as Skipped on a failed run", () => {
+    const events = [
+      event("stage.started", "source"),
+      event("stage.completed", "source"),
+      event("stage.started", "prepare"),
+      event("stage.completed", "prepare"),
+      event("run.failed", undefined),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    expect(screen.getByText("Source").closest("li")).toHaveTextContent("✓");
+    expect(screen.getByText("Prepare").closest("li")).toHaveTextContent("✓");
+    expect(screen.getByText("Findings").closest("li")).toHaveTextContent(/skipped/i);
+  });
+
+  it("keeps unstarted stages as waiting when there is no terminal event (interrupted)", () => {
+    // No run.completed/run.failed: an interrupted run must not claim skipped.
+    render(<StageRail events={eventsThroughEvidence} t={getDictionary("en")} />);
+    const revisionItem = screen.getByText("Revision").closest("li");
+    expect(revisionItem).toHaveTextContent(/enter a url/i);
+    expect(revisionItem).not.toHaveTextContent(/skipped/i);
+  });
+
+  it("still shows Revision completed with duration when it actually ran", () => {
+    const events = [
+      ...eventsThroughEvidence,
+      event("stage.started", "revision"),
+      event("stage.completed", "revision"),
+      event("run.completed", undefined),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    const item = screen.getByText("Revision").closest("li");
+    expect(item).toHaveTextContent("✓");
+    expect(item).not.toHaveTextContent(/skipped/i);
+  });
 });

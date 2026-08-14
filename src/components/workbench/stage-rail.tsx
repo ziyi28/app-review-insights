@@ -42,6 +42,11 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
   const timings = new Map<string, StageTiming>();
   let currentStage: string | null = null;
   let failed = false;
+  // A run that reached a terminal event (completed/failed) is over: any stage
+  // that never started is genuinely SKIPPED, not waiting for input. An
+  // interrupted run (no terminal event yet) keeps its unstarted stages as
+  // waiting — we cannot know they were skipped.
+  let hasTerminal = false;
   // "Now" for an in-flight stage is the newest event timestamp: the rail is
   // re-rendered as events stream, so the elapsed time stays live.
   let latestTs = events[0]?.timestamp;
@@ -61,6 +66,7 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
       if (currentStage === e.stage) currentStage = null;
     }
     if (e.type === "run.failed") failed = true;
+    if (e.type === "run.completed" || e.type === "run.failed") hasTerminal = true;
   }
 
   const elapsedFor = (stage: string): string | null => {
@@ -80,7 +86,7 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
         const current = currentStage === stage && !done;
         const duration = elapsedFor(stage);
         const batch = current ? batchProgress(events, stage) : null;
-        const statusText = done ? t.completed : current ? t.running : t.waiting;
+        const statusText = done ? t.completed : current ? t.running : hasTerminal ? t.stageSkipped : t.waiting;
         return (
           <li key={stage} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: done || current ? 1 : 0.55 }}>
             <span
