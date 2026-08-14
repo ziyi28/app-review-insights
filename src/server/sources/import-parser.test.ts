@@ -201,6 +201,52 @@ describe("import date validation", () => {
     expect(result.reviews).toHaveLength(0);
     expect(result.errors.some((e) => e.includes("updatedAt"))).toBe(true);
   });
+
+  it.each([
+    "2026-02-30T10:00:00Z",
+    "01/02/2026",
+    "1",
+    "2026-07-01",
+    "2026-07-01T10:00:00",
+  ])("rejects non-contract updatedAt %s", (updatedAt) => {
+    const content = JSON.stringify({
+      schemaVersion: "1",
+      reviews: [
+        { id: "bad", body: "bad date", rating: 1, updatedAt },
+        {
+          id: "good",
+          body: "valid date",
+          rating: 5,
+          updatedAt: "2026-07-01T10:00:00Z",
+        },
+      ],
+    });
+
+    const result = parseImportedReviews({
+      fileName: "dates.json",
+      mediaType: "application/json",
+      content,
+    });
+
+    expect(result.reviews.map((r) => r.sourceReviewId)).toEqual(["good"]);
+    expect(result.errors).toContain("row 1: invalid updatedAt");
+  });
+
+  it("accepts an ISO datetime with an explicit offset and normalizes to UTC", () => {
+    const content = [
+      "id,body,rating,updatedAt",
+      "r1,valid offset,5,2026-07-01T18:00:00+08:00",
+    ].join("\n");
+
+    const result = parseImportedReviews({
+      fileName: "offset.csv",
+      mediaType: "text/csv",
+      content,
+    });
+
+    expect(result.errors).toEqual([]);
+    expect(result.reviews[0].updatedAt).toBe("2026-07-01T10:00:00.000Z");
+  });
 });
 
 describe("CSV unknown columns", () => {

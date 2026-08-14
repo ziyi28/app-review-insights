@@ -43,7 +43,7 @@ provenance is labeled `Imported` in the UI.
 | `id` | yes | string | stable unique source id |
 | `body` | yes | string | review text |
 | `rating` | yes | integer 1–5 | |
-| `updatedAt` | yes (JSON) | ISO 8601 | in CSV this column is required too |
+| `updatedAt` | yes (JSON) | ISO 8601 / RFC 3339 datetime | must include a `Z` or `±HH:MM` timezone; in CSV this column is required too |
 | `title` | no | string | |
 | `version` | no | string | app version the review was filed against |
 | `language` | no | string | display hint only; the app re-labels deterministically |
@@ -65,9 +65,17 @@ are kept as warnings (never silently reinterpreted).
 - Missing required column → error with the row/column identified.
 - Invalid rating or unparseable date → row-level error; the offending row is
   excluded but valid rows in the same file are still analyzed.
-- `updatedAt` is **required and must parse**: a blank value is a `missing
-  updatedAt` row error, an unparseable value is an `invalid updatedAt` row
-  error. Neither is silently treated as "no date".
+- `updatedAt` is **required and must be a timezone-qualified ISO 8601 / RFC
+  3339 datetime**: a blank value is a `missing updatedAt` row error, and
+  anything that is not a full datetime with a `Z` or `±HH:MM` offset is an
+  `invalid updatedAt` row error. Neither is silently treated as "no date" or
+  silently "fixed" into a valid date.
+  - Valid: `2026-07-01T10:00:00Z`, `2026-07-01T18:00:00+08:00` (the latter is
+    normalized to UTC `2026-07-01T10:00:00.000Z`).
+  - Invalid: `2026-02-30T10:00:00Z` (nonexistent calendar date), `01/02/2026`
+    (localized date), `2026-07-01` (date-only), `2026-07-01T10:00:00` (no
+    timezone).
+  - An invalid row is excluded; valid rows in the same file are still analyzed.
 - Unknown CSV columns are tolerated: each is warned exactly once
   (`CSV unknown column ignored: <name>`), never once per row, and its value
   never reaches the normalized review.

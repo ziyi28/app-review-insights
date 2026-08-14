@@ -1,5 +1,6 @@
 import { parse } from "csv-parse/sync";
 import { createHash } from "node:crypto";
+import { z } from "zod";
 import { RawReviewSchema, type RawReview } from "@/domain/contracts/review";
 import type { SourceFile } from "./source-types";
 
@@ -35,6 +36,9 @@ type ImportInput = {
 
 const MAX_CONTENT_BYTES = 2_000_000;
 
+/** Import 日期契约：必须是带时区的 ISO 8601 / RFC 3339 日期时间。 */
+const ImportDateTimeSchema = z.iso.datetime({ offset: true });
+
 /** UTF-8 byte length of a string (matches the documented byte limits). */
 function byteLength(s: string): number {
   return Buffer.byteLength(s, "utf8");
@@ -46,12 +50,15 @@ function contentKey(r: { body: string; rating: number; version: string | null; u
 
 function toRawReview(id: string, row: Record<string, unknown>, source: "json-import" | "csv-import"): RawReview {
   const rating = Number(row.rating);
-  // updatedAt is required and must parse; an unparseable or blank value is a
-  // row-level error (the row is excluded, never silently nulled).
+  // updatedAt 必须是带时区的 ISO 8601 / RFC 3339 日期时间：接受 `Z` 和
+  // `±HH:MM`，拒绝缺失、日期单独值、本地化日期、无时区日期和不存在的
+  // 日历日期。校验在构造 Date 之前完成，避免宽松解析“静默修正”无效输入。
   const updatedAtText = String(row.updatedAt ?? "").trim();
   if (!updatedAtText) throw new Error("missing updatedAt");
+  if (!ImportDateTimeSchema.safeParse(updatedAtText).success) {
+    throw new Error("invalid updatedAt");
+  }
   const parsedDate = new Date(updatedAtText);
-  if (Number.isNaN(parsedDate.getTime())) throw new Error("invalid updatedAt");
   const updatedAt = parsedDate.toISOString();
   return RawReviewSchema.parse({
     sourceReviewId: id,
