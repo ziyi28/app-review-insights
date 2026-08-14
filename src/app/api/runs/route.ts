@@ -225,9 +225,18 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
             stage: "source",
           });
         }
-        const liveLimitations = selected.live.limitations.filter((l) => l.code === "SERPAPI_ITEMS_DROPPED" || l.code === "SERPAPI_PARTIAL" || l.code === "SERPAPI_PAGE_CAP" || l.code === "RSS_SUSPECT_EMPTY" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "RSS_PARTIAL");
+        // The run's source status comes from the preview's authoritative live
+        // collection status — never re-derived from limitation codes. A stable
+        // (local-history) selection with a previously-complete live collection
+        // stays complete: the cached sample is valid even though it was not
+        // re-collected. A stable selection over a partial/failed live can never
+        // be upgraded to complete.
         const status: "complete" | "suspect-empty" | "partial" | "failed" =
-          reviews.length === 0 ? "suspect-empty" : liveLimitations.length > 0 ? "partial" : "complete";
+          selection === "live"
+            ? selected.live.status
+            : selected.live.status === "complete"
+              ? "complete"
+              : "partial";
         deps = {
           model: buildModel(),
           source: {

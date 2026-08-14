@@ -400,9 +400,58 @@ describe("runFindingsStage", () => {
     expect(result.findings.every((f) => f.supportingSampleCount === 1)).toBe(true);
     void findingsCalls;
   });
+
+  it("runs the consolidation path with a partial source and downgrades merged confidence", async () => {
+    // 3 chunks each return a finding on the same topic; consolidation merges
+    // them into one canonical finding with 3 supporting reviews. A complete
+    // source would be medium; a partial source must downgrade to low AND the
+    // merged sufficiency must fail on SOURCE_NOT_COMPLETE.
+    const many = Array.from({ length: 60 }, (_, i) => review(`r${i}`, "x".repeat(490) + ` review number ${i}`));
+    const generate = vi.fn(async (request: { promptVersion: string; user?: string }) => {
+      if (request.promptVersion.includes("consolidation")) {
+        const parsed = JSON.parse(request.user as string) as { candidates: { id: string; supportingReviewIds: string[] }[] };
+        return {
+          groups: [
+            {
+              id: "finding-merged",
+              title: "x",
+              summary: "y",
+              candidateIds: parsed.candidates.map((c) => c.id),
+              focusAreaIds: [],
+            },
+          ],
+        };
+      }
+      const parsed = JSON.parse(request.user as string) as { reviews: { reviewId: string }[] };
+      return {
+        findings: [
+          {
+            id: "finding-1",
+            topicIds: ["topic-1"],
+            title: "x",
+            summary: "y",
+            supportingReviewIds: [parsed.reviews[0].reviewId],
+            evidenceExcerpts: [{ reviewId: parsed.reviews[0].reviewId, excerpt: "x".repeat(10) }],
+            conflictingReviewIds: [],
+            uncertainties: [],
+            limitations: [],
+          },
+        ],
+      };
+    });
+    const ctx = context({ reviews: many, model: { generate } as never, sourceStatus: "partial" });
+    const result = await runFindingsStage(ctx);
+    const merged = result.findings.find((f) => f.id === "finding-merged");
+    expect(merged).toBeDefined();
+    expect(merged!.supportingSampleCount).toBeGreaterThanOrEqual(3);
+    expect(merged!.confidence.level).toBe("low");
+    expect(merged!.confidence.reasons).toContain("source status: partial");
+    expect(merged!.evidenceSufficiency.status).toBe("insufficient");
+    expect(merged!.evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
+  });
 });
 
-function candidateFinding(id: string, reviewIds: string[], focusAreaIds: string[] = [], excerpt = "price is too expensive"): Finding {
+function candidateFinding(id: string, reviewIds: string[], focusAreaIds: string[] = [], excerpt = "price is too expensive", corpusReviewCount = 500): Finding {
   return {
     id,
     topicIds: ["topic-1"],
@@ -417,8 +466,8 @@ function candidateFinding(id: string, reviewIds: string[], focusAreaIds: string[
     confidence: { level: "low", method: "deterministic-v1", reasons: [] },
     evidenceSufficiency: {
       status: "insufficient",
-      corpusReviewCount: 500,
-      supportRatio: reviewIds.length / 500,
+      corpusReviewCount,
+      supportRatio: reviewIds.length / corpusReviewCount,
       reasons: ["SUPPORT_BELOW_MINIMUM"],
     },
     uncertainties: [],
@@ -432,9 +481,11 @@ describe("consolidateFindings", () => {
       candidateFinding("c1", ["r1", "r2"], ["focus-1"]),
       candidateFinding("c2", ["r3"], ["focus-1"]),
     ];
-    const result = consolidateFindings(candidates, [
-      { id: "finding-1", title: "Pricing is high", summary: "Users complain about cost", candidateIds: ["c1", "c2"], focusAreaIds: ["focus-1"] },
-    ]);
+    const result = consolidateFindings(
+      candidates,
+      [{ id: "finding-1", title: "Pricing is high", summary: "Users complain about cost", candidateIds: ["c1", "c2"], focusAreaIds: ["focus-1"] }],
+      "complete",
+    );
     expect(result.findings).toHaveLength(1);
     const f = result.findings[0];
     expect(f.sourceFindingIds).toEqual(["c1", "c2"]);
@@ -447,10 +498,14 @@ describe("consolidateFindings", () => {
 
   it("refuses to reuse a candidate across two final findings", () => {
     const candidates = [candidateFinding("c1", ["r1"])];
-    const result = consolidateFindings(candidates, [
-      { id: "finding-1", title: "a", summary: "a", candidateIds: ["c1"] },
-      { id: "finding-2", title: "b", summary: "b", candidateIds: ["c1"] }, // reused!
-    ]);
+    const result = consolidateFindings(
+      candidates,
+      [
+        { id: "finding-1", title: "a", summary: "a", candidateIds: ["c1"] },
+        { id: "finding-2", title: "b", summary: "b", candidateIds: ["c1"] }, // reused!
+      ],
+      "complete",
+    );
     // finding-2 references an already-used candidate → dropped with a warning.
     expect(result.findings).toHaveLength(1);
     expect(result.findings[0].id).toBe("finding-1");
@@ -459,9 +514,11 @@ describe("consolidateFindings", () => {
 
   it("drops unknown candidate references and records a warning", () => {
     const candidates = [candidateFinding("c1", ["r1"])];
-    const result = consolidateFindings(candidates, [
-      { id: "finding-1", title: "a", summary: "a", candidateIds: ["c1", "ghost"] },
-    ]);
+    const result = consolidateFindings(
+      candidates,
+      [{ id: "finding-1", title: "a", summary: "a", candidateIds: ["c1", "ghost"] }],
+      "complete",
+    );
     expect(result.findings).toHaveLength(1);
     expect(result.warnings.some((w) => w.code === "FINDING_GROUP_UNKNOWN_CANDIDATE")).toBe(true);
   });
@@ -469,7 +526,7 @@ describe("consolidateFindings", () => {
   it("drops unused candidates and keeps every valid group", () => {
     const candidates = Array.from({ length: 30 }, (_, i) => candidateFinding(`c${i}`, [`r${i}`]));
     const groups = Array.from({ length: 5 }, (_, i) => ({ id: `finding-${i + 1}`, title: "a", summary: "a", candidateIds: [`c${i}`] }));
-    const result = consolidateFindings(candidates, groups);
+    const result = consolidateFindings(candidates, groups, "complete");
     expect(result.findings).toHaveLength(5);
     // The 25 candidates never referenced by any group are dropped.
     expect(result.droppedCandidateIds).toHaveLength(25);
@@ -483,5 +540,44 @@ describe("consolidateFindings", () => {
     ];
     const strongest = pickStrongestForUncovered(candidates, ["focus-2"], used, new Set(["focus-1"]));
     expect(strongest?.id).toBe("c2"); // more supporting reviews
+  });
+
+  it("propagates a partial source status through merged candidates", () => {
+    // Two candidates merge to 3 supporting reviews (would be "medium" on a
+    // complete source) but the authoritative source is partial: the merged
+    // confidence must downgrade to low, and sufficiency must fail on
+    // SOURCE_NOT_COMPLETE even though the support floor and ratio are met.
+    const candidates = [
+      candidateFinding("c1", ["r1", "r2"], ["focus-1"], "price is too expensive", 100),
+      candidateFinding("c2", ["r3"], ["focus-1"], "price is too expensive", 100),
+    ];
+    const result = consolidateFindings(
+      candidates,
+      [{ id: "finding-1", title: "Pricing is high", summary: "Users complain about cost", candidateIds: ["c1", "c2"], focusAreaIds: ["focus-1"] }],
+      "partial",
+    );
+    expect(result.findings).toHaveLength(1);
+    const f = result.findings[0];
+    // 3 supporting reviews on a partial source: medium downgraded to low.
+    expect(f.supportingSampleCount).toBe(3);
+    expect(f.confidence.level).toBe("low");
+    expect(f.confidence.reasons).toContain("source status: partial");
+    // The absolute support floor (3) and ratio (3/100 = 3% > 1%) are met, so
+    // the ONLY insufficiency reason must be the incomplete source.
+    expect(f.evidenceSufficiency.status).toBe("insufficient");
+    expect(f.evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
+    expect(f.evidenceSufficiency.reasons).not.toContain("SUPPORT_BELOW_MINIMUM");
+    expect(f.evidenceSufficiency.reasons).not.toContain("SUPPORT_RATIO_BELOW_MINIMUM");
+  });
+
+  it("treats a suspect-empty source as insufficient for broad or critical claims", () => {
+    const candidates = [candidateFinding("c1", ["r1", "r2", "r3"])];
+    const result = consolidateFindings(
+      candidates,
+      [{ id: "finding-1", title: "a", summary: "a", candidateIds: ["c1"] }],
+      "suspect-empty",
+    );
+    expect(result.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(result.findings[0].evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
   });
 });

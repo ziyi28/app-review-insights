@@ -233,6 +233,12 @@ export async function executeRun(
           : "parsing imported reviews…";
     await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: sourceStageMessage } });
     const source = await collectSource(deps.source, deps);
+    // The authoritative source completeness for the entire run. It is captured
+    // once here and threaded into every stage that derives confidence or
+    // sufficiency — never re-derived from limitation codes, which would both
+    // miss SerpApi partial states and allow a revision to silently re-upgrade
+    // a partial source to complete.
+    const sourceStatus = source.status;
     await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: `collected ${source.rawReviews.length} reviews` } });
     limitations.push(...source.limitations);
     for (const l of source.limitations) {
@@ -348,7 +354,7 @@ export async function executeRun(
       outputLocale,
       goal,
       focusAreas,
-      sourceStatus: sourceStatusOf(limitations),
+      sourceStatus,
       onProgress: onStageProgress("topics"),
     });
     for (const w of topics.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "topics", data: w });
@@ -368,7 +374,7 @@ export async function executeRun(
       outputLocale,
       goal,
       focusAreas,
-      sourceStatus: sourceStatusOf(limitations),
+      sourceStatus,
       onProgress: onStageProgress("findings"),
     });
     for (const w of findingsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "findings", data: w });
@@ -506,7 +512,7 @@ export async function executeRun(
       // always recomputed by code, never trusted from the model.
       const revisedFindingsResult = normalizeFindings(
         { findings: (revision.findings as FindingOutput["findings"]) ?? [] },
-        { reviews: analysisReviews, topics: topics.topics, sourceStatus: sourceStatusOf(limitations) },
+        { reviews: analysisReviews, topics: topics.topics, sourceStatus },
       );
       for (const w of revisedFindingsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "revision", data: w });
       const revisedPlanning = normalizePlanningOutput(
@@ -593,13 +599,6 @@ export async function executeRun(
     await publisher.publish({ type: "run.failed", runId, data: { error: message } });
     await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
   }
-}
-
-function sourceStatusOf(limitations: Limitation[]): "complete" | "partial" | "suspect-empty" | "failed" {
-  if (limitations.some((l) => l.code === "RSS_SUSPECT_EMPTY")) return "suspect-empty";
-  if (limitations.some((l) => l.code === "RSS_PARTIAL" || l.code === "RSS_UNSTABLE_PAGINATION" || l.code === "IMPORT_ERROR")) return "partial";
-  if (limitations.some((l) => l.code === "RSS_FETCH_FAILED")) return "failed";
-  return "complete";
 }
 
 type ScopeFilters = { rating: number[]; versions: string[]; languages: string[]; minDate: string | null; maxDate: string | null };

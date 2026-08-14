@@ -198,10 +198,16 @@ function candidateById(candidates: Finding[]): Map<string, Finding> {
  * code then merges evidence (supporting review ids, excerpts, topics, focus
  * areas) deterministically, recomputes counts/confidence/sufficiency, and
  * refuses to reuse a candidate in more than one final finding.
+ *
+ * `sourceStatus` is the authoritative collection status from the source stage
+ * and is required: merging can change the support count, so confidence and
+ * sufficiency must be re-derived here against the real source status rather
+ * than assuming a complete corpus.
  */
 export function consolidateFindings(
   candidates: Finding[],
   groups: { id: string; title: string; summary: string; candidateIds: string[]; focusAreaIds?: string[] }[],
+  sourceStatus: SourceStatus,
 ): { findings: Finding[]; warnings: { code: string; message: string }[]; usedCandidateIds: Set<string>; droppedCandidateIds: string[] } {
   const warnings: { code: string; message: string }[] = [];
   const index = candidateById(candidates);
@@ -245,12 +251,12 @@ export function consolidateFindings(
     }
     const evidenceExcerpts = [...excerptByReview.entries()].map(([reviewId, excerpt]) => ({ reviewId, excerpt }));
     const hasConflict = conflictingReviewIds.length > 0;
-    const confidence = computeConfidence({ supportCount: supportingReviewIds.length, sourceStatus: "complete", hasConflict });
+    const confidence = computeConfidence({ supportCount: supportingReviewIds.length, sourceStatus, hasConflict });
     const evidenceSufficiency = assessEvidenceSufficiency({
       supportCount: supportingReviewIds.length,
       corpusCount: Math.max(...members.map((m) => m.evidenceSufficiency.corpusReviewCount)),
       conflictCount: new Set(conflictingReviewIds).size,
-      sourceStatus: "complete",
+      sourceStatus,
     });
 
     findings.push({
@@ -402,7 +408,7 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
         message: `consolidation returned ${consolidation.groups.length} groups; kept first ${MAX_FINDINGS_TOTAL} deterministically`,
       });
     }
-    const merged = consolidateFindings(consolidatedCandidates, groups);
+    const merged = consolidateFindings(consolidatedCandidates, groups, ctx.sourceStatus);
     warnings.push(...merged.warnings);
 
     // Goal-coverage backfill: if a focus area has evidence but the

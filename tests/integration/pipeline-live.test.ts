@@ -6,6 +6,7 @@ import { RunStore } from "@/server/runs/run-store";
 import { EventPublisher } from "@/server/streaming/event-publisher";
 import { executeRun, type ExecuteDeps } from "@/server/pipeline/orchestrator";
 import { ScriptedModelClient } from "@/server/model/scripted-client";
+import type { RawReview } from "@/domain/contracts/review";
 
 const PAGE1 = JSON.stringify({
   feed: {
@@ -528,5 +529,150 @@ describe("executeRun (live pipeline)", () => {
     };
     expect(finalReport.prd).toBeNull();
     expect(finalReport.report).toBeNull();
+  });
+
+  it("downgrades requirements to P2/null when the source is partial despite sufficient support", async () => {
+    // 100-review corpus, finding supported by 3 reviews with exact excerpts:
+    // the absolute floor (3), ratio (3%), and conflict bar are all met. On a
+    // complete source this requirement would survive at P1 with a version;
+    // a SERPAPI_PARTIAL source must keep the finding insufficient via
+    // SOURCE_NOT_COMPLETE, pinning the requirement to P2/null even though the
+    // model asked for P1/ver-1.
+    // The three supporting reviews must have DIFFERENT bodies so exact-content
+    // dedupe keeps all three in the analysis corpus. They all share the exact
+    // quote substring "price is too high" so topic/finding excerpts validate.
+    const rawReviews: RawReview[] = Array.from({ length: 100 }, (_, i) => ({
+      sourceReviewId: `rev-${i + 1}`,
+      source: "apple-rss",
+      title: "",
+      body:
+        i === 0
+          ? "the price is too high for me, cannot afford"
+          : i === 1
+            ? "price is too high compared to competitors"
+            : i === 2
+              ? "I cancelled because the price is too high"
+              : `review body number ${i + 1}`,
+      rating: 1,
+      version: null,
+      updatedAt: "2026-07-01T10:00:00Z",
+    }));
+    const model = new ScriptedModelClient([
+      // scope
+      JSON.stringify({ interpretation: "Pricing focus", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
+      // topic discovery
+      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Pricing", description: "d", supportingReviewIds: ["rev-1", "rev-2", "rev-3"], quote: "price is too high" }] }),
+      // topic consolidation
+      JSON.stringify({ topics: [{ id: "topic-1", label: "Pricing", description: "d", candidateIds: ["topic-candidate-1"] }] }),
+      // findings: single finding supported by 3 reviews (single chunk, no
+      // consolidation call — the candidate list is length 1).
+      JSON.stringify({
+        findings: [
+          {
+            id: "finding-1",
+            topicIds: ["topic-1"],
+            title: "Too expensive",
+            summary: "Users cannot afford the price",
+            supportingReviewIds: ["rev-1", "rev-2", "rev-3"],
+            evidenceExcerpts: [
+              { reviewId: "rev-1", excerpt: "price is too high" },
+              { reviewId: "rev-2", excerpt: "price is too high" },
+              { reviewId: "rev-3", excerpt: "price is too high" },
+            ],
+            conflictingReviewIds: [],
+            uncertainties: [],
+            limitations: [],
+          },
+        ],
+      }),
+      // planning: model requests P1 in a version
+      JSON.stringify({
+        title: "Release plan",
+        overview: "Improve pricing",
+        versions: [{ id: "ver-1", name: "1.0.0", summary: "Pricing", rationale: "r", requirementIds: ["req-1"] }],
+        requirements: [
+          {
+            id: "req-1",
+            findingIds: ["finding-1"],
+            title: "Lower the price",
+            description: "make it affordable",
+            priority: "P1",
+            acceptanceCriteria: ["cheaper"],
+            versionId: "ver-1",
+            planningFactors: {
+              severity: "high",
+              userImpact: "high",
+              implementationScope: "medium",
+              dependencyRequirementIds: [],
+              rationale: "r",
+            },
+          },
+        ],
+        assumptions: [],
+      }),
+      // tests
+      JSON.stringify({
+        tests: [
+          { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["rev-1", "rev-2", "rev-3"], testType: "manual", precondition: "p", steps: ["s"], expectedResult: "e" },
+        ],
+      }),
+    ]);
+    const deps: ExecuteDeps = {
+      model,
+      source: {
+        kind: "preview",
+        data: {
+          previewId: "preview-partial",
+          appId: "839285684",
+          canonicalUrl: "https://apps.apple.com/us/app/workout/id839285684",
+          selection: "live",
+          reviews: rawReviews,
+          rawRefs: rawReviews.map((r) => `sources/apple/page-01.json#${r.sourceReviewId}`),
+          limitations: [
+            { code: "SERPAPI_PARTIAL", message: "SerpApi pagination ended early", stage: "source" },
+          ],
+          sourceSummary: {
+            kind: "app-store-reviews",
+            provider: "serpapi",
+            appId: "839285684",
+            storefront: "US",
+            status: "partial",
+            selection: "live",
+            liveCount: 100,
+            stableCount: 0,
+            reviewCount: 100,
+            collectedAt: "2026-08-12T00:00:00.000Z",
+            forcedRefresh: true,
+            providerCached: false,
+            requestCount: 2,
+            searchCount: 2,
+            searchId: "search-1",
+            requestId: null,
+            creditsUsed: null,
+          },
+        },
+      },
+    };
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    expect(manifest.limitations.some((l) => l.code === "SERPAPI_PARTIAL")).toBe(true);
+    const prd = (await store.readArtifact(runId, "prd", 1)) as {
+      requirements: { priority: string; versionId: string | null }[];
+      findings: { evidenceSufficiency: { status: string; reasons: string[] } }[];
+    };
+    void manifest;
+    // The finding is supported enough to be medium/high on a complete source,
+    // so the ONLY reason it stays insufficient is the partial source.
+    expect(prd.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(prd.findings[0].evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
+    expect(prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
+    // The version that only claimed the downgraded requirement is dropped.
+    const versionPlan = (await store.readArtifact(runId, "version-plan", 1)) as { versions: { requirementIds: string[] }[] };
+    expect(versionPlan.versions).toHaveLength(0);
   });
 });
