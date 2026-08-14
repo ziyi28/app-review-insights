@@ -79,7 +79,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ runId: s
     }
   }
 
-  // 所有 root 都没有 manifest：允许运行早期没有 manifest 的 attempt-01 artifact。
+  // 所有 root 都没有 manifest：只允许读取早期没有 manifest 的 attempt-01
+  // artifact。更高 attempt 无 manifest 索引，无法判定其归属，必须 404。
+  if (requestedAttempt !== null && requestedAttempt !== 1) {
+    return notFound("artifact attempt not found");
+  }
   try {
     const value = await new RunStore(cfg.runsDir).readArtifact(runId, artifactName, requestedAttempt ?? 1);
     return NextResponse.json(value, {

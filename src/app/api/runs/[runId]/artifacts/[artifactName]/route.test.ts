@@ -226,16 +226,44 @@ describe("GET artifact (bundled fixture viewing)", () => {
   it("still serves an early-run artifact before the manifest is written", async () => {
     // No manifest yet: the run was accepted and the first artifact landed, but
     // the manifest write raced or the process died before finalize. The
-    // attempt-01 artifact must still be readable.
+    // attempt-01 artifact must still be readable, both by default and when
+    // attempt 1 is requested explicitly.
     await store.writeArtifact(runId, "scope", 1, { interpretation: "early" });
 
+    const get = (suffix = "") =>
+      GET(
+        new Request(`http://localhost/api/runs/${runId}/artifacts/scope${suffix}`),
+        { params: Promise.resolve({ runId, artifactName: "scope" }) },
+      );
+
+    expect((await get()).status).toBe(200);
+    expect((await get("?attempt=1")).status).toBe(200);
+    expect(await (await get("?attempt=1")).json()).toEqual({ interpretation: "early" });
+  });
+
+  it("rejects attempts after 1 when no manifest exists in any root", async () => {
+    // No manifest in any root: only an early attempt-01 may be served. A later
+    // attempt must be a 404 even if the file itself exists.
+    await store.writeArtifact(runId, "scope", 2, {
+      interpretation: "orphan later attempt",
+    });
+
     const res = await GET(
-      new Request(`http://localhost/api/runs/${runId}/artifacts/scope`),
-      { params: Promise.resolve({ runId, artifactName: "scope" }) },
+      new Request(
+        `http://localhost/api/runs/${runId}/artifacts/scope?attempt=2`,
+      ),
+      {
+        params: Promise.resolve({
+          runId,
+          artifactName: "scope",
+        }),
+      },
     );
 
-    expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ interpretation: "early" });
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({
+      error: "artifact attempt not found",
+    });
   });
 
   it("ignores an orphan runtime artifact without a manifest and serves the fixture owner", async () => {
