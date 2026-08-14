@@ -7,26 +7,38 @@ import { waitForRunComplete } from "./wizard";
 // run is needed, only the demo fixture shipped under fixtures/demo-runs.
 test("cached replay of the bundled fixture never calls upstream", async ({ page }) => {
   await page.goto("/");
-  await page.getByRole("radio", { name: /缓存回放/ }).click();
-  await page
-    .getByRole("combobox", { name: /缓存回放/ })
-    .selectOption("run-workout-for-women-us");
+  await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+
   // Zero both counters before replay: the replay that follows must not touch
-  // Apple RSS or the model endpoint.
+  // Apple RSS, SerpApi, or the model endpoint.
   resetCounters();
 
-  await page.getByRole("button", { name: /下一步/ }).click();
-  await page.getByRole("button", { name: /^开始分析$/ }).click();
+  // Open the history panel and replay the bundled demo fixture. Its goal text is
+  // unique to the fixture, so we assert on it to confirm the demo is listed.
+  await page.getByRole("button", { name: /历史/ }).click();
+  await expect(page.getByRole("dialog", { name: /历史/ })).toBeVisible();
+  await expect(page.getByText(/识别最新版本引入的回归问题/).first()).toBeVisible();
+
+  // The demo run is replayable; click its Replay action.
+  const replayPromise = page.waitForResponse((r) => r.url().includes("/api/runs") && r.request().method() === "POST");
+  await page.getByRole("button", { name: /回放/ }).first().click();
+  expect((await replayPromise).status()).toBe(200);
+
   await waitForRunComplete(page);
-  await expect(page.getByText(/缓存回放/i).first()).toBeVisible();
 
   // Replay must not have hit SerpApi, Apple RSS, or the model endpoint again.
   expect(getUpstreamState()).toEqual({ serpApiRequests: 0, rssRequests: 0, modelRequests: 0 });
 
-  // Final Deliverables tab shows counts and the legacy fallback: the bundled
-  // fixture predates the P1 planning factors, so Version Plan reports it.
-  await page.getByRole("tab", { name: /最终交付物/ }).click();
-  await expect(page.getByText(/追溯/i).first()).toBeVisible({ timeout: 10_000 });
-  await page.getByRole("tab", { name: /版本计划/ }).click();
-  await expect(page.getByText(/该缓存运行中不可用/i).first()).toBeVisible({ timeout: 10_000 });
+  // The provenance badge labels the run as a cached replay.
+  await expect(page.getByText(/缓存回放/i).first()).toBeVisible();
+
+  // Findings and traceability are grounded artifacts, not a fabricated mock.
+  await page.getByRole("tab", { name: /发现/ }).click();
+  await expect(page.getByText(/回归/i).first()).toBeVisible({ timeout: 10_000 });
+
+  await page.getByRole("tab", { name: /追溯/ }).click();
+  // Traceability panel renders "已完成 — N 错误"; scope the assertion to the
+  // traceability tabpanel so the stage rail's sr-only "已完成" labels don't
+  // trip strict mode.
+  await expect(page.locator("#panel-traceability").getByText(/0 错误/)).toBeVisible({ timeout: 10_000 });
 });

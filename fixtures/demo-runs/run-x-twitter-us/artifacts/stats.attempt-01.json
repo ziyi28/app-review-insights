@@ -1,0 +1,30 @@
+{
+  "rawCount": 500,
+  "includedCount": 500,
+  "excludedCount": 0,
+  "duplicateCount": 0,
+  "identityConflictCount": 0,
+  "normalizedChangedCount": 458,
+  "ratingDistribution": {
+    "1": 213,
+    "2": 20,
+    "3": 25,
+    "4": 13,
+    "5": 229
+  },
+  "versionDistribution": {
+    "12.16": 119,
+    "12.15": 275,
+    "12.14": 106
+  },
+  "languageDistribution": {
+    "other": 115,
+    "und": 13,
+    "en": 365,
+    "zh": 7
+  },
+  "dateRange": {
+    "earliest": "2026-08-04T15:38:18.000Z",
+    "latest": "2026-08-12T17:17:19.000Z"
+  }
+}

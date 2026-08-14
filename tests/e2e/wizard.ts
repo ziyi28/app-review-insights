@@ -19,7 +19,10 @@ export async function startLiveRun(page: Page, goal: string, selection: "fresh" 
 /** Open the run-log tab and wait for the run to complete. */
 export async function waitForRunComplete(page: Page, timeout = 30_000) {
   await page.getByRole("tab", { name: /运行日志/ }).click();
-  await page.getByText(/run.completed/).first().waitFor({ state: "visible", timeout });
+  // The run-log panel also renders an event-type filter whose <option>s include
+  // "run.completed"; match the visible table cell (<code>) instead of the hidden
+  // option so the wait resolves on the actual event row.
+  await page.locator("tbody code", { hasText: "run.completed" }).first().waitFor({ state: "visible", timeout });
 }
 
 /** Switch the UI to English (for scenarios asserting English copy). */

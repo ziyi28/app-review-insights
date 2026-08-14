@@ -1,0 +1,62 @@
+{
+  "validFindingCount": 5,
+  "rejectedFindingCount": 0,
+  "sufficientCount": 4,
+  "insufficientCount": 1,
+  "findings": [
+    {
+      "findingId": "finding-1",
+      "supportCount": 27,
+      "corpusCount": 233,
+      "supportRatio": 0.11587982832618025,
+      "conflictCount": 0,
+      "confidence": "high",
+      "sufficiency": "sufficient",
+      "reasons": []
+    },
+    {
+      "findingId": "finding-2",
+      "supportCount": 20,
+      "corpusCount": 233,
+      "supportRatio": 0.08583690987124463,
+      "conflictCount": 0,
+      "confidence": "high",
+      "sufficiency": "sufficient",
+      "reasons": []
+    },
+    {
+      "findingId": "finding-3",
+      "supportCount": 15,
+      "corpusCount": 233,
+      "supportRatio": 0.06437768240343347,
+      "conflictCount": 0,
+      "confidence": "high",
+      "sufficiency": "sufficient",
+      "reasons": []
+    },
+    {
+      "findingId": "finding-4",
+      "supportCount": 19,
+      "corpusCount": 233,
+      "supportRatio": 0.0815450643776824,
+      "conflictCount": 0,
+      "confidence": "high",
+      "sufficiency": "sufficient",
+      "reasons": []
+    },
+    {
+      "findingId": "finding-5",
+      "supportCount": 1,
+      "corpusCount": 233,
+      "supportRatio": 0.004291845493562232,
+      "conflictCount": 0,
+      "confidence": "low",
+      "sufficiency": "insufficient",
+      "reasons": [
+        "SUPPORT_BELOW_MINIMUM",
+        "SUPPORT_RATIO_BELOW_MINIMUM"
+      ]
+    }
+  ],
+  "rejected": []
+}

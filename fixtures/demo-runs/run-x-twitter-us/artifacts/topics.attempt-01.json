@@ -1,0 +1,271 @@
+{
+  "topics": [
+    {
+      "id": "topic-1",
+      "label": "垃圾机器人、虚假账号与诈骗/骚扰账号泛滥",
+      "description": "平台存在大量机器人、虚假账号、骗子账号和假冒身份，通过私信、关注和评论进行骚扰和诈骗；AI机器人和垃圾/政治广告泛滥，举报无效，真实互动被淹没。",
+      "candidateIds": [
+        "topic-candidate-3@c0",
+        "topic-candidate-3@c1",
+        "topic-candidate-3@c2",
+        "topic-candidate-3@c3",
+        "topic-candidate-3@c4",
+        "topic-candidate-5@c4"
+      ],
+      "reviewIds": [
+        "9967c9c6b724e5b8f101",
+        "d1acd46c72b340d99cc8",
+        "0bc98e613ff518920ba4",
+        "2d0bfdaffe85ca8d0abe",
+        "bee7c70a9d15b0768e5e",
+        "94524f8831d5b195494f",
+        "08bd931a4e9eae138727",
+        "0a460bd4781c764cf5a7",
+        "3f3aac09a81a25ad96ed",
+        "7f8726384e9d02b8afe1",
+        "4ecb043db74be454e15d",
+        "797933af247af55265a5",
+        "58cb89038c5d95bddd35",
+        "2d9454ce738c332a9df2",
+        "3ddfe92752c385eac585",
+        "83f5c44b25058cb05ddf"
+      ],
+      "focusAreaIds": [
+        "focus-3",
+        "focus-5",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-2",
+      "label": "内容审核与举报机制失效",
+      "description": "举报按钮或举报流程无法正常工作，同时自残、色情、暴力、儿童剥削、种族主义等有害内容得不到有效处理，审核机制崩溃。",
+      "candidateIds": [
+        "topic-candidate-6@c0"
+      ],
+      "reviewIds": [
+        "087861f6c78d5f58aae4",
+        "13497782d29654cdc8bb",
+        "5d26ce76109abe273f0b",
+        "eb6d11d72a61f84afcd9",
+        "d840b3524ddde373f7b4",
+        "0d2fb66f7a2baeb2498b",
+        "bba97357c3fb434085f5"
+      ],
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-3",
+      "label": "账号被误判/封禁/限制且申诉无门",
+      "description": "大量用户反映账号被自动系统或AI误判为‘非真实行为’、机器人或违规，导致临时标记、限流、封禁或锁定；用户申诉后只收到自动化回复或秒拒，缺乏人工客服和有效纠正流程；部分付费用户也遇到相同问题。",
+      "candidateIds": [
+        "topic-candidate-1@c3",
+        "topic-candidate-5@c0",
+        "topic-candidate-5@c1",
+        "topic-candidate-5@c2",
+        "topic-candidate-5@c3",
+        "topic-candidate-6@c3",
+        "topic-candidate-6@c4"
+      ],
+      "reviewIds": [
+        "35eb895d170e72db7c3f",
+        "9deaa8767e951c3815a9",
+        "5b4dbeab037cbbf05cd1",
+        "4b179258c68325d39439",
+        "dac93fd351efa43aa9e5",
+        "6968500a7d802fa8b0dd",
+        "e9ff07f9c3099106c6d0",
+        "21078cd5f72c93dcfe70",
+        "ad09ee0c82427a4d4ff8",
+        "0c38d3bbc8650e87cfc0",
+        "ad22f0958cb90d14bc0b",
+        "d3628c95042284cffb28",
+        "d93e284cdad50e7bba01",
+        "3abfe40f83b27b93d00f",
+        "2c6502f872d30345aefe",
+        "11a5c3b5bca434420cbc",
+        "2e9a0c1b53bf745ed15e",
+        "5201893c76b46852f669",
+        "1a6f66f1d74dc590634f",
+        "7a94033ac9009aa1e066",
+        "c57f2c368b6726c519e5",
+        "e8431ff7989cb9465ae9",
+        "6c86fdd1c1207af552aa",
+        "b562144a8438ede882e5",
+        "471534206422e17b689b",
+        "ae3c3e4c2f54e21b6395",
+        "31989df8af018c9fc9f7",
+        "5ae4adca2a0f08e04b73",
+        "ee88cad39c6744bb46e5",
+        "da444211d93fb2ee4969",
+        "b84612f86fa05395dc27",
+        "aeea54630897fba0f355",
+        "44215ba921871ab18426",
+        "d5fbfcabd5412c9239ad",
+        "f4e788e956c8b5d68a4c"
+      ],
+      "focusAreaIds": [
+        "focus-4",
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-4",
+      "label": "X Premium付费体验不佳：限流、客服无效与权益未兑现",
+      "description": "购买X Premium或Premium+后仍遭遇影子禁言、限流、隐藏评论，客服仅提供模板回复；Grok等付费功能不可靠，提额不值；付费用户认为付费没有带来对等服务，账号仍可能被无故暂停。",
+      "candidateIds": [
+        "topic-candidate-2@c5",
+        "topic-candidate-4@c0",
+        "topic-candidate-4@c1",
+        "topic-candidate-4@c2"
+      ],
+      "reviewIds": [
+        "4a2debe531e3a0800e6d",
+        "d1acd46c72b340d99cc8",
+        "ff374fafd3a3a08b1d63",
+        "060188969730e2225952",
+        "ad22f0958cb90d14bc0b",
+        "9748af67b822016e0d4a",
+        "4585dd25ef43e3be5d6d",
+        "7f8726384e9d02b8afe1",
+        "797933af247af55265a5",
+        "3d4f4d0d519b3cb62272",
+        "db909039be4b7e41c2c7",
+        "c430942dd607d0bd2b3f"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-5",
+      "label": "时间线算法推荐质量差：推送无关/政治内容、压制原创/小众内容",
+      "description": "用户投诉算法将大量无关内容、广告、旧帖和右翼宣传/政治操控内容推上信息流顶部，且偏向大号和付费账号，导致正常内容被淹没，小账号难获曝光；算法不透明，甚至压制或隐藏部分内容。",
+      "candidateIds": [
+        "topic-candidate-1@c4",
+        "topic-candidate-2@c1",
+        "topic-candidate-2@c2",
+        "topic-candidate-2@c3",
+        "topic-candidate-4@c4"
+      ],
+      "reviewIds": [
+        "70f909729a7e468d5626",
+        "060188969730e2225952",
+        "4585dd25ef43e3be5d6d",
+        "1bcd2e5bac7de57f7233",
+        "7f8726384e9d02b8afe1",
+        "797933af247af55265a5",
+        "5ac2822d1e3ff900b245",
+        "29a852c2054a68f546af",
+        "da53165b290c8253c59d",
+        "4138640f8e91bccaba13",
+        "9bea59684a37c5ba4361",
+        "5de4264701ea7e2c88a6",
+        "1a70d4b0a7f84fa058d2",
+        "8bc837306e6f1bcaca8d",
+        "285b5cdb7a0fa1328fe7",
+        "7812c4b3b453dc60f772",
+        "b2ae6b67c3d81c2ae3ee",
+        "35c199d588e66936a855",
+        "6ad5a5cb80562e87be20",
+        "b680022465b8bd4adbaa",
+        "46f6febe4e287d198214"
+      ],
+      "focusAreaIds": [
+        "focus-6",
+        "focus-2",
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-6",
+      "label": "时间线自动刷新导致正在阅读的内容丢失",
+      "description": "打开应用或阅读时信息流自动更新，用户正在看的推文被顶掉且无法找回，影响阅读体验。",
+      "candidateIds": [
+        "topic-candidate-1@c0"
+      ],
+      "reviewIds": [
+        "c5e4dd6a49553397b882",
+        "dabc7ca85c6be245ea65",
+        "397b9e8e139c307922dd"
+      ],
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-7",
+      "label": "近期版本回归：登录/账号异常、视频无法播放、界面与功能故障",
+      "description": "用户集中反馈最新版本出现多个回归：账号切换卡死、被强制登出或锁定；视频/GIF显示‘内容不可用’或无法加载；无法回复/评论；点击通知导致其他通知消失；报告页卡在标志处，整体性能下降。",
+      "candidateIds": [
+        "topic-candidate-1@c1",
+        "topic-candidate-1@c2",
+        "topic-candidate-2@c0",
+        "topic-candidate-2@c4",
+        "topic-candidate-3@c5",
+        "topic-candidate-4@c3",
+        "topic-candidate-6@c1",
+        "topic-candidate-6@c2"
+      ],
+      "reviewIds": [
+        "dabc7ca85c6be245ea65",
+        "85af3264a023757e933e",
+        "4bcaf2e9d2315cf29425",
+        "e65585cfcd381a145856",
+        "ce55aaf7bdadf6e2ed70",
+        "11e77387e4336da39237",
+        "d52e5ce2502c1fb3db3d",
+        "2f62dc8aa63697e7ddf6",
+        "fe996470ac7cc136390f",
+        "1bcd2e5bac7de57f7233",
+        "b8ace3ccf5b408696c11",
+        "c238acb8869b86898031",
+        "1d9c03fa7c1752ec039c",
+        "667138f3e69c5bd452e7",
+        "5ae4adca2a0f08e04b73",
+        "0aab79fc5aa69d2f67a9",
+        "6d605a081ebe72d7fdcd",
+        "105842b234ac9ce7b4ea",
+        "365c33ad8f340a5946d7",
+        "3902d86035600c4c4156",
+        "5e2dd3899347c079a2cc",
+        "3d4f4d0d519b3cb62272"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-2",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-8",
+      "label": "言论自由承诺与审查/影子封禁的矛盾",
+      "description": "用户指出X宣传言论自由，但实际上特定观点会被影子封禁、限流或由自动化系统停用账号，审核尺度有政治偏见，并非真正的自由广场。",
+      "candidateIds": [
+        "topic-candidate-1@c5"
+      ],
+      "reviewIds": [
+        "05d5408e5be132f875bd",
+        "8705e89d353623b04cfd",
+        "975e8a5c7dda6b9c31b0",
+        "d0e59478c8b751e1fb1a",
+        "2afc91dd147c2508799c",
+        "24ac8cd6c953c4425527",
+        "d883b185fdea6916711c",
+        "6acd02e50e0dfd677461",
+        "474067a9b46c5e32c82d"
+      ],
+      "focusAreaIds": [
+        "focus-1"
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "code": "TOPIC_CANDIDATES_TRUNCATED",
+      "message": "kept 36 of 40 discovered candidates (goal-aware selection); 4 excess dropped deterministically"
+    }
+  ]
+}

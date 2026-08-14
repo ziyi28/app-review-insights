@@ -1,0 +1,81 @@
+{
+  "valid": true,
+  "retried": false,
+  "items": [
+    {
+      "focusAreaId": "focus-1",
+      "label": "12.16版本回归问题",
+      "status": "covered",
+      "findingIds": [
+        "finding-1"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-2",
+        "req-3"
+      ]
+    },
+    {
+      "focusAreaId": "focus-2",
+      "label": "时间线算法投诉",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-3"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-2",
+        "req-3",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-3",
+      "label": "垃圾机器人泛滥投诉",
+      "status": "covered",
+      "findingIds": [
+        "finding-2",
+        "finding-3"
+      ],
+      "requirementIds": [
+        "req-4",
+        "req-5",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-4",
+      "label": "通知投递问题",
+      "status": "unsupported",
+      "findingIds": [],
+      "requirementIds": []
+    },
+    {
+      "focusAreaId": "focus-5",
+      "label": "私信投递问题",
+      "status": "covered",
+      "findingIds": [
+        "finding-2"
+      ],
+      "requirementIds": [
+        "req-4",
+        "req-5"
+      ]
+    },
+    {
+      "focusAreaId": "focus-6",
+      "label": "1-2星评论中的X Premium付费订阅体验",
+      "status": "covered",
+      "findingIds": [
+        "finding-3",
+        "finding-4"
+      ],
+      "requirementIds": [
+        "req-6",
+        "req-7",
+        "req-8"
+      ]
+    }
+  ]
+}

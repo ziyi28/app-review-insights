@@ -154,7 +154,7 @@ replays may still show legacy source provenance.
 
 For the bundled demo fixture the analysis used a DeepSeek-compatible endpoint
 (`deepseek-v4-flash`); that configuration is documented in
-`fixtures/demo-runs/run-workout-for-women-us/provenance.json` and is **not**
+`fixtures/demo-runs/run-x-twitter-us/provenance.json` and is **not**
 required to replay it.
 
 See `docs/model-analysis.md` for per-stage rules-vs-model rationale, prompt
@@ -229,13 +229,13 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
   model; the UI's **Cached Replay** mode lists replayable runs and re-materializes
   all artifacts under a fresh run id, labeled **Cached Replay**, and it never
   calls Apple or the model.
-- `fixtures/demo-runs/run-workout-for-women-us/` is a **real** capture from the
-  US App Store (App ID 839285684, "Workout for Women: Home Gym") analyzed by a
-  real model, privacy-minimized, with full provenance:
+- `fixtures/demo-runs/run-x-twitter-us/` is a **real** capture from the
+  US App Store (App ID 333903271, "X") analyzed by a real model,
+  privacy-minimized, with full provenance:
   - review id / rating / title / body / version / timestamp retained;
   - reviewer nickname, author URI, and sensitive headers removed;
   - `provenance.json` records capture time, source URL pattern, storefront,
-    snapshot SHA-256, model, temperature, and prompt versions.
+    model, temperature, and prompt versions.
 - Real snapshots are marked as such. The app never pretends a mock, a rule
   fallback, or a static text is a live model result.
 

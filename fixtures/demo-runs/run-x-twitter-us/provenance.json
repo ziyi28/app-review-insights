@@ -1,0 +1,28 @@
+{
+  "provenance": {
+    "schemaVersion": "1",
+    "reviewData": "apple-rss-real",
+    "storefront": "us",
+    "appId": "333903271",
+    "capturedAt": "2026-08-14T01:56:45.418Z",
+    "captureMethod": "Apple Customer Reviews RSS (sequential, max 10 pages, >=500ms delay)",
+    "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained"
+  },
+  "analysis": {
+    "executionMode": "live",
+    "outputLocale": "zh-CN",
+    "goal": "识别最新版本引入的回归问题。\n\n分析时间线算法和垃圾机器人泛滥的投诉。\n\n调查通知和私信投递方面的问题。\n\n聚焦 1-2 星评论中关于付费订阅(X Premium)体验的问题。",
+    "modelProvider": "OpenAI-compatible endpoint",
+    "modelName": "deepseek-v4-flash",
+    "temperature": 0.1,
+    "promptVersions": [
+      "scope@2",
+      "topics.discovery@3",
+      "topics.consolidation@3",
+      "findings@3",
+      "findings.consolidation@1",
+      "planning@3",
+      "tests@1"
+    ]
+  }
+}

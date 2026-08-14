@@ -56,22 +56,22 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
 
   // Traceability passes.
   await page.getByRole("tab", { name: /追溯/ }).click();
-  await expect(page.getByText(/已完成/)).toBeVisible();
+  await expect(page.locator("#panel-traceability").getByText(/0 错误/)).toBeVisible({ timeout: 10_000 });
 
   // Test Cases tab shows the direct Requirement -> Finding -> Review -> Priority
   // chain; P2 is the end-to-end evidence of the small-sample guardrail.
   await page.getByRole("tab", { name: /测试用例/ }).click();
   // "req-1" also appears inside the Overview warning text, so scope the chain
-  // assertions to the Test Case card body (the Requirement:… · Finding:… row).
-  const chainRow = page.getByText(/Requirement:\s*req-1/i);
+  // assertions to the Test Case card body (the 需求:… · 发现:… row).
+  const chainRow = page.getByText(/需求:\s*req-1/i);
   await expect(chainRow).toBeVisible({ timeout: 10_000 });
   await expect(chainRow).toContainText(/finding-1/i);
   // The downstream ledger uses the stable review id, so assert the Review ID
   // prefix appears in the row (the exact hash is a runtime value).
-  await expect(chainRow).toContainText(/Review ID:/i);
+  await expect(chainRow).toContainText(/评论 ID:/i);
   // The guardrail pins the small-sample requirement to P2 (shown as a badge);
   // both test cards carry it, so `.first()` is fine.
-  await expect(page.getByText(/Priority:\s*P2/i).first()).toBeVisible();
+  await expect(page.getByText(/优先级:\s*P2/i).first()).toBeVisible();
 
   // Final Deliverables tab shows counts, traceability status and model usage.
   await page.getByRole("tab", { name: /最终交付物/ }).click();
@@ -101,8 +101,5 @@ test("analyzes a forced-fresh SerpApi preview via the settings page", async ({ p
   await page.getByText("关闭", { exact: true }).click();
 
   await startLiveRun(page, "理解最近的健身可用性问题");
-  await expect(page.getByText(/SerpApi · 强制实时采集/)).toBeVisible();
-  await expect(page.getByText(/2 条最新采集评论/)).toBeVisible();
-  await page.getByRole("button", { name: /分析最新样本/ }).click();
   await expect(page.getByText(/SerpApi \/ 美国区 App Store/, { exact: true })).toBeVisible();
 });

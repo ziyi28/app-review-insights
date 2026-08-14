@@ -214,6 +214,19 @@ function scriptedModelResponse(body: { messages?: { role: string; content: strin
       assumptions: [],
     });
   }
+  if (last.includes("groups")) {
+    // findings consolidation: the user prompt carries the candidate findings
+    // (which contain evidenceExcerpts) AND the instruction asks for "groups",
+    // so this must be matched before the evidenceExcerpts branch below.
+    // One group per candidate keeps finding-1/finding-2 stable for the
+    // downstream planning/tests/traceability stubs.
+    return JSON.stringify({
+      groups: [
+        { id: "finding-1", title: "Loves variety", summary: "Users praise workout variety", candidateIds: ["finding-1"], focusAreaIds: [] },
+        { id: "finding-2", title: "Too expensive", summary: "Users find it costly", candidateIds: ["finding-2"], focusAreaIds: [] },
+      ],
+    });
+  }
   if (last.includes("evidenceExcerpts")) {
     return JSON.stringify({
       findings: [

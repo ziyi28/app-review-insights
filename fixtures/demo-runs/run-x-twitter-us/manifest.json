@@ -1,0 +1,215 @@
+{
+  "runId": "run-x-twitter-us",
+  "status": "completed",
+  "executionMode": "live",
+  "goal": "识别最新版本引入的回归问题。\n\n分析时间线算法和垃圾机器人泛滥的投诉。\n\n调查通知和私信投递方面的问题。\n\n聚焦 1-2 星评论中关于付费订阅(X Premium)体验的问题。",
+  "appName": "X",
+  "appUrl": "https://apps.apple.com/us/app/id333903271",
+  "createdAt": "2026-08-14T01:56:37.734Z",
+  "updatedAt": "2026-08-14T02:12:47.957Z",
+  "stages": {
+    "source": {
+      "status": "completed",
+      "startedAt": "2026-08-14T01:56:37.737Z",
+      "finishedAt": "2026-08-14T01:56:45.418Z"
+    },
+    "prepare": {
+      "status": "completed",
+      "startedAt": "2026-08-14T01:56:45.419Z",
+      "finishedAt": "2026-08-14T01:56:45.580Z"
+    },
+    "scope": {
+      "status": "completed",
+      "startedAt": "2026-08-14T01:56:45.581Z",
+      "finishedAt": "2026-08-14T01:57:09.246Z"
+    },
+    "topics": {
+      "status": "completed",
+      "startedAt": "2026-08-14T01:57:09.248Z",
+      "finishedAt": "2026-08-14T02:04:38.615Z"
+    },
+    "findings": {
+      "status": "completed",
+      "startedAt": "2026-08-14T02:04:38.616Z",
+      "finishedAt": "2026-08-14T02:10:59.369Z"
+    },
+    "evidence-validation": {
+      "status": "completed",
+      "startedAt": "2026-08-14T02:10:59.372Z",
+      "finishedAt": "2026-08-14T02:10:59.379Z"
+    },
+    "planning": {
+      "status": "completed",
+      "startedAt": "2026-08-14T02:10:59.383Z",
+      "finishedAt": "2026-08-14T02:12:11.830Z"
+    },
+    "tests": {
+      "status": "completed",
+      "startedAt": "2026-08-14T02:12:11.831Z",
+      "finishedAt": "2026-08-14T02:12:47.943Z"
+    },
+    "traceability": {
+      "status": "completed",
+      "startedAt": "2026-08-14T02:12:47.944Z",
+      "finishedAt": "2026-08-14T02:12:47.950Z"
+    }
+  },
+  "artifacts": {
+    "raw-reviews": {
+      "attempt": 1,
+      "file": "artifacts/raw-reviews.attempt-01.json"
+    },
+    "source-evidence": {
+      "attempt": 1,
+      "file": "artifacts/source-evidence.attempt-01.json"
+    },
+    "cleaned-reviews": {
+      "attempt": 1,
+      "file": "artifacts/cleaned-reviews.attempt-01.json"
+    },
+    "stats": {
+      "attempt": 1,
+      "file": "artifacts/stats.attempt-01.json"
+    },
+    "scope": {
+      "attempt": 1,
+      "file": "artifacts/scope.attempt-01.json"
+    },
+    "topic-candidates": {
+      "attempt": 1,
+      "file": "artifacts/topic-candidates.attempt-01.json"
+    },
+    "topics": {
+      "attempt": 1,
+      "file": "artifacts/topics.attempt-01.json"
+    },
+    "findings": {
+      "attempt": 1,
+      "file": "artifacts/findings.attempt-01.json"
+    },
+    "evidence-validation": {
+      "attempt": 1,
+      "file": "artifacts/evidence-validation.attempt-01.json"
+    },
+    "version-plan": {
+      "attempt": 1,
+      "file": "artifacts/version-plan.attempt-01.json"
+    },
+    "prd": {
+      "attempt": 1,
+      "file": "artifacts/prd.attempt-01.json"
+    },
+    "goal-coverage": {
+      "attempt": 1,
+      "file": "artifacts/goal-coverage.attempt-01.json"
+    },
+    "tests": {
+      "attempt": 1,
+      "file": "artifacts/tests.attempt-01.json"
+    },
+    "traceability": {
+      "attempt": 1,
+      "file": "artifacts/traceability.attempt-01.json"
+    },
+    "final-report": {
+      "attempt": 1,
+      "file": "artifacts/final-report.attempt-01.json"
+    }
+  },
+  "limitations": [
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "仅提供聚合统计，无评论文本，无法直接确认时间线算法、垃圾机器人、通知/私信投递及X Premium相关的具体投诉内容。"
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "不支持按应用内主题（如时间线、垃圾机器人、通知、私信、X Premium）进行筛选，只能作为分析维度手动解读。"
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "回归判断需要依赖评论文本，当前统计数据只能显示版本间的数量或比例差异，无法确认功能是否真正回归。"
+    },
+    {
+      "code": "INSUFFICIENT_EVIDENCE",
+      "message": "1 of 5 findings have insufficient evidence for broad or critical claims"
+    },
+    {
+      "code": "GOAL_AREA_UNSUPPORTED",
+      "message": "Goal dimension \"通知投递问题\" has no findings with sufficient evidence"
+    }
+  ],
+  "canReplay": true,
+  "modelUsage": {
+    "model": "deepseek-v4-flash",
+    "provider": "OpenAI-compatible endpoint",
+    "temperature": 0.1,
+    "calls": 19,
+    "attempts": 19,
+    "retries": 0,
+    "retryReasons": [],
+    "promptVersions": [
+      "scope@2",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.consolidation@3",
+      "findings@3",
+      "findings@3",
+      "findings@3",
+      "findings@3",
+      "findings@3",
+      "findings@3",
+      "findings@3",
+      "findings.consolidation@1",
+      "planning@3",
+      "tests@1"
+    ],
+    "totalTokens": 316428,
+    "durationsMs": [
+      23641,
+      77437,
+      124473,
+      143490,
+      106578,
+      157068,
+      125784,
+      45593,
+      172702,
+      68952,
+      94427,
+      129943,
+      77110,
+      123131,
+      77075,
+      73470,
+      135731,
+      72427,
+      36104
+    ]
+  },
+  "promptVersions": [
+    "scope@2",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.consolidation@3",
+    "findings@3",
+    "findings@3",
+    "findings@3",
+    "findings@3",
+    "findings@3",
+    "findings@3",
+    "findings@3",
+    "findings.consolidation@1",
+    "planning@3",
+    "tests@1"
+  ]
+}

@@ -1,0 +1,525 @@
+{
+  "candidates": [
+    {
+      "id": "topic-candidate-2@c0",
+      "label": "近期版本回归：账号切换卡死与性能下降",
+      "description": "用户反映切换账号时应用会卡死，且最近一周前还没有出现该问题，同时整体性能变慢，疑似与最新版本回归有关。",
+      "supportingReviewIds": [
+        "dabc7ca85c6be245ea65",
+        "85af3264a023757e933e"
+      ],
+      "quote": "switching between accounts causes the app to lock up maybe 50% of the time. no obvious reason why. it wasn’t doing this a week ago.",
+      "focusAreaIds": [
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c0",
+      "label": "时间线自动刷新导致内容丢失",
+      "description": "用户打开或阅读时信息流自动刷新，导致正在看的内容被顶掉、无法找回，影响阅读体验。",
+      "supportingReviewIds": [
+        "c5e4dd6a49553397b882",
+        "dabc7ca85c6be245ea65",
+        "397b9e8e139c307922dd"
+      ],
+      "quote": "when you enter, when you start reading the tweet, the feed itself is updated and the tweet you read can no longer be found.",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c0",
+      "label": "垃圾机器人/骗子账号泛滥",
+      "description": "用户指责平台放任诈骗和垃圾账号横行：一边对普通用户禁言限流，一边让垃圾账号和骗子账号继续存在。",
+      "supportingReviewIds": [
+        "9967c9c6b724e5b8f101",
+        "d1acd46c72b340d99cc8"
+      ],
+      "quote": "yeah, you’ll shadow ban people that speak their mind but let the scammers run wild. what a disgrace.",
+      "focusAreaIds": [
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c1",
+      "label": "通知点击后全部消失/跳回首页问题在 12.16 仍未修复",
+      "description": "点开一条通知会同时清除其余通知并跳到个性化首页，用户从 11.x 一直追踪到 12.16，多次更新后问题依然存在，属于长期未修复的回归。",
+      "supportingReviewIds": [
+        "4bcaf2e9d2315cf29425"
+      ],
+      "quote": "tapping to view one will dismiss the rest, forcing you to scroll through your notification tab to see what you missed",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c4",
+      "label": "虚假账号、机器人与陌生人私信/请求骚扰",
+      "description": "平台存在大量假冒名人和机器人账号，用户不断收到陌生私信、关注请求和诈骗联系，缺乏有效治理。",
+      "supportingReviewIds": [
+        "0bc98e613ff518920ba4",
+        "2d0bfdaffe85ca8d0abe",
+        "bee7c70a9d15b0768e5e",
+        "94524f8831d5b195494f"
+      ],
+      "quote": "there are more than on hundred fake accounts in the name elon musk",
+      "focusAreaIds": [
+        "focus-3",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c0",
+      "label": "X Premium 付费用户仍被限流且客服无效",
+      "description": "即使购买了 Premium 或 Premium+，用户仍遭遇影子禁言、限流、隐藏评论；付费优先客服也只是复制粘贴模板回复，无法解决问题。",
+      "supportingReviewIds": [
+        "4a2debe531e3a0800e6d",
+        "d1acd46c72b340d99cc8",
+        "ff374fafd3a3a08b1d63"
+      ],
+      "quote": "they are still shadowbanning, throttling, hiding comments for no particular reason, no explanation, and no means by which to remedy the situation, which is extremely frustrating for a premium+ paying subscriber.",
+      "focusAreaIds": [
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c2",
+      "label": "最新版本更新回归：登录被登出/账号锁定/体验变差",
+      "description": "用户集中反馈最新更新后出现被强制登出、账号锁定等回归问题，并认为每次更新都让应用更差。",
+      "supportingReviewIds": [
+        "e65585cfcd381a145856",
+        "ce55aaf7bdadf6e2ed70",
+        "11e77387e4336da39237"
+      ],
+      "quote": "last update logged me out and locked account. trouble getting back in.",
+      "focusAreaIds": [
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c1",
+      "label": "首页时间线被无关内容与广告淹没",
+      "description": "用户反馈主页算法近两周开始推荐大量与兴趣无关的“slop”、重复内容和广告，信息流质量明显下降。",
+      "supportingReviewIds": [
+        "70f909729a7e468d5626",
+        "060188969730e2225952"
+      ],
+      "quote": "starting approx. two weeks ago has become nothing but slop of no interest to me.",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c1",
+      "label": "AI 机器人与垃圾/政治广告泛滥，举报无效",
+      "description": "时间线被 AI 机器人和极右广告/宣传内容污染，即使用户反复举报也不会消失。",
+      "supportingReviewIds": [
+        "08bd931a4e9eae138727"
+      ],
+      "quote": "corrupted by far right ads and ai bots no matter how many times it’s reported.",
+      "focusAreaIds": [
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c3",
+      "label": "账号标记/暂停缺少原因通知，通知与互动数据丢失",
+      "description": "用户在被标记或暂停时没有收到具体原因通知，也无法得知如何移除标记；账号受限后还会失去关注列表、书签和关注对象的通知，说明通知相关功能存在严重问题。",
+      "supportingReviewIds": [
+        "35eb895d170e72db7c3f",
+        "9deaa8767e951c3815a9"
+      ],
+      "quote": "account has a temporary flag label applied for suspicious activity; no way to appeal, notification for what flagged",
+      "focusAreaIds": [
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c1",
+      "label": "X Premium/Grok 付费体验不佳",
+      "description": "用户认为付费提高使用限制并不划算，Grok 被描述为不可靠/无用，付费订阅价值存疑。",
+      "supportingReviewIds": [
+        "060188969730e2225952",
+        "ad22f0958cb90d14bc0b"
+      ],
+      "quote": "grok is crooked and when you pay for higher limits it’s not worth it.",
+      "focusAreaIds": [
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c0",
+      "label": "账号被封禁/限制后申诉无门",
+      "description": "多个用户反映账号被无故封禁、锁定或限制，系统只给出 AI 回复，无法联系人工客服，也没有有效纠正流程。",
+      "supportingReviewIds": [
+        "5b4dbeab037cbbf05cd1",
+        "4b179258c68325d39439",
+        "dac93fd351efa43aa9e5",
+        "6968500a7d802fa8b0dd",
+        "e9ff07f9c3099106c6d0"
+      ],
+      "quote": "i appealed 10 times and i get the same ai agent response.",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-6@c0",
+      "label": "举报功能故障与有害内容/审核失效",
+      "description": "举报按钮或举报流程无法正常工作，同时用户看到自残、色情、暴力、儿童剥削、种族主义等有害内容却得不到有效处理。",
+      "supportingReviewIds": [
+        "087861f6c78d5f58aae4",
+        "13497782d29654cdc8bb",
+        "5d26ce76109abe273f0b",
+        "eb6d11d72a61f84afcd9",
+        "d840b3524ddde373f7b4",
+        "0d2fb66f7a2baeb2498b",
+        "bba97357c3fb434085f5"
+      ],
+      "quote": "report button’s broken, which is especially needed for this hellhole of an app",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-5@c1",
+      "label": "账号被自动系统误判、限制或封禁",
+      "description": "多位用户反映账号被自动系统以“机器人”或无理由原因限制、封禁或影子封禁，且申诉与支持无法有效解决。",
+      "supportingReviewIds": [
+        "21078cd5f72c93dcfe70",
+        "ad09ee0c82427a4d4ff8",
+        "0c38d3bbc8650e87cfc0",
+        "ad22f0958cb90d14bc0b"
+      ],
+      "quote": "someone has reported me as a bot or x just randomly restricted my account",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-6@c1",
+      "label": "视频播放报错“内容不可用”",
+      "description": "视频加载时转圈后提示 content is not available，该问题已持续数日，可能是播放回归。",
+      "supportingReviewIds": [
+        "d52e5ce2502c1fb3db3d"
+      ],
+      "quote": "videos spin then turn to content is not available error. been happening for days",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-2@c2",
+      "label": "时间线算法向大号/付费账号倾斜并推送愤怒诱饵",
+      "description": "算法让小账号几乎无法获得曝光，未付费用户帖子很少被看到；信息流充满刻意引发争论的愤怒诱饵内容，用户难以屏蔽。",
+      "supportingReviewIds": [
+        "4585dd25ef43e3be5d6d",
+        "1bcd2e5bac7de57f7233",
+        "7f8726384e9d02b8afe1",
+        "797933af247af55265a5"
+      ],
+      "quote": "once an account has followers the algorithm just keeps feeding it, and if you're small there's no realistic way to break out of that no matter what you post unless you pay.",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c2",
+      "label": "垃圾机器人、诈骗与不当内容泛滥",
+      "description": "机器人账号、推销诈骗和色情/自残等不当内容大量存在，降低平台可信度，尤其在低龄用户可见。",
+      "supportingReviewIds": [
+        "0a460bd4781c764cf5a7",
+        "3f3aac09a81a25ad96ed",
+        "7f8726384e9d02b8afe1",
+        "4ecb043db74be454e15d",
+        "797933af247af55265a5",
+        "58cb89038c5d95bddd35"
+      ],
+      "quote": "there is a lot of scam in it/bots trying to sell it",
+      "focusAreaIds": [
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c2",
+      "label": "X Premium 付费订阅体验不值得",
+      "description": "1-2星评论普遍认为付费订阅无价值：不付费曝光受限、客服被锁在付费墙后，即使付费也得不到支持，账号仍可能被无故关闭。",
+      "supportingReviewIds": [
+        "9748af67b822016e0d4a",
+        "4585dd25ef43e3be5d6d",
+        "7f8726384e9d02b8afe1",
+        "797933af247af55265a5"
+      ],
+      "quote": "premium is a waste. there is no support, terms of service are unequally enforced, and verified accounts are closed for no reason.",
+      "focusAreaIds": [
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c2",
+      "label": "AI自动审核导致账号被误判、限流或封禁且申诉无门",
+      "description": "多个用户称账号被AI无故标记或封禁，评论/回复被过滤，且没有人工渠道可申诉。",
+      "supportingReviewIds": [
+        "d3628c95042284cffb28",
+        "d93e284cdad50e7bba01",
+        "3abfe40f83b27b93d00f",
+        "2c6502f872d30345aefe",
+        "11a5c3b5bca434420cbc",
+        "2e9a0c1b53bf745ed15e"
+      ],
+      "quote": "this ai overreach is outta hand",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-6@c2",
+      "label": "应用内功能故障：无法回复/评论、视频不播放、链接错误跳转浏览器",
+      "description": "用户反馈多项基础功能故障，包括回复/评论报错、部分视频无法播放、应用内链接跳转到浏览器并反复引导下载应用。",
+      "supportingReviewIds": [
+        "2f62dc8aa63697e7ddf6",
+        "fe996470ac7cc136390f",
+        "1bcd2e5bac7de57f7233"
+      ],
+      "quote": "x doesn’t let me reply or comment on any posts, every time i try to it just says error resend or edit in drafts?",
+      "focusAreaIds": [
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c3",
+      "label": "账号被误判/标记为‘非真实行为’后遭封禁或限制，申诉无效",
+      "description": "大量 1 星评论反映账号因 AI 判定的‘非真实行为’被冻结、限制可见性或封禁；用户称没有违规操作，提交申诉后只得到自动化回复或直接被驳回，部分账号还被黑客接管后无法恢复。",
+      "supportingReviewIds": [
+        "5201893c76b46852f669",
+        "1a6f66f1d74dc590634f",
+        "7a94033ac9009aa1e066",
+        "c57f2c368b6726c519e5",
+        "e8431ff7989cb9465ae9",
+        "6c86fdd1c1207af552aa",
+        "b562144a8438ede882e5",
+        "471534206422e17b689b"
+      ],
+      "quote": "many people including myself have been unjustifiably suspended indefinitely",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-2@c3",
+      "label": "信息流算法强制推送不感兴趣的内容并放大政治宣传、仇恨与虚假信息",
+      "description": "用户投诉信息流算法会重复显示旧帖、把 Elon 的推文和右翼宣传推上顶部，即使关注列表与政治无关；同时信息流整体充斥着仇恨、歧视和虚假信息。",
+      "supportingReviewIds": [
+        "5ac2822d1e3ff900b245",
+        "29a852c2054a68f546af",
+        "da53165b290c8253c59d",
+        "4138640f8e91bccaba13",
+        "9bea59684a37c5ba4361",
+        "5de4264701ea7e2c88a6",
+        "1a70d4b0a7f84fa058d2"
+      ],
+      "quote": "if you’re scrolling down a feed it will repeat the same posts after a couple of screens so that you cannot see earlier posts. on top of that you see elon’s terrible takes on everything boosted to the top of your feed and right wing propaganda shoved in your face",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c3",
+      "label": "垃圾机器人、诈骗账号与假冒身份泛滥",
+      "description": "用户反映平台充斥着用 AI 伪造声音/视频的诈骗账号和机器人，假冒名人开设多个账户行骗，平台安全性不足。",
+      "supportingReviewIds": [
+        "2d9454ce738c332a9df2",
+        "3ddfe92752c385eac585"
+      ],
+      "quote": "the x platform is full of scamsters, who are using ai to mimic voice, video of even elon himself to scam people",
+      "focusAreaIds": [
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c3",
+      "label": "近期更新后的视频播放与界面回归问题",
+      "description": "多个 1-2 星评论指向最新版本回归：视频静音状态在切换后丢失、视频无法加载或显示内容不可用、返回应用时信息流自动刷新、帖子与转发的分离布局让账号页看起来空洞。",
+      "supportingReviewIds": [
+        "b8ace3ccf5b408696c11",
+        "c238acb8869b86898031",
+        "1d9c03fa7c1752ec039c",
+        "667138f3e69c5bd452e7",
+        "5ae4adca2a0f08e04b73"
+      ],
+      "quote": "everytime i mute a video, then go to the next video it unmutes",
+      "focusAreaIds": [
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c3",
+      "label": "付费/变现规则与 Premium 体验问题",
+      "description": "1 星评论中抱怨平台随意变更变现规则、只有大账号能获得收益；普通用户被处置后不付费就没有申诉渠道，同时对 AI 生成的过长 Premium 帖子体验不满。",
+      "supportingReviewIds": [
+        "ae3c3e4c2f54e21b6395",
+        "31989df8af018c9fc9f7",
+        "5ae4adca2a0f08e04b73"
+      ],
+      "quote": "they just changed the monetization rules today with no warning only the biggest accounts can get monetized.",
+      "focusAreaIds": [
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c4",
+      "label": "付费订阅用户账号被误封/受限且客服无响应",
+      "description": "用户在购买认证/订阅后遭遇账号被临时标记、封禁、回复不显示或意外扣费，提交申诉后客服无实质解决，付费体验差。",
+      "supportingReviewIds": [
+        "8bc837306e6f1bcaca8d",
+        "285b5cdb7a0fa1328fe7",
+        "7812c4b3b453dc60f772",
+        "b2ae6b67c3d81c2ae3ee"
+      ],
+      "quote": "they take your money and don’t care to help fix your issue",
+      "focusAreaIds": [
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c4",
+      "label": "时间线算法被指政治化操控、内容不展示",
+      "description": "用户指控信息流被置顶特定政治立场内容，并出现评论/帖子不显示的情况，算法不透明。",
+      "supportingReviewIds": [
+        "0aab79fc5aa69d2f67a9",
+        "6d605a081ebe72d7fdcd"
+      ],
+      "quote": "elon musk puts maga voices at the top of my feed always",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c4",
+      "label": "近期更新后视频/GIF无法播放（content not available）",
+      "description": "多名用户反映视频和GIF在更新后显示“content not available”或无法加载，部分与网络环境相关，且已持续较长时间，疑似回归问题。",
+      "supportingReviewIds": [
+        "35c199d588e66936a855",
+        "6ad5a5cb80562e87be20",
+        "b680022465b8bd4adbaa",
+        "46f6febe4e287d198214"
+      ],
+      "quote": "content not available or media cannot be loaded",
+      "focusAreaIds": [
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c4",
+      "label": "卸载后仍收到通知邮件且退订失效",
+      "description": "用户删除应用后仍持续收到邮件通知，退订链接将用户引导回下载页面而非取消订阅，通知投递不可控。",
+      "supportingReviewIds": [
+        "83f5c44b25058cb05ddf"
+      ],
+      "quote": "i still receive emails and the unsubscribe link in those emails redirects to redownload the app",
+      "focusAreaIds": [
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c4",
+      "label": "内容审核缺失：色情、种族歧视与非法内容泛滥",
+      "description": "大量用户投诉平台上充斥色情、种族歧视、暴力甚至非法内容，举报/审核机制无效甚至崩溃。",
+      "supportingReviewIds": [
+        "ee88cad39c6744bb46e5",
+        "da444211d93fb2ee4969",
+        "b84612f86fa05395dc27",
+        "aeea54630897fba0f355",
+        "44215ba921871ab18426",
+        "d5fbfcabd5412c9239ad",
+        "f4e788e956c8b5d68a4c"
+      ],
+      "quote": "what does the moderation bring to the table",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-1@c5",
+      "label": "版本回归与功能异常（视频加载/搜索/分享/UI）",
+      "description": "用户集中反馈近期版本中多项基本功能受损：视频无法加载或白屏显示“content not available”，报告页面卡在 X 标志，搜索无结果，分享按钮逻辑不一致，媒体标签页被移除，且整体卡顿。",
+      "supportingReviewIds": [
+        "05d5408e5be132f875bd",
+        "8705e89d353623b04cfd",
+        "975e8a5c7dda6b9c31b0",
+        "d0e59478c8b751e1fb1a",
+        "2afc91dd147c2508799c",
+        "24ac8cd6c953c4425527",
+        "d883b185fdea6916711c",
+        "6acd02e50e0dfd677461",
+        "474067a9b46c5e32c82d"
+      ],
+      "quote": "report section always stuck on x logo since 11.13 version. fix this bug immediately.",
+      "focusAreaIds": [
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c5",
+      "label": "时间线算法压制原创/小众内容",
+      "description": "用户抱怨算法不透明：发帖会被埋没、粉丝看不到，小账号的内容很少出现在时间线上，而部分宣传性内容却被助推，导致互动和自然增长困难。",
+      "supportingReviewIds": [
+        "3d4f4d0d519b3cb62272",
+        "db909039be4b7e41c2c7",
+        "c430942dd607d0bd2b3f"
+      ],
+      "quote": "your content will be buried by the algorithm and your followers will never see it",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c5",
+      "label": "机器人、虚假账号与低质内容泛滥",
+      "description": "大量评论指出平台充斥着机器人、骗子、引战账号和仿冒用户，真实互动被淹没，平台氛围恶化。",
+      "supportingReviewIds": [
+        "105842b234ac9ce7b4ea",
+        "365c33ad8f340a5946d7",
+        "3902d86035600c4c4156",
+        "5e2dd3899347c079a2cc",
+        "3d4f4d0d519b3cb62272"
+      ],
+      "quote": "tons of bots",
+      "focusAreaIds": [
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c5",
+      "label": "账号被暂停/封禁且申诉与客服渠道失效",
+      "description": "用户反映账号因“非真实行为”被反复暂停或无法登录，申诉被自动秒拒，没有实际可用的恢复流程，人工客服长期无响应。",
+      "supportingReviewIds": [
+        "00c9a4597dcf4e2ff06b",
+        "69ce3c7f334e8eb768d7",
+        "cf580cd0617474ec1f5f"
+      ],
+      "quote": "every single one has been rejected within seconds with what appears to be an automated response",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-5@c5",
+      "label": "言论自由承诺与审查/影子封禁的矛盾",
+      "description": "用户投诉平台并非真正的言论自由广场：特定观点会被影子封禁、限流或由自动化系统停用账号，审核尺度带有政治偏见。",
+      "supportingReviewIds": [
+        "d926ec66bad83a0deb59",
+        "7e1b40d868017dfbbb91",
+        "84a8dc78cb2acf13a48c",
+        "84a49c617fef0f3709f8",
+        "367d7ccbe0f99d769e69",
+        "a6f427a600fa930f87aa"
+      ],
+      "quote": "x claims free speech. it is anything but free speech.",
+      "focusAreaIds": []
+    },
+    {
+      "id": "topic-candidate-6@c5",
+      "label": "X Premium 付费订阅权益未兑现",
+      "description": "付费订阅用户表示花钱后并未获得对等服务，触达仍被限制、账号仍会被暂停，付费体验与承诺不符。",
+      "supportingReviewIds": [
+        "a6f427a600fa930f87aa"
+      ],
+      "quote": "although i’m a paying customer i don’t receive the same & equal services",
+      "focusAreaIds": [
+        "focus-6"
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "code": "TOPIC_CANDIDATES_TRUNCATED",
+      "message": "kept 36 of 40 discovered candidates (goal-aware selection); 4 excess dropped deterministically"
+    }
+  ]
+}

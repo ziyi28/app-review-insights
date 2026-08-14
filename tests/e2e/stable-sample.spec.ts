@@ -49,7 +49,7 @@ test("stable sample analysis uses the live-merged cache and reports local histor
 
   // Traceability passes.
   await page.getByRole("tab", { name: /追溯/ }).click();
-  await expect(page.getByText(/已完成/)).toBeVisible();
+  await expect(page.locator("#panel-traceability").getByText(/0 错误/)).toBeVisible({ timeout: 10_000 });
 });
 
 test("falls back to Apple RSS when SerpApi is rate-limited", async ({ page }) => {

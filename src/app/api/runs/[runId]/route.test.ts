@@ -58,7 +58,7 @@ describe("DELETE /api/runs/[runId]", () => {
   });
 
   it("returns 404 for a bundled fixture id (fixtures are not deletable)", async () => {
-    const res = await del("run-workout-for-women-us");
+    const res = await del("run-x-twitter-us");
     expect(res.status).toBe(404);
   });
 });

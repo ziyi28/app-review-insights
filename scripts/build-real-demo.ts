@@ -86,12 +86,12 @@ export async function buildRealDemo(): Promise<string> {
   }
 
   // Materialize the completed run into the bundled fixture so the offline demo
-  // (fixtures/demo-runs/run-workout-for-women-us) is reproducible from this
+  // (fixtures/demo-runs/run-x-twitter-us) is reproducible from this
   // command. Copying a directory tree under a fixed fixture name keeps the
   // shipped snapshot in sync with a fresh real capture+analysis.
   if (manifest.status === "completed") {
     const { cp, rm, mkdir } = await import("node:fs/promises");
-    const fixtureDir = path.join(process.cwd(), "fixtures", "demo-runs", "run-workout-for-women-us");
+    const fixtureDir = path.join(process.cwd(), "fixtures", "demo-runs", "run-x-twitter-us");
     const sourceDir = store.resolveRunDir(runId);
     await rm(fixtureDir, { recursive: true, force: true });
     await mkdir(fixtureDir, { recursive: true });
@@ -102,7 +102,7 @@ export async function buildRealDemo(): Promise<string> {
     const manifestPath = path.join(fixtureDir, "manifest.json");
     const { readFile, writeFile } = await import("node:fs/promises");
     const current = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>;
-    await writeFile(manifestPath, JSON.stringify({ ...current, runId: "run-workout-for-women-us" }, null, 2), "utf8");
+    await writeFile(manifestPath, JSON.stringify({ ...current, runId: "run-x-twitter-us" }, null, 2), "utf8");
     console.log("Bundled fixture updated:", fixtureDir);
   }
 
