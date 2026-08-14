@@ -354,6 +354,7 @@ export function Workbench() {
   const handleRetryHistory = useCallback(async (sourceRunId: string) => {
     setHistoryOpen(false);
     setIsRetrying(true);
+    let requestToStart: unknown = null;
     try {
       const res = await fetch(`/api/runs/${sourceRunId}`, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -366,45 +367,43 @@ export function Workbench() {
       if (manifest.startRequest) {
         const req = manifest.startRequest;
         // If retrying a historical live run, strip previewId so it freshly collects from App Store without stale preview snapshot issues
-        const cleanRequest = {
+        requestToStart = {
           ...req,
           source: req.source?.kind === "live" && req.source.appStoreUrl
             ? { kind: "live", appStoreUrl: req.source.appStoreUrl }
             : req.source,
         };
-        seenRunId.current = null;
-        setCache({ runId: null });
-        setTab("overview");
-        autoJumpedKeys.current.clear();
-        userNavigated.current = false;
-        await start(cleanRequest);
       } else if (manifest.appUrl && manifest.goal) {
         // Fallback for older historical runs without saved startRequest: reconstruct start request
-        seenRunId.current = null;
-        setCache({ runId: null });
-        setTab("overview");
-        autoJumpedKeys.current.clear();
-        userNavigated.current = false;
-        await start({
+        requestToStart = {
           protocolVersion: "1",
           mode: "analyze",
           uiLocale,
           outputLocale: uiLocale,
           goal: manifest.goal,
           source: { kind: "live", appStoreUrl: manifest.appUrl },
-        });
-      } else {
-        await loadHistory(sourceRunId);
+        };
       }
     } catch {
-      await loadHistory(sourceRunId);
+      // ignore
     } finally {
       setIsRetrying(false);
+    }
+
+    if (requestToStart) {
+      seenRunId.current = null;
+      setCache({ runId: null });
+      setTab("overview");
+      autoJumpedKeys.current.clear();
+      userNavigated.current = false;
+      void start(requestToStart);
+    } else {
+      void loadHistory(sourceRunId);
     }
   }, [start, loadHistory, uiLocale]);
 
   const idle = !running && events.length === 0 && !isRetrying;
-  const starting = (running && runId === null) || isRetrying;
+  const starting = running && runId === null;
 
   const runFailed = useMemo(() => {
     if (running || events.length === 0) return false;
