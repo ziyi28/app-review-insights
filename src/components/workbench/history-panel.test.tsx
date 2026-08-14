@@ -194,4 +194,53 @@ describe("HistoryPanel", () => {
       expect(screen.getByText(tEn.deleteFailed)).toBeInTheDocument();
     });
   });
+
+  it("hides the delete button for non-deletable runs (bundled fixtures)", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          runs: [
+            { runId: "run-a", status: "completed", createdAt: "2026-08-12T00:00:00Z", canReplay: true, goal: "Understand pricing", deletable: true },
+            { runId: "run-demo", status: "completed", createdAt: "2026-08-11T00:00:00Z", canReplay: true, goal: "Demo run", deletable: false },
+          ],
+        }),
+      }),
+    );
+
+    render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByText("Demo run")).toBeInTheDocument();
+    });
+
+    // Only the deletable run exposes a delete button.
+    expect(screen.getAllByRole("button", { name: tEn.delete })).toHaveLength(1);
+  });
+
+  it("allows deleting a running (zombie) run", async () => {
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      if (init?.method === "DELETE") {
+        return { ok: true, status: 204 };
+      }
+      return { ok: true, json: async () => ({ runs: [{ runId: "run-a", status: "running", createdAt: "2026-08-12T00:00:00Z", canReplay: false, goal: "Long goal" }] }) };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const user = userEvent.setup();
+    render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByText("Long goal")).toBeInTheDocument();
+    });
+
+    // A running (interrupted/zombie) run must still be deletable.
+    const deleteBtn = screen.getByRole("button", { name: tEn.delete });
+    expect(deleteBtn).toBeEnabled();
+    await user.click(deleteBtn);
+    await user.click(screen.getAllByRole("button", { name: tEn.delete })[1]);
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(expect.stringContaining("/api/runs/run-a"), expect.objectContaining({ method: "DELETE" }));
+    });
+  });
 });

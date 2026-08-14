@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
-import { POST } from "./route";
+import { GET, POST } from "./route";
 import type { SourcePreview } from "@/server/sources/source-preview";
 import { RunStore } from "@/server/runs/run-store";
 
@@ -262,5 +262,43 @@ describe("POST /api/runs preview-backed live", () => {
       searchId: "search_page_1",
     });
     expect(JSON.stringify(sourceEvidence)).not.toContain("serp_");
+  });
+});
+
+describe("GET /api/runs listing", () => {
+  beforeEach(() => {
+    baseDir = mkdtempSync(path.join(tmpdir(), "runs-list-route-"));
+    process.env = { ...saved };
+    process.env.RUNS_DIR = path.join(baseDir, "runs");
+  });
+
+  afterEach(() => {
+    process.env = saved;
+    rmSync(baseDir, { recursive: true, force: true });
+  });
+
+  it("marks runtime runs deletable and bundled fixtures non-deletable", async () => {
+    const store = new RunStore(process.env.RUNS_DIR!);
+    const runId = store.createRunId();
+    await store.writeManifest(runId, {
+      runId,
+      status: "completed",
+      executionMode: "live",
+      createdAt: "2026-08-12T00:00:00Z",
+      updatedAt: "",
+      stages: {},
+      artifacts: {},
+      limitations: [],
+      canReplay: true,
+    });
+
+    const res = await GET();
+    const body = (await res.json()) as { runs: { runId: string; deletable: boolean }[] };
+
+    const runtimeRun = body.runs.find((r) => r.runId === runId);
+    expect(runtimeRun?.deletable).toBe(true);
+
+    const demoRun = body.runs.find((r) => r.runId === "run-workout-for-women-us");
+    expect(demoRun?.deletable).toBe(false);
   });
 });

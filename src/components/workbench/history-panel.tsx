@@ -25,6 +25,7 @@ type HistoryEntry = {
   appName?: string;
   appUrl?: string;
   fileName?: string;
+  deletable?: boolean;
 };
 
 /**
@@ -160,14 +161,16 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
                     {t.retry}
                   </button>
                 ) : null}
-                <button
-                  type="button"
-                  className="btn btn-danger"
-                  onClick={() => setConfirmingRunId(run.runId)}
-                  disabled={run.status === "running" || deletingRunId === run.runId}
-                >
-                  {deletingRunId === run.runId ? "…" : t.delete}
-                </button>
+                {run.deletable !== false ? (
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => setConfirmingRunId(run.runId)}
+                    disabled={deletingRunId === run.runId}
+                  >
+                    {deletingRunId === run.runId ? "…" : t.delete}
+                  </button>
+                ) : null}
               </div>
               {confirmingRunId === run.runId ? (
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", borderTop: "1px solid var(--border)", paddingTop: "8px" }}>

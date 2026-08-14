@@ -2,6 +2,9 @@
   "runId": "run-workout-for-women-us",
   "status": "completed",
   "executionMode": "import",
+  "goal": "Identify the most impactful product problems and opportunities from real user reviews",
+  "appName": "Workout for Women",
+  "appUrl": "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684",
   "createdAt": "2026-08-12T12:01:49.636Z",
   "updatedAt": "2026-08-12T12:01:49.636Z",
   "stages": {

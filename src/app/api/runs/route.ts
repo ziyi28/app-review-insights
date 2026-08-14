@@ -60,6 +60,9 @@ export async function GET() {
         appName,
         appUrl,
         fileName,
+        // Only runs in the runtime store are deletable; bundled fixtures (demo
+        // runs) are read-only and the UI hides their delete button.
+        deletable: r.root === cfg.runsDir,
       };
     })
   );
