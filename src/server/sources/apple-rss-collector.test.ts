@@ -298,3 +298,91 @@ describe("collectAppleReviews", () => {
     expect(result.status).toBe("complete");
   });
 });
+
+describe("raw source file archiving", () => {
+  it("archives one sourceFile per successful request with an attempt-level path", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const page1 = fixture("page-01.json");
+    const deps = depsFor({ [url1]: page1 });
+    // Advertise lastPage=1 so pagination ends naturally after page 1.
+    deps.fetchFn = vi.fn(async () => {
+      const j = JSON.parse(page1);
+      j.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+      return makeResponse(JSON.stringify(j));
+    }) as unknown as typeof fetch;
+    const result = await collectAppleReviews(deps);
+    expect(result.sourceFiles).toHaveLength(1);
+    expect(result.sourceFiles[0].relativePath).toBe("sources/apple/page-01.attempt-01.json");
+    // The archived content is the exact body the collector received.
+    expect(JSON.parse(result.sourceFiles[0].content).feed.entry).toHaveLength(2);
+    // PageEvidence.rawFile matches the archived path.
+    expect(result.pages[0].rawFile).toBe("sources/apple/page-01.attempt-01.json");
+  });
+
+  it("points every review rawRef at the attempt file that actually provided it", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const page1 = fixture("page-01.json");
+    const deps = depsFor({ [url1]: page1 });
+    // Advertise lastPage=1 so pagination ends after page 1.
+    deps.fetchFn = vi.fn(async () => {
+      const j = JSON.parse(page1);
+      j.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+      return makeResponse(JSON.stringify(j));
+    }) as unknown as typeof fetch;
+    const result = await collectAppleReviews(deps);
+    expect(result.reviews.length).toBeGreaterThan(0);
+    for (const ref of result.rawRefs) {
+      expect(ref).toMatch(/^sources\/apple\/page-01\.attempt-01\.json#/);
+    }
+    // The parser's rawRef fragment (entry id) is preserved after the file.
+    expect(result.rawRefs[0].split("#")[1]).toBeTruthy();
+  });
+
+  it("archives each attempt separately when page 1 empties twice then succeeds", async () => {
+    const calls: string[] = [];
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      calls.push(String(input));
+      // First two attempts empty, third returns real content.
+      if (calls.length <= 2) return makeResponse(fixture("empty-feed.json"));
+      const page1 = JSON.parse(fixture("page-01.json"));
+      page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+        "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+      return makeResponse(JSON.stringify(page1));
+    });
+    const deps = depsFor({});
+    deps.fetchFn = fetchMock as unknown as typeof fetch;
+    deps.emptyPageRetryDelaysMs = [1, 1];
+    const result = await collectAppleReviews(deps);
+    expect(deps.fetchFn).toHaveBeenCalledTimes(3);
+    // Three distinct attempt-level files, one per HTTP request.
+    const paths = result.sourceFiles.map((f) => f.relativePath);
+    expect(paths).toEqual([
+      "sources/apple/page-01.attempt-01.json",
+      "sources/apple/page-01.attempt-02.json",
+      "sources/apple/page-01.attempt-03.json",
+    ]);
+    // The empty retries are archived too, so failures are independently verifiable.
+    expect(result.sourceFiles[0].content).toBe(fixture("empty-feed.json"));
+  });
+
+  it("measures byteLength in UTF-8 bytes, not JS string length", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    // A body with multi-byte characters: "é" is 2 UTF-8 bytes, "好" is 3.
+    const body = JSON.stringify({ feed: { entry: [], link: [] }, note: "café 好评" });
+    const deps = depsFor({ [url1]: body });
+    const result = await collectAppleReviews(deps);
+    expect(Buffer.byteLength(body, "utf8")).toBeGreaterThan(body.length);
+    expect(result.pages[0].byteLength).toBe(Buffer.byteLength(body, "utf8"));
+  });
+
+  it("archives non-JSON failure responses for later forensics", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const deps = depsFor({ [url1]: "<html>not a feed</html>" });
+    const result = await collectAppleReviews(deps);
+    expect(result.status).toBe("failed");
+    expect(result.sourceFiles).toHaveLength(1);
+    expect(result.sourceFiles[0].content).toBe("<html>not a feed</html>");
+  });
+});

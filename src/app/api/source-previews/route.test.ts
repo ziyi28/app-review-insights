@@ -66,7 +66,7 @@ describe("POST /api/source-previews", () => {
     expect(res.status).toBe(422);
   });
 
-  it("returns summaries without leaking full reviews", async () => {
+  it("returns summaries without leaking full reviews or raw source bodies", async () => {
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url.includes("/page=1/")) return new Response(fixture("page-01.json"), { status: 200, headers: { "content-type": "application/json" } });
@@ -80,6 +80,12 @@ describe("POST /api/source-previews", () => {
     // The response must not carry the review bodies.
     expect(JSON.stringify(json)).not.toContain("Great workout app");
     expect(JSON.stringify(json)).not.toContain("entry");
+    // The response must not expose the raw sourceFiles archive or the raw body.
+    const previewId = json.previewId as string;
+    const snapshot = await readPreview(process.env.SOURCE_PREVIEWS_DIR!, previewId);
+    expect(snapshot?.live.sourceFiles?.length).toBeGreaterThan(0);
+    expect(JSON.stringify(json)).not.toContain("sourceFiles");
+    expect(JSON.stringify(json)).not.toContain("attempt-01");
   });
 
   it("persists a snapshot that includes the full live reviews server-side", async () => {

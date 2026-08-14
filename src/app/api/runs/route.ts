@@ -249,6 +249,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
               reviews,
               rawRefs,
               limitations,
+              sourceFiles: selected.live.sourceFiles,
               sourceSummary: {
                 kind: "app-store-reviews",
                 provider: selected.live.provider,
@@ -266,6 +267,9 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
                 requestCount: selected.live.requestCount,
                 searchCount: "searchIds" in selected.live.evidence ? selected.live.evidence.requestCount : 0,
                 searchId: "searchIds" in selected.live.evidence ? (selected.live.evidence.searchIds.at(-1) ?? null) : null,
+                ...("pages" in selected.live.evidence && selected.live.evidence.pages
+                  ? { pages: selected.live.evidence.pages }
+                  : {}),
               },
             },
           },

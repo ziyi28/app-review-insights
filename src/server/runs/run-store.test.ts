@@ -108,4 +108,36 @@ describe("RunStore", () => {
   it("deleteRun rejects a path-traversal id", async () => {
     await expect(store.deleteRun("../evil")).rejects.toThrow(/run id/i);
   });
+
+  it("writes a source file atomically under an allowed sources path", async () => {
+    const runId = store.createRunId();
+    await store.writeSourceFile(runId, "sources/apple/page-01.attempt-01.json", "{\"ok\":true}");
+    const content = await store.readSourceFile(runId, "sources/apple/page-01.attempt-01.json");
+    expect(content).toBe("{\"ok\":true}");
+  });
+
+  it("rejects a source path escaping the run directory", async () => {
+    const runId = store.createRunId();
+    await expect(store.writeSourceFile(runId, "../outside.txt", "x")).rejects.toThrow(/escapes|not allowed/i);
+    await expect(store.writeSourceFile(runId, "sources/apple/../../outside.txt", "x")).rejects.toThrow(/escapes|not allowed/i);
+    await expect(store.writeSourceFile(runId, "C:/evil.txt", "x")).rejects.toThrow(/escapes|not allowed/i);
+  });
+
+  it("rejects an absolute source path", async () => {
+    const runId = store.createRunId();
+    await expect(store.writeSourceFile(runId, path.join(dir, "evil.txt"), "x")).rejects.toThrow(/escapes|not allowed/i);
+  });
+
+  it("rejects a source path outside the allowed sources trees", async () => {
+    const runId = store.createRunId();
+    await expect(store.writeSourceFile(runId, "sources/other/file.json", "x")).rejects.toThrow(/not allowed/i);
+    await expect(store.writeSourceFile(runId, "artifacts/x.json", "x")).rejects.toThrow(/not allowed/i);
+  });
+
+  it("never silently overwrites an existing source file", async () => {
+    const runId = store.createRunId();
+    await store.writeSourceFile(runId, "sources/apple/page-01.attempt-01.json", "first");
+    await expect(store.writeSourceFile(runId, "sources/apple/page-01.attempt-01.json", "second")).rejects.toThrow(/already exists/i);
+    expect(await store.readSourceFile(runId, "sources/apple/page-01.attempt-01.json")).toBe("first");
+  });
 });

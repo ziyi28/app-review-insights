@@ -158,6 +158,13 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
       await publisher.publish({ type: "artifact.available", runId, data: { artifact: name, attempt, file: relativeFile } });
     }
 
+    // Re-materialize the source run's archived raw files. writeSourceFile only
+    // accepts safe sources/apple|import paths and rejects overwrites, so a
+    // malicious bundle can never plant or clobber files outside those trees.
+    for (const file of bundle.sourceFiles ?? []) {
+      await store.writeSourceFile(runId, file.relativePath, file.content);
+    }
+
     // Emit the terminal event (or a synthetic completion when the source lacked
     // one), then finalize the manifest as completed + replayable.
     if (terminalEvent) {

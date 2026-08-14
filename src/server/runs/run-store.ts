@@ -117,6 +117,45 @@ export class RunStore {
   }
 
   /**
+   * Atomically writes a raw source file (response body / imported file) into
+   * the run directory. Only run-relative paths under `sources/apple/` or
+   * `sources/import/` are accepted; the resolved target must stay inside the
+   * run directory (path traversal / SSRF guard). The same path may never be
+   * overwritten, so archived source bytes are immutable.
+   */
+  async writeSourceFile(runId: string, relativePath: string, content: string): Promise<void> {
+    const runDir = this.resolveRunDir(runId);
+    const sourcesRoot = path.resolve(runDir, "sources");
+    // Both the raw prefix and the RESOLVED path must stay inside the sources
+    // tree: `sources/apple/../../x.json` starts with a valid prefix but
+    // resolves outside it, and a bare absolute path never starts under sources.
+    if (!/^sources\/(apple|import)\//.test(relativePath)) {
+      throw new Error(`Source file path not allowed: ${relativePath}`);
+    }
+    const resolved = path.resolve(sourcesRoot, relativePath.replace(/^sources\//, ""));
+    const allowedRoot = path.resolve(runDir, "sources");
+    if (!resolved.startsWith(allowedRoot + path.sep)) {
+      throw new Error(`Source file path escapes the sources tree: ${relativePath}`);
+    }
+    await fs.mkdir(path.dirname(resolved), { recursive: true });
+    if (existsSync(resolved)) {
+      throw new Error(`Source file already exists: ${relativePath}`);
+    }
+    const tmp = path.join(path.dirname(resolved), `.${path.basename(resolved)}.${randomUUID()}.tmp`);
+    await fs.writeFile(tmp, content, "utf8");
+    await fs.rename(tmp, resolved);
+  }
+
+  async readSourceFile(runId: string, relativePath: string): Promise<string> {
+    const runDir = this.resolveRunDir(runId);
+    const resolved = path.resolve(runDir, relativePath);
+    if (!resolved.startsWith(path.resolve(runDir) + path.sep)) {
+      throw new Error(`Source file path escapes the run directory: ${relativePath}`);
+    }
+    return fs.readFile(resolved, "utf8");
+  }
+
+  /**
    * Appends a fully-framed NDJSON line (must already end with "\n"). Writing an
    * already-framed line keeps the on-disk byte stream identical to the HTTP
    * stream and avoids double newlines between events.

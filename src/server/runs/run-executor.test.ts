@@ -189,4 +189,46 @@ describe("executeReplayTask", () => {
     const manifest = await store.readManifest(runId).catch(() => null);
     expect(manifest?.status ?? "failed").toBe("failed");
   });
+
+  it("copies archived source files into the new run and rejects disallowed paths", async () => {
+    const runId = store.createRunId();
+    registerActive(runId);
+    const bundle = replayBundle("src-run");
+    bundle.sourceFiles = [
+      { relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"raw\":true}" },
+      { relativePath: "sources/import/input.csv", content: "id,body\n" },
+      // A manifest-named path outside the allowed trees must be rejected.
+      { relativePath: "../outside.txt", content: "evil" },
+    ];
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay");
+    await executeReplayTask({ runId, store, bundle, delayMs: 0, publisher });
+
+    expect(isRunActive(runId)).toBe(false);
+    // The replay itself fails (bad path), so the manifest is failed, NOT the
+    // two valid files surviving half-written.
+    const manifest = await store.readManifest(runId).catch(() => null);
+    expect(manifest?.status ?? "failed").toBe("failed");
+    // Even so, no source file may escape the run directory.
+    const outside = path.join(dir, "outside.txt");
+    expect(await import("node:fs").then((fs) => fs.existsSync(outside))).toBe(false);
+  });
+
+  it("copies allowed archived source files when every path is valid", async () => {
+    const runId = store.createRunId();
+    registerActive(runId);
+    const bundle = replayBundle("src-run");
+    bundle.sourceFiles = [
+      { relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"raw\":true}" },
+      { relativePath: "sources/import/input.csv", content: "id,body,rating,updatedAt\n" },
+    ];
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay");
+    await executeReplayTask({ runId, store, bundle, delayMs: 0, publisher });
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("completed");
+    const readF = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "sources", "apple", "page-01.attempt-01.json"), "utf8"));
+    expect(readF).toBe("{\"raw\":true}");
+    const readC = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "sources", "import", "input.csv"), "utf8"));
+    expect(readC).toBe("id,body,rating,updatedAt\n");
+  });
 });

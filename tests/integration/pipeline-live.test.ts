@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtempSync, rmSync, readFileSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { RunStore } from "@/server/runs/run-store";
@@ -7,6 +8,10 @@ import { EventPublisher } from "@/server/streaming/event-publisher";
 import { executeRun, type ExecuteDeps } from "@/server/pipeline/orchestrator";
 import { ScriptedModelClient } from "@/server/model/scripted-client";
 import type { RawReview } from "@/domain/contracts/review";
+
+function sha256(text: string): string {
+  return createHash("sha256").update(text).digest("hex");
+}
 
 const PAGE1 = JSON.stringify({
   feed: {
@@ -529,6 +534,39 @@ describe("executeRun (live pipeline)", () => {
     };
     expect(finalReport.prd).toBeNull();
     expect(finalReport.report).toBeNull();
+  });
+
+  it("archives raw Apple RSS responses and ties evidence to verifiable files", async () => {
+    const model = new ScriptedModelClient(await buildScript());
+    const deps = makeDeps(model);
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+
+    await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
+
+    const runDir = store.resolveRunDir(runId);
+    // Every HTTP attempt's raw response is archived under sources/apple/.
+    const rawFile = path.join(runDir, "sources", "apple", "page-01.attempt-01.json");
+    expect(existsSync(rawFile)).toBe(true);
+    // The archived bytes are the exact response body the collector received.
+    const archived = readFileSync(rawFile, "utf8");
+    expect(archived).toBe(PAGE1);
+    // source-evidence carries the per-request SHA-256, which matches the file.
+    const evidence = (await store.readArtifact(runId, "source-evidence", 1)) as {
+      pages?: { rawFile: string; sha256: string; byteLength: number }[];
+    };
+    expect(evidence.pages).toBeDefined();
+    const pageEvidence = evidence.pages!.find((p) => p.rawFile === "sources/apple/page-01.attempt-01.json");
+    expect(pageEvidence).toBeDefined();
+    expect(pageEvidence!.sha256).toBe(sha256(PAGE1));
+    expect(pageEvidence!.byteLength).toBe(Buffer.byteLength(PAGE1, "utf8"));
+    // Every raw-reviews rawRef points at an archived file that exists.
+    const rawArtifact = (await store.readArtifact(runId, "raw-reviews", 1)) as { rawRefs: string[] };
+    for (const ref of rawArtifact.rawRefs) {
+      const filePart = ref.split("#")[0];
+      expect(filePart.startsWith("sources/apple/")).toBe(true);
+      expect(existsSync(path.join(runDir, filePart))).toBe(true);
+    }
   });
 
   it("downgrades requirements to P2/null when the source is partial despite sufficient support", async () => {

@@ -3,11 +3,14 @@ import path from "node:path";
 import type { RunManifest } from "./run-store";
 import { ARTIFACT_NAMES, type ArtifactName, RunStore } from "./run-store";
 import { RunEventSchema } from "@/domain/contracts/events";
+import type { SourceFile } from "@/server/sources/source-types";
 
 export type ReplayBundle = {
   manifest: RunManifest;
   events: unknown[];
   artifacts: Record<string, unknown>;
+  /** Raw source files archived under sources/apple|import, read back for replay. */
+  sourceFiles?: SourceFile[];
 };
 
 function isArtifactName(name: string): name is ArtifactName {
@@ -99,7 +102,27 @@ export async function loadReplayRun(roots: string[], runId: string): Promise<Rep
       }
     }
 
-    return { manifest, events, artifacts };
+    // Read back archived source files (raw Apple responses / imported files) so
+    // a replay can re-materialize them in the new run directory. Only the safe
+    // sources/apple|import trees are enumerated; a manifest can never name
+    // arbitrary paths. Old runs and fixtures without sources/ simply have none.
+    const sourceFiles: SourceFile[] = [];
+    const sourcesRoot = path.join(runDir, "sources");
+    for (const sub of ["apple", "import"] as const) {
+      const dir = path.join(sourcesRoot, sub);
+      let files: string[];
+      try {
+        files = await fs.readdir(dir);
+      } catch {
+        continue;
+      }
+      for (const f of files) {
+        const content = await fs.readFile(path.join(dir, f), "utf8");
+        sourceFiles.push({ relativePath: `sources/${sub}/${f}`, content });
+      }
+    }
+
+    return { manifest, events, artifacts, sourceFiles };
   }
   throw new Error(`Run ${runId} not found in any replay root`);
 }

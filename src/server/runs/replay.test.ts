@@ -119,4 +119,24 @@ describe("loadReplayRun", () => {
     writeFileSync(path.join(runDir, "manifest.json"), JSON.stringify(manifest));
     await expect(loadReplayRun([dir], runId)).rejects.toThrow(/canReplay/i);
   });
+
+  it("reads back archived source files under the allowed trees", async () => {
+    const runId = store.createRunId();
+    await seedRun(runId);
+    const runDir = path.join(dir, runId);
+    const appleDir = path.join(runDir, "sources", "apple");
+    mkdirSync(appleDir, { recursive: true });
+    writeFileSync(path.join(appleDir, "page-01.attempt-01.json"), "{\"raw\":true}");
+    const loaded = await loadReplayRun([dir], runId);
+    expect(loaded.sourceFiles).toEqual([
+      { relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"raw\":true}" },
+    ]);
+  });
+
+  it("returns no sourceFiles for a run without a sources directory", async () => {
+    const runId = store.createRunId();
+    await seedRun(runId);
+    const loaded = await loadReplayRun([dir], runId);
+    expect(loaded.sourceFiles).toEqual([]);
+  });
 });

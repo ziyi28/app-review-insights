@@ -1,6 +1,7 @@
 import { parse } from "csv-parse/sync";
 import { createHash } from "node:crypto";
 import { RawReviewSchema, type RawReview } from "@/domain/contracts/review";
+import type { SourceFile } from "./source-types";
 
 export const MAX_IMPORT_REVIEWS = 1000;
 
@@ -22,6 +23,8 @@ export type ImportParseResult = {
   /** Zero-based indices of identity conflicts (same id, conflicting body/rating). */
   conflictIndices: number[];
   evidence: ImportEvidence;
+  /** The original imported file, archived at a fixed safe run-local path. */
+  sourceFiles: SourceFile[];
 };
 
 type ImportInput = {
@@ -71,6 +74,10 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
     sha256: createHash("sha256").update(content).digest("hex"),
     schemaVersion: null,
   };
+  // The original file is archived at a fixed, safe run-local path (never the
+  // user-supplied filename, which is kept only in evidence metadata).
+  const archivePath = mediaType === "application/json" ? "sources/import/input.json" : "sources/import/input.csv";
+  const sourceFiles: SourceFile[] = [{ relativePath: archivePath, content }];
 
   if (byteLength(content) > MAX_CONTENT_BYTES) {
     throw new Error(`Import content exceeds ${MAX_CONTENT_BYTES} bytes`);
@@ -89,7 +96,7 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
       json = JSON.parse(content);
     } catch {
       errors.push("File is not valid JSON");
-      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence };
+      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence, sourceFiles };
     }
     const root = json as { schemaVersion?: unknown; reviews?: unknown };
     if (root.schemaVersion !== "1") {
@@ -99,7 +106,7 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
     const list = root.reviews;
     if (!Array.isArray(list)) {
       errors.push("JSON root must contain a reviews array");
-      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence };
+      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence, sourceFiles };
     }
     if (list.length > MAX_IMPORT_REVIEWS) {
       throw new Error(`Import exceeds the ${MAX_IMPORT_REVIEWS} review limit`);
@@ -153,7 +160,7 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
       records = parse(content, { columns: true, skip_empty_lines: true }) as Record<string, string>[];
     } catch (err) {
       errors.push(`CSV parse failed: ${err instanceof Error ? err.message : String(err)}`);
-      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence };
+      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence, sourceFiles };
     }
     if (records.length > MAX_IMPORT_REVIEWS) {
       throw new Error(`Import exceeds the ${MAX_IMPORT_REVIEWS} review limit`);
@@ -166,7 +173,7 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
       }
     }
     if (errors.length > 0) {
-      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence };
+      return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence, sourceFiles };
     }
     records.forEach((row, index) => {
       const id = String(row.id ?? "").trim();
@@ -207,5 +214,5 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
     });
   }
 
-  return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence };
+  return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence, sourceFiles };
 }

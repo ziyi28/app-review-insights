@@ -36,6 +36,7 @@ function liveResult(overrides: Partial<SourceResult>): SourceResult {
     rawRefs: [],
     limitations: [],
     pages: [],
+    sourceFiles: [],
     ...overrides,
   };
 }
@@ -274,5 +275,42 @@ describe("source preview", () => {
     const removed = await pruneExpiredPreviews(previewsDir, "2026-08-13T00:00:00.000Z");
     expect(removed).toBe(1);
     expect(await readPreview(previewsDir, "preview-1")).toBeNull();
+  });
+
+  it("keeps raw source files in the server-side snapshot", async () => {
+    mockedCollect.mockResolvedValue(
+      liveResult({
+        status: "complete",
+        reviews: [rssRaw("r1")],
+        rawRefs: ["sources/apple/page-01.attempt-01.json#r1"],
+        pages: [
+          {
+            url: "u", finalUrl: "u", startedAt: "s", finishedAt: "f", httpStatus: 200, headers: {}, byteLength: 5, sha256: "abc", page: 1, attempt: 1, reviewCount: 1, parserWarnings: [], contentType: "application/json", rawFile: "sources/apple/page-01.attempt-01.json",
+          },
+        ],
+        sourceFiles: [{ relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"x\":1}" }],
+      }),
+    );
+    const preview = await runPreviewImpl(makeInput());
+    expect(preview.live.sourceFiles).toEqual([{ relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"x\":1}" }]);
+  });
+
+  it("counts requestCount as attempts made and pageCount as unique pages", async () => {
+    // Two attempts on page 1 (one empty, one recovered) plus a retry confirm:
+    // requestCount = pages.length = 3, pageCount = unique pages = 1.
+    mockedCollect.mockResolvedValue(
+      liveResult({
+        status: "complete",
+        reviews: [rssRaw("r1")],
+        pages: [
+          { url: "u1", finalUrl: "u1", startedAt: "s", finishedAt: "f", httpStatus: 200, headers: {}, byteLength: 1, sha256: "a", page: 1, attempt: 1, reviewCount: 0, parserWarnings: [], contentType: "application/json", rawFile: "sources/apple/page-01.attempt-01.json" },
+          { url: "u2", finalUrl: "u2", startedAt: "s", finishedAt: "f", httpStatus: 200, headers: {}, byteLength: 1, sha256: "b", page: 1, attempt: 2, reviewCount: 0, parserWarnings: [], contentType: "application/json", rawFile: "sources/apple/page-01.attempt-02.json" },
+          { url: "u3", finalUrl: "u3", startedAt: "s", finishedAt: "f", httpStatus: 200, headers: {}, byteLength: 1, sha256: "c", page: 1, attempt: 3, reviewCount: 1, parserWarnings: [], contentType: "application/json", rawFile: "sources/apple/page-01.attempt-03.json" },
+        ],
+      }),
+    );
+    const preview = await runPreviewImpl(makeInput());
+    expect(preview.live.requestCount).toBe(3);
+    expect(preview.live.pageCount).toBe(1);
   });
 });

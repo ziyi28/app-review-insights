@@ -58,6 +58,7 @@ describe("prepareReviews", () => {
         sha256: "a".repeat(64),
         schemaVersion: "1",
       },
+      sourceFiles: [{ relativePath: "sources/import/input.json", content: "{}" }],
     };
     const out = prepareReviews({ kind: "import", parse });
     expect(out.stats.duplicateCount).toBe(1);

@@ -84,8 +84,12 @@ npm run dev
 - **实时（降级路径）：** Apple 客户评论 RSS
   （`/us/rss/customerreviews/page={1..10}/id={id}/sortBy=mostRecent/json`），
   顺序抓取，间隔至少 500ms，最多 10 页，不并发；与 SerpApi 一样使用所选的
-  `100 / 300 / 500` 上限，达到数量后停止继续请求页面。每一页的原始响应、安全请求头、时间戳、
-  SHA-256 和 HTTP 尝试次数都会被保留。这是实时网络来源，本地历史缓存不会被伪装成它。
+  `100 / 300 / 500` 上限，达到数量后停止继续请求页面。每次 HTTP 尝试的原始响应
+  body 都会原样归档到运行目录 `sources/apple/page-XX.attempt-YY.json`（本地
+  git-ignored），并随 `source-evidence` 保存每一页的页码、attempt、文件引用、URL、
+  HTTP 状态、安全请求头、起止时间、UTF-8 字节数、SHA-256、解析警告和评论数——
+  原始响应可随时从运行目录逐字节复核，但不通过浏览器 API 暴露。这是实时网络来源，
+  本地历史缓存不会被伪装成它。
 - **有界、可见的重试。** HTTP 200 且第 1 页为空时，先重试两次（2 秒 / 5 秒，绕过缓存），
   之后才接受为 `suspect-empty`。当 `rel=last` 仍宣称有更多页而某页为空时，等待 2 秒后
   确认一次，然后报告为 `partial`（`RSS_UNSTABLE_PAGINATION`）；重复页会在追加前被检测到

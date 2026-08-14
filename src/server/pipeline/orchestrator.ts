@@ -1,6 +1,7 @@
 import type { NormalizedReview, RawReview } from "@/domain/contracts/review";
 import type { FocusArea, Prd } from "@/domain/contracts/analysis";
 import type { Limitation } from "@/server/sources/apple-rss-collector";
+import type { SourceFile } from "@/server/sources/source-types";
 import { prepareReviews } from "@/domain/reviews/prepare";
 import { validateTraceability } from "@/domain/traceability/validate";
 import { buildEvidenceValidationReport } from "@/domain/analysis/evidence-validation";
@@ -33,6 +34,8 @@ export type ImportParseShape = {
   duplicateIndices: number[];
   conflictIndices: number[];
   evidence: { fileName: string; mediaType: "application/json" | "text/csv"; byteLength: number; sha256: string; schemaVersion: string | null };
+  /** The original imported file archived into the run directory. */
+  sourceFiles: SourceFile[];
 };
 
 /**
@@ -62,6 +65,24 @@ export type AppStoreReviewSourceSummary = {
   searchId: string | null;
   creditsUsed?: number | null;
   requestId?: string | null;
+  /** Per-request archive evidence for an apple-rss provider (optional: absent
+   *  for SerpApi providers and old artifacts). */
+  pages?: {
+    page: number;
+    attempt: number;
+    rawFile: string;
+    url: string;
+    finalUrl: string;
+    httpStatus: number;
+    headers: Record<string, string>;
+    startedAt: string;
+    finishedAt: string;
+    byteLength: number;
+    sha256: string;
+    parserWarnings: { code: string; message: string; index?: number }[];
+    reviewCount: number;
+    contentType: string | null;
+  }[];
 };
 
 /** A pre-collected live dataset taken from a preview snapshot. */
@@ -75,6 +96,8 @@ export type PreviewSourceShape = {
   /** Source limitations carried from the preview (e.g. LOCAL_HISTORY_SELECTED). */
   limitations: Limitation[];
   sourceSummary: AppStoreReviewSourceSummary;
+  /** Raw response bodies from the preview, archived into the run directory. */
+  sourceFiles?: SourceFile[];
 };
 
 export type ExecuteDeps = {
@@ -102,6 +125,7 @@ async function collectSource(
   rawRefs: string[];
   limitations: Limitation[];
   sourceSummary: unknown;
+  sourceFiles: SourceFile[];
 }> {
   if (source.kind === "preview") {
     const data = source.data;
@@ -111,6 +135,7 @@ async function collectSource(
       rawRefs: data.rawRefs,
       limitations: data.limitations,
       sourceSummary: data.sourceSummary,
+      sourceFiles: data.sourceFiles ?? [],
     };
   }
   if (source.kind === "apple-rss") {
@@ -131,7 +156,36 @@ async function collectSource(
       rawReviews: result.reviews,
       rawRefs: result.rawRefs,
       limitations: result.limitations,
-      sourceSummary: { kind: "apple-rss", appId: source.appId, status: result.status, pages: result.pages.length, reviewCount: result.reviews.length },
+      sourceSummary: {
+        kind: "apple-rss",
+        appId: source.appId,
+        status: result.status,
+        reviewCount: result.reviews.length,
+        requestCount: result.pages.length,
+        pageCount: new Set(result.pages.map((p) => p.page)).size,
+        // Per-request archive evidence so every raw response can be re-verified
+        // from the run directory: page, attempt, raw file path, URL, HTTP
+        // status, safe headers, timing, UTF-8 byte length, SHA-256, parser
+        // warnings and review count. The raw bodies themselves are archived as
+        // source files, never embedded here.
+        pages: result.pages.map((p) => ({
+          page: p.page,
+          attempt: p.attempt,
+          rawFile: p.rawFile,
+          url: p.url,
+          finalUrl: p.finalUrl,
+          httpStatus: p.httpStatus,
+          headers: p.headers,
+          startedAt: p.startedAt,
+          finishedAt: p.finishedAt,
+          byteLength: p.byteLength,
+          sha256: p.sha256,
+          parserWarnings: p.parserWarnings,
+          reviewCount: p.reviewCount,
+          contentType: p.contentType,
+        })),
+      },
+      sourceFiles: result.sourceFiles,
     };
   }
   const parse = source.parse as ImportParseShape;
@@ -142,6 +196,7 @@ async function collectSource(
     rawRefs: parse.rawRefs,
     limitations,
     sourceSummary: { kind: "import", reviewCount: parse.reviews.length, warnings: parse.warnings },
+    sourceFiles: parse.sourceFiles ?? [],
   };
 }
 
@@ -243,6 +298,13 @@ export async function executeRun(
     limitations.push(...source.limitations);
     for (const l of source.limitations) {
       await publisher.publish({ type: "limitation.reported", runId, stage: "source", data: l });
+    }
+    // Archive every raw source response BEFORE the raw-reviews artifact is
+    // published, so the moment an artifact references a source file it is
+    // already on disk and immutable (the write rejects overwrites). Raw bodies
+    // live only in the run directory and are never exposed over the API.
+    for (const file of source.sourceFiles) {
+      await store.writeSourceFile(runId, file.relativePath, file.content);
     }
     // Persist the exact reviews that entered this run so downstream rawRefs and
     // Cached Replay reference run-local immutable artifacts, never the source

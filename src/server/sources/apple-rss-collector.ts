@@ -1,6 +1,6 @@
 import type { RawReview } from "@/domain/contracts/review";
 import { parseAppleRssJson, type AppleRssParseResult } from "./apple-rss-parser";
-import type { Limitation } from "./source-types";
+import type { Limitation, SourceFile } from "./source-types";
 
 // Re-exported so existing consumers keep working; the canonical type lives in
 // source-types.ts and is shared with the SocialCrawl collector.
@@ -13,6 +13,7 @@ export type PageEvidence = {
   finishedAt: string;
   httpStatus: number;
   headers: Record<string, string>;
+  /** UTF-8 byte length of the raw response body. */
   byteLength: number;
   sha256: string;
   page: number;
@@ -21,6 +22,8 @@ export type PageEvidence = {
   reviewCount: number;
   parserWarnings: { code: string; message: string; index?: number }[];
   contentType: string | null;
+  /** Run-local path to the archived raw response for this request. */
+  rawFile: string;
 };
 
 export type SourceResult = {
@@ -29,6 +32,8 @@ export type SourceResult = {
   rawRefs: string[];
   limitations: Limitation[];
   pages: PageEvidence[];
+  /** Every raw HTTP response body, one per fetchOnce attempt. */
+  sourceFiles: SourceFile[];
 };
 
 export type CollectorDeps = {
@@ -58,6 +63,11 @@ async function sha256(text: string): Promise<string> {
   return createHash("sha256").update(text).digest("hex");
 }
 
+/** Run-local, safe archive path for one HTTP attempt's raw response. */
+function sourceFilePath(page: number, attempt: number): string {
+  return `sources/apple/page-${String(page).padStart(2, "0")}.attempt-${String(attempt).padStart(2, "0")}.json`;
+}
+
 export function buildPageUrl(baseUrl: string, page: number, appId: string): string {
   return `${baseUrl}/page=${page}/id=${appId}/sortBy=mostRecent/json`;
 }
@@ -75,6 +85,8 @@ type FetchOutcome = {
   contentType: string | null;
   startedAt: string;
   finishedAt: string;
+  /** Run-local archive path for this request's raw body. */
+  rawFile: string;
 };
 
 /**
@@ -101,6 +113,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
   const rawRefs: string[] = [];
   const limitations: Limitation[] = [];
   const pages: PageEvidence[] = [];
+  const sourceFiles: SourceFile[] = [];
   let lastBodyHash: string | null = null;
   // The most recent advertised last page across responses. An empty page often
   // carries no rel=last link of its own, so the collector falls back to the
@@ -153,11 +166,15 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
       contentType: res.headers.get("content-type"),
       startedAt,
       finishedAt,
+      rawFile: sourceFilePath(page, attempt),
     };
   }
 
   function record(o: FetchOutcome): void {
     if (o.parsed.lastPage !== null) advertisedLastPage = o.parsed.lastPage;
+    // Archive the exact raw response body so every HTTP attempt is
+    // independently verifiable from the run directory.
+    sourceFiles.push({ relativePath: o.rawFile, content: o.body });
     pages.push({
       url: o.url,
       finalUrl: o.res.url || o.url,
@@ -165,20 +182,23 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
       finishedAt: o.finishedAt,
       httpStatus: o.httpStatus,
       headers: o.safeHeaders,
-      byteLength: o.body.length,
+      byteLength: Buffer.byteLength(o.body, "utf8"),
       sha256: o.bodyHash,
       page: o.page,
       attempt: o.attempt,
       reviewCount: o.parsed.reviews.length,
       parserWarnings: o.parsed.warnings,
       contentType: o.contentType,
+      rawFile: o.rawFile,
     });
   }
 
   function appendFrom(o: FetchOutcome): void {
     for (const [i, r] of o.parsed.reviews.entries()) {
       reviews.push(r);
-      rawRefs.push(`sources/apple/page-${String(o.page).padStart(2, "0")}.json#${o.parsed.rawRefs[i]}`);
+      // The rawRef points at the attempt file that actually provided this
+      // review, so its body can always be re-read from the archive.
+      rawRefs.push(`${o.rawFile}#${o.parsed.rawRefs[i]}`);
     }
     lastBodyHash = o.bodyHash;
   }
@@ -201,14 +221,14 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
           message: `Page ${page} fetch failed: ${err instanceof Error ? err.message : String(err)}`,
           stage: "source",
         });
-        return { status: "failed", reviews, rawRefs, limitations, pages };
+        return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
       }
       limitations.push({
         code: "RSS_PARTIAL",
         message: `Page ${page} fetch failed; continuing with collected reviews`,
         stage: "source",
       });
-      return { status: "partial", reviews, rawRefs, limitations, pages };
+      return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
     }
     record(outcome);
 
@@ -216,10 +236,10 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
       const message = `Page ${page} returned HTTP ${outcome.httpStatus}`;
       if (page === 1 && pages.length === 1) {
         limitations.push({ code: "RSS_FETCH_FAILED", message, stage: "source" });
-        return { status: "failed", reviews, rawRefs, limitations, pages };
+        return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
       }
       limitations.push({ code: "RSS_PARTIAL", message: `${message}; continuing with collected reviews`, stage: "source" });
-      return { status: "partial", reviews, rawRefs, limitations, pages };
+      return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
     }
 
     // An HTTP 200 page that is not valid JSON (or has no feed object, or a
@@ -231,7 +251,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
         message: `Page ${page} returned HTTP 200 but its body is not a valid Apple RSS feed`,
         stage: "source",
       });
-      return { status: "failed", reviews, rawRefs, limitations, pages };
+      return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
     }
 
     // Empty page 1: retry twice (2s, 5s) with cache-busting before accepting
@@ -264,7 +284,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             message: `Page ${page} returned HTTP 200 but its body is not a valid Apple RSS feed`,
             stage: "source",
           });
-          return { status: "failed", reviews, rawRefs, limitations, pages };
+          return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
         }
         // Still empty; loop continues to the next retry.
       }
@@ -275,7 +295,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             "Apple RSS returned an HTTP 200 empty feed on page 1 after retries; review availability is uncertain and cannot be reported as 'no reviews'",
           stage: "source",
         });
-        return { status: "suspect-empty", reviews, rawRefs, limitations, pages };
+        return { status: "suspect-empty", reviews, rawRefs, limitations, pages, sourceFiles };
       }
     }
 
@@ -298,7 +318,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             message: `Page ${page} is empty while ${lastPage} pages are advertised; confirmation failed`,
             stage: "source",
           });
-          return { status: "partial", reviews, rawRefs, limitations, pages };
+          return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
         }
         record(confirm);
         if (confirm.parsed.reviews.length > 0 && !structuralFailure(confirm)) {
@@ -309,7 +329,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             message: `Page ${page} is empty while ${lastPage} pages are advertised; ending pagination early`,
             stage: "source",
           });
-          return { status: "partial", reviews, rawRefs, limitations, pages };
+          return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
         }
       } else {
         // Natural end: the advertised last page was reached (or unknown), or
@@ -352,5 +372,5 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
     }
   }
 
-  return { status: "complete", reviews, rawRefs, limitations, pages };
+  return { status: "complete", reviews, rawRefs, limitations, pages, sourceFiles };
 }

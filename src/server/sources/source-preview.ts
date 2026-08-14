@@ -1,7 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
-import type { Limitation, CollectionStatus } from "./source-types";
+import type { Limitation, CollectionStatus, SourceFile } from "./source-types";
 import { collectAppleReviews, type CollectorDeps } from "./apple-rss-collector";
 import { collectSerpApiReviews, type SerpApiEvidence, type SerpApiCollectorDeps } from "./serpapi-collector";
 import { AppleReviewCacheStore } from "./apple-review-cache";
@@ -11,9 +11,32 @@ export const PREVIEW_TTL_MS = 30 * 60 * 1000;
 /** Which live provider produced this preview's fresh sample. */
 export type LiveProvider = "serpapi" | "apple-rss";
 
+/**
+ * Per-request archive pointer for an Apple RSS response, so a run can later
+ * re-read the exact raw body that produced each page's reviews. This is the
+ * secret-free provenance the source-evidence artifact carries; the raw bodies
+ * themselves live only in the local run directory.
+ */
+export type AppleRssPageEvidence = {
+  page: number;
+  attempt: number;
+  rawFile: string;
+  url: string;
+  finalUrl: string;
+  httpStatus: number;
+  headers: Record<string, string>;
+  startedAt: string;
+  finishedAt: string;
+  byteLength: number;
+  sha256: string;
+  parserWarnings: { code: string; message: string; index?: number }[];
+  reviewCount: number;
+  contentType: string | null;
+};
+
 type LiveSourceEvidence =
   | SerpApiEvidence
-  | { provider: "apple-rss"; pageCount: number; requestCount: number };
+  | { provider: "apple-rss"; pageCount: number; requestCount: number; pages?: AppleRssPageEvidence[] };
 
 export type SourcePreview = {
   protocolVersion: "1";
@@ -41,6 +64,9 @@ export type SourcePreview = {
     /** Full live reviews, never sent to the browser. */
     reviews: RawReview[];
     rawRefs: string[];
+    /** Raw response bodies for this live sample; server-side only, never sent
+     *  to the browser. Absent on old snapshots. */
+    sourceFiles?: SourceFile[];
   };
   stable: {
     available: boolean;
@@ -128,21 +154,7 @@ export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview
         reviews: liveReviews,
         rawRefs: liveRawRefs,
       }
-    : {
-        provider: "apple-rss",
-        forcedRefresh: false,
-        cached: null,
-        collectedAt: now,
-        status: rss!.status,
-        reviewCount: liveReviews.length,
-        pageCount: rss!.pages.length,
-        requestCount: rss!.pages.reduce((n, p) => n + p.attempt, 0),
-        dateRange: dateRangeOf(liveReviews),
-        limitations,
-        evidence: { provider: "apple-rss", pageCount: rss!.pages.length, requestCount: rss!.pages.reduce((n, p) => n + p.attempt, 0) },
-        reviews: liveReviews,
-        rawRefs: liveRawRefs,
-      };
+    : buildRssLive(liveReviews, liveRawRefs, rss!, now, limitations);
 
   const cacheStore = new AppleReviewCacheStore(cacheDir);
   // Empty or partial live results must never clear the cache.
@@ -187,6 +199,58 @@ export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview
 
   await writeSnapshotAtomically(previewsDir, previewId, snapshot);
   return snapshot;
+}
+
+function buildRssLive(
+  liveReviews: RawReview[],
+  liveRawRefs: string[],
+  rss: Awaited<ReturnType<typeof collectAppleReviews>>,
+  now: string,
+  limitations: Limitation[],
+): SourcePreview["live"] {
+  const rssPages = rss.pages;
+  const rssRequestCount = rssPages.length;
+  const rssPageCount = new Set(rssPages.map((p) => p.page)).size;
+  const evidence: Extract<LiveSourceEvidence, { provider: "apple-rss" }> = {
+    provider: "apple-rss",
+    pageCount: rssPageCount,
+    requestCount: rssRequestCount,
+    pages: rssPages.map((p) => ({
+      page: p.page,
+      attempt: p.attempt,
+      rawFile: p.rawFile,
+      url: p.url,
+      finalUrl: p.finalUrl,
+      httpStatus: p.httpStatus,
+      headers: p.headers,
+      startedAt: p.startedAt,
+      finishedAt: p.finishedAt,
+      byteLength: p.byteLength,
+      sha256: p.sha256,
+      parserWarnings: p.parserWarnings,
+      reviewCount: p.reviewCount,
+      contentType: p.contentType,
+    })),
+  };
+  return {
+    provider: "apple-rss",
+    forcedRefresh: false,
+    cached: null,
+    collectedAt: now,
+    status: rss.status,
+    reviewCount: liveReviews.length,
+    pageCount: rssPageCount,
+    requestCount: rssRequestCount,
+    dateRange: dateRangeOf(liveReviews),
+    limitations,
+    evidence,
+    reviews: liveReviews,
+    rawRefs: liveRawRefs,
+    // The raw responses ride along in the server-side snapshot only; the
+    // public preview API never exposes them. A run started from this preview
+    // archives them into its own run directory.
+    sourceFiles: rss.sourceFiles,
+  };
 }
 
 export function previewFilePath(previewsDir: string, previewId: string): string {
