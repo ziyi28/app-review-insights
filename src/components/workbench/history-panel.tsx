@@ -62,7 +62,14 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
   if (!open) return null;
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div
+      className={styles.overlay}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div
         ref={containerRef}
         role="dialog"

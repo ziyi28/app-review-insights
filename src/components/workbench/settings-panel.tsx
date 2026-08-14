@@ -166,7 +166,14 @@ export function SettingsPanel({ t, open, onClose, onConfigChange }: SettingsPane
   };
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
+    <div
+      className={styles.overlay}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div
         ref={containerRef}
         role="dialog"

@@ -34,6 +34,7 @@ export function useModal(open: boolean, onClose: () => void, containerRef: React
 
   const onKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Escape") {
+      if (e.nativeEvent.isComposing) return;
       e.preventDefault();
       onClose();
       return;
