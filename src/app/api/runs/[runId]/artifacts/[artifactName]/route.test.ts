@@ -162,4 +162,79 @@ describe("GET artifact (bundled fixture viewing)", () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ interpretation: "live-only" });
   });
+
+  it("does not fall back to fixture artifacts after a runtime manifest owns the run id", async () => {
+    const collidingRunId = "run-x-twitter-us";
+
+    await store.writeManifest(collidingRunId, {
+      runId: collidingRunId,
+      status: "completed",
+      executionMode: "live",
+      createdAt: new Date().toISOString(),
+      updatedAt: "",
+      goal: "RUNTIME-SHADOW",
+      stages: {},
+      artifacts: {},
+      limitations: [],
+      canReplay: false,
+    });
+
+    const res = await GET(
+      new Request(
+        `http://localhost/api/runs/${collidingRunId}/artifacts/raw-reviews`,
+      ),
+      {
+        params: Promise.resolve({
+          runId: collidingRunId,
+          artifactName: "raw-reviews",
+        }),
+      },
+    );
+
+    expect(res.status).toBe(404);
+  });
+
+  it("serves the runtime artifact, not the fixture, once a same-named run owns the id", async () => {
+    const collidingRunId = "run-x-twitter-us";
+
+    await store.writeArtifact(collidingRunId, "raw-reviews", 1, {
+      reviews: [{ id: "runtime-only" }],
+    });
+    await store.writeManifest(collidingRunId, {
+      runId: collidingRunId,
+      status: "completed",
+      executionMode: "live",
+      createdAt: new Date().toISOString(),
+      updatedAt: "",
+      goal: "RUNTIME-SHADOW",
+      stages: {},
+      artifacts: { "raw-reviews": { attempt: 1, file: "artifacts/raw-reviews.attempt-01.json" } },
+      limitations: [],
+      canReplay: false,
+    });
+
+    const res = await GET(
+      new Request(`http://localhost/api/runs/${collidingRunId}/artifacts/raw-reviews`),
+      { params: Promise.resolve({ runId: collidingRunId, artifactName: "raw-reviews" }) },
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { reviews: { id: string }[] };
+    expect(body.reviews).toEqual([{ id: "runtime-only" }]);
+  });
+
+  it("still serves an early-run artifact before the manifest is written", async () => {
+    // No manifest yet: the run was accepted and the first artifact landed, but
+    // the manifest write raced or the process died before finalize. The
+    // attempt-01 artifact must still be readable.
+    await store.writeArtifact(runId, "scope", 1, { interpretation: "early" });
+
+    const res = await GET(
+      new Request(`http://localhost/api/runs/${runId}/artifacts/scope`),
+      { params: Promise.resolve({ runId, artifactName: "scope" }) },
+    );
+
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ interpretation: "early" });
+  });
 });

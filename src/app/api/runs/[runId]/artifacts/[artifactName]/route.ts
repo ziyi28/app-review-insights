@@ -15,13 +15,16 @@ export const runtime = "nodejs";
  * manifest was finalized.
  *
  * The runtime store is searched first, then the bundled fixture root, so a
- * built-in demo run's artifacts are viewable offline. The same manifest/attempt
- * resolution runs per root and the first hit wins.
+ * built-in demo run's artifacts are viewable offline. Ownership is decided per
+ * root by the manifest: once a manifest for the run id exists in a root, that
+ * root is authoritative for the request — an artifact missing there is a 404
+ * and never falls back to a same-named fixture artifact. Only when no manifest
+ * and no artifact exist in a root do we continue to the next root.
  */
 export async function GET(req: Request, { params }: { params: Promise<{ runId: string; artifactName: string }> }) {
   const { runId, artifactName } = await params;
   if (!(ARTIFACT_NAMES as readonly string[]).includes(artifactName)) {
-    return NextResponse.json({ error: "unknown artifact" }, { status: 404, headers: { "cache-control": "no-store" } });
+    return notFound("unknown artifact");
   }
   const rawAttempt = new URL(req.url).searchParams.get("attempt");
   const requestedAttempt = rawAttempt === null ? null : Number(rawAttempt);
@@ -32,24 +35,42 @@ export async function GET(req: Request, { params }: { params: Promise<{ runId: s
   const roots = [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")];
   for (const root of roots) {
     const store = new RunStore(root);
+    let manifestFound = false;
+    let attempt = 1;
+
     try {
-      let attempt = 1;
-      try {
-        const manifest = await store.readManifest(runId);
-        const info = manifest.artifacts[artifactName];
-        if (info?.attempt) attempt = info.attempt;
-        if (requestedAttempt !== null && requestedAttempt > attempt) {
-          return NextResponse.json({ error: "artifact attempt not found" }, { status: 404, headers: { "cache-control": "no-store" } });
-        }
-      } catch {
-        // no manifest yet (early run or crash before finalize) -> attempt 1
+      const manifest = await store.readManifest(runId);
+      manifestFound = true;
+
+      const info = manifest.artifacts[artifactName];
+      if (info?.attempt) attempt = info.attempt;
+
+      if (requestedAttempt !== null && requestedAttempt > attempt) {
+        return notFound("artifact attempt not found");
       }
-      const targetAttempt = requestedAttempt ?? attempt;
-      const value = await store.readArtifact(runId, artifactName, targetAttempt);
-      return NextResponse.json(value, { headers: { "cache-control": "no-store" } });
     } catch {
-      // try the next root
+      // 允许运行早期没有 manifest 的 attempt-01 artifact。
+    }
+
+    try {
+      const value = await store.readArtifact(
+        runId,
+        artifactName,
+        requestedAttempt ?? attempt,
+      );
+      return NextResponse.json(value, {
+        headers: { "cache-control": "no-store" },
+      });
+    } catch {
+      if (manifestFound) {
+        return notFound("artifact not found");
+      }
     }
   }
-  return NextResponse.json({ error: "artifact not found" }, { status: 404, headers: { "cache-control": "no-store" } });
+  return notFound("artifact not found");
+}
+
+/** 文件内私有辅助函数：统一生成带 `cache-control: no-store` 的 404 JSON。 */
+function notFound(message: string): NextResponse {
+  return NextResponse.json({ error: message }, { status: 404, headers: { "cache-control": "no-store" } });
 }
