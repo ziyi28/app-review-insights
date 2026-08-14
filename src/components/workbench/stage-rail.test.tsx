@@ -193,4 +193,56 @@ describe("StageRail", () => {
     expect(within(revisionItem!).queryByText("Skipped", { exact: true })).not.toBeInTheDocument();
     expect(revisionItem).toHaveTextContent("✓");
   });
+
+  // 缺陷：run.failed 后，执行中的阶段必须显示 Failed，不得继续显示 Running。
+  it("marks the in-flight stage Failed and unstarted stages Skipped after run.failed", () => {
+    const events = [
+      event("stage.started", "source"),
+      event("stage.completed", "source"),
+      event("stage.started", "prepare"),
+      event("stage.completed", "prepare"),
+      event("stage.started", "scope"),
+      event("stage.completed", "scope"),
+      event("stage.started", "topics"),
+      event("run.failed", undefined),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+
+    const topicsItem = screen.getByText("Topics").closest("li");
+    expect(topicsItem).not.toBeNull();
+    const failedStatus = within(topicsItem!).getByText("Failed", { exact: true });
+    expect(failedStatus).toBeVisible();
+    expect(topicsItem).not.toHaveTextContent("Running");
+    expect(topicsItem).not.toHaveTextContent("Skipped");
+
+    // 尚未开始的后续阶段显示可见 Skipped。
+    const planningItem = screen.getByText("Planning").closest("li");
+    expect(planningItem).not.toBeNull();
+    expect(within(planningItem!).getByText("Skipped", { exact: true })).toBeVisible();
+    const testsItem = screen.getByText("Tests").closest("li");
+    expect(testsItem).not.toBeNull();
+    expect(within(testsItem!).getByText("Skipped", { exact: true })).toBeVisible();
+  });
+
+  // 强化 interrupted 测试：没有终态事件时，进行中的阶段仍显示 Running，
+  // 后续阶段仍是 Waiting，绝不误报为 Skipped 或 Failed。
+  it("keeps the in-flight stage Running and downstream stages Waiting when interrupted", () => {
+    const events = [
+      event("stage.started", "source"),
+      event("stage.completed", "source"),
+      event("stage.started", "topics"),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+
+    const topicsItem = screen.getByText("Topics").closest("li");
+    expect(topicsItem).not.toBeNull();
+    expect(screen.getByText(/Topics: Analysis running/)).toBeInTheDocument();
+    expect(topicsItem).not.toHaveTextContent("Failed");
+    expect(topicsItem).not.toHaveTextContent("Skipped");
+
+    const planningItem = screen.getByText("Planning").closest("li");
+    expect(planningItem).not.toBeNull();
+    expect(planningItem).toHaveTextContent(/enter a url/i);
+    expect(planningItem).not.toHaveTextContent(/skipped/i);
+  });
 });

@@ -82,14 +82,26 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
     <ol style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gap: "4px" }}>
       {STAGE_ORDER.map((stage) => {
         const label = t[STAGE_LABELS[stage]];
+        const started = timings.get(stage)?.startedAt != null;
         const done = timings.get(stage)?.finishedAt != null;
-        const current = currentStage === stage && !done;
+        // A stage that started but never finished on a failed run is itself the
+        // failure point; once the run is terminal nothing can still be "current".
+        const failedStage = failed && started && !done;
+        const current = !hasTerminal && currentStage === stage && !done;
+        const skipped = hasTerminal && !started;
         const duration = elapsedFor(stage);
         const batch = current ? batchProgress(events, stage) : null;
-        const skipped = hasTerminal && !done && !current;
-        const statusText = done ? t.completed : current ? t.running : hasTerminal ? t.stageSkipped : t.waiting;
+        const statusText = done
+          ? t.completed
+          : failedStage
+            ? t.failed
+            : current
+              ? t.running
+              : skipped
+                ? t.stageSkipped
+                : t.waiting;
         return (
-          <li key={stage} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: done || current ? 1 : 0.55 }}>
+          <li key={stage} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: done || current || failedStage ? 1 : 0.55 }}>
             <span
               aria-hidden="true"
               style={{
@@ -104,7 +116,19 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
             <span className="sr-only">
               {label}: {statusText}
             </span>
-            {skipped ? (
+            {failedStage ? (
+              <span
+                aria-hidden="true"
+                style={{
+                  color: "var(--danger)",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  flexShrink: 0,
+                }}
+              >
+                {t.failed}
+              </span>
+            ) : skipped ? (
               <span
                 aria-hidden="true"
                 style={{
