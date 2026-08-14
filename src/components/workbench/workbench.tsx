@@ -354,7 +354,12 @@ export function Workbench() {
     try {
       const res = await fetch(`/api/runs/${sourceRunId}`, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const manifest = (await res.json()) as { startRequest?: { source?: { kind: string; appStoreUrl?: string; previewId?: string; reviewSelection?: string } } };
+      const manifest = (await res.json()) as {
+        goal?: string;
+        appName?: string;
+        appUrl?: string;
+        startRequest?: { source?: { kind: string; appStoreUrl?: string; previewId?: string; reviewSelection?: string } };
+      };
       if (manifest.startRequest) {
         const req = manifest.startRequest;
         // If retrying a historical live run, strip previewId so it freshly collects from App Store without stale preview snapshot issues
@@ -370,28 +375,60 @@ export function Workbench() {
         autoJumpedKeys.current.clear();
         userNavigated.current = false;
         void start(cleanRequest);
+      } else if (manifest.appUrl && manifest.goal) {
+        // Fallback for older historical runs without saved startRequest: reconstruct start request
+        seenRunId.current = null;
+        setCache({ runId: null });
+        setTab("overview");
+        autoJumpedKeys.current.clear();
+        userNavigated.current = false;
+        void start({
+          protocolVersion: "1",
+          mode: "analyze",
+          uiLocale,
+          outputLocale: uiLocale,
+          goal: manifest.goal,
+          source: { kind: "live", appStoreUrl: manifest.appUrl },
+        });
       } else {
         void loadHistory(sourceRunId);
       }
     } catch {
       void loadHistory(sourceRunId);
     }
-  }, [start, loadHistory]);
+  }, [start, loadHistory, uiLocale]);
 
   const idle = !running && events.length === 0;
   const starting = running && runId === null;
 
   const runFailed = useMemo(() => {
-    return !running && (Boolean(error) || events.some((e) => e.type === "run.failed"));
+    if (running || events.length === 0) return false;
+    if (Boolean(error)) return true;
+    if (events.some((e) => e.type === "run.failed")) return true;
+    // If not running and events exist but never saw run.completed, it was interrupted/failed
+    return !events.some((e) => e.type === "run.completed");
   }, [running, error, events]);
 
   const runFailedMessage = useMemo(() => {
     if (error) return error;
     const failedEvent = events.find((e) => e.type === "run.failed");
-    if (!failedEvent) return null;
-    const data = failedEvent.data as { error?: string; outcome?: string } | undefined;
-    return data?.error ?? (data?.outcome ? `Outcome: ${data.outcome}` : t.failed);
+    if (failedEvent) {
+      const data = failedEvent.data as { error?: string; outcome?: string } | undefined;
+      return data?.error ?? (data?.outcome ? `Outcome: ${data.outcome}` : t.failed);
+    }
+    if (!events.some((e) => e.type === "run.completed")) {
+      return t.failed;
+    }
+    return null;
   }, [error, events, t]);
+
+  const handleRetryCurrent = useCallback(() => {
+    if (canRetry) {
+      void retry();
+    } else if (runId) {
+      void handleRetryHistory(runId);
+    }
+  }, [canRetry, retry, runId, handleRetryHistory]);
 
   const runningStatusText = running ? (starting ? t.starting : t.running) : events.length > 0 ? (terminal ? (runFailed ? t.failed : t.completed) : t.waiting) : t.waiting;
 
@@ -415,6 +452,11 @@ export function Workbench() {
         </div>
         <span className={styles.spacer} />
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
+        {runFailed ? (
+          <button className="btn btn-primary" onClick={handleRetryCurrent} disabled={running}>
+            {t.retry}
+          </button>
+        ) : null}
         <button className="btn btn-primary" onClick={handleNewRun} disabled={running}>
           {t.newRun}
         </button>
@@ -487,11 +529,9 @@ export function Workbench() {
                   {runFailedMessage ? <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)" }}>{runFailedMessage}</p> : null}
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  {canRetry ? (
-                    <button type="button" className="btn btn-primary" onClick={() => void retry()}>
-                      {t.retry}
-                    </button>
-                  ) : null}
+                  <button type="button" className="btn btn-primary" onClick={handleRetryCurrent}>
+                    {t.retry}
+                  </button>
                   <button type="button" className="btn btn-secondary" onClick={handleNewRun}>
                     {t.newRun}
                   </button>
