@@ -1,4 +1,4 @@
-# App Review Planner
+# App Review Insights
 
 [English](README.en.md) · **[中文](README.md)**
 
