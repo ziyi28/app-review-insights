@@ -146,4 +146,84 @@ describe("Workbench settings integration", () => {
     expect(screen.queryByRole("button", { name: tZh.analyzeFresh })).not.toBeInTheDocument();
     expect(screen.getAllByText(tZh.starting).length).toBeGreaterThan(0);
   });
+
+  it("retries a failed run from history panel", async () => {
+    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
+      if (url === "/api/runs" && init?.method === "POST") {
+        return Promise.resolve(
+          new Response(
+            new ReadableStream<Uint8Array>({
+              start() {},
+            }),
+            { status: 200 },
+          ),
+        );
+      }
+      if (url === "/api/runs") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            runs: [
+              {
+                runId: "run-failed-1",
+                status: "failed",
+                createdAt: "2026-08-12T00:00:00Z",
+                canReplay: false,
+                canRetry: true,
+                goal: "Analyze login dropoff",
+                executionMode: "live",
+                appName: "Test App",
+                appUrl: "https://apps.apple.com/us/app/test-app/id839285684",
+              },
+            ],
+          }),
+        });
+      }
+      if (url === "/api/runs/run-failed-1") {
+        return Promise.resolve({
+          ok: true,
+          json: async () => ({
+            runId: "run-failed-1",
+            status: "failed",
+            startRequest: {
+              protocolVersion: "1",
+              mode: "analyze",
+              uiLocale: "zh-CN",
+              outputLocale: "zh-CN",
+              goal: "Analyze login dropoff",
+              source: { kind: "live", appStoreUrl: "https://apps.apple.com/us/app/test-app/id839285684" },
+            },
+          }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        json: async () => ({ modelConfigured: false, modelApiKeyConfigured: false, serpApiKeyConfigured: false, modelName: null, modelBaseUrl: null, jsonMode: "prompt" }),
+      });
+    });
+
+    vi.stubGlobal("fetch", fetchMock);
+    const user = userEvent.setup();
+    render(<Workbench />);
+
+    // Open history modal
+    await user.click(screen.getByRole("button", { name: tZh.history }));
+    expect(await screen.findByRole("dialog", { name: tZh.history })).toBeInTheDocument();
+
+    // Click retry button in history modal
+    const retryBtn = await screen.findByRole("button", { name: tZh.retry });
+    await user.click(retryBtn);
+
+    // Verify it fetched the manifest and started a new run with startRequest
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/api/runs/run-failed-1", expect.anything());
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/api/runs",
+        expect.objectContaining({
+          method: "POST",
+          body: expect.stringContaining("Analyze login dropoff"),
+        }),
+      );
+    });
+  });
 });

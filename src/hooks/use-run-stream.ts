@@ -11,11 +11,15 @@ export type RunStreamState = {
   lastEvent: RunEvent | null;
   /** Count of streamed lines that failed the event schema and were dropped. */
   droppedEvents: number;
+  /** Whether the last start request is available to be retried. */
+  canRetry: boolean;
 };
 
 export type RunStreamActions = {
   start: (body: unknown) => Promise<void>;
   reset: () => void;
+  /** Re-runs the last started request if available. */
+  retry: () => Promise<void>;
   /** Loads a completed run's persisted events for read-only history viewing. */
   loadHistory: (runId: string) => Promise<void>;
 };
@@ -33,13 +37,17 @@ export function useRunStream(): RunStreamState & RunStreamActions {
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [droppedEvents, setDroppedEvents] = useState(0);
+  const [hasLastBody, setHasLastBody] = useState(false);
   const aborter = useRef<AbortController | null>(null);
   const generation = useRef(0);
+  const lastStartBody = useRef<unknown | null>(null);
 
   const reset = useCallback(() => {
     generation.current += 1;
     aborter.current?.abort();
     aborter.current = null;
+    lastStartBody.current = null;
+    setHasLastBody(false);
     setEvents([]);
     setRunning(false);
     setError(null);
@@ -51,6 +59,8 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     const controller = new AbortController();
     aborter.current = controller;
     const gen = ++generation.current;
+    lastStartBody.current = body;
+    setHasLastBody(true);
     setEvents([]);
     setRunning(true);
     setError(null);
@@ -92,6 +102,12 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     }
   }, []);
 
+  const retry = useCallback(async () => {
+    if (lastStartBody.current) {
+      await start(lastStartBody.current);
+    }
+  }, [start]);
+
   // Loads a completed run's persisted events in one shot (no streaming) so the
   // history view can inspect a past run without re-running or re-streaming it.
   const loadHistory = useCallback(async (runId: string) => {
@@ -123,5 +139,16 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     }
   }, []);
 
-  return { events, running, error, lastEvent: events.at(-1) ?? null, droppedEvents, start, reset, loadHistory };
+  return {
+    events,
+    running,
+    error,
+    lastEvent: events.at(-1) ?? null,
+    droppedEvents,
+    canRetry: hasLastBody && !running,
+    start,
+    reset,
+    retry,
+    loadHistory,
+  };
 }

@@ -11,6 +11,7 @@ export type HistoryPanelProps = {
   onClose: () => void;
   onView: (runId: string) => void;
   onReplay: (runId: string) => void;
+  onRetry?: (runId: string) => void;
 };
 
 type HistoryEntry = {
@@ -18,8 +19,12 @@ type HistoryEntry = {
   status: string;
   createdAt: string;
   canReplay: boolean;
+  canRetry?: boolean;
   goal?: string;
   executionMode?: string;
+  appName?: string;
+  appUrl?: string;
+  fileName?: string;
 };
 
 /**
@@ -28,7 +33,7 @@ type HistoryEntry = {
  * runs, a "replay" (re-streams via cached-replay). Runs of any status are
  * listed so failures and running jobs are visible too.
  */
-export function HistoryPanel({ t, open, onClose, onView, onReplay }: HistoryPanelProps) {
+export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: HistoryPanelProps) {
   const [runs, setRuns] = useState<HistoryEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -85,6 +90,32 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay }: HistoryPane
                 {run.executionMode ? <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{run.executionMode}</span> : null}
                 <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{new Date(run.createdAt).toLocaleString()}</span>
               </div>
+
+              {/* App Name / App Store Link / Imported File */}
+              {run.appName || run.appUrl ? (
+                <div style={{ fontSize: "14px", fontWeight: 600, display: "flex", alignItems: "center", gap: "6px" }}>
+                  {run.appUrl ? (
+                    <a
+                      href={run.appUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={t.openInAppStore}
+                      style={{ color: "var(--accent)", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "4px" }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <span>{run.appName || run.appUrl}</span>
+                      <span aria-hidden="true" style={{ fontSize: "12px" }}>↗</span>
+                    </a>
+                  ) : (
+                    <span style={{ color: "var(--text)" }}>{run.appName}</span>
+                  )}
+                </div>
+              ) : run.fileName ? (
+                <div style={{ fontSize: "13px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
+                  <span>📄 {run.fileName}</span>
+                </div>
+              ) : null}
+
               <p style={{ margin: 0, fontSize: "13px", color: "var(--text)" }}>{run.goal || <span style={{ color: "var(--text-muted)" }}>—</span>}</p>
               <div style={{ display: "flex", gap: "8px" }}>
                 <button type="button" className="btn btn-secondary" onClick={() => onView(run.runId)}>
@@ -93,6 +124,11 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay }: HistoryPane
                 {run.canReplay ? (
                   <button type="button" className="btn btn-primary" onClick={() => onReplay(run.runId)}>
                     {t.replay}
+                  </button>
+                ) : null}
+                {run.canRetry && onRetry ? (
+                  <button type="button" className="btn btn-primary" onClick={() => onRetry(run.runId)}>
+                    {t.retry}
                   </button>
                 ) : null}
               </div>

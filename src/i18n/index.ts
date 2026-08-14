@@ -193,6 +193,11 @@ export type Dictionary = {
   stage: string;
   type: string;
   message: string;
+  retry: string;
+  retrying: string;
+  runFailed: string;
+  openInAppStore: string;
+  importedFile: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -389,6 +394,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     stage: "Stage",
     type: "Type",
     message: "Message",
+    retry: "Retry",
+    retrying: "Retrying…",
+    runFailed: "Analysis failed",
+    openInAppStore: "Open in App Store",
+    importedFile: "File",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -583,6 +593,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     stage: "阶段",
     type: "类型",
     message: "消息",
+    retry: "重试",
+    retrying: "正在重试…",
+    runFailed: "分析失败",
+    openInAppStore: "在 App Store 中打开",
+    importedFile: "导入文件",
   },
 };
 

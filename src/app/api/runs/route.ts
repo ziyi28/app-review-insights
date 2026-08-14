@@ -5,7 +5,7 @@ import { RunStore } from "@/server/runs/run-store";
 import { RunCatalog } from "@/server/runs/run-catalog";
 import { loadReplayRun } from "@/server/runs/replay";
 import { EventPublisher } from "@/server/streaming/event-publisher";
-import { executeRun, type ExecuteDeps, type ImportParseShape } from "@/server/pipeline/orchestrator";
+import { executeRun, type ExecuteDeps, type ImportParseShape, type RunMetadata } from "@/server/pipeline/orchestrator";
 import { OpenAiCompatibleClient } from "@/server/model/openai-compatible-client";
 import { loadConfig, isModelConfigured } from "@/server/config";
 import { parseImportedReviews } from "@/server/sources/import-parser";
@@ -13,6 +13,7 @@ import { encodeNdjsonLine } from "@/server/streaming/ndjson";
 import type { RunEvent } from "@/domain/contracts/events";
 import type { Limitation } from "@/server/sources/apple-rss-collector";
 import { readPreview, isPreviewExpired, type SourcePreview } from "@/server/sources/source-preview";
+import { extractAppNameFromUrl, parseAppStoreUrl } from "@/server/sources/app-store-url";
 
 export const runtime = "nodejs";
 
@@ -24,7 +25,23 @@ export async function GET() {
   const roots = [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")];
   const catalog = new RunCatalog(roots);
   const runs = await catalog.list();
-  return NextResponse.json({ runs: runs.map((r) => ({ runId: r.runId, status: r.manifest.status, createdAt: r.manifest.createdAt, canReplay: r.manifest.canReplay, goal: r.manifest.goal, executionMode: r.manifest.executionMode })) }, { headers: { "cache-control": "no-store" } });
+  return NextResponse.json(
+    {
+      runs: runs.map((r) => ({
+        runId: r.runId,
+        status: r.manifest.status,
+        createdAt: r.manifest.createdAt,
+        canReplay: r.manifest.canReplay,
+        canRetry: Boolean(r.manifest.startRequest && r.manifest.status !== "running"),
+        goal: r.manifest.goal,
+        executionMode: r.manifest.executionMode,
+        appName: r.manifest.appName,
+        appUrl: r.manifest.appUrl,
+        fileName: r.manifest.fileName,
+      })),
+    },
+    { headers: { "cache-control": "no-store" } }
+  );
 }
 
 /**
@@ -120,6 +137,10 @@ async function replayRun(sourceRunId: string, store: RunStore, delayMs: number, 
     runId,
     status: "completed",
     executionMode: "cached-replay",
+    goal: bundle.manifest.goal,
+    appName: bundle.manifest.appName,
+    appUrl: bundle.manifest.appUrl,
+    fileName: bundle.manifest.fileName,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     stages: bundle.manifest.stages,
@@ -219,6 +240,10 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
   // errors are clean 4xx problem responses, not a started-then-failed run.
   let deps: ExecuteDeps;
   let executionMode: "live" | "import";
+  let appName: string | undefined;
+  let appUrl: string | undefined;
+  let fileName: string | undefined;
+
   const buildModel = () =>
     modelConfigured && cfg.modelBaseUrl && cfg.modelName
       ? new OpenAiCompatibleClient({
@@ -233,8 +258,9 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
         ({ generate: async () => { throw new Error("model not configured"); } } as never);
   try {
     if (request.source.kind === "live") {
-      const { parseAppStoreUrl } = await import("@/server/sources/app-store-url");
       const parsed = parseAppStoreUrl(request.source.appStoreUrl);
+      appName = extractAppNameFromUrl(request.source.appStoreUrl) ?? `App ${parsed.appId}`;
+      appUrl = parsed.canonicalUrl;
       executionMode = "live";
       const hasPreview = request.source.previewId !== undefined || request.source.reviewSelection !== undefined;
       if (request.source.previewId !== undefined && request.source.reviewSelection === undefined) {
@@ -316,6 +342,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
         };
       }
     } else {
+      fileName = request.source.fileName;
       const parseResult = parseImportedReviews({
         fileName: request.source.fileName,
         mediaType: request.source.mediaType,
@@ -330,6 +357,13 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
   } catch (err) {
     return problem("422", "invalid source", err instanceof Error ? err.message : String(err));
   }
+
+  const metadata: RunMetadata = {
+    appName,
+    appUrl,
+    fileName,
+    startRequest: request,
+  };
 
   const runId = store.createRunId();
   const publisher = new EventPublisher(store, () => new Date().toISOString(), "live");
@@ -350,7 +384,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
       void (async () => {
         try {
           await publisher.publish({ type: "run.accepted", runId, data: { runId } });
-          await executeRun(runId, request.goal, request.outputLocale, deps, publisher, store, executionMode, modelConfigured);
+          await executeRun(runId, request.goal, request.outputLocale, deps, publisher, store, executionMode, modelConfigured, metadata);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           try {
@@ -363,6 +397,11 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
               runId,
               status: "failed",
               executionMode,
+              goal: request.goal,
+              appName,
+              appUrl,
+              fileName,
+              startRequest: request,
               createdAt: new Date().toISOString(),
               updatedAt: new Date().toISOString(),
               stages: {},

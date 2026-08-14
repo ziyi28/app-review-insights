@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { existsSync } from "node:fs";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import type { RunStartRequest } from "@/domain/contracts/run";
 
 export const ARTIFACT_NAMES = [
   "scope",
@@ -33,6 +34,14 @@ export type RunManifest = {
    *  show what each run was about. Optional because pre-existing manifests
    *  predate this field. */
   goal?: string;
+  /** Friendly app display name extracted from App Store URL or provider. */
+  appName?: string;
+  /** Canonical App Store URL for live / cached-replay runs. */
+  appUrl?: string;
+  /** Imported file name for import mode. */
+  fileName?: string;
+  /** Request payload used to start the run, enabling one-click retry. */
+  startRequest?: RunStartRequest;
   stages: Record<string, { status: string; startedAt?: string; finishedAt?: string; attempt?: number }>;
   artifacts: Record<string, { attempt: number; file: string }>;
   limitations: { code: string; message: string }[];

@@ -48,6 +48,60 @@ describe("HistoryPanel", () => {
     expect(onReplay).toHaveBeenCalledWith("run-a");
   });
 
+  it("renders app links, filenames, and retry button for failed runs", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          runs: [
+            {
+              runId: "run-live",
+              status: "failed",
+              createdAt: "2026-08-12T00:00:00Z",
+              canReplay: false,
+              canRetry: true,
+              goal: "Improve retention",
+              executionMode: "live",
+              appName: "Workout For Women",
+              appUrl: "https://apps.apple.com/us/app/workout-for-women/id839285684",
+            },
+            {
+              runId: "run-import",
+              status: "completed",
+              createdAt: "2026-08-11T00:00:00Z",
+              canReplay: true,
+              canRetry: false,
+              goal: "Feature requests",
+              executionMode: "import",
+              fileName: "feedback_sample.csv",
+            },
+          ],
+        }),
+      }),
+    );
+
+    const onRetry = vi.fn();
+    const user = userEvent.setup();
+    render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} onRetry={onRetry} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Workout For Women")).toBeInTheDocument();
+    });
+
+    const link = screen.getByRole("link", { name: /Workout For Women/i });
+    expect(link).toHaveAttribute("href", "https://apps.apple.com/us/app/workout-for-women/id839285684");
+    expect(link).toHaveAttribute("target", "_blank");
+
+    expect(screen.getByText(/feedback_sample\.csv/)).toBeInTheDocument();
+
+    const retryBtn = screen.getByRole("button", { name: tEn.retry });
+    expect(retryBtn).toBeInTheDocument();
+
+    await user.click(retryBtn);
+    expect(onRetry).toHaveBeenCalledWith("run-live");
+  });
+
   it("shows an empty state when there are no runs", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ runs: [] }) }));
     render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} />);

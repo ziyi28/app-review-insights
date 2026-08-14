@@ -14,8 +14,16 @@ import { runRevisionStage } from "./stages/revision";
 import type { FindingOutput, PlanningOutput, TestsOutput } from "@/server/model/prompts/prompts";
 import type { EventPublisher } from "@/server/streaming/event-publisher";
 import type { ArtifactName, RunStore } from "@/server/runs/run-store";
+import type { RunStartRequest } from "@/domain/contracts/run";
 import type { ScriptedModelClient } from "@/server/model/scripted-client";
 import type { StageModelClient } from "./dependencies";
+
+export type RunMetadata = {
+  appName?: string;
+  appUrl?: string;
+  fileName?: string;
+  startRequest?: RunStartRequest;
+};
 
 export type ImportParseShape = {
   reviews: RawReview[];
@@ -151,6 +159,7 @@ export async function executeRun(
   store: RunStore,
   executionMode: "live" | "import" = deps.source.kind === "import" ? "import" : "live",
   modelConfigured = true,
+  metadata?: RunMetadata,
 ): Promise<void> {
   const createdAt = new Date().toISOString();
   const stages: Record<string, StageStatus> = {};
@@ -198,6 +207,10 @@ export async function executeRun(
       status: "running",
       executionMode,
       goal,
+      appName: metadata?.appName,
+      appUrl: metadata?.appUrl,
+      fileName: metadata?.fileName,
+      startRequest: metadata?.startRequest,
       createdAt,
       updatedAt: new Date().toISOString(),
       stages,
@@ -233,7 +246,7 @@ export async function executeRun(
     if (source.status === "failed") {
       limitations.push({ code: "SOURCE_FAILED", message: "Source collection failed; no reviews could be analyzed", stage: "source" });
       await publisher.publish({ type: "run.failed", runId, data: { error: "source collection failed" } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
       return;
     }
 
@@ -273,7 +286,7 @@ export async function executeRun(
         stage: "scope",
       });
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "model-not-configured", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
       return;
     }
 
@@ -284,7 +297,7 @@ export async function executeRun(
     if (corpus.length === 0) {
       // Suspect-empty / no analyzable reviews: do not enter model stages.
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-data", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
       return;
     }
 
@@ -567,16 +580,16 @@ export async function executeRun(
     await publishArtifact("final-report", 1, { prd, report, limitations, goalCoverage: goalCoverageArtifact });
     if (report.valid) {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "valid", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+      await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
     } else {
       await publisher.publish({ type: "run.failed", runId, data: { outcome: "invalid-after-revision", limitations } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
     }
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     limitations.push({ code: "PIPELINE_ERROR", message, stage: "pipeline" });
     await publisher.publish({ type: "run.failed", runId, data: { error: message } });
-    await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+    await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
   }
 }
 
@@ -638,12 +651,17 @@ async function finalizeManifest(
   goal: string,
   model?: unknown,
   createdAt?: string,
+  metadata?: RunMetadata,
 ): Promise<void> {
   await store.writeManifest(runId, {
     runId,
     status,
     executionMode,
     goal,
+    appName: metadata?.appName,
+    appUrl: metadata?.appUrl,
+    fileName: metadata?.fileName,
+    startRequest: metadata?.startRequest,
     // The run's true start time is captured at executeRun entry; the manifest
     // must never reset it (a stale createdAt makes total run duration wrong).
     createdAt: createdAt ?? new Date().toISOString(),

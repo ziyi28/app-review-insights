@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Dictionary, Locale } from "@/i18n";
 import { getDictionary } from "@/i18n";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
@@ -109,7 +109,7 @@ export function Workbench() {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
 
-  const { events, running, error, droppedEvents, start, reset, loadHistory } = useRunStream();
+  const { events, running, error, droppedEvents, canRetry, start, reset, retry, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -349,10 +349,51 @@ export function Workbench() {
     userNavigated.current = false;
   };
 
+  const handleRetryHistory = useCallback(async (sourceRunId: string) => {
+    setHistoryOpen(false);
+    try {
+      const res = await fetch(`/api/runs/${sourceRunId}`, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const manifest = (await res.json()) as { startRequest?: { source?: { kind: string; appStoreUrl?: string; previewId?: string; reviewSelection?: string } } };
+      if (manifest.startRequest) {
+        const req = manifest.startRequest;
+        // If retrying a historical live run, strip previewId so it freshly collects from App Store without stale preview snapshot issues
+        const cleanRequest = {
+          ...req,
+          source: req.source?.kind === "live" && req.source.appStoreUrl
+            ? { kind: "live", appStoreUrl: req.source.appStoreUrl }
+            : req.source,
+        };
+        seenRunId.current = null;
+        setCache({ runId: null });
+        setTab("overview");
+        autoJumpedKeys.current.clear();
+        userNavigated.current = false;
+        void start(cleanRequest);
+      } else {
+        void loadHistory(sourceRunId);
+      }
+    } catch {
+      void loadHistory(sourceRunId);
+    }
+  }, [start, loadHistory]);
+
   const idle = !running && events.length === 0;
   const starting = running && runId === null;
 
-  const runningStatusText = running ? (starting ? t.starting : t.running) : events.length > 0 ? (terminal ? t.completed : t.waiting) : t.waiting;
+  const runFailed = useMemo(() => {
+    return !running && (Boolean(error) || events.some((e) => e.type === "run.failed"));
+  }, [running, error, events]);
+
+  const runFailedMessage = useMemo(() => {
+    if (error) return error;
+    const failedEvent = events.find((e) => e.type === "run.failed");
+    if (!failedEvent) return null;
+    const data = failedEvent.data as { error?: string; outcome?: string } | undefined;
+    return data?.error ?? (data?.outcome ? `Outcome: ${data.outcome}` : t.failed);
+  }, [error, events, t]);
+
+  const runningStatusText = running ? (starting ? t.starting : t.running) : events.length > 0 ? (terminal ? (runFailed ? t.failed : t.completed) : t.waiting) : t.waiting;
 
   return (
     <div className={styles.shell}>
@@ -405,6 +446,7 @@ export function Workbench() {
             setHistoryOpen(false);
             void start({ protocolVersion: "1", mode: "cached-replay", sourceRunId: runId });
           }}
+          onRetry={handleRetryHistory}
         />
       </header>
 
@@ -435,6 +477,28 @@ export function Workbench() {
 
           {/* Right: tabs + content */}
           <main className={styles.content}>
+            {runFailed ? (
+              <div className="card" style={{ borderLeft: "4px solid var(--danger)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "12px" }}>
+                <div style={{ display: "grid", gap: "4px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, color: "var(--danger)" }}>
+                    <span>✗</span>
+                    <span>{t.runFailed}</span>
+                  </div>
+                  {runFailedMessage ? <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)" }}>{runFailedMessage}</p> : null}
+                </div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  {canRetry ? (
+                    <button type="button" className="btn btn-primary" onClick={() => void retry()}>
+                      {t.retry}
+                    </button>
+                  ) : null}
+                  <button type="button" className="btn btn-secondary" onClick={handleNewRun}>
+                    {t.newRun}
+                  </button>
+                </div>
+              </div>
+            ) : null}
+
             <div className={styles.progressRow}>
               <LiveProgress events={events} running={running} t={t} />
             </div>
