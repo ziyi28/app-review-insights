@@ -5,6 +5,12 @@ import { loadConfig } from "@/server/config";
 
 export const runtime = "nodejs";
 
+/** 只有文件系统报告的 `ENOENT` 才表示 manifest 不存在；JSON 解析、权限等
+ *  错误说明 manifest 存在但损坏/不可读，必须视为 500 而不是“不存在”。 */
+function isMissingManifestError(error: unknown): boolean {
+  return typeof error === "object" && error !== null && (error as NodeJS.ErrnoException).code === "ENOENT";
+}
+
 /**
  * Returns a specific artifact attempt for a run, selected by ?attempt=<n>.
  * Without ?attempt the manifest's declared latest attempt is served.
@@ -14,12 +20,14 @@ export const runtime = "nodejs";
  * declared attempt and fall back to attempt 1 for artifacts written before the
  * manifest was finalized.
  *
- * The runtime store is searched first, then the bundled fixture root, so a
- * built-in demo run's artifacts are viewable offline. Ownership is decided per
- * root by the manifest: once a manifest for the run id exists in a root, that
- * root is authoritative for the request — an artifact missing there is a 404
- * and never falls back to a same-named fixture artifact. Only when no manifest
- * and no artifact exist in a root do we continue to the next root.
+ * Ownership is resolved in two phases. First the runtime store, then the
+ * bundled fixture root, is checked for a manifest: the first root whose
+ * manifest exists owns the run id, and every artifact/attempt read happens
+ * against that owner only — an artifact missing there is a 404 and never falls
+ * back to a same-named fixture artifact. A manifest that exists but is corrupt
+ * or unreadable is a 500, never mistaken for "absent". Only when no manifest
+ * exists in any root is the runtime root allowed to serve an early attempt-01
+ * artifact written before the manifest was finalized.
  */
 export async function GET(req: Request, { params }: { params: Promise<{ runId: string; artifactName: string }> }) {
   const { runId, artifactName } = await params;
@@ -33,41 +41,53 @@ export async function GET(req: Request, { params }: { params: Promise<{ runId: s
   }
   const cfg = loadConfig();
   const roots = [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")];
+
+  // 阶段一：确定 manifest 所有者。第一个存在 manifest 的 root 拥有 run id。
+  let owner: RunStore | null = null;
+  let ownerAttempt = 1;
   for (const root of roots) {
     const store = new RunStore(root);
-    let manifestFound = false;
-    let attempt = 1;
-
     try {
       const manifest = await store.readManifest(runId);
-      manifestFound = true;
-
+      owner = store;
       const info = manifest.artifacts[artifactName];
-      if (info?.attempt) attempt = info.attempt;
-
-      if (requestedAttempt !== null && requestedAttempt > attempt) {
-        return notFound("artifact attempt not found");
+      if (info?.attempt) ownerAttempt = info.attempt;
+      break;
+    } catch (error) {
+      if (!isMissingManifestError(error)) {
+        return NextResponse.json(
+          { error: "manifest unreadable" },
+          { status: 500, headers: { "cache-control": "no-store" } },
+        );
       }
-    } catch {
-      // 允许运行早期没有 manifest 的 attempt-01 artifact。
+      // ENOENT：该 root 没有 manifest，继续检查下一个 root。
     }
+  }
 
+  // 阶段二：从所有者 root 读取 artifact，绝不回落到其他 root。
+  if (owner !== null) {
+    if (requestedAttempt !== null && requestedAttempt > ownerAttempt) {
+      return notFound("artifact attempt not found");
+    }
     try {
-      const value = await store.readArtifact(
-        runId,
-        artifactName,
-        requestedAttempt ?? attempt,
-      );
+      const value = await owner.readArtifact(runId, artifactName, requestedAttempt ?? ownerAttempt);
       return NextResponse.json(value, {
         headers: { "cache-control": "no-store" },
       });
     } catch {
-      if (manifestFound) {
-        return notFound("artifact not found");
-      }
+      return notFound("artifact not found");
     }
   }
-  return notFound("artifact not found");
+
+  // 所有 root 都没有 manifest：允许运行早期没有 manifest 的 attempt-01 artifact。
+  try {
+    const value = await new RunStore(cfg.runsDir).readArtifact(runId, artifactName, requestedAttempt ?? 1);
+    return NextResponse.json(value, {
+      headers: { "cache-control": "no-store" },
+    });
+  } catch {
+    return notFound("artifact not found");
+  }
 }
 
 /** 文件内私有辅助函数：统一生成带 `cache-control: no-store` 的 404 JSON。 */

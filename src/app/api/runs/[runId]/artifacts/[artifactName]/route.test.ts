@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { RunStore } from "@/server/runs/run-store";
@@ -236,5 +236,42 @@ describe("GET artifact (bundled fixture viewing)", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ interpretation: "early" });
+  });
+
+  it("ignores an orphan runtime artifact without a manifest and serves the fixture owner", async () => {
+    // A same-named run id whose artifact landed but whose manifest was never
+    // written must NOT claim ownership: the fixture's manifest owns the id, so
+    // the fixture artifact is served and the orphan is ignored.
+    const collidingRunId = "run-x-twitter-us";
+    await store.writeArtifact(collidingRunId, "raw-reviews", 1, {
+      reviews: [{ id: "runtime-orphan" }],
+    });
+
+    const res = await GET(
+      new Request(`http://localhost/api/runs/${collidingRunId}/artifacts/raw-reviews`),
+      { params: Promise.resolve({ runId: collidingRunId, artifactName: "raw-reviews" }) },
+    );
+
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as { reviews: { sourceReviewId?: string; id?: string }[] };
+    expect(body.reviews.length).toBeGreaterThan(0);
+    expect(body.reviews.some((r) => r.id === "runtime-orphan")).toBe(false);
+    expect(body.reviews.some((r) => r.sourceReviewId === "14419453273")).toBe(true);
+  });
+
+  it("returns 500 for a corrupted runtime manifest instead of falling back to fixture", async () => {
+    const collidingRunId = "run-x-twitter-us";
+    const runDir = store.resolveRunDir(collidingRunId);
+    mkdirSync(runDir, { recursive: true });
+    writeFileSync(path.join(runDir, "manifest.json"), "{ not valid json", "utf8");
+
+    const res = await GET(
+      new Request(`http://localhost/api/runs/${collidingRunId}/artifacts/raw-reviews`),
+      { params: Promise.resolve({ runId: collidingRunId, artifactName: "raw-reviews" }) },
+    );
+
+    expect(res.status).toBe(500);
+    const body = (await res.json()) as { error?: string };
+    expect(body.error).toBeTruthy();
   });
 });
