@@ -24,9 +24,17 @@ export const ARTIFACT_NAMES = [
 ] as const;
 export type ArtifactName = (typeof ARTIFACT_NAMES)[number];
 
+/** Persisted manifest status. A run that was `running` when the process died is
+ *  computed as `interrupted` at read time; it is never written to disk. */
+export type RunManifestStatus = "running" | "completed" | "failed" | "cancelled";
+
+/** Effective status exposed to the UI: a persisted `running` manifest whose task
+ *  is no longer active in the in-process registry reads as `interrupted`. */
+export type RunStatus = RunManifestStatus | "interrupted";
+
 export type RunManifest = {
   runId: string;
-  status: "running" | "completed" | "failed" | "cancelled";
+  status: RunManifestStatus;
   executionMode: "live" | "import" | "cached-replay";
   createdAt: string;
   updatedAt: string;

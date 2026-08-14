@@ -5,7 +5,7 @@ import type { Dictionary, Locale } from "@/i18n";
 import { getDictionary } from "@/i18n";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
-import { useRunStream } from "@/hooks/use-run-stream";
+import { useRunStream, LAST_RUN_ID_KEY, TERMINAL_STATUSES } from "@/hooks/use-run-stream";
 import { useArtifactVersions } from "@/hooks/use-artifact-versions";
 import { RunForm } from "./run-form";
 import { StageRail } from "./stage-rail";
@@ -110,7 +110,7 @@ export function Workbench() {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
 
-  const { events, running, error, droppedEvents, canRetry, start, reset, retry, loadHistory } = useRunStream();
+  const { runId, status, events, running, reconnecting, error, droppedEvents, canRetry, start, reset, retry, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
   const [historyOpen, setHistoryOpen] = useState(false);
@@ -141,8 +141,6 @@ export function Workbench() {
   // the rest of the run).
   const autoJumpedKeys = useRef<Set<keyof ArtifactCache>>(new Set());
   const userNavigated = useRef(false);
-
-  const runId = useMemo(() => events.find((e) => e.type === "run.accepted")?.runId ?? null, [events]);
 
   // Source provenance: prefer the structured source-evidence artifact, then the
   // event/limitation signals, over the deliveryMode fallback — so Imported /
@@ -197,83 +195,61 @@ export function Workbench() {
     return map;
   }, []);
 
-  // Poll the run's artifacts until every expected one has loaded OR the run
-  // reached a terminal state (which may legitimately lack some artifacts, e.g.
-  // insufficient-data or early failure). Polling continues for as long as the
-  // run is in flight: a real run took ~25min (topics alone ~17min), so a fixed
-  // attempt ceiling must never stop the poller while the run is still healthy.
-  // The normal exit is the terminal-event signal below; after termination one
-  // final flush tries once more so artifacts published right before the
-  // terminal event (e.g. final-report) are still fetched, then the poller stops.
-  const loadedArtifacts = useRef<Set<string>>(new Set());
+  // Derive the artifact attempts that have been announced by the event stream.
+  // The UI only fetches an artifact once its `artifact.available` event has
+  // arrived — never by unconditionally polling every name. A revised attempt 2
+  // replaces attempt 1 because the map tracks the latest announced attempt.
+  const availableArtifacts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const e of events) {
+      if (e.type === "artifact.available") {
+        const d = e.data as { artifact?: string; attempt?: number };
+        if (d.artifact) map.set(d.artifact, d.attempt ?? 1);
+      }
+    }
+    return map;
+  }, [events]);
+
+  // Fetch each announced artifact exactly once, keyed by name+attempt+runId so a
+  // stale request can never overwrite a newer attempt or a different run.
+  const loadedArtifactKeys = useRef<Set<string>>(new Set());
   const seenRunId = useRef<string | null>(null);
-  const runTerminatedRef = useRef(false);
-  const flushedAfterTerminationRef = useRef(false);
   useEffect(() => {
     if (!runId) return;
-    // New run -> fresh cache (never show the previous run's artifacts). The
-    // reset happens inside the async loader so it is not a synchronous setState
-    // in the effect body.
-    loadedArtifacts.current.clear();
-    runTerminatedRef.current = false;
-    flushedAfterTerminationRef.current = false;
-    autoJumpedKeys.current.clear();
-    userNavigated.current = false;
+    if (seenRunId.current !== runId) {
+      seenRunId.current = runId;
+      loadedArtifactKeys.current.clear();
+      setCache({ runId });
+      setTab("overview");
+      autoJumpedKeys.current.clear();
+      userNavigated.current = false;
+    }
     let cancelled = false;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-
-    const loadOnce = async () => {
-      if (cancelled) return;
-      if (seenRunId.current !== runId) {
-        seenRunId.current = runId;
-        setCache({ runId });
-        setTab("overview");
-      }
-      const names = Object.keys(artifactNameToKey);
-      const next: Record<string, unknown> = {};
-      for (const name of names) {
-        if (loadedArtifacts.current.has(name)) continue;
+    const fetchMissing = async () => {
+      for (const [name, attempt] of availableArtifacts) {
         const key = artifactNameToKey[name];
+        if (!key) continue;
+        const loadKey = `${runId}:${name}:${attempt}`;
+        if (loadedArtifactKeys.current.has(loadKey)) continue;
+        loadedArtifactKeys.current.add(loadKey);
         try {
-          const res = await fetch(`/api/runs/${runId}/artifacts/${name}`, { cache: "no-store" });
-          if (!res.ok) continue;
+          const res = await fetch(`/api/runs/${runId}/artifacts/${name}?attempt=${attempt}`, { cache: "no-store" });
+          if (!res.ok) {
+            loadedArtifactKeys.current.delete(loadKey);
+            continue;
+          }
           const value = await res.json();
-          next[key] = value;
-          loadedArtifacts.current.add(name);
+          if (!cancelled) setCache((c) => ({ ...c, runId, [key]: value }));
         } catch {
-          // retry below
+          loadedArtifactKeys.current.delete(loadKey);
         }
       }
-      if (!cancelled) setCache((c) => ({ ...c, runId, ...(next as Partial<ArtifactCache>) }));
-      // Keep polling while the run is still in flight. Once it terminates, a
-      // final flush runs once more (in case the last artifacts appeared between
-      // the previous poll and the terminal event) and then stops — artifacts a
-      // terminated run never produced will never appear.
-      const terminated = runTerminatedRef.current;
-      if (cancelled) return;
-      if (loadedArtifacts.current.size >= names.length) return;
-      if (terminated) {
-        if (flushedAfterTerminationRef.current) return;
-        flushedAfterTerminationRef.current = true;
-      }
-      timer = setTimeout(loadOnce, 800);
     };
-    void loadOnce();
-
+    void fetchMissing();
     return () => {
       cancelled = true;
-      if (timer) clearTimeout(timer);
     };
-  }, [runId, artifactNameToKey]);
-
-  // Flip the terminal flag the moment the run stream reports completion or
-  // failure. Read through a ref so the poll loop above observes it without
-  // being rebuilt on every streamed event.
-  useEffect(() => {
-    if (events.some((e) => e.type === "run.completed" || e.type === "run.failed")) {
-      runTerminatedRef.current = true;
-    }
-  }, [events]);
+  }, [runId, availableArtifacts, artifactNameToKey]);
 
   // Auto-advance the active tab to the newest artifact as it lands, so a live
   // run shows results without manual clicking. Stops the moment the user picks
@@ -319,7 +295,7 @@ export function Workbench() {
 
   // Terminal state: fetch the Draft/Final artifact pairs once the run finishes
   // so revised runs show attempt 1 vs attempt 2 and never a stale draft.
-  const terminal = events.some((e) => e.type === "run.completed" || e.type === "run.failed");
+  const terminal = status !== null && TERMINAL_STATUSES.includes(status);
   const versions = useArtifactVersions(runId, terminal);
   const [prdPhase, setPrdPhase] = useState<"draft" | "final">("draft");
   const [testsPhase, setTestsPhase] = useState<"draft" | "final">("draft");
@@ -401,9 +377,36 @@ export function Workbench() {
       userNavigated.current = false;
       void start(requestToStart);
     } else {
-      void loadHistory(sourceRunId);
+      loadHistory(sourceRunId);
     }
   }, [start, loadHistory, uiLocale]);
+
+  // Refresh recovery: on mount, restore the latest in-flight run (or the last
+  // viewed run) so a page refresh keeps monitoring the same analysis. A stored
+  // id that no longer resolves simply falls back to the idle state.
+  useEffect(() => {
+    if (typeof localStorage === "undefined") return;
+    const restored = localStorage.getItem(LAST_RUN_ID_KEY);
+    if (!restored) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const res = await fetch("/api/runs", { cache: "no-store" });
+        if (!res.ok || cancelled) return;
+        const json = (await res.json()) as { runs?: { runId: string; status: string }[] };
+        if (cancelled) return;
+        const runs = json.runs ?? [];
+        const runningRun = runs.find((r) => r.status === "running");
+        const target = runningRun?.runId ?? (runs.some((r) => r.runId === restored) ? restored : null);
+        if (target && !cancelled) loadHistory(target);
+      } catch {
+        // Non-fatal: the idle state remains.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadHistory]);
 
   const idle = !running && events.length === 0 && !isRetrying;
   const starting = running && runId === null;
@@ -411,10 +414,11 @@ export function Workbench() {
   const runFailed = useMemo(() => {
     if (running || events.length === 0) return false;
     if (Boolean(error)) return true;
+    if (status === "failed") return true;
+    if (status === "interrupted") return true;
     if (events.some((e) => e.type === "run.failed")) return true;
-    // If not running and events exist but never saw run.completed, it was interrupted/failed
-    return !events.some((e) => e.type === "run.completed");
-  }, [running, error, events]);
+    return false;
+  }, [running, error, events, status]);
 
   const runFailedMessage = useMemo(() => {
     if (error) return error;
@@ -423,11 +427,10 @@ export function Workbench() {
       const data = failedEvent.data as { error?: string; outcome?: string } | undefined;
       return data?.error ?? (data?.outcome ? `Outcome: ${data.outcome}` : t.failed);
     }
-    if (!events.some((e) => e.type === "run.completed")) {
-      return t.failed;
-    }
+    if (status === "interrupted") return t.interrupted;
+    if (status === "failed") return t.failed;
     return null;
-  }, [error, events, t]);
+  }, [error, events, status, t]);
 
   const handleRetryCurrent = useCallback(() => {
     if (canRetry) {
@@ -437,7 +440,19 @@ export function Workbench() {
     }
   }, [canRetry, retry, runId, handleRetryHistory]);
 
-  const runningStatusText = running ? (starting ? t.starting : t.running) : events.length > 0 ? (terminal ? (runFailed ? t.failed : t.completed) : t.waiting) : t.waiting;
+  const statusLabel = useMemo(() => {
+    if (status === "running") return running ? t.running : t.running;
+    if (status === "interrupted") return t.interrupted;
+    if (status === "completed") return t.completed;
+    if (status === "failed") return t.failed;
+    return null;
+  }, [status, running, t]);
+
+  const runningStatusText = running
+    ? (starting ? t.starting : t.running)
+    : reconnecting
+      ? t.reconnecting
+      : statusLabel ?? (events.length > 0 ? t.waiting : t.waiting);
 
   return (
     <div className={styles.shell}>
@@ -460,11 +475,11 @@ export function Workbench() {
         <span className={styles.spacer} />
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
         {runFailed ? (
-          <button className="btn btn-primary" onClick={handleRetryCurrent} disabled={running || isRetrying}>
+          <button className="btn btn-primary" onClick={handleRetryCurrent} disabled={isRetrying}>
             {isRetrying ? t.retrying : t.retry}
           </button>
         ) : null}
-        <button className="btn btn-primary" onClick={handleNewRun} disabled={running || isRetrying}>
+        <button className="btn btn-primary" onClick={handleNewRun} disabled={isRetrying}>
           {t.newRun}
         </button>
         <button className="btn btn-secondary" onClick={() => setHistoryOpen(true)}>
@@ -489,7 +504,7 @@ export function Workbench() {
           onClose={() => setHistoryOpen(false)}
           onView={(runId) => {
             setHistoryOpen(false);
-            void loadHistory(runId);
+            loadHistory(runId);
           }}
           onReplay={(runId) => {
             setHistoryOpen(false);
@@ -521,6 +536,7 @@ export function Workbench() {
             <StageRail events={events} t={t} />
             {error ? <p className={styles.railError}>{error}</p> : null}
             {running ? <p className={styles.railRunning}>{t.running}</p> : null}
+            {reconnecting ? <p className={styles.railRunning}>{t.reconnecting}</p> : null}
             {!running && droppedEvents > 0 ? <p className={styles.railDropped}>{t.someEventsDropped}</p> : null}
           </aside>
 
@@ -536,10 +552,10 @@ export function Workbench() {
                   {runFailedMessage ? <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)" }}>{runFailedMessage}</p> : null}
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button type="button" className="btn btn-primary" onClick={handleRetryCurrent} disabled={running || isRetrying}>
+                  <button type="button" className="btn btn-primary" onClick={handleRetryCurrent} disabled={isRetrying}>
                     {isRetrying ? t.retrying : t.retry}
                   </button>
-                  <button type="button" className="btn btn-secondary" onClick={handleNewRun} disabled={running || isRetrying}>
+                  <button type="button" className="btn btn-secondary" onClick={handleNewRun} disabled={isRetrying}>
                     {t.newRun}
                   </button>
                 </div>

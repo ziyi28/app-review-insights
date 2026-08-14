@@ -30,7 +30,7 @@ test("stable sample analysis uses the live-merged cache and reports local histor
   // Analyze the stable sample.
   const postPromise = page.waitForResponse("**/api/runs");
   await page.getByRole("button", { name: /分析本地历史样本/ }).click();
-  expect((await postPromise).status()).toBe(200);
+  expect((await postPromise).status()).toBe(202);
 
   // Wait for the run to complete.
   await waitForRunComplete(page);

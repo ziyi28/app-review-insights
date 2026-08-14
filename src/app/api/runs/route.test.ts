@@ -1,11 +1,24 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi, type Mock } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
-import { GET, POST } from "./route";
 import type { SourcePreview } from "@/server/sources/source-preview";
 import { RunStore } from "@/server/runs/run-store";
+import { isRunActive, resetActiveRuns } from "@/server/runs/run-executor";
+
+// The route schedules the pipeline via `after()` (which needs a request scope).
+// Tests run the route handler directly, so `after` is stubbed to capture the
+// scheduled callback; the pipeline is then exercised by invoking it manually.
+vi.mock("next/server", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("next/server")>();
+  return { ...mod, after: vi.fn() };
+});
+
+import { GET, POST } from "./route";
+import { after } from "next/server";
+
+const afterMock = after as unknown as Mock;
 
 let baseDir: string;
 const saved = { ...process.env };
@@ -132,11 +145,14 @@ beforeEach(() => {
   process.env.SOURCE_PREVIEWS_DIR = path.join(baseDir, "previews");
   process.env.MODEL_BASE_URL = "https://example.com/v1";
   process.env.MODEL_NAME = "model";
+  resetActiveRuns();
+  afterMock.mockClear();
 });
 
 afterEach(() => {
   process.env = saved;
   rmSync(baseDir, { recursive: true, force: true });
+  resetActiveRuns();
 });
 
 describe("POST /api/runs preview-backed live", () => {
@@ -189,7 +205,7 @@ describe("POST /api/runs preview-backed live", () => {
     expect(body.title).toContain("unavailable");
   });
 
-  it("accepts a China page URL and matches the US app id preview", async () => {
+  it("accepts a China page URL, matches the US app id preview, and returns 202 immediately", async () => {
     writeSnapshot(snapshot(1, { appId: "839285684" }));
     const req = new Request("http://localhost/api/runs", {
       method: "POST",
@@ -209,8 +225,23 @@ describe("POST /api/runs preview-backed live", () => {
       }),
     });
     const res = await POST(req);
-    expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toContain("application/x-ndjson");
+    expect(res.status).toBe(202);
+    const body = (await res.json()) as { runId: string; status: string; eventsUrl: string };
+    expect(body.runId).toMatch(/^run-/);
+    expect(body.status).toBe("running");
+    expect(body.eventsUrl).toBe(`/api/runs/${body.runId}/events`);
+
+    // The run is identifiable (running manifest), registered as active, and has
+    // already persisted a run.accepted event before the response returned.
+    expect(isRunActive(body.runId)).toBe(true);
+    const store = new RunStore(process.env.RUNS_DIR!);
+    const manifest = await store.readManifest(body.runId);
+    expect(manifest.status).toBe("running");
+    const eventsText = await (await import("node:fs")).promises.readFile(
+      path.join(store.resolveRunDir(body.runId), "events.ndjson"),
+      "utf8",
+    );
+    expect(eventsText).toContain("run.accepted");
   });
 
   it("rejects an unavailable stable dataset when stable has no reviews (422)", async () => {
@@ -229,26 +260,22 @@ describe("POST /api/runs preview-backed live", () => {
     delete process.env.MODEL_BASE_URL;
     delete process.env.MODEL_NAME;
     const res = await POST(analyzeRequest("preview-serp", "live"));
-    expect(res.status).toBe(200);
-    // Drain the NDJSON stream: the pipeline runs inside the stream and only
-    // completes (writing artifacts) when the stream closes.
-    const text = await res.text();
+    expect(res.status).toBe(202);
+    const body = (await res.json()) as { runId: string };
+    expect(body.runId).toMatch(/^run-/);
 
-    // The run reads the frozen preview reviews and produces a provider-aware
-    // source-evidence artifact.
-    const fs = await import("node:fs");
-    const ids = await fs.promises.readdir(process.env.RUNS_DIR!);
+    // The route schedules the pipeline via after(); invoke the captured callback
+    // to run it to completion, exactly as the request scope would after the
+    // response is sent.
+    const callback = afterMock.mock.calls.at(-1)?.[0] as (() => Promise<void>) | undefined;
+    expect(callback).toBeTypeOf("function");
+    await callback!();
+
+    // The task unregisters on completion.
+    expect(isRunActive(body.runId)).toBe(false);
+
     const store = new RunStore(process.env.RUNS_DIR!);
-    let sourceEvidence: Record<string, unknown> | null = null;
-    for (const id of ids) {
-      if (!id.startsWith("run-")) continue;
-      const value = await store.readArtifact(id, "source-evidence", 1).catch(() => null);
-      if (value && typeof value === "object" && (value as { kind?: string }).kind === "app-store-reviews") {
-        sourceEvidence = value as Record<string, unknown>;
-        break;
-      }
-    }
-    expect(text).toContain("run.completed");
+    const sourceEvidence = (await store.readArtifact(body.runId, "source-evidence", 1)) as Record<string, unknown>;
     expect(sourceEvidence).toMatchObject({
       kind: "app-store-reviews",
       provider: "serpapi",

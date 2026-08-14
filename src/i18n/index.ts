@@ -36,6 +36,8 @@ export type Dictionary = {
   starting: string;
   running: string;
   completed: string;
+  interrupted: string;
+  reconnecting: string;
   someEventsDropped: string;
   goalTooShort: string;
   history: string;
@@ -240,6 +242,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     waiting: "Enter a URL or import reviews to begin.",
     starting: "Starting analysis…",
     running: "Analysis running…",
+    interrupted: "Interrupted",
+    reconnecting: "Reconnecting…",
     someEventsDropped: "Some stream events were dropped — check the browser console.",
     goalTooShort: "Analysis goal must be at least 10 characters.",
     history: "History",
@@ -443,6 +447,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     waiting: "输入链接或导入评论以开始。",
     starting: "正在启动分析…",
     running: "分析进行中…",
+    interrupted: "已中断",
+    reconnecting: "正在重新连接…",
     someEventsDropped: "部分流事件被丢弃 — 请查看浏览器控制台。",
     goalTooShort: "分析目标至少需要 10 个字符。",
     history: "历史",

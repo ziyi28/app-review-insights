@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { RunStore } from "@/server/runs/run-store";
 import { loadConfig } from "@/server/config";
 import { extractAppNameFromUrl } from "@/server/sources/app-store-url";
+import { isRunActive } from "@/server/runs/run-executor";
 
 export const runtime = "nodejs";
 
@@ -66,6 +67,12 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ runI
   }
   if (!store.existsFile(runDir)) {
     return NextResponse.json({ error: "run not found" }, { status: 404, headers: { "cache-control": "no-store" } });
+  }
+  // A genuinely running task must not be deleted (its pipeline is still writing
+  // into the directory). An `interrupted` run (persisted `running` manifest, no
+  // active task) is deletable — it is not protected here.
+  if (isRunActive(runId)) {
+    return NextResponse.json({ error: "run is still running" }, { status: 409, headers: { "cache-control": "no-store" } });
   }
   try {
     await store.deleteRun(runId);

@@ -25,7 +25,7 @@ test("cached replay of the bundled fixture never calls upstream", async ({ page 
   const xRow = page.locator(".card", { hasText: /识别最新版本引入的回归问题/ }).first();
   const replayPromise = page.waitForResponse((r) => r.url().includes("/api/runs") && r.request().method() === "POST");
   await xRow.getByRole("button", { name: /回放/ }).click();
-  expect((await replayPromise).status()).toBe(200);
+  expect((await replayPromise).status()).toBe(202);
 
   await waitForRunComplete(page);
 

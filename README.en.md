@@ -36,8 +36,8 @@ an analysis goal, and the app collects, cleans, analyzes, plans, and validates
    (attempt 1 vs attempt 2) side by side for PRD, tests, traceability and the
    version plan; never-revised runs show "Final · no revision required".
 
-Every run streams its progress as NDJSON events and persists a complete file
-snapshot under `data/runs/<runId>/`, which can be replayed offline as a
+Every run persists a complete file snapshot under `data/runs/<runId>/` and
+appends stage events to `events.ndjson`, which can be replayed offline as a
 **Cached Replay**. Cached runs that predate these P1 artifacts show a clear
 fallback instead of fabricated data.
 
@@ -60,6 +60,31 @@ a model you can still:
 - import and clean datasets: collection/import, dedupe, and stats run, then the
   run completes with a `MODEL_NOT_CONFIGURED` limitation (no model call is
   attempted).
+
+## Background Tasks and Refresh Recovery
+
+Analysis is decoupled from the browser connection and runs as a background task:
+
+- `POST /api/runs` returns `202` immediately with `{ runId, status: "running",
+  eventsUrl }`; the pipeline then runs in the background via Next.js `after()`.
+  **Refreshing the page, switching history, or starting another task never
+  cancels a running analysis.** Request-shape errors still return 4xx
+  `application/problem+json`.
+- Multiple tasks run in parallel; the **History** panel is the unified task
+  list, refreshed every 2s to show all concurrent tasks. Each task has its own
+  `runId`, event publisher, and snapshot directory, so events and artifacts
+  never cross-wire.
+- The client polls `GET /api/runs/{runId}/events?afterSequence=N` incrementally,
+  receiving `{ runId, status, events, lastSequence }`. A single failed poll shows
+  "Reconnecting…" and keeps retrying — only the authoritative status or a
+  terminal event decides the outcome. Cached replay reveals artifacts strictly in
+  event order; the final report is readable only after its `artifact.available`
+  event, so stages never race ahead of the report.
+- On refresh the newest `running` task is restored, otherwise the last-viewed run
+  (falling back to the idle page when that id no longer resolves). After a
+  process restart, a leftover `running` run reads as `interrupted` and can be
+  retried or deleted; a genuinely running task cannot be deleted (`409`).
+  No resume-after-restart is supported.
 
 ## Data Sources and Limitations
 

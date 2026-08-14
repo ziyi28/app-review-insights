@@ -57,13 +57,23 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
     void (async () => {
       // Reset inside the async loader so the reset is not a synchronous
       // setState call in the effect body (react-hooks/set-state-in-effect).
       setDeleteError(null);
       setConfirmingRunId(null);
-      await reload();
+      if (!cancelled) await reload();
     })();
+    // Refresh the list every 2s while open so parallel tasks' statuses stay
+    // current (running → completed/failed/interrupted) without a manual reload.
+    const interval = setInterval(() => {
+      void reload();
+    }, 2000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [open, reload]);
 
   const handleDelete = async (runId: string) => {

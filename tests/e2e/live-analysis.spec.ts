@@ -30,7 +30,7 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   // Analyze the fresh sample: POST /api/runs carries the preview selection.
   const postPromise = page.waitForResponse("**/api/runs");
   await page.getByRole("button", { name: /分析最新样本/ }).click();
-  expect((await postPromise).status()).toBe(200);
+  expect((await postPromise).status()).toBe(202);
 
   // Wait for the run to complete (run.completed lands in the run-log tab).
   await waitForRunComplete(page);

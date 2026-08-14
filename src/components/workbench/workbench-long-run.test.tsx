@@ -5,11 +5,11 @@ import { getDictionary } from "@/i18n";
 
 const tZh = getDictionary("zh-CN");
 
-// A live run whose artifacts are published long after the run started, with
-// `run.completed` arriving even later. The frontend must keep polling for
-// artifacts until the run terminates — it must NOT give up on a fixed attempt
-// ceiling while the run is still healthy (a real run took ~25min, with topics
-// alone ~17min).
+// A live run whose artifacts are announced long after the run started, with
+// `run.completed` arriving even later. The frontend must keep polling events and
+// fetch an artifact only once its `artifact.available` event arrives — it must
+// NOT give up on a fixed attempt ceiling while the run is still healthy (a real
+// run took ~25min, with topics alone ~17min).
 function event(seq: number, type: string, overrides: Record<string, unknown> = {}) {
   return {
     protocolVersion: "1",
@@ -60,9 +60,9 @@ beforeEach(() => {
   };
   availableArtifacts["scope"] = { explicitLimitations: [], filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null } };
   vi.useFakeTimers();
-  // Route /api/runs POST returns a stream that emits the initial events then
-  // stays open (the run keeps running); artifact GETs resolve against a map
-  // that gains entries over "time" — simulating late-published artifacts.
+  // POST /api/runs returns 202 {runId}; the events endpoint serves a growing
+  // list (as artifact.available events land) keyed by afterSequence; artifact
+  // GETs resolve against a map that gains entries over "time".
   vi.stubGlobal(
     "fetch",
     vi.fn((url: string, init?: RequestInit) => {
@@ -70,22 +70,26 @@ beforeEach(() => {
         return Promise.resolve({ ok: true, json: async () => previewResponse() });
       }
       if (url === "/api/runs" && init?.method === "POST") {
-        const initial = [
+        return Promise.resolve({ ok: true, json: async () => ({ runId: "run-long", status: "running", eventsUrl: "/api/runs/run-long/events" }) });
+      }
+      if (url === "/api/runs" && !init?.method) {
+        return Promise.resolve({ ok: true, json: async () => ({ runs: [] }) });
+      }
+      const ev = url.match(/\/api\/runs\/run-long\/events\?afterSequence=(\d+)/);
+      if (ev) {
+        const after = Number(ev[1]);
+        const events = [
           event(1, "run.accepted", { runId: "run-long" }),
           event(2, "stage.started", { stage: "scope", data: { stage: "scope" } }),
         ];
-        const body = new ReadableStream<Uint8Array>({
-          start(controller) {
-            for (const e of initial) controller.enqueue(new TextEncoder().encode(JSON.stringify(e) + "\n"));
-            // Do NOT close: the run stays in flight.
-          },
-        });
-        return Promise.resolve(new Response(body, { status: 200 }));
+        if (availableArtifacts["topics"]) {
+          events.push(event(3, "artifact.available", { data: { artifact: "topics", attempt: 1 } }));
+        }
+        const page = events.filter((e) => (e as { sequence: number }).sequence > after);
+        const lastSequence = (events.at(-1) as { sequence: number } | undefined)?.sequence ?? 0;
+        return Promise.resolve({ ok: true, json: async () => ({ runId: "run-long", status: "running", events: page, lastSequence }) });
       }
-      if (url === "/api/runs") {
-        return Promise.resolve({ ok: true, json: async () => ({ runs: [] }) });
-      }
-      const m = url.match(/^\/api\/runs\/run-long\/artifacts\/([a-z-]+)$/);
+      const m = url.match(/^\/api\/runs\/run-long\/artifacts\/([a-z-]+)(?:\?attempt=(\d+))?$/);
       if (m) {
         const name = m[1];
         if (name in availableArtifacts) {
@@ -121,9 +125,6 @@ async function startLiveRun() {
   await act(async () => {
     fireEvent.click(screen.getByRole("button", { name: tZh.next }));
   });
-  // Entering the confirm step auto-checks the sample (an async effect + fetch).
-  // Flush microtasks/timers until the live sample card renders; avoid waitFor,
-  // which does not advance under fake timers.
   for (let i = 0; i < 10; i++) {
     await act(async () => {
       await vi.advanceTimersByTimeAsync(0);
@@ -135,27 +136,33 @@ async function startLiveRun() {
   });
 }
 
+/** Advance time in small steps, flushing microtasks/effects between, until the
+ *  predicate passes or the step budget is exhausted. */
+async function advanceUntil(predicate: () => boolean, maxSteps = 20): Promise<void> {
+  for (let i = 0; i < maxSteps; i++) {
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(800);
+    });
+    if (predicate()) return;
+  }
+}
+
 describe("Workbench long-running artifact polling", () => {
-  it("keeps polling for artifacts beyond a fixed attempt ceiling while the run is still running", async () => {
+  it("keeps polling events and loads an artifact announced far later, past a fixed ceiling", async () => {
     render(<Workbench />);
     await startLiveRun();
 
-    // Advance WELL past the old attempt ceiling (1000 × 800ms ≈ 13.3min).
-    // With the old ceiling the poller has now stopped entirely; the topics
-    // artifact is only published *after* that point.
+    // Advance WELL past the old artifact-poll attempt ceiling (~13min). The
+    // topics artifact is only announced (via its artifact.available event) after
+    // that point.
     await act(async () => {
       await vi.advanceTimersByTimeAsync(1000 * 800 + 100);
     });
     availableArtifacts["topics"] = { topics: [{ id: "topic-1", label: "Pricing", description: "cost complaints", reviewIds: [] }] };
 
-    // Give the poller one more tick. A poller that stopped at the ceiling will
-    // never pick the artifact up; a poller that only stops on run termination
-    // will.
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
-    });
-
-    // Open the topics tab; the late artifact must be shown.
+    // One more event-poll tick announces the topics artifact; the client then
+    // fetches it. A client that stopped at a ceiling would never pick it up.
+    await advanceUntil(() => screen.queryByRole("tab", { name: tZh.topics }) !== null, 3);
     await act(async () => {
       fireEvent.click(screen.getByRole("tab", { name: tZh.topics }));
     });
@@ -167,12 +174,8 @@ describe("Workbench long-running artifact polling", () => {
     render(<Workbench />);
     await startLiveRun();
 
-    // Publish the topics artifact; the UI should follow it to the topics tab
-    // automatically without the user clicking the tab.
     availableArtifacts["topics"] = { topics: [{ id: "topic-1", label: "Pricing", description: "cost complaints", reviewIds: [] }] };
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(800);
-    });
+    await advanceUntil(() => screen.queryByText(/Pricing/) !== null);
 
     // No manual tab click: the topics panel content must be visible already.
     expect(screen.getByText(/Pricing/)).toBeInTheDocument();
