@@ -86,6 +86,7 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
         const current = currentStage === stage && !done;
         const duration = elapsedFor(stage);
         const batch = current ? batchProgress(events, stage) : null;
+        const skipped = hasTerminal && !done && !current;
         const statusText = done ? t.completed : current ? t.running : hasTerminal ? t.stageSkipped : t.waiting;
         return (
           <li key={stage} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: done || current ? 1 : 0.55 }}>
@@ -103,6 +104,18 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
             <span className="sr-only">
               {label}: {statusText}
             </span>
+            {skipped ? (
+              <span
+                aria-hidden="true"
+                style={{
+                  color: "var(--text-muted)",
+                  fontSize: "12px",
+                  flexShrink: 0,
+                }}
+              >
+                {t.stageSkipped}
+              </span>
+            ) : null}
             {done ? (
               <span style={{ color: "var(--ok)", fontSize: "12px", flexShrink: 0 }} aria-hidden="true">✓{duration != null ? ` ${duration}` : ""}</span>
             ) : current ? (

@@ -66,11 +66,32 @@ test("read-only viewing of a bundled fixture makes no analysis or upstream calls
   const xRow = page.locator(".card", { hasText: /识别最新版本引入的回归问题/ }).first();
   await xRow.getByRole("button", { name: /查看/ }).click();
 
-  // The view loads the fixture's persisted artifacts.
-  await page.getByRole("tab", { name: /发现/ }).click();
-  await expect(page.getByText(/回归/i).first()).toBeVisible({ timeout: 10_000 });
-  await page.getByRole("tab", { name: /评论/ }).click();
-  await expect(page.getByRole("tabpanel")).toContainText(/评论/i, { timeout: 10_000 }).catch(() => {});
+  // The view loads the fixture's persisted artifacts; every deliverable must be
+  // present and rendered from real fixture content, so any missing artifact
+  // fails the test instead of being swallowed.
+
+  // Overview and review count.
+  const overview = page.locator("#panel-overview");
+  await expect(overview.locator(".stat-card").filter({ hasText: /原始评论/ })).toContainText("500");
+
+  // The unexecuted revision stage must be visibly skipped for ordinary users.
+  await expect(page.getByText("已跳过", { exact: true })).toBeVisible();
+
+  // Raw reviews.
+  await page.getByRole("tab", { name: "原始评论", exact: true }).click();
+  await expect(page.locator("#panel-raw").getByText("6e32dfa0")).toBeVisible();
+
+  // PRD.
+  await page.getByRole("tab", { name: "PRD", exact: true }).click();
+  await expect(page.locator("#panel-prd").getByText("修复视频/GIF 无法加载的问题")).toBeVisible();
+
+  // Test cases.
+  await page.getByRole("tab", { name: "测试用例", exact: true }).click();
+  await expect(page.locator("#panel-tests").getByText("test-1", { exact: true })).toBeVisible();
+
+  // Traceability.
+  await page.getByRole("tab", { name: "追溯", exact: true }).click();
+  await expect(page.locator("#panel-traceability").getByText(/0 错误/)).toBeVisible();
 
   // No POST to source-previews or runs, and zero upstream traffic.
   expect(previewPosts).toBe(0);

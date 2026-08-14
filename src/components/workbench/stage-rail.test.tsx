@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { getDictionary } from "@/i18n";
 import { StageRail } from "./stage-rail";
 import type { RunEvent } from "@/domain/contracts/events";
@@ -91,9 +91,12 @@ describe("StageRail", () => {
   it("marks unexecuted stages as Skipped after a run.completed event, not waiting", () => {
     const events = [...eventsThroughEvidence, event("run.completed", undefined)];
     render(<StageRail events={events} t={getDictionary("en")} />);
-    // A stage that never started reads "Skipped" once the run is terminal.
+    // A stage that never started reads "Skipped" once the run is terminal. The
+    // skipped status must be a visible element, not only sr-only text.
     const revisionItem = screen.getByText("Revision").closest("li");
-    expect(revisionItem).toHaveTextContent(/skipped/i);
+    expect(revisionItem).not.toBeNull();
+    const skippedStatus = within(revisionItem!).getByText("Skipped", { exact: true });
+    expect(skippedStatus).toBeVisible();
     expect(revisionItem).not.toHaveTextContent(/enter a url/i);
     // The stages that did run still read completed.
     const findingsItem = screen.getByText("Findings").closest("li");
@@ -112,7 +115,8 @@ describe("StageRail", () => {
     render(<StageRail events={events} t={getDictionary("en")} />);
     for (const label of ["Scope", "Topics", "Findings", "Planning", "Tests", "Traceability", "Revision"]) {
       const item = screen.getByText(label).closest("li");
-      expect(item).toHaveTextContent(/skipped/i);
+      expect(item).not.toBeNull();
+      expect(within(item!).getByText("Skipped", { exact: true })).toBeVisible();
     }
     const sourceItem = screen.getByText("Source").closest("li");
     expect(sourceItem).toHaveTextContent("✓");
@@ -129,7 +133,9 @@ describe("StageRail", () => {
     render(<StageRail events={events} t={getDictionary("en")} />);
     expect(screen.getByText("Source").closest("li")).toHaveTextContent("✓");
     expect(screen.getByText("Prepare").closest("li")).toHaveTextContent("✓");
-    expect(screen.getByText("Findings").closest("li")).toHaveTextContent(/skipped/i);
+    const findingsItem = screen.getByText("Findings").closest("li");
+    expect(findingsItem).not.toBeNull();
+    expect(within(findingsItem!).getByText("Skipped", { exact: true })).toBeVisible();
   });
 
   it("keeps unstarted stages as waiting when there is no terminal event (interrupted)", () => {
@@ -151,5 +157,40 @@ describe("StageRail", () => {
     const item = screen.getByText("Revision").closest("li");
     expect(item).toHaveTextContent("✓");
     expect(item).not.toHaveTextContent(/skipped/i);
+  });
+
+  // run.completed / run.failed: 未开始阶段显示可见的 Skipped。
+  it.each([
+    ["run.completed", "run.completed"],
+    ["run.failed", "run.failed"],
+  ] as const)("shows a visible Skipped on unstarted stages after %s", (_name, terminal) => {
+    const events = [...eventsThroughEvidence, event(terminal as "run.completed", undefined)];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    const revisionItem = screen.getByText("Revision").closest("li");
+    expect(revisionItem).not.toBeNull();
+    expect(within(revisionItem!).getByText("Skipped", { exact: true })).toBeVisible();
+  });
+
+  // interrupted：没有 terminal event，未开始阶段不显示 Skipped。
+  it("keeps unstarted stages without a visible Skipped when interrupted (no terminal event)", () => {
+    render(<StageRail events={eventsThroughEvidence} t={getDictionary("en")} />);
+    const revisionItem = screen.getByText("Revision").closest("li");
+    expect(revisionItem).not.toBeNull();
+    expect(within(revisionItem!).queryByText("Skipped", { exact: true })).not.toBeInTheDocument();
+  });
+
+  // revision 确实执行完成：不显示 Skipped，且显示完成标记。
+  it("does not show Skipped when revision actually completed", () => {
+    const events = [
+      ...eventsThroughEvidence,
+      event("stage.started", "revision"),
+      event("stage.completed", "revision"),
+      event("run.completed", undefined),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+    const revisionItem = screen.getByText("Revision").closest("li");
+    expect(revisionItem).not.toBeNull();
+    expect(within(revisionItem!).queryByText("Skipped", { exact: true })).not.toBeInTheDocument();
+    expect(revisionItem).toHaveTextContent("✓");
   });
 });
