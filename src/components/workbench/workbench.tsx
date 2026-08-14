@@ -349,8 +349,11 @@ export function Workbench() {
     userNavigated.current = false;
   };
 
+  const [isRetrying, setIsRetrying] = useState(false);
+
   const handleRetryHistory = useCallback(async (sourceRunId: string) => {
     setHistoryOpen(false);
+    setIsRetrying(true);
     try {
       const res = await fetch(`/api/runs/${sourceRunId}`, { cache: "no-store" });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -374,7 +377,7 @@ export function Workbench() {
         setTab("overview");
         autoJumpedKeys.current.clear();
         userNavigated.current = false;
-        void start(cleanRequest);
+        await start(cleanRequest);
       } else if (manifest.appUrl && manifest.goal) {
         // Fallback for older historical runs without saved startRequest: reconstruct start request
         seenRunId.current = null;
@@ -382,7 +385,7 @@ export function Workbench() {
         setTab("overview");
         autoJumpedKeys.current.clear();
         userNavigated.current = false;
-        void start({
+        await start({
           protocolVersion: "1",
           mode: "analyze",
           uiLocale,
@@ -391,15 +394,17 @@ export function Workbench() {
           source: { kind: "live", appStoreUrl: manifest.appUrl },
         });
       } else {
-        void loadHistory(sourceRunId);
+        await loadHistory(sourceRunId);
       }
     } catch {
-      void loadHistory(sourceRunId);
+      await loadHistory(sourceRunId);
+    } finally {
+      setIsRetrying(false);
     }
   }, [start, loadHistory, uiLocale]);
 
-  const idle = !running && events.length === 0;
-  const starting = running && runId === null;
+  const idle = !running && events.length === 0 && !isRetrying;
+  const starting = (running && runId === null) || isRetrying;
 
   const runFailed = useMemo(() => {
     if (running || events.length === 0) return false;
@@ -453,11 +458,11 @@ export function Workbench() {
         <span className={styles.spacer} />
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
         {runFailed ? (
-          <button className="btn btn-primary" onClick={handleRetryCurrent} disabled={running}>
-            {t.retry}
+          <button className="btn btn-primary" onClick={handleRetryCurrent} disabled={running || isRetrying}>
+            {isRetrying ? t.retrying : t.retry}
           </button>
         ) : null}
-        <button className="btn btn-primary" onClick={handleNewRun} disabled={running}>
+        <button className="btn btn-primary" onClick={handleNewRun} disabled={running || isRetrying}>
           {t.newRun}
         </button>
         <button className="btn btn-secondary" onClick={() => setHistoryOpen(true)}>
@@ -529,10 +534,10 @@ export function Workbench() {
                   {runFailedMessage ? <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)" }}>{runFailedMessage}</p> : null}
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button type="button" className="btn btn-primary" onClick={handleRetryCurrent}>
-                    {t.retry}
+                  <button type="button" className="btn btn-primary" onClick={handleRetryCurrent} disabled={running || isRetrying}>
+                    {isRetrying ? t.retrying : t.retry}
                   </button>
-                  <button type="button" className="btn btn-secondary" onClick={handleNewRun}>
+                  <button type="button" className="btn btn-secondary" onClick={handleNewRun} disabled={running || isRetrying}>
                     {t.newRun}
                   </button>
                 </div>
