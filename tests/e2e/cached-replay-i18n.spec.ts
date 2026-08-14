@@ -19,9 +19,12 @@ test("cached replay of the bundled fixture never calls upstream", async ({ page 
   await expect(page.getByRole("dialog", { name: /历史/ })).toBeVisible();
   await expect(page.getByText(/识别最新版本引入的回归问题/).first()).toBeVisible();
 
-  // The demo run is replayable; click its Replay action.
+  // The demo run is replayable; click its Replay action. Scope the Replay click
+  // to the row whose goal text identifies the X fixture, so a second bundled
+  // fixture (a different app) does not make the click ambiguous.
+  const xRow = page.locator(".card", { hasText: /识别最新版本引入的回归问题/ }).first();
   const replayPromise = page.waitForResponse((r) => r.url().includes("/api/runs") && r.request().method() === "POST");
-  await page.getByRole("button", { name: /回放/ }).first().click();
+  await xRow.getByRole("button", { name: /回放/ }).click();
   expect((await replayPromise).status()).toBe(200);
 
   await waitForRunComplete(page);

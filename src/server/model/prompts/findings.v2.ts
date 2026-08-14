@@ -33,6 +33,11 @@ RULES
   substring of that review's normalized body.
 - A finding is a concrete, user-visible problem or behavior with supporting and
   (if present) conflicting evidence. Do not inflate sample size.
+- Conflicting evidence is a signal, not noise. When reviews express opposite
+  views about the same theme — some users praise a feature while others report
+  that same feature failing or disappointing — you MUST list the opposing
+  reviews' IDs in "conflictingReviewIds". Never drop opposing reviews to make a
+  finding look unanimous; a mixed verdict is a valid, more honest finding.
 - Distinguish what is supported by evidence (summary) from what is uncertain or
   limited (uncertainties, limitations).
 - Do not invent requirements or solutions here.
@@ -44,7 +49,7 @@ RULES
 
 export const findingsPrompt: PromptDefinition<FindingOutput> = {
   id: "findings",
-  version: "findings@3",
+  version: "findings@4",
   system: SYSTEM,
   buildUser: (context: unknown) => {
     const c = context as { reviews: unknown; topics: unknown; goal: string; focusAreas: unknown; outputLocale: string };

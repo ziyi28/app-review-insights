@@ -1,0 +1,150 @@
+{
+  "versions": [
+    {
+      "id": "ver-1",
+      "name": "1.0.0 - Trust & Stability",
+      "summary": "Fix paywall confusion, billing trust, and ad abuse that are causing churn and 1-star reviews.",
+      "rationale": "Findings 1-3 carry the highest severity and user impact. They directly cause users to abandon the app or label it a scam. Stabilizing these trust surfaces is a prerequisite for any longer-term value work.",
+      "requirementIds": [
+        "req-1",
+        "req-2",
+        "req-3"
+      ]
+    },
+    {
+      "id": "ver-2",
+      "name": "1.1.0 - Core Experience",
+      "summary": "Make personalization honor user constraints and improve workout content quality.",
+      "rationale": "Once trust is restored, the most polarizing feature — the workout library — becomes the focus. Finding 4 and finding 5 show users either love the short/varied workouts or hate repetitions, AI-slop, and ignored safety settings. These are medium-frequency but high-impact issues for retention and safety.",
+      "requirementIds": [
+        "req-4",
+        "req-5"
+      ]
+    },
+    {
+      "id": "ver-3",
+      "name": "1.2.0 - Inclusive Wellness",
+      "summary": "Rebrand onboarding and imagery to be inclusive and wellness-first.",
+      "rationale": "Finding 6 is a small but vocal signal that the app's weight-loss-first framing and AI body imagery alienate wellness-focused users. The change is low-cost and aligns the brand with a broader, more inclusive fitness audience.",
+      "requirementIds": [
+        "req-6"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "requirementId": "req-1",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "16.8% of reviews describe paywall regression that turns long-time users into detractors. The same evidence also shows a subset of subscribers who love the app, so the fix is not to remove the subscription but to make the free tier and premium boundary honest and valuable.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 84,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.168
+        }
+      }
+    },
+    {
+      "requirementId": "req-2",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "large",
+        "dependencyRequirementIds": [],
+        "rationale": "Billing failures directly break the subscription value proposition and brand trust. 7.8% of reviews report immediate charges, cancellation failures, or account lockouts, often using the word 'scam'. Fixing this is essential before any monetization expansion.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 39,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.078
+        }
+      }
+    },
+    {
+      "requirementId": "req-3",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "10.4% of reviews cite 90-second or unclosable ads and Shein redirects as churn triggers. Some users explicitly accept ads as a fair trade for free access, so the goal is to keep the ad-supported tier but make it non-abusive and functional.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 52,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.104
+        }
+      }
+    },
+    {
+      "requirementId": "req-4",
+      "priority": "P1",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "medium",
+        "implementationScope": "large",
+        "dependencyRequirementIds": [],
+        "rationale": "Personalization failures are safety-relevant (especially prenatal) and directly contradict the app's customization promise. Frequency is low (2.4%) but the damage to affected users is severe and the feature differentiates the app from competitors.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 12,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.024
+        }
+      }
+    },
+    {
+      "requirementId": "req-5",
+      "priority": "P1",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "The workout library is the most polarizing feature: 14.8% of reviews are split between 5-star praise for short, effective, varied sessions and strong criticism of repetitive or AI-generated content. Improving freshness while keeping the short format serves the largest audience.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 74,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.148
+        }
+      }
+    },
+    {
+      "requirementId": "req-6",
+      "priority": "P2",
+      "versionId": "ver-3",
+      "planningFactors": {
+        "severity": "low",
+        "userImpact": "low",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "A small but vocal segment (1.2% of reviews) finds the weight-loss-first framing and AI body imagery actively harmful. The change is low-cost and improves brand inclusivity and alignment with wellness values.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 6,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.012
+        }
+      }
+    }
+  ]
+}

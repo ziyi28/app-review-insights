@@ -152,10 +152,9 @@ loopback overrides of `SERPAPI_BASE_URL` are allowed for tests (production must
 use `https://serpapi.com`). The SocialCrawl integration has been removed; old
 replays may still show legacy source provenance.
 
-For the bundled demo fixture the analysis used a DeepSeek-compatible endpoint
-(`deepseek-v4-flash`); that configuration is documented in
-`fixtures/demo-runs/run-x-twitter-us/provenance.json` and is **not**
-required to replay it.
+For the bundled demo fixtures the analysis used a DeepSeek-compatible endpoint
+(`deepseek-v4-flash`); that configuration is documented in each fixture's
+`provenance.json` and is **not** required to replay them.
 
 See `docs/model-analysis.md` for per-stage rules-vs-model rationale, prompt
 versions, and failure handling.
@@ -229,12 +228,17 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
   model; the UI's **Cached Replay** mode lists replayable runs and re-materializes
   all artifacts under a fresh run id, labeled **Cached Replay**, and it never
   calls Apple or the model.
-- `fixtures/demo-runs/run-x-twitter-us/` is a **real** capture from the
-  US App Store (App ID 333903271, "X") analyzed by a real model,
-  privacy-minimized, with full provenance:
-  - review id / rating / title / body / version / timestamp retained;
-  - reviewer nickname, author URI, and sensitive headers removed;
-  - `provenance.json` records capture time, source URL pattern, storefront,
+- Two **real** demo fixtures ship under `fixtures/demo-runs/`, each a real
+  capture from the US App Store analyzed by a real model, privacy-minimized,
+  with full provenance:
+  - `run-x-twitter-us/` — App ID 333903271 ("X");
+  - `run-workout-for-women-us/` — App ID 839285684 ("Workout for Women"), the
+    assessment's primary example.
+  - Shipping two different app categories is intentional: it demonstrates the
+    pipeline is not hard-coded to any single app.
+  - Each fixture retains review id / rating / title / body / version / timestamp
+    and removes reviewer nickname, author URI, and sensitive headers; its
+    `provenance.json` records capture time, source URL pattern, storefront,
     model, temperature, and prompt versions.
 - Real snapshots are marked as such. The app never pretends a mock, a rule
   fallback, or a static text is a live model result.

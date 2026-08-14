@@ -16,6 +16,7 @@ import { TabList } from "./tab-list";
 import { RunLogPanel } from "./run-log-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
+import { RatingDistribution, VersionDistribution, LanguageDistribution } from "@/components/artifacts/stats-panels";
 import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, ArtifactPhaseSelector, FinalDeliverablesPanel } from "@/components/artifacts/workflow-panels";
 import { ProvenanceBadge } from "./provenance-badge";
 import type { VersionPlanArtifact } from "@/domain/contracts/analysis";
@@ -308,7 +309,9 @@ export function Workbench() {
           includedCount: number;
           duplicateCount: number;
           identityConflictCount: number;
-          ratingDistribution: Record<string, number>;
+          ratingDistribution: Record<number, number>;
+          versionDistribution: Record<string, number>;
+          languageDistribution: Record<string, number>;
         }
       | undefined;
     return s;
@@ -573,6 +576,22 @@ export function Workbench() {
                           <div className="stat-label">{s.k}</div>
                         </div>
                       ))}
+                    </div>
+                  ) : null}
+                  {stats && (stats.ratingDistribution || stats.versionDistribution || stats.languageDistribution) ? (
+                    <div className="card" style={{ display: "grid", gap: "14px" }}>
+                      <div>
+                        <h4 style={{ margin: "0 0 8px" }}>{t.ratingDistribution}</h4>
+                        <RatingDistribution distribution={stats.ratingDistribution ?? {}} t={t} />
+                      </div>
+                      <div>
+                        <h4 style={{ margin: "0 0 8px" }}>{t.versionDistribution}</h4>
+                        <VersionDistribution distribution={stats.versionDistribution ?? {}} t={t} />
+                      </div>
+                      <div>
+                        <h4 style={{ margin: "0 0 8px" }}>{t.languageDistribution}</h4>
+                        <LanguageDistribution distribution={stats.languageDistribution ?? {}} t={t} />
+                      </div>
                     </div>
                   ) : null}
                   {cache.analysisSample ? (

@@ -1,0 +1,116 @@
+{
+  "valid": true,
+  "retried": false,
+  "items": [
+    {
+      "focusAreaId": "focus-1",
+      "label": "Impactful problems",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-2",
+        "finding-3",
+        "finding-4",
+        "finding-5",
+        "finding-6"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-2",
+        "req-3",
+        "req-5",
+        "req-4",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-2",
+      "label": "Opportunities",
+      "status": "covered",
+      "findingIds": [
+        "finding-3",
+        "finding-4",
+        "finding-5",
+        "finding-6"
+      ],
+      "requirementIds": [
+        "req-3",
+        "req-5",
+        "req-4",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-3",
+      "label": "Polarizing features (loved vs disliked)",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-3",
+        "finding-4",
+        "finding-5",
+        "finding-6"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-3",
+        "req-5",
+        "req-4",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-4",
+      "label": "Subscription value",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-2",
+        "finding-3"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-2",
+        "req-3"
+      ]
+    },
+    {
+      "focusAreaId": "focus-5",
+      "label": "Workout usability",
+      "status": "covered",
+      "findingIds": [
+        "finding-2",
+        "finding-3",
+        "finding-4",
+        "finding-5"
+      ],
+      "requirementIds": [
+        "req-2",
+        "req-3",
+        "req-5",
+        "req-4"
+      ]
+    },
+    {
+      "focusAreaId": "focus-6",
+      "label": "Conflicting feedback",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-2",
+        "finding-3",
+        "finding-4",
+        "finding-5",
+        "finding-6"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-2",
+        "req-3",
+        "req-5",
+        "req-4",
+        "req-6"
+      ]
+    }
+  ]
+}

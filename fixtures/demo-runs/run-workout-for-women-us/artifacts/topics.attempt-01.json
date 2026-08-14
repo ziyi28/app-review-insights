@@ -1,0 +1,422 @@
+{
+  "topics": [
+    {
+      "id": "topic-1",
+      "label": "AI avatars and objectifying imagery trigger backlash",
+      "description": "Long-term users criticize the redesign's AI-generated avatars and unrealistic body imagery, which displaces the original real-woman workout experience and conflicts with body-positivity values.",
+      "candidateIds": [
+        "topic-candidate-2@c0"
+      ],
+      "reviewIds": [
+        "cbb69a199b87635d6910",
+        "1e26434428fd7d297ebd",
+        "7d579ddab7ad9866916e",
+        "75d7b5fc1746c4d80026"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-2",
+      "label": "Paywall blocks previously free workouts",
+      "description": "Users report that workouts, saved plans, and features that used to be free now require a subscription, including after updates or a very short free trial. Long-time users feel misled and locked out.",
+      "candidateIds": [
+        "topic-candidate-1@c1",
+        "topic-candidate-1@c2",
+        "topic-candidate-1@c3",
+        "topic-candidate-3@c2",
+        "topic-candidate-3@c4",
+        "topic-candidate-6@c3"
+      ],
+      "reviewIds": [
+        "15adc40ae33fa59c6460",
+        "3c469722f1d0864a64bb",
+        "50dd40e82486e9e93aae",
+        "be03fa8fd8bdfb45b97d",
+        "5388376e53d4eca15c60",
+        "cd3e775a272561da7d61",
+        "4b4d13468d71f994d0a9",
+        "0567acea07a5f230c350",
+        "1f584730f8580f6b15bd",
+        "8e1dadc88db3cb1e2d52",
+        "a8cafd51b7cbb04b0ad9",
+        "b336d30bd0c5bb4c158b",
+        "1e69a0302e47a4ef87e7",
+        "19dd801156be88554d22",
+        "4f2cf6597c046f4c579d",
+        "b46e6db96ab3b39e12b8",
+        "cc63855d1f2503b23e1a",
+        "ce914d45a09ffcb8351b",
+        "5a40025573b2c55b1963",
+        "c9338a41a33df24b016d",
+        "1f437acb3f7e7e8c10b3",
+        "cb0cc8ac89a9761a3b16",
+        "0975a5a2992339e60625",
+        "446debb488c9e30a47dd",
+        "453d414ea6a6bf40613e",
+        "d12437b2f22497298e1b",
+        "b87d5108f1c3d560a191",
+        "bc8c57bc004f780e2a19",
+        "665cd14c6001dacd0a84",
+        "b5db1fbb2e56d1b56e16",
+        "ea2a981452bdd7fb7f68",
+        "0e621260607a04cf082e",
+        "52ecbbc862689ee97897",
+        "d2556889c59bcc869614",
+        "89f15c4184fe51fd54d2",
+        "52dc5e5cc66e6598d0af",
+        "dc4faf66d83960f53218",
+        "abde41fc0222660ff656",
+        "9209576b87ce4944ca28",
+        "a9a965a3ee3756a838f8",
+        "f65d70e0417408b7a7e4",
+        "32e7a4d8aaa1b9789f74"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-6",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-3",
+      "label": "Misleading billing, free trials, and cancellation issues",
+      "description": "Multiple users report being charged immediately for free trials, charged after cancellation, or misled about plan terms. These billing failures severely damage trust in the subscription model.",
+      "candidateIds": [
+        "topic-candidate-6@c0",
+        "topic-candidate-2@c1",
+        "topic-candidate-2@c2",
+        "topic-candidate-2@c3",
+        "topic-candidate-2@c4",
+        "topic-candidate-1@c6"
+      ],
+      "reviewIds": [
+        "1cf18baaa2b920a6718d",
+        "a714751ef74be8bea80e",
+        "a4c127668e22552df85d",
+        "c352d86551671d7b8d70",
+        "dd0b01e8efe7359b1089",
+        "4fbc4f72bcfecda65727",
+        "eeb35f52212cad12f495",
+        "a23ee85600cd3c3ae86f",
+        "3db3756c43b8043720be",
+        "f8eb72f77f1bd83b00c8",
+        "62be00dda9ffd5c8bc7a",
+        "7a160bd56131157f4752",
+        "c5cec2597485411001ba",
+        "474aa2e44c378c760f59",
+        "cc85fc2414bb9b897dfd",
+        "14811281319525325893",
+        "7aaf37a74c0b10a4cc33",
+        "3041a3e4c84f6e84e057",
+        "55bfd9115408f9880868",
+        "f7056bce85c297605c99",
+        "e5b8843ff3eecb453ed7",
+        "ea303adaff4ec227d28c"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-4",
+      "label": "Long, unskippable ads disrupt the free experience",
+      "description": "Free users face 90-second to 3-minute ads that are hard to exit, sometimes requiring force-closing the app. Forced and broken ad flows are a major friction point.",
+      "candidateIds": [
+        "topic-candidate-5@c0",
+        "topic-candidate-1@c4",
+        "topic-candidate-2@c5"
+      ],
+      "reviewIds": [
+        "c0f1c62d059d3ec7cd06",
+        "ab3a2f593db6baa75d7a",
+        "d209ae2dfd97ff0bdb80",
+        "a9a965a3ee3756a838f8",
+        "a3219e1290028aaf4834",
+        "b4467727f123a07beea9",
+        "db79928046519e7ffdcd",
+        "f65d70e0417408b7a7e4",
+        "bf3841e67602dc01e0b2",
+        "1e0fb9be01863f607fa3",
+        "72cf0fc6b2f25ec4e1ac",
+        "8cab578e3ab71d8124a9",
+        "76e57a90688ac2de17a6",
+        "af48b9baedefbffda432",
+        "7e2302afb4e5dac12a13"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-2",
+        "focus-4",
+        "focus-3",
+        "focus-5",
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-5",
+      "label": "Workout strengths: short, varied, and beginner-friendly",
+      "description": "Positive reviews highlight well-sequenced, varied workouts, short sessions, visible demonstrations, progress tracking, and approachability for beginners. Users build consistent habits and see results.",
+      "candidateIds": [
+        "topic-candidate-5@c1",
+        "topic-candidate-4@c2",
+        "topic-candidate-5@c2",
+        "topic-candidate-4@c4",
+        "topic-candidate-3@c5"
+      ],
+      "reviewIds": [
+        "b6d75605977aad508231",
+        "f7290fe64a406f83b54f",
+        "35faa42d589b56ba38f2",
+        "0b88af6733f38b6a7474",
+        "668f40f529d9d0dd21ae",
+        "c64a82c6820fc3aeeeb1",
+        "0fe319101430b82ef5a6",
+        "dcb564f577dabd2fe953",
+        "030127cbe4098673f827",
+        "edb0da5e3f55117ad807",
+        "17cdc8c508a860319c27",
+        "3c49af9bb0aef09a3fdc",
+        "53974bcc26a0d788626b",
+        "98de3937a388855366bc",
+        "e0d1838121012adeedaa",
+        "c7ed3b29dfdc1ebd1d1e",
+        "5e9ea710a133198a495c",
+        "abec4e956a261a973827",
+        "39f537e8298befa28a06",
+        "1a50245eec24db09a48c",
+        "98fa3a30eb191e9b4f92",
+        "55d763820c6068e5fa96",
+        "d723d3091dfcb5ebcacb",
+        "63e3062c81dc6548b47e",
+        "42ab00aa53fb637834a4",
+        "9dcf6dee35426a0c9035",
+        "fbfc29ddbb6142d2e40f",
+        "1a8557f142bc630824ef",
+        "bf3116f0b6bef0a0f65b",
+        "f663a47722d240c912da",
+        "818576cbf19f52251034",
+        "d5b25078d199b55fd062",
+        "66fa455a3bc44f182c65",
+        "578366a04f7da6efbe18",
+        "c3b30dfe2ecbdea7ee35",
+        "0b8fc13d97546607d5e6",
+        "a0e2af0c15b6600346ca",
+        "0b2d2f5d4346261f1d73"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-3",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-6",
+      "label": "Workout content quality is polarizing: effective but repetitive",
+      "description": "While many love the workouts' effectiveness, others complain about repetitive routines, mislabeled stretches, missing pregnancy-safe options, and AI demos that contradict instructions. Content quality and variety need attention.",
+      "candidateIds": [
+        "topic-candidate-4@c0",
+        "topic-candidate-4@c3",
+        "topic-candidate-4@c5"
+      ],
+      "reviewIds": [
+        "b34f61d4a24155813305",
+        "89d39ff177caa228b26f",
+        "6ad576008e6465adc345",
+        "12277142053771f844f1",
+        "d331227b060177a24ad3",
+        "6acda9e389faa1143883",
+        "4a644a56a8619cd8783c",
+        "63ac45e9ef64dcf4fe0f",
+        "6d22e4014053df4dd6eb",
+        "5a83a72849e12b022595",
+        "2143f3ec8ed35afd12de",
+        "1cf18baaa2b920a6718d",
+        "22362f152de51b719e6f",
+        "d12437b2f22497298e1b",
+        "b13ecc45b66030acc2d7",
+        "a5900337c9421dc68dbc",
+        "61cabebf911229cac631",
+        "b4e7ccd6da5e64cc4de3"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-5",
+        "focus-6",
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-7",
+      "label": "Subscription value is polarizing: worth it vs resentment",
+      "description": "Users are split between those who find the subscription cheaper than a gym and those who refuse to pay for an app that was once free. The love for the workouts conflicts with subscription resentment.",
+      "candidateIds": [
+        "topic-candidate-6@c1",
+        "topic-candidate-6@c2",
+        "topic-candidate-1@c5"
+      ],
+      "reviewIds": [
+        "0b88af6733f38b6a7474",
+        "4b4d13468d71f994d0a9",
+        "be03fa8fd8bdfb45b97d",
+        "49f29c1a38b41e2bc8dd",
+        "cd3e775a272561da7d61",
+        "fec6299a11560eaa8f62",
+        "b46e6db96ab3b39e12b8",
+        "cc63855d1f2503b23e1a",
+        "b336d30bd0c5bb4c158b",
+        "5a40025573b2c55b1963",
+        "1f437acb3f7e7e8c10b3",
+        "842e5e0f16697cf1a01a",
+        "a0b0f9da4e31b7a6f52d",
+        "c837abacb62f11bf392f",
+        "0515592adfe6c089a8ea",
+        "19245404c6e294fa0231",
+        "4a97f4d4338874d4a871",
+        "4395008b5af14e4a1615",
+        "2c27621158b0b10ba11f",
+        "893a5614aeb5510fceb5",
+        "d92cce6e9e7960f75948",
+        "89626a77cb324252fb52"
+      ],
+      "focusAreaIds": [
+        "focus-3",
+        "focus-4",
+        "focus-6",
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-8",
+      "label": "Workout personalization ignores user constraints and difficulty needs",
+      "description": "Users with specific goals or limitations (e.g., knee problems, advanced level) find the app ignores them: exercises still include squats/lunges, and difficulty settings don't challenge advanced users.",
+      "candidateIds": [
+        "topic-candidate-3@c0",
+        "topic-candidate-5@c4"
+      ],
+      "reviewIds": [
+        "bd7a17c7711d6f478c76",
+        "22362f152de51b719e6f",
+        "43f4266f074eaa80d2fc",
+        "2143f3ec8ed35afd12de",
+        "cb1ac0588b2aee125248",
+        "1a50245eec24db09a48c",
+        "32e7a4d8aaa1b9789f74",
+        "63e3062c81dc6548b47e",
+        "42ab00aa53fb637834a4",
+        "d723d3091dfcb5ebcacb"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-2",
+        "focus-5",
+        "focus-3",
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-9",
+      "label": "Feature requests: workout controls, music integrations, and targeted routines",
+      "description": "Users ask for more control over workout delivery (rep counting, quieter cues, Apple Watch support) and for additional music integrations like YouTube Music, plus more targeted routines like abs or pregnancy-safe programs.",
+      "candidateIds": [
+        "topic-candidate-3@c3",
+        "topic-candidate-6@c4",
+        "topic-candidate-6@c5"
+      ],
+      "reviewIds": [
+        "feaae9dce2297b34ac2e",
+        "4a9e233a7d40327ddd01",
+        "2e0026d69a6bca97b90a",
+        "e48f507238167347f923",
+        "55d763820c6068e5fa96",
+        "abec4e956a261a973827",
+        "1a50245eec24db09a48c",
+        "beffe6788ff06768a18c",
+        "132cc8f4d54b08bdd560",
+        "f2bb995e4a1d10521898"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5",
+        "focus-6",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-10",
+      "label": "Account access, data sync, and support failures",
+      "description": "Paid users report being locked out of accounts, losing workout data on new devices, and receiving unresponsive or rejected support messages. These account-level failures undermine retention.",
+      "candidateIds": [
+        "topic-candidate-3@c1",
+        "topic-candidate-5@c5"
+      ],
+      "reviewIds": [
+        "3108668c8b4ee2438bf7",
+        "50dd40e82486e9e93aae",
+        "22935659be45db2172e8",
+        "dd0b01e8efe7359b1089",
+        "d92cce6e9e7960f75948",
+        "342561b8e8592cc0b63a",
+        "85861b1ae4ea322bed91"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-11",
+      "label": "Weight-loss-first framing alienates wellness-focused users",
+      "description": "One detailed review notes the app forces a weight-loss goal and attaches weight-loss notes to every exercise, even for flexibility/wellness users, which could be harmful for those with eating disorder histories.",
+      "candidateIds": [
+        "topic-candidate-5@c3"
+      ],
+      "reviewIds": [
+        "51d4b3f25ab831d4417f"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-2",
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-12",
+      "label": "In-workout redirects to Shein break the session",
+      "description": "During workouts the app repeatedly opens the Shein website without user interaction, interrupting and severely degrading the core workout experience.",
+      "candidateIds": [
+        "topic-candidate-4@c1"
+      ],
+      "reviewIds": [
+        "3c469722f1d0864a64bb",
+        "3ca751f46d64b8b6d725"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-5"
+      ]
+    }
+  ],
+  "warnings": [
+    {
+      "code": "INVALID_TOPIC_EVIDENCE",
+      "message": "dropped topic-candidate-1 (bad citation or quote)"
+    },
+    {
+      "code": "INVALID_TOPIC_EVIDENCE",
+      "message": "dropped topic-candidate-3 (bad citation or quote)"
+    },
+    {
+      "code": "TOPIC_CANDIDATES_TRUNCATED",
+      "message": "kept 36 of 81 discovered candidates (goal-aware selection); 45 excess dropped deterministically"
+    }
+  ]
+}

@@ -32,7 +32,7 @@ describe("prompt registry", () => {
     expect(PromptRegistry["scope"].version).toBe("scope@2");
     expect(PromptRegistry["topic-discovery"].version).toBe("topics.discovery@3");
     expect(PromptRegistry["topic-consolidation"].version).toBe("topics.consolidation@3");
-    expect(PromptRegistry["findings"].version).toBe("findings@3");
+    expect(PromptRegistry["findings"].version).toBe("findings@4");
     expect(PromptRegistry["findings-consolidation"].version).toBe("findings.consolidation@1");
     expect(PromptRegistry["planning-coverage-repair"].version).toBe("planning.coverage-repair@1");
     expect(PromptRegistry["planning"].version).toBe("planning@3");

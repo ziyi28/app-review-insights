@@ -1,0 +1,28 @@
+{
+  "provenance": {
+    "schemaVersion": "1",
+    "reviewData": "serpapi-apple-reviews-real",
+    "storefront": "us",
+    "appId": "839285684",
+    "capturedAt": "2026-08-14T06:01:28.542Z",
+    "captureMethod": "SerpApi Apple Reviews engine (country=us, sort=mostrecent, no_cache=true)",
+    "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained"
+  },
+  "analysis": {
+    "executionMode": "live",
+    "outputLocale": "en",
+    "goal": "Analyze the most impactful problems and opportunities from US App Store reviews. Identify the most polarizing features — loved by some users, disliked by others — especially around subscription value and workout usability. Capture conflicting feedback explicitly instead of discarding it.",
+    "modelProvider": "OpenAI-compatible endpoint",
+    "modelName": "deepseek-v4-flash",
+    "temperature": 0.1,
+    "promptVersions": [
+      "scope@2",
+      "topics.discovery@3",
+      "topics.consolidation@3",
+      "findings@4",
+      "findings.consolidation@1",
+      "planning@3",
+      "tests@1"
+    ]
+  }
+}

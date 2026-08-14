@@ -1,0 +1,260 @@
+{
+  "runId": "run-workout-for-women-us",
+  "status": "completed",
+  "executionMode": "live",
+  "goal": "Analyze the most impactful problems and opportunities from US App Store reviews. Identify the most polarizing features — loved by some users, disliked by others — especially around subscription value and workout usability. Capture conflicting feedback explicitly instead of discarding it.",
+  "appName": "Workout for Women",
+  "appUrl": "https://apps.apple.com/us/app/id839285684",
+  "createdAt": "2026-08-14T06:01:59.552Z",
+  "updatedAt": "2026-08-14T06:25:32.401Z",
+  "stages": {
+    "source": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:01:59.555Z",
+      "finishedAt": "2026-08-14T06:01:59.567Z"
+    },
+    "prepare": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:01:59.568Z",
+      "finishedAt": "2026-08-14T06:01:59.743Z"
+    },
+    "scope": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:01:59.744Z",
+      "finishedAt": "2026-08-14T06:02:33.405Z"
+    },
+    "topics": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:02:33.405Z",
+      "finishedAt": "2026-08-14T06:12:27.398Z"
+    },
+    "findings": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:12:27.398Z",
+      "finishedAt": "2026-08-14T06:23:18.331Z"
+    },
+    "evidence-validation": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:23:18.331Z",
+      "finishedAt": "2026-08-14T06:23:18.334Z"
+    },
+    "planning": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:23:18.336Z",
+      "finishedAt": "2026-08-14T06:24:22.471Z"
+    },
+    "tests": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:24:22.471Z",
+      "finishedAt": "2026-08-14T06:25:32.393Z"
+    },
+    "traceability": {
+      "status": "completed",
+      "startedAt": "2026-08-14T06:25:32.393Z",
+      "finishedAt": "2026-08-14T06:25:32.397Z"
+    }
+  },
+  "artifacts": {
+    "raw-reviews": {
+      "attempt": 1,
+      "file": "artifacts/raw-reviews.attempt-01.json"
+    },
+    "source-evidence": {
+      "attempt": 1,
+      "file": "artifacts/source-evidence.attempt-01.json"
+    },
+    "cleaned-reviews": {
+      "attempt": 1,
+      "file": "artifacts/cleaned-reviews.attempt-01.json"
+    },
+    "stats": {
+      "attempt": 1,
+      "file": "artifacts/stats.attempt-01.json"
+    },
+    "scope": {
+      "attempt": 1,
+      "file": "artifacts/scope.attempt-01.json"
+    },
+    "topic-candidates": {
+      "attempt": 1,
+      "file": "artifacts/topic-candidates.attempt-01.json"
+    },
+    "topics": {
+      "attempt": 1,
+      "file": "artifacts/topics.attempt-01.json"
+    },
+    "findings": {
+      "attempt": 1,
+      "file": "artifacts/findings.attempt-01.json"
+    },
+    "evidence-validation": {
+      "attempt": 1,
+      "file": "artifacts/evidence-validation.attempt-01.json"
+    },
+    "version-plan": {
+      "attempt": 1,
+      "file": "artifacts/version-plan.attempt-01.json"
+    },
+    "prd": {
+      "attempt": 1,
+      "file": "artifacts/prd.attempt-01.json"
+    },
+    "goal-coverage": {
+      "attempt": 1,
+      "file": "artifacts/goal-coverage.attempt-01.json"
+    },
+    "tests": {
+      "attempt": 1,
+      "file": "artifacts/tests.attempt-01.json"
+    },
+    "traceability": {
+      "attempt": 1,
+      "file": "artifacts/traceability.attempt-01.json"
+    },
+    "final-report": {
+      "attempt": 1,
+      "file": "artifacts/final-report.attempt-01.json"
+    }
+  },
+  "limitations": [
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "Cannot filter by app-specific themes like subscription or workout usability because these are not structured fields; they must be inferred from review text."
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "Store territory (US) is not a generic filter; the dataset is assumed to contain US App Store reviews but cannot be explicitly verified."
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "No structured sentiment or intent labels are available; all detection of polarizing features depends on the reliability of raw review language."
+    },
+    {
+      "code": "INSUFFICIENT_EVIDENCE",
+      "message": "1 of 7 findings have insufficient evidence for broad or critical claims"
+    }
+  ],
+  "canReplay": true,
+  "modelUsage": {
+    "model": "deepseek-v4-flash",
+    "provider": "https://opencode.ai",
+    "temperature": 0.1,
+    "calls": 33,
+    "attempts": 39,
+    "retries": 6,
+    "retryReasons": [
+      "MODEL_NON_JSON_OUTPUT",
+      "MODEL_NON_JSON_OUTPUT",
+      "MODEL_NON_JSON_OUTPUT",
+      "MODEL_NON_JSON_OUTPUT",
+      "MODEL_HTTP_ERROR",
+      "MODEL_NON_JSON_OUTPUT"
+    ],
+    "promptVersions": [
+      "scope@2",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.consolidation@3",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings.consolidation@1",
+      "planning@3",
+      "tests@1"
+    ],
+    "totalTokens": 687220,
+    "durationsMs": [
+      33655,
+      110027,
+      126769,
+      159562,
+      82445,
+      104970,
+      123132,
+      81850,
+      105870,
+      90630,
+      122518,
+      112759,
+      67497,
+      118564,
+      128582,
+      46031,
+      55650,
+      88760,
+      91114,
+      95920,
+      78568,
+      176385,
+      89992,
+      107416,
+      116424,
+      120249,
+      164998,
+      127063,
+      111934,
+      80068,
+      100335,
+      64123,
+      69914
+    ]
+  },
+  "promptVersions": [
+    "scope@2",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.consolidation@3",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings.consolidation@1",
+    "planning@3",
+    "tests@1"
+  ]
+}

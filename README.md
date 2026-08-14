@@ -112,7 +112,7 @@ SerpApi API Key，或直接在本机 `.env.local` 中设置 `SERPAPI_API_KEY=`�
 SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance。
 
 自带的演示 fixture 分析时使用了一个 DeepSeek 兼容端点（`deepseek-v4-flash`）；该配置记录在
-`fixtures/demo-runs/run-x-twitter-us/provenance.json`，回放**并不需要**它。
+每个 fixture 的 `provenance.json` 里，回放**并不需要**它。
 
 各阶段的规则 vs 模型权衡、提示词版本和失败处理的说明，见 `docs/model-analysis.md`。
 
@@ -165,11 +165,13 @@ SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance
 
 - 每次运行都可以从快照离线回放，无需网络、无需模型；界面的 **缓存回放** 模式会列出可回放的
   运行，并在新的运行 ID 下重新物化所有产物，标记为 **缓存回放**，且从不调用 Apple 或模型。
-- `fixtures/demo-runs/run-x-twitter-us/` 是美国区 App Store（App ID 333903271，
-  「X」）的**真实**抓取，由真实模型分析，已做隐私最小化处理，带完整溯源：
-  - 保留评论 ID / 评分 / 标题 / 正文 / 版本 / 时间戳；
-  - 移除评论者昵称、作者 URI 和敏感请求头；
-  - `provenance.json` 记录抓取时间、来源 URL 模式、商店地区、模型、
+- `fixtures/demo-runs/` 下自带**两个真实**演示 fixture，均为美国区 App Store 的真实抓取、
+  由真实模型分析、已做隐私最小化处理、带完整溯源：
+  - `run-x-twitter-us/` —— App ID 333903271（「X」）；
+  - `run-workout-for-women-us/` —— App ID 839285684（「Workout for Women」，即本评估的主示例）。
+  - 刻意附带两个不同品类 App，用于证明流水线未针对任何单一 App 写死。
+  - 每个 fixture 保留评论 ID / 评分 / 标题 / 正文 / 版本 / 时间戳，移除评论者昵称、作者
+    URI 和敏感请求头；其 `provenance.json` 记录抓取时间、来源 URL 模式、商店地区、模型、
     temperature 和提示词版本。
 - 真实快照会被如实标记。应用绝不把 mock、规则后备或静态文本伪装成实时模型结果。
 

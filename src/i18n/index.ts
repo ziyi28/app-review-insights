@@ -66,6 +66,9 @@ export type Dictionary = {
   rating: string;
   version: string;
   language: string;
+  ratingDistribution: string;
+  versionDistribution: string;
+  languageDistribution: string;
   status: string;
   body: string;
   title: string;
@@ -268,6 +271,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     rating: "Rating",
     version: "Version",
     language: "Language",
+    ratingDistribution: "Rating distribution",
+    versionDistribution: "Version distribution",
+    languageDistribution: "Language distribution",
     status: "Status",
     body: "Body",
     title: "Title",
@@ -468,6 +474,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     rating: "评分",
     version: "版本",
     language: "语言",
+    ratingDistribution: "评分分布",
+    versionDistribution: "版本分布",
+    languageDistribution: "语言分布",
     status: "状态",
     body: "正文",
     title: "标题",

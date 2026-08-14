@@ -1,0 +1,17 @@
+{
+  "kind": "app-store-reviews",
+  "provider": "serpapi",
+  "appId": "839285684",
+  "storefront": "US",
+  "status": "complete",
+  "selection": "live",
+  "liveCount": 500,
+  "stableCount": 0,
+  "reviewCount": 500,
+  "collectedAt": "2026-08-14T06:01:28.542Z",
+  "forcedRefresh": true,
+  "providerCached": false,
+  "requestCount": 20,
+  "searchCount": 20,
+  "searchId": "6a7eaf5573d175c98f519021"
+}

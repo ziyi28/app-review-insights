@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import type { Finding } from "@/domain/contracts/analysis";
-import { runFindingsStage, consolidateFindings, pickStrongestForUncovered, type FindingsStageContext } from "./findings";
+import { runFindingsStage, consolidateFindings, pickStrongestForUncovered, normalizeFindings, type FindingsStageContext } from "./findings";
 
 function review(id: string, body: string): NormalizedReview {
   return {
@@ -215,6 +215,32 @@ describe("runFindingsStage", () => {
     );
     const result = await runFindingsStage(ctx);
     expect(result.findings[0].conflictingReviewIds).toEqual(["r3"]);
+  });
+
+  it("caps confidence at medium when conflicting evidence is present", () => {
+    // 9 supporting reviews would normally be "high"; a material conflict caps
+    // the deterministic confidence at "medium" and records the reason.
+    const corpus = Array.from({ length: 10 }, (_, i) => review(`r${i}`, `timer resets on restart`));
+    const output = {
+      findings: [
+        {
+          id: "finding-1",
+          topicIds: [],
+          focusAreaIds: [],
+          title: "x",
+          summary: "y",
+          supportingReviewIds: corpus.slice(0, 9).map((r) => r.reviewId),
+          evidenceExcerpts: corpus.slice(0, 9).map((r) => ({ reviewId: r.reviewId, excerpt: "timer resets on restart" })),
+          conflictingReviewIds: ["r9"],
+          uncertainties: [],
+          limitations: [],
+        },
+      ],
+    };
+    const result = normalizeFindings(output, { reviews: corpus, topics, sourceStatus: "complete" });
+    expect(result.findings[0].confidence.level).toBe("medium");
+    expect(result.findings[0].confidence.reasons).toContain("material conflicting evidence present");
+    expect(result.findings[0].conflictingReviewIds).toEqual(["r9"]);
   });
 
   it("returns insufficient evidence status when no supported findings survive", async () => {

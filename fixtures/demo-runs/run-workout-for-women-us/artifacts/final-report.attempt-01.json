@@ -1,0 +1,3432 @@
+{
+  "prd": {
+    "outputLocale": "en",
+    "title": "Recover Trust and Unlock Growth: US App Store Review-Driven Release Plan",
+    "overview": "This release plan translates the dominant signals from US App Store reviews into an executable roadmap. The evidence shows three acute trust breakers — paywall regression, trial/billing failures, and abusive ads — that are turning long-time users into detractors. At the same time, the core workout content is genuinely polarizing: loved for its short, varied, effective format and hated when it feels repetitive, AI-generated, or unsafe. Our plan first stabilizes trust and monetization transparency, then improves workout personalization and quality, and finally realigns brand messaging with inclusive wellness values.",
+    "findings": [
+      {
+        "id": "finding-1",
+        "topicIds": [
+          "topic-2",
+          "topic-7",
+          "topic-3",
+          "topic-4"
+        ],
+        "focusAreaIds": [
+          "focus-1",
+          "focus-3",
+          "focus-4",
+          "focus-6"
+        ],
+        "sourceFindingIds": [
+          "finding-1@c0",
+          "finding-1@c1",
+          "finding-2@c2",
+          "finding-4@c2",
+          "finding-1@c4",
+          "finding-1@c5",
+          "finding-1@c6",
+          "finding-1@c7",
+          "finding-1@c8",
+          "finding-2@c10",
+          "finding-3@c11",
+          "finding-1@c12",
+          "finding-1@c13",
+          "finding-1@c3"
+        ],
+        "title": "Paywall regression turns long-time users into detractors, but subscription value is still polarizing",
+        "summary": "Many long-time users report that workouts and features that used to be free now require a subscription, often after an update or reinstall. They describe feeling locked out and betrayed, calling the app 'money hungry' or a 'bait-and-switch'. However, a smaller set of subscribers says the subscription is worth the cost, cheaper than a gym, and delivers real results. The same monetization shift therefore creates a sharp split in perceived value.",
+        "supportingReviewIds": [
+          "7d579ddab7ad9866916e",
+          "41dda90bb7c5bf6a5f50",
+          "1e26434428fd7d297ebd",
+          "cbb69a199b87635d6910",
+          "f1d769915693bff365b5",
+          "aa10fd1c007b0ebde89f",
+          "02bfe99c3421d23ff17d",
+          "3c469722f1d0864a64bb",
+          "15adc40ae33fa59c6460",
+          "50dd40e82486e9e93aae",
+          "cd3e775a272561da7d61",
+          "8e1dadc88db3cb1e2d52",
+          "0567acea07a5f230c350",
+          "5388376e53d4eca15c60",
+          "b336d30bd0c5bb4c158b",
+          "ce914d45a09ffcb8351b",
+          "5a40025573b2c55b1963",
+          "c9338a41a33df24b016d",
+          "4f2cf6597c046f4c579d",
+          "19dd801156be88554d22",
+          "1f437acb3f7e7e8c10b3",
+          "53974bcc26a0d788626b",
+          "98de3937a388855366bc",
+          "3c49af9bb0aef09a3fdc",
+          "8221336732d84bbc19bc",
+          "dc4faf66d83960f53218",
+          "abde41fc0222660ff656",
+          "a9a965a3ee3756a838f8",
+          "9209576b87ce4944ca28",
+          "bf3841e67602dc01e0b2",
+          "842e5e0f16697cf1a01a",
+          "a0b0f9da4e31b7a6f52d",
+          "4395008b5af14e4a1615",
+          "0515592adfe6c089a8ea",
+          "4a97f4d4338874d4a871",
+          "8cab578e3ab71d8124a9",
+          "19245404c6e294fa0231",
+          "2c27621158b0b10ba11f",
+          "370a4d8f25cfb867adfb",
+          "1e38cfa729df94fff88e",
+          "85ac9926c35e9ced7bc0",
+          "e5b8843ff3eecb453ed7",
+          "3041a3e4c84f6e84e057",
+          "55bfd9115408f9880868",
+          "f7056bce85c297605c99",
+          "684e6330b8fac437b13e",
+          "5184627d2d5497da6d62",
+          "87ff885886d7b44aeef3",
+          "e4b8fa7ef7269260f815",
+          "8f0ffce208065e602a36",
+          "71e32c64d58bfad69023",
+          "19e1a0f890dbf73868f7",
+          "fb88e60b92da3ec716cb",
+          "6d94ebe28a85a3dcf249",
+          "15f604b02b3ad18f03d0",
+          "5c97738ed20a7c341e5c",
+          "7fdc5eed949ae3a82be7",
+          "99feb7e0845671c5f22e",
+          "ac28cca049c11be5e365",
+          "866cb162f4975f95e12a",
+          "30a5fd6d9dce927d3a10",
+          "fa6f611ee7cc5823b765",
+          "9e1d108f76c21760c330",
+          "0278fa392e7a0cf2059d",
+          "131de1abcd62a356b9df",
+          "b12c48d5085ef0eb06c9",
+          "4c31eadff68fc21e8e1a",
+          "9b88234eeb4203203bc7",
+          "95687878a72648d948ac",
+          "c125965442e6d933940b",
+          "b070bd8f0da66a35b6e9",
+          "8426056257c7ff92c7e3",
+          "62ce5fa08734b0d0990a",
+          "9dc526a4996302308508",
+          "446debb488c9e30a47dd",
+          "453d414ea6a6bf40613e",
+          "cb0cc8ac89a9761a3b16",
+          "d12437b2f22497298e1b",
+          "b87d5108f1c3d560a191",
+          "665cd14c6001dacd0a84",
+          "b5db1fbb2e56d1b56e16",
+          "ea2a981452bdd7fb7f68",
+          "c5cec2597485411001ba",
+          "474aa2e44c378c760f59"
+        ],
+        "supportingSampleCount": 84,
+        "evidenceExcerpts": [
+          {
+            "reviewId": "7d579ddab7ad9866916e",
+            "excerpt": "they recently changed it so you are unable to use it for free"
+          },
+          {
+            "reviewId": "41dda90bb7c5bf6a5f50",
+            "excerpt": "they’ve refused to let me work out using their app unless i pay, saying i’ve used my limit"
+          },
+          {
+            "reviewId": "1e26434428fd7d297ebd",
+            "excerpt": "it’s all ai slip and you have to pay. it used to be free and easy to use"
+          },
+          {
+            "reviewId": "cbb69a199b87635d6910",
+            "excerpt": "everything is behind some sketchy paywall"
+          },
+          {
+            "reviewId": "f1d769915693bff365b5",
+            "excerpt": "i can’t even use basic workouts i used to do for free anymore"
+          },
+          {
+            "reviewId": "aa10fd1c007b0ebde89f",
+            "excerpt": "stop putting stuff under free thats not free"
+          },
+          {
+            "reviewId": "02bfe99c3421d23ff17d",
+            "excerpt": "you have to pay to feel proud and i don’t like that"
+          },
+          {
+            "reviewId": "3c469722f1d0864a64bb",
+            "excerpt": "they’ve put everything behind a paywall"
+          },
+          {
+            "reviewId": "15adc40ae33fa59c6460",
+            "excerpt": "premium something basically that i had to pay"
+          },
+          {
+            "reviewId": "50dd40e82486e9e93aae",
+            "excerpt": "it won’t let me do anything without a subscription"
+          },
+          {
+            "reviewId": "cd3e775a272561da7d61",
+            "excerpt": "i couldn’t access anything without paying"
+          },
+          {
+            "reviewId": "8e1dadc88db3cb1e2d52",
+            "excerpt": "even workouts i had previously saved now ask you to pay"
+          },
+          {
+            "reviewId": "0567acea07a5f230c350",
+            "excerpt": "i cannot do saved workouts or any other plan that i used to be able to access"
+          },
+          {
+            "reviewId": "5388376e53d4eca15c60",
+            "excerpt": "everything is behind a paywall"
+          },
+          {
+            "reviewId": "b336d30bd0c5bb4c158b",
+            "excerpt": "the second day it was making me have to pay to continue"
+          },
+          {
+            "reviewId": "ce914d45a09ffcb8351b",
+            "excerpt": "i used this app for years and it’s no longer free, you have to pay monthly or yearly"
+          },
+          {
+            "reviewId": "5a40025573b2c55b1963",
+            "excerpt": "now everything i click on they want you to subscribe and that sucks"
+          },
+          {
+            "reviewId": "c9338a41a33df24b016d",
+            "excerpt": "my app updated and i no longer have access to free with ads"
+          },
+          {
+            "reviewId": "4f2cf6597c046f4c579d",
+            "excerpt": "i only got to do one session for free. now it wants me to pay for a subscription."
+          },
+          {
+            "reviewId": "19dd801156be88554d22",
+            "excerpt": "paywall to use what a disapppointment once you have reached"
+          },
+          {
+            "reviewId": "1f437acb3f7e7e8c10b3",
+            "excerpt": "downloaded it again to use it, now you have to pay. ugh."
+          },
+          {
+            "reviewId": "53974bcc26a0d788626b",
+            "excerpt": "no match for an expensive gym membership"
+          },
+          {
+            "reviewId": "98de3937a388855366bc",
+            "excerpt": "already lost 80 pounds i recommend this app a lot"
+          },
+          {
+            "reviewId": "3c49af9bb0aef09a3fdc",
+            "excerpt": "this workout app is probably the best option out there!"
+          },
+          {
+            "reviewId": "8221336732d84bbc19bc",
+            "excerpt": "i’m so happy about this app i love it so so much"
+          },
+          {
+            "reviewId": "dc4faf66d83960f53218",
+            "excerpt": "couldn’t access anything without the subscription"
+          },
+          {
+            "reviewId": "abde41fc0222660ff656",
+            "excerpt": "now you have to pay for a subscription to do the exercises"
+          },
+          {
+            "reviewId": "a9a965a3ee3756a838f8",
+            "excerpt": "they limit your free use now"
+          },
+          {
+            "reviewId": "9209576b87ce4944ca28",
+            "excerpt": "you have to pay to subscribe"
+          },
+          {
+            "reviewId": "bf3841e67602dc01e0b2",
+            "excerpt": "the workouts are good but i don’t want to have to pay to do a workout or watch a ad"
+          },
+          {
+            "reviewId": "842e5e0f16697cf1a01a",
+            "excerpt": "says it’s free, but it makes you go through a ton of steps, then gives you no way to continue without paying $40/yr"
+          },
+          {
+            "reviewId": "a0b0f9da4e31b7a6f52d",
+            "excerpt": "after filling everything out you find out the app is not free. you only get 7 days free then have to pay"
+          },
+          {
+            "reviewId": "4395008b5af14e4a1615",
+            "excerpt": "it won’t let me use the app without paying"
+          },
+          {
+            "reviewId": "0515592adfe6c089a8ea",
+            "excerpt": "you can’t use the app unless you sign up for a subscription"
+          },
+          {
+            "reviewId": "4a97f4d4338874d4a871",
+            "excerpt": "you can only use the app if you buy the subscription"
+          },
+          {
+            "reviewId": "8cab578e3ab71d8124a9",
+            "excerpt": "i used to be able to work out after an ad now i can’t sad you guys had to ruin it to get ppl to pay subscription"
+          },
+          {
+            "reviewId": "19245404c6e294fa0231",
+            "excerpt": "when i was almost done, it asked me to pay for it"
+          },
+          {
+            "reviewId": "2c27621158b0b10ba11f",
+            "excerpt": "it charged my card $39.99 for a yearly subscription despite me cancelling this “free trial” within 10 minutes of downloading the app"
+          },
+          {
+            "reviewId": "893a5614aeb5510fceb5",
+            "excerpt": "it’s worth the money"
+          },
+          {
+            "reviewId": "d92cce6e9e7960f75948",
+            "excerpt": "cheaper than a gym membership and worth it"
+          },
+          {
+            "reviewId": "beffe6788ff06768a18c",
+            "excerpt": "i could still utilize workouts, even though i didn’t pay for the premium"
+          },
+          {
+            "reviewId": "0989bab8169f5de29fa0",
+            "excerpt": "i thought i was going to have to pay for it but it’s a good app and less benefits but still really good"
+          },
+          {
+            "reviewId": "370a4d8f25cfb867adfb",
+            "excerpt": "now it’s all behind a subscription"
+          },
+          {
+            "reviewId": "1e38cfa729df94fff88e",
+            "excerpt": "now of course there’s a subscription fee. ridiculous."
+          },
+          {
+            "reviewId": "85ac9926c35e9ced7bc0",
+            "excerpt": "used to be good. free with a few ads."
+          },
+          {
+            "reviewId": "e5b8843ff3eecb453ed7",
+            "excerpt": "you have to pay for literally everything!"
+          },
+          {
+            "reviewId": "3041a3e4c84f6e84e057",
+            "excerpt": "still making me pay when i canceled my subscription."
+          },
+          {
+            "reviewId": "55bfd9115408f9880868",
+            "excerpt": "i tried to cancel membership, the app still took the money out"
+          },
+          {
+            "reviewId": "f7056bce85c297605c99",
+            "excerpt": "supposed to get a week free and got charged $49.99"
+          },
+          {
+            "reviewId": "684e6330b8fac437b13e",
+            "excerpt": "it’s no longer free to use, only focuses on weight loss"
+          },
+          {
+            "reviewId": "5184627d2d5497da6d62",
+            "excerpt": "but i need to pay when it’s suppose to be free."
+          },
+          {
+            "reviewId": "87ff885886d7b44aeef3",
+            "excerpt": "it now has so many premium workouts"
+          },
+          {
+            "reviewId": "e4b8fa7ef7269260f815",
+            "excerpt": "they’re locking previously-free features behind paywalls and ads"
+          },
+          {
+            "reviewId": "8f0ffce208065e602a36",
+            "excerpt": "you have to literally pay for every. single. thing."
+          },
+          {
+            "reviewId": "71e32c64d58bfad69023",
+            "excerpt": "they've locked the basic workouts i used to do daily behind a paywall or a 90 second ad."
+          },
+          {
+            "reviewId": "19e1a0f890dbf73868f7",
+            "excerpt": "now you have to pay for everything"
+          },
+          {
+            "reviewId": "fb88e60b92da3ec716cb",
+            "excerpt": "this app never had so many ads i’m tired of the greed"
+          },
+          {
+            "reviewId": "6d94ebe28a85a3dcf249",
+            "excerpt": "ever since they started charging for every single workout it makes me not want to use it"
+          },
+          {
+            "reviewId": "15f604b02b3ad18f03d0",
+            "excerpt": "found out now it costs $"
+          },
+          {
+            "reviewId": "5c97738ed20a7c341e5c",
+            "excerpt": "we have to pay for it after you’re fist workout"
+          },
+          {
+            "reviewId": "7fdc5eed949ae3a82be7",
+            "excerpt": "where are all the exercises? there are maybe 5 that are more than 10 minutes"
+          },
+          {
+            "reviewId": "99feb7e0845671c5f22e",
+            "excerpt": "this free app used to be my go to for workouts that i could pick and do at random and still get results"
+          },
+          {
+            "reviewId": "952cbcb04116d22ffe44",
+            "excerpt": "you don’t have to subscribe to a service or pay a lot of money to get access to great workouts"
+          },
+          {
+            "reviewId": "ac28cca049c11be5e365",
+            "excerpt": "made me pay even if though working out should be free"
+          },
+          {
+            "reviewId": "866cb162f4975f95e12a",
+            "excerpt": "i could not touch or try anything without this popping up. in the past everything used to be free to use, now you guys are just like every other money grabbing app"
+          },
+          {
+            "reviewId": "30a5fd6d9dce927d3a10",
+            "excerpt": "a gym membership costing the same as an at home work out"
+          },
+          {
+            "reviewId": "fa6f611ee7cc5823b765",
+            "excerpt": "it’s making me download a subscription to do workout. not happy"
+          },
+          {
+            "reviewId": "9e1d108f76c21760c330",
+            "excerpt": "not paying the price for some i could use for free"
+          },
+          {
+            "reviewId": "0278fa392e7a0cf2059d",
+            "excerpt": "the price point per year for a subscription too expensive for no ads."
+          },
+          {
+            "reviewId": "131de1abcd62a356b9df",
+            "excerpt": "i had cancelled it before it was supposed to charge me, about 5 days beforehand. it charged me anyway."
+          },
+          {
+            "reviewId": "b12c48d5085ef0eb06c9",
+            "excerpt": "i chose one that charged my phone a very small plan each month and they charged me for a whole year i did not even use the app and it was the 3rd day"
+          },
+          {
+            "reviewId": "4c31eadff68fc21e8e1a",
+            "excerpt": "i wish that the programs were still free"
+          },
+          {
+            "reviewId": "9b88234eeb4203203bc7",
+            "excerpt": "when i tried to do challenge 2 they want me to pay 29.99 or 19.99 and i’m not having it"
+          },
+          {
+            "reviewId": "95687878a72648d948ac",
+            "excerpt": "i hate it because you need a subscription to use it."
+          },
+          {
+            "reviewId": "c125965442e6d933940b",
+            "excerpt": "used to be free"
+          },
+          {
+            "reviewId": "b070bd8f0da66a35b6e9",
+            "excerpt": "ever since i subscribed to the app all of my favorite workouts have been deleted. i am no longer able to select the individual workouts."
+          },
+          {
+            "reviewId": "8426056257c7ff92c7e3",
+            "excerpt": "i used to love this app but i re downloaded it recently and it’s like it’s no longer free"
+          },
+          {
+            "reviewId": "62ce5fa08734b0d0990a",
+            "excerpt": "pay to use the app"
+          },
+          {
+            "reviewId": "9dc526a4996302308508",
+            "excerpt": "i used this app for years now that i downloaded it from another phone it wants me to pay"
+          },
+          {
+            "reviewId": "446debb488c9e30a47dd",
+            "excerpt": "there is little to no workouts now that you can do for free"
+          },
+          {
+            "reviewId": "453d414ea6a6bf40613e",
+            "excerpt": "now u need premium for every feature"
+          },
+          {
+            "reviewId": "cb0cc8ac89a9761a3b16",
+            "excerpt": "you have to have the subscription to do anything basically"
+          },
+          {
+            "reviewId": "d12437b2f22497298e1b",
+            "excerpt": "just about everything now requires a subscription"
+          },
+          {
+            "reviewId": "b87d5108f1c3d560a191",
+            "excerpt": "blocked off from most of the app unless you pay"
+          },
+          {
+            "reviewId": "665cd14c6001dacd0a84",
+            "excerpt": "now you can’t get anything without a subscription"
+          },
+          {
+            "reviewId": "b5db1fbb2e56d1b56e16",
+            "excerpt": "all of them require the subscription"
+          },
+          {
+            "reviewId": "ea2a981452bdd7fb7f68",
+            "excerpt": "every workout i select stated i need premium"
+          },
+          {
+            "reviewId": "c5cec2597485411001ba",
+            "excerpt": "was charged the same day i signed up and wasn’t given the advertised 3 days free"
+          },
+          {
+            "reviewId": "474aa2e44c378c760f59",
+            "excerpt": "says free but charges me on the second day"
+          }
+        ],
+        "conflictingReviewIds": [
+          "5a83a72849e12b022595",
+          "021386bdfee491a3baeb",
+          "6d22e4014053df4dd6eb",
+          "0b88af6733f38b6a7474",
+          "53974bcc26a0d788626b",
+          "98de3937a388855366bc",
+          "3c49af9bb0aef09a3fdc",
+          "4f2cf6597c046f4c579d",
+          "1ae1015baaba922f02d0",
+          "028401fef9603d6d798d",
+          "fec6299a11560eaa8f62",
+          "32e7a4d8aaa1b9789f74",
+          "893a5614aeb5510fceb5",
+          "d92cce6e9e7960f75948",
+          "beffe6788ff06768a18c",
+          "0989bab8169f5de29fa0",
+          "9090014af5591854637e",
+          "42a3722f697ca6fa429c",
+          "11ac6c75bc4ac9c5920e",
+          "4567fdc8c64cf4387eed",
+          "c81a093be52c57fc2b5a",
+          "3b06b202a87e6f90e64d",
+          "042a4233d01a3034db7a",
+          "a8554d7d712031f35dd7",
+          "3150865688fdafebfb79",
+          "28e93edf3f6464914d47",
+          "952cbcb04116d22ffe44",
+          "a5b2727fec5666d7b37b",
+          "98103cea5f09dfdf9653",
+          "66da746e4d3c593be79d",
+          "b9ceb9345b2bf9aec611",
+          "ee0a1261de38ac7f6a3e",
+          "96df9c8523bd7c068198",
+          "e711038fc4b80e5d0fcb",
+          "2c9375922636f2d6e064",
+          "24ab445109f536f39fc7",
+          "ab74ad67b4af4e4a0bbe",
+          "172ef624df2457cc9c1d",
+          "4289773519b7cb245f09",
+          "08b6057c7b031c96ceb3",
+          "0e621260607a04cf082e",
+          "52ecbbc862689ee97897"
+        ],
+        "confidence": {
+          "level": "medium",
+          "method": "deterministic-v1",
+          "reasons": [
+            "84 distinct supporting review(s)",
+            "source status: complete",
+            "material conflicting evidence present"
+          ]
+        },
+        "evidenceSufficiency": {
+          "status": "sufficient",
+          "corpusReviewCount": 500,
+          "supportRatio": 0.168,
+          "reasons": []
+        },
+        "uncertainties": [
+          "It is unclear which specific app version or update triggered these paywall changes, since review timestamps are not available in this dataset.",
+          "The phrase 'free' in the positive reviews may mean a limited free tier rather than full access, so the exact subscription scope is ambiguous.",
+          "It is not clear whether the paywall applies to all users equally or only to free-tier accounts.",
+          "Some complaints may reflect older expectations of a free app rather than a changed pricing model.",
+          "The exact free-tier policy at the time of each review is unknown.",
+          "It isn’t clear whether the free-with-ads option was removed for all users or only some accounts.",
+          "We cannot compute the ratio of satisfied to dissatisfied subscribers from this small sample.",
+          "Some positive reviews may be from free-trial users or users on older pricing, so their value assessment may not reflect current subscription terms.",
+          "We cannot verify the app’s historical pricing or whether \"free workouts\" were intentionally relabeled; reviews only report their experience.",
+          "It is unclear whether the paywall is a device-specific bug or a deliberate change; one user lost free access only after getting a new phone, while another says they can still use free workouts without premium. Trial-billing details cannot be verified from review text.",
+          "Billing disputes may involve user error or third-party processing; no transaction records are available in reviews. Reviews span different app versions, so paywall changes may not reflect current app state.",
+          "It is unclear whether the complaining users were on legacy free accounts or had active subscriptions; paywall changes may not affect all users equally.",
+          "The positive reviews do not explicitly discuss subscription pricing, so the split is inferred from overall sentiment rather than direct price comparisons.",
+          "It is unclear whether the paid requirement applies to all workouts or only some; positive reviews indicate free content is still available.",
+          "The exact subscription price is not disclosed in these reviews, so 'worth it' versus 'price gouging' judgments cannot be compared to a concrete price point.",
+          "The conflicting perceptions may come from different subscription tiers, device platforms, or plan terms that the reviews do not reveal.",
+          "Price points and plan details are not stated in most reviews; the exact share of users affected by paywalls cannot be quantified.",
+          "The reviews do not clarify whether the paywall is total or just for specific workouts; the sample is too small to estimate how widespread the resentment is.",
+          "Not possible to verify the current paywall configuration from reviews alone; complaints may predate a newer version."
+        ],
+        "limitations": [
+          "This finding is based on self-reported experiences and cannot verify actual subscription terms or the app's current paywall logic.",
+          "The sample is small and may over-represent frustrated long-time users.",
+          "The review sample is dominated by users who chose to write a review, so extreme views are overrepresented.",
+          "No subscription-revenue or conversion data is available to weigh the business trade-off.",
+          "No app changelog or store listing history was available to verify when and how the free tier changed.",
+          "User descriptions of “previously free” workouts may come from different app versions or time periods.",
+          "Pricing and free-tier behavior changed over the review period, and Apple App Store reviews are self-selected toward strong opinions.",
+          "No purchase or subscription-confirmation data was available to verify actual plan terms.",
+          "Evidence is limited to US App Store reviews in this dataset; no developer or app changelog was analyzed.",
+          "Sample is limited to a small set of US App Store reviews and may not reflect the current app version or entitlement behavior.",
+          "Small sample of self-reported reviews; no developer-side data.",
+          "Free-text app reviews tend to over-represent extreme negative sentiment.",
+          "No quantitative subscription or paywall data is available in this review set.",
+          "Review dates and app versions were not controlled; users may be describing different states of the app.",
+          "Value judgments are subjective and depend on each reviewer's reference point: the former free version versus comparable paid fitness services.",
+          "This finding is based on a small mix of negative and positive reviews; it cannot measure the overall subscription satisfaction rate.",
+          "The sample is small and may be biased toward long-time users who remember the free era.",
+          "Only 15 reviews were provided; reviewer sentiment is self-selected and not a representative sample.",
+          "Self-reported reviews; no subscription or funnel data to confirm actual terms."
+        ]
+      },
+      {
+        "id": "finding-2",
+        "topicIds": [
+          "topic-3",
+          "topic-10",
+          "topic-2"
+        ],
+        "focusAreaIds": [
+          "focus-1",
+          "focus-4",
+          "focus-6",
+          "focus-5"
+        ],
+        "sourceFindingIds": [
+          "finding-2@c0",
+          "finding-2@c1",
+          "finding-1@c2",
+          "finding-2@c4",
+          "finding-4@c5",
+          "finding-2@c7",
+          "finding-2@c8",
+          "finding-4@c10",
+          "finding-2@c11",
+          "finding-2@c12",
+          "finding-2@c13",
+          "finding-2@c9",
+          "finding-4@c12"
+        ],
+        "title": "Trial, billing, and account failures break trust in the subscription",
+        "summary": "A substantial cluster of reviews reports being charged immediately after signing up for a free trial, being charged after cancellation, being unable to cancel, and having trouble with account login, data syncing, or unresponsive support. Users describe these as scams or trust-breaking experiences. These issues directly undermine the subscription model and can cause even paying users to stop using the app.",
+        "supportingReviewIds": [
+          "1cf18baaa2b920a6718d",
+          "a714751ef74be8bea80e",
+          "a4c127668e22552df85d",
+          "c352d86551671d7b8d70",
+          "dd0b01e8efe7359b1089",
+          "4fbc4f72bcfecda65727",
+          "3108668c8b4ee2438bf7",
+          "22935659be45db2172e8",
+          "eeb35f52212cad12f495",
+          "50dd40e82486e9e93aae",
+          "1f584730f8580f6b15bd",
+          "62be00dda9ffd5c8bc7a",
+          "a23ee85600cd3c3ae86f",
+          "3db3756c43b8043720be",
+          "f8eb72f77f1bd83b00c8",
+          "7a160bd56131157f4752",
+          "cc85fc2414bb9b897dfd",
+          "14811281319525325893",
+          "7aaf37a74c0b10a4cc33",
+          "d92cce6e9e7960f75948",
+          "342561b8e8592cc0b63a",
+          "85861b1ae4ea322bed91",
+          "58d6f7a97c358d824e92",
+          "2aedc427e4dd7abdeda2",
+          "7fe3d5c111a39f529034",
+          "7fdc5eed949ae3a82be7",
+          "5b6b6430a07507dd49fd",
+          "a5c8c0fdb39ac4b94d5e",
+          "c362da02203928cb4335",
+          "2af72a3a899103342b9d",
+          "131de1abcd62a356b9df",
+          "b12c48d5085ef0eb06c9",
+          "cecdadc8c8db0243be8b",
+          "471fb1773b65dcc96180",
+          "747ef981eb8af30960a2",
+          "a161abb65a16fbc3092e",
+          "f277dd62f58166319e5e",
+          "360d76f07347c48043fe",
+          "e2b818f9dfbd9186d3ab"
+        ],
+        "supportingSampleCount": 39,
+        "evidenceExcerpts": [
+          {
+            "reviewId": "1cf18baaa2b920a6718d",
+            "excerpt": "i signed up for a trial expecting a trial experience, but i was charged afterward without a clear enough reminder"
+          },
+          {
+            "reviewId": "a714751ef74be8bea80e",
+            "excerpt": "the app doesn’t have an account with my email and when i tried asking their customer support it doesn’t submit my question because it’s flagged for likely to be spam"
+          },
+          {
+            "reviewId": "a4c127668e22552df85d",
+            "excerpt": "at day 3 it doesn’t work and ask for the payment"
+          },
+          {
+            "reviewId": "c352d86551671d7b8d70",
+            "excerpt": "it was 39.99 per month not 39.99 for the entire year. this was very misleading."
+          },
+          {
+            "reviewId": "dd0b01e8efe7359b1089",
+            "excerpt": "you guys immediately charged me!"
+          },
+          {
+            "reviewId": "4fbc4f72bcfecda65727",
+            "excerpt": "two charges in the same day"
+          },
+          {
+            "reviewId": "3108668c8b4ee2438bf7",
+            "excerpt": "cannot log into the account"
+          },
+          {
+            "reviewId": "22935659be45db2172e8",
+            "excerpt": "cannot log back in to access my workouts"
+          },
+          {
+            "reviewId": "eeb35f52212cad12f495",
+            "excerpt": "its charged me 30 dollars"
+          },
+          {
+            "reviewId": "50dd40e82486e9e93aae",
+            "excerpt": "it said my email couldn’t be sent"
+          },
+          {
+            "reviewId": "1f584730f8580f6b15bd",
+            "excerpt": "made me pay after the first day"
+          },
+          {
+            "reviewId": "62be00dda9ffd5c8bc7a",
+            "excerpt": "cancelled subscription and still got charged for it"
+          },
+          {
+            "reviewId": "a23ee85600cd3c3ae86f",
+            "excerpt": "once i used the apple pay feature to subscribe to the free trial i was charged $29.99!?"
+          },
+          {
+            "reviewId": "3db3756c43b8043720be",
+            "excerpt": "you told me a free trial for a week and the charged me $19.99 right away"
+          },
+          {
+            "reviewId": "f8eb72f77f1bd83b00c8",
+            "excerpt": "they offer a free week then when you accept they charge you"
+          },
+          {
+            "reviewId": "7a160bd56131157f4752",
+            "excerpt": "horrible wouldn’t let me cancel my subscription"
+          },
+          {
+            "reviewId": "cc85fc2414bb9b897dfd",
+            "excerpt": "i got charged $52.99 instantly for the year when that option was not even highlighted"
+          },
+          {
+            "reviewId": "14811281319525325893",
+            "excerpt": "was charged at the moment for a monthly subscription i never wanted"
+          },
+          {
+            "reviewId": "7aaf37a74c0b10a4cc33",
+            "excerpt": "app falsely claims to have a free trial but was charged immediately"
+          },
+          {
+            "reviewId": "d92cce6e9e7960f75948",
+            "excerpt": "none of the data loaded to my new device, even with my log in"
+          },
+          {
+            "reviewId": "342561b8e8592cc0b63a",
+            "excerpt": "theres no login option on my tablet. it’s just asking me to resub. i’ve emailed for the last couple of days and noone is responding"
+          },
+          {
+            "reviewId": "85861b1ae4ea322bed91",
+            "excerpt": "you email them and they don’t get back to you ever!"
+          },
+          {
+            "reviewId": "58d6f7a97c358d824e92",
+            "excerpt": "i tried to get the week trial and instead they charged me $50 for the year"
+          },
+          {
+            "reviewId": "2aedc427e4dd7abdeda2",
+            "excerpt": "i was charged $42 when it said one week free trial. it charged me immediately."
+          },
+          {
+            "reviewId": "7fe3d5c111a39f529034",
+            "excerpt": "now december they started to charge me again when i don’t even have the app."
+          },
+          {
+            "reviewId": "7fdc5eed949ae3a82be7",
+            "excerpt": "it charged my card after less than a half hour."
+          },
+          {
+            "reviewId": "5b6b6430a07507dd49fd",
+            "excerpt": "they will not allow me to cancel my subscription and keep charging my card"
+          },
+          {
+            "reviewId": "a5c8c0fdb39ac4b94d5e",
+            "excerpt": "it’s not showing up on my apple subscription page. i hope i don’t get billed!!"
+          },
+          {
+            "reviewId": "c362da02203928cb4335",
+            "excerpt": "the app shows free trial to start and already it charged me after one day. when i ask for the refund, they showed it was not eligible for a refund. don’t fall for the scam!!"
+          },
+          {
+            "reviewId": "2af72a3a899103342b9d",
+            "excerpt": "can’t log in, no one replies to emails for support. just after paying a subscription i can’t access the account or anything. waste of time and money."
+          },
+          {
+            "reviewId": "131de1abcd62a356b9df",
+            "excerpt": "i had cancelled it before it was supposed to charge me, about 5 days beforehand. it charged me anyway."
+          },
+          {
+            "reviewId": "b12c48d5085ef0eb06c9",
+            "excerpt": "they charged me for a whole year i did not even use the app and it was the 3rd day"
+          },
+          {
+            "reviewId": "cecdadc8c8db0243be8b",
+            "excerpt": "got charged immediately 43 dollars even though the app said would not be charged. apple denied request to refund."
+          },
+          {
+            "reviewId": "471fb1773b65dcc96180",
+            "excerpt": "just wasted my time giving them all my data and surveying about my personal goals just for a paywall to come up at the very end"
+          },
+          {
+            "reviewId": "747ef981eb8af30960a2",
+            "excerpt": "the intro forces you through a survey and to sign up for premium, no way around it, including inputting a card to charge for a subscription"
+          },
+          {
+            "reviewId": "a161abb65a16fbc3092e",
+            "excerpt": "they dont even refund your money after the free trial"
+          },
+          {
+            "reviewId": "f277dd62f58166319e5e",
+            "excerpt": "it charged me right away the full year subscription."
+          },
+          {
+            "reviewId": "360d76f07347c48043fe",
+            "excerpt": "don’t waste your time downloading the app and filling out the questions unless you’re okay with paying to use the app."
+          },
+          {
+            "reviewId": "e2b818f9dfbd9186d3ab",
+            "excerpt": "i also have an issue with this app (i can’t get it to work on my ipad or any other device). i’ve reached out to customer support and thus far only received automated messages. problem not resolved."
+          }
+        ],
+        "conflictingReviewIds": [
+          "53974bcc26a0d788626b",
+          "24ab445109f536f39fc7"
+        ],
+        "confidence": {
+          "level": "medium",
+          "method": "deterministic-v1",
+          "reasons": [
+            "39 distinct supporting review(s)",
+            "source status: complete",
+            "material conflicting evidence present"
+          ]
+        },
+        "evidenceSufficiency": {
+          "status": "sufficient",
+          "corpusReviewCount": 500,
+          "supportRatio": 0.078,
+          "reasons": []
+        },
+        "uncertainties": [
+          "The reviewer a4c127668e22552df85d gave a 5-star rating despite describing the payment wall as bad, so the intended star rating is unclear.",
+          "The exact trial terms and whether the charges were erroneous cannot be verified from the review text alone.",
+          "Billing events cannot be independently verified from the review text alone.",
+          "It is unclear whether these failures are caused by the app, the App Store, or user misunderstanding of trial terms.",
+          "It’s unclear whether immediate charges stem from a product bug, Apple Pay confirmation UX, or user misunderstanding of trial terms.",
+          "We cannot verify whether charges were eventually refunded or whether the cancellation failures were account-specific.",
+          "We cannot determine whether the charges are a deliberate dark pattern, an App Store configuration error, or a UI misunderstanding; the reviews only reflect user experience.",
+          "Only a few reviews mention account/support issues, so prevalence is unknown. Apple Watch Series 11 compatibility may be an external hardware/OS issue rather than an app defect.",
+          "Charges may stem from forgotten auto-renewal rather than intentional deception; transaction records cannot be verified from reviews.",
+          "One user mentions Apple refused a refund, but the app's own billing policy is not visible in the review data.",
+          "The a5c8c0fdb payment may not have completed; it is unclear whether that user was actually billed.",
+          "Only two detailed reports of billing or login failures appear in this review set, so the frequency and root cause are unknown.",
+          "The exact plan terms, screens, and confirmation flows are not visible in these reviews, so the cause of the charges cannot be confirmed.",
+          "Only one review in this set reports an immediate charge; it is unclear whether the charge was a trial-to-paid conversion or a billing error.",
+          "We cannot verify the billing events or subscription terms from reviews alone.",
+          "Only one review explicitly reports the immediate charge; no data on how widespread this is or whether it was a UI misunderstanding vs a real billing bug.",
+          "This is a single reviewer's experience; other users may not encounter the same issue or support response."
+        ],
+        "limitations": [
+          "Only three reviews in this sample describe billing issues, so this may understate or overstate the prevalence of such problems.",
+          "No positive reviews in this dataset directly address the billing or cancellation process.",
+          "No responses from the developer are available to clarify whether these issues were resolved.",
+          "The sample of billing complaints is small but consistent in describing immediate charges or locked accounts.",
+          "Billing claims are user-reported and not independently confirmed.",
+          "Sample is limited to US App Store reviews.",
+          "The dataset contains no successful-trial reviews, so we cannot quantify how widespread the failure is across all subscribers.",
+          "Support response times cannot be verified; support complaints in reviews may be more emotional and less representative of the general user base.",
+          "Only three reviews in this set describe billing problems, so the base rate of such issues is unknown.",
+          "No developer responses or resolution timelines are available.",
+          "Only three reviews in this dataset mention billing issues; server-side or account data could not be verified.",
+          "Charge timestamps, refund policy details, and support interactions could not be independently verified from the review text alone.",
+          "Only two users report billing failures in this sample; these could be isolated errors or user misunderstandings rather than systemic problems.",
+          "No purchase history or support-ticket details are available to verify the billing claim.",
+          "Only two reviews describe billing; no official billing policy or support thread was reviewed.",
+          "Cannot verify transaction history; limited to the reviewer's account of events.",
+          "No account data, device details, or support transcripts are available to diagnose the problem."
+        ]
+      },
+      {
+        "id": "finding-3",
+        "topicIds": [
+          "topic-12",
+          "topic-4",
+          "topic-5",
+          "topic-2",
+          "topic-7"
+        ],
+        "focusAreaIds": [
+          "focus-1",
+          "focus-5",
+          "focus-3",
+          "focus-6",
+          "focus-2",
+          "focus-4"
+        ],
+        "sourceFindingIds": [
+          "finding-3@c1",
+          "finding-3@c2",
+          "finding-3@c4",
+          "finding-2@c5",
+          "finding-3@c6",
+          "finding-3@c7",
+          "finding-3@c8",
+          "finding-1@c9",
+          "finding-1@c10",
+          "finding-1@c11"
+        ],
+        "title": "Aggressive ads and in-app redirects disrupt the core workout experience",
+        "summary": "Free users report 90-second or longer ads before almost every workout, with some ads impossible to close, looping back into another ad, or failing to return to the workout. In several cases, the app redirects to the Shein website mid-session. These interruptions break the workout flow and are a major driver of churn among free users, though a few users accept ads as a fair trade for free access.",
+        "supportingReviewIds": [
+          "3c469722f1d0864a64bb",
+          "3ca751f46d64b8b6d725",
+          "cd3e775a272561da7d61",
+          "0567acea07a5f230c350",
+          "bf6882ede9d60abe6519",
+          "a294f3b4369a18c41112",
+          "cc63855d1f2503b23e1a",
+          "d209ae2dfd97ff0bdb80",
+          "a3219e1290028aaf4834",
+          "b4467727f123a07beea9",
+          "a9a965a3ee3756a838f8",
+          "f65d70e0417408b7a7e4",
+          "db79928046519e7ffdcd",
+          "1e0fb9be01863f607fa3",
+          "72cf0fc6b2f25ec4e1ac",
+          "76e57a90688ac2de17a6",
+          "af48b9baedefbffda432",
+          "7e2302afb4e5dac12a13",
+          "7252a9f2ad243e056c5f",
+          "85ac9926c35e9ced7bc0",
+          "4bb3f46e84c78d125a84",
+          "87ff885886d7b44aeef3",
+          "e4b8fa7ef7269260f815",
+          "fb88e60b92da3ec716cb",
+          "71e32c64d58bfad69023",
+          "19e1a0f890dbf73868f7",
+          "fc8df7a9de28fa4fa19d",
+          "99feb7e0845671c5f22e",
+          "d18171787f9c6072d9d8",
+          "c796ff1aa8f52e33a38c",
+          "2f57299d49c5934daab9",
+          "38950670f6a31d9f5575",
+          "a2e8dff816390c08bd39",
+          "0dac5b4736fc63cc0fe9",
+          "c3b561b8cf472607d744",
+          "1d8d80b4ba6bf55cb7d6",
+          "bc997c31991c7d4722fb",
+          "f1859898316bb44ff620",
+          "a3577b72441328c6e62b",
+          "61b1749c64043a0baa9c",
+          "a031cd5604fc2b37c2e2",
+          "ba7129bae3aa936f5289",
+          "39ccd3f449af85187dac",
+          "9e1d108f76c21760c330",
+          "0ac12ef8e8eb7fc7f400",
+          "f4e3e0d9277894a2b03b",
+          "797ffad899d35f87407e",
+          "701a3f34985f078b3214",
+          "cdab8c157cca90c2a05e",
+          "fded74adaf6576c6fc7a",
+          "0278fa392e7a0cf2059d",
+          "098ae901805499990bf8"
+        ],
+        "supportingSampleCount": 52,
+        "evidenceExcerpts": [
+          {
+            "reviewId": "3c469722f1d0864a64bb",
+            "excerpt": "randomly during my workouts the app redirects me to shein’s website"
+          },
+          {
+            "reviewId": "3ca751f46d64b8b6d725",
+            "excerpt": "the shein website will open"
+          },
+          {
+            "reviewId": "cd3e775a272561da7d61",
+            "excerpt": "required 90sec ads to do workouts"
+          },
+          {
+            "reviewId": "0567acea07a5f230c350",
+            "excerpt": "over a minute of ads"
+          },
+          {
+            "reviewId": "bf6882ede9d60abe6519",
+            "excerpt": "the interface traps you with their predatory ads"
+          },
+          {
+            "reviewId": "a294f3b4369a18c41112",
+            "excerpt": "i was redirected to the shein website three times during a recent workout"
+          },
+          {
+            "reviewId": "cc63855d1f2503b23e1a",
+            "excerpt": "as soon as you hit the second day, it fires in your face, a bunch of different ads to get their premium"
+          },
+          {
+            "reviewId": "d209ae2dfd97ff0bdb80",
+            "excerpt": "90 sec ads for 7 minute workouts then another 30 sec figuring out how to exit the ad"
+          },
+          {
+            "reviewId": "a3219e1290028aaf4834",
+            "excerpt": "how do you x out of ads? i have no idea"
+          },
+          {
+            "reviewId": "b4467727f123a07beea9",
+            "excerpt": "you can’t even get out of the ad without force closing the whole app"
+          },
+          {
+            "reviewId": "a9a965a3ee3756a838f8",
+            "excerpt": "you have to watch the 90 sec long ad all over again"
+          },
+          {
+            "reviewId": "f65d70e0417408b7a7e4",
+            "excerpt": "you have to watch a 90 second ad before every workout unless you’d rather pay for premium"
+          },
+          {
+            "reviewId": "db79928046519e7ffdcd",
+            "excerpt": "too many adds 90 seconds???"
+          },
+          {
+            "reviewId": "1e0fb9be01863f607fa3",
+            "excerpt": "to make it so we have to watch a three minute add before every. single. work out. is completely unreasonable"
+          },
+          {
+            "reviewId": "72cf0fc6b2f25ec4e1ac",
+            "excerpt": "now i’m forced to watch a 90s ad. i’m not opposed to that but it’s takes more than 90s to close them out"
+          },
+          {
+            "reviewId": "76e57a90688ac2de17a6",
+            "excerpt": "every time i try to get my workout in it’s always buy premium or watch a 90 second add"
+          },
+          {
+            "reviewId": "af48b9baedefbffda432",
+            "excerpt": "except for every single workout u have to earn by watching a 90 second add"
+          },
+          {
+            "reviewId": "7e2302afb4e5dac12a13",
+            "excerpt": "app become bad after the ads. i stopped using it and found a better app."
+          },
+          {
+            "reviewId": "7252a9f2ad243e056c5f",
+            "excerpt": "now it’s nothing but ads and takes longer to get a workout in because of it."
+          },
+          {
+            "reviewId": "85ac9926c35e9ced7bc0",
+            "excerpt": "but now they have tons of ads or you gotta pay premium."
+          },
+          {
+            "reviewId": "4bb3f46e84c78d125a84",
+            "excerpt": "but i did not have so many advertisement especially just to do the workouts."
+          },
+          {
+            "reviewId": "87ff885886d7b44aeef3",
+            "excerpt": "after watching a now required 90 sec ad the app often doesn’t load!"
+          },
+          {
+            "reviewId": "e4b8fa7ef7269260f815",
+            "excerpt": "watch 90 seconds of ads to get this workout free!"
+          },
+          {
+            "reviewId": "fb88e60b92da3ec716cb",
+            "excerpt": "this app never had so many ads i’m tired of the greed"
+          },
+          {
+            "reviewId": "71e32c64d58bfad69023",
+            "excerpt": "locked the basic workouts i used to do daily behind a paywall or a 90 second ad."
+          },
+          {
+            "reviewId": "19e1a0f890dbf73868f7",
+            "excerpt": "before all the ads & ai ruined the app"
+          },
+          {
+            "reviewId": "fc8df7a9de28fa4fa19d",
+            "excerpt": "purchase incentives every time you press a button is becoming agitating"
+          },
+          {
+            "reviewId": "99feb7e0845671c5f22e",
+            "excerpt": "make me sit through 2 minutes of ads just to do one 5 minute workout"
+          },
+          {
+            "reviewId": "66da746e4d3c593be79d",
+            "excerpt": "it’s also free but you would have to watch a 90 second ad. but as long as i’m getting in my i don’t care about any ads."
+          },
+          {
+            "reviewId": "d18171787f9c6072d9d8",
+            "excerpt": "hate that they added ads and they don’t have as many free workouts."
+          },
+          {
+            "reviewId": "c796ff1aa8f52e33a38c",
+            "excerpt": "the ads are glitchy and you can’t always make it back to the workout."
+          },
+          {
+            "reviewId": "2f57299d49c5934daab9",
+            "excerpt": "forcing you to watch 90 second ads before each workout."
+          },
+          {
+            "reviewId": "38950670f6a31d9f5575",
+            "excerpt": "the ad never clicks off after the 90 seconds are done"
+          },
+          {
+            "reviewId": "a2e8dff816390c08bd39",
+            "excerpt": "it won’t even let me do the workout after an ad"
+          },
+          {
+            "reviewId": "0dac5b4736fc63cc0fe9",
+            "excerpt": "it still has me watch it 2 or 3 more times"
+          },
+          {
+            "reviewId": "c3b561b8cf472607d744",
+            "excerpt": "i have to watch a 90 second ad just to “unlock” a workout"
+          },
+          {
+            "reviewId": "1d8d80b4ba6bf55cb7d6",
+            "excerpt": "now you either have to pay to use it or watch ads."
+          },
+          {
+            "reviewId": "bc997c31991c7d4722fb",
+            "excerpt": "started adding ads into the “free” workouts unless you pay"
+          },
+          {
+            "reviewId": "f1859898316bb44ff620",
+            "excerpt": "they are pushing more for a paid membership or ad watching to get the content."
+          },
+          {
+            "reviewId": "a3577b72441328c6e62b",
+            "excerpt": "now they make you watch a 90 second add or pay"
+          },
+          {
+            "reviewId": "61b1749c64043a0baa9c",
+            "excerpt": "not even being able to do free workouts without getting a pop up that requires you to watch a 90 sec ad and can’t be closed"
+          },
+          {
+            "reviewId": "a031cd5604fc2b37c2e2",
+            "excerpt": "the introduction of 90 second ads is ridiculous"
+          },
+          {
+            "reviewId": "ba7129bae3aa936f5289",
+            "excerpt": "many of the routines can’t be accessed any more, if they’re locked or not isn’t indicated until you try to start, and the ones that are still available require watching a 90sec ad movie first"
+          },
+          {
+            "reviewId": "39ccd3f449af85187dac",
+            "excerpt": "now you have to watch 2 minutes of ads for a 6 minute workout"
+          },
+          {
+            "reviewId": "9e1d108f76c21760c330",
+            "excerpt": "i have to wait 3 minutes before my workout just so i don’t have to pay"
+          },
+          {
+            "reviewId": "0ac12ef8e8eb7fc7f400",
+            "excerpt": "to do the free workouts you have to watch a 90 second ad"
+          },
+          {
+            "reviewId": "f4e3e0d9277894a2b03b",
+            "excerpt": "now i have to buy premium or watch a 90 second add before i can do my workout"
+          },
+          {
+            "reviewId": "797ffad899d35f87407e",
+            "excerpt": "90 second ads have now been added for each workout"
+          },
+          {
+            "reviewId": "701a3f34985f078b3214",
+            "excerpt": "this ad that won’t let me click out at all and i can’t work out unless i pay some money"
+          },
+          {
+            "reviewId": "cdab8c157cca90c2a05e",
+            "excerpt": "90 sec ad for one workout this new thing is very annoying"
+          },
+          {
+            "reviewId": "fded74adaf6576c6fc7a",
+            "excerpt": "after a recent update, they implemented 90 second ads which i am fine with watching but many of these ads are broken. i would finish watching an ad but the exit button never shows up and i end up watching another 90 second ad again."
+          },
+          {
+            "reviewId": "0278fa392e7a0cf2059d",
+            "excerpt": "upsetting they added ads. time to find a new app after using this one for 5+ years!"
+          },
+          {
+            "reviewId": "098ae901805499990bf8",
+            "excerpt": "used to be a great workout app but now is so covered in adds you can’t even get one workout done"
+          }
+        ],
+        "conflictingReviewIds": [
+          "edb0da5e3f55117ad807",
+          "17cdc8c508a860319c27",
+          "3c49af9bb0aef09a3fdc",
+          "98de3937a388855366bc",
+          "abde41fc0222660ff656",
+          "11ac6c75bc4ac9c5920e",
+          "66da746e4d3c593be79d",
+          "e7e013ad6884892b3e7c",
+          "199d692c875326528ae9",
+          "5f9f61ab1e8c3690e062",
+          "7e8ac2a6cb11d4ccdb35",
+          "7c23c0edff14fc9d5db9",
+          "9d1aee69a47f853ad97f",
+          "c206b46cd9c790302106"
+        ],
+        "confidence": {
+          "level": "medium",
+          "method": "deterministic-v1",
+          "reasons": [
+            "52 distinct supporting review(s)",
+            "source status: complete",
+            "material conflicting evidence present"
+          ]
+        },
+        "evidenceSufficiency": {
+          "status": "sufficient",
+          "corpusReviewCount": 500,
+          "supportRatio": 0.104,
+          "reasons": []
+        },
+        "uncertainties": [
+          "The cause of the redirects is not identifiable from reviews; it could be an ad-network bug or a malicious redirect.",
+          "Only a few reviews mention Shein specifically, so the prevalence across all users is unknown.",
+          "Not all users report ads; we cannot tell whether this is account-specific, A/B testing, or due to when reviews were written.",
+          "The cause of the Shein redirect is unknown.",
+          "The exact ad SDK/interaction is not visible from reviews; \"hidden X\" may be an ad-network UI rather than the app’s own design.",
+          "Ad length and frequency may vary by version or A/B test; one reviewer says 90 seconds, another says 3 minutes. Some users keep using the app despite ads, so ads do not always cause churn.",
+          "Ad frequency and length may depend on app version, device, or subscription state; the complaint about advertisements may also refer to promotional content rather than video ads.",
+          "No review in this set defends or praises the ad experience, so the size of the satisfied free-tier audience is unknown.",
+          "Some positive reviewers may be paid subscribers who never see these ads, which is not stated in their reviews.",
+          "Exact ad lengths and frequencies were not measured; these are self-reported user experiences.",
+          "It is unclear from reviews whether the ad/paywall is applied to all users or tested in cohorts, or whether some free workouts remain available.",
+          "The app's actual monetization policy may differ from what users describe; reviews reflect perceived gating.",
+          "It is unclear from reviews alone whether the 90-second ad is a persistent app-wide policy or limited to certain free routines or regions.",
+          "It is unclear how widespread the broken ad-flow is; the missing exit button may be a bug affecting some users rather than a universal experience."
+        ],
+        "limitations": [
+          "No screenshot or session log is available to confirm the redirect behavior.",
+          "Reviews mentioning ads may not distinguish between normal rewarded ads and forcefully interrupting ads.",
+          "Only a handful of the provided reviews mention in-workout disruptions; most positive reviews simply do not mention ads.",
+          "Ratings do not always match sentiment — one ad complaint is attached to a 5-star rating.",
+          "All cited reviews are from free-tier users; paid users may not experience these ads.",
+          "Ad experiences are self-reported and may be exaggerated by frustration; exact ad length and close behavior cannot be independently verified.",
+          "Only three reviews explicitly describe ad load in this sample; one conflicting review says the free version is great.",
+          "Complaints come from users on different app versions; current ad behavior cannot be confirmed from reviews alone.",
+          "The sample is small and self-selected toward frustrated users.",
+          "Only two reviews in this sample complain about ad load, though one additional review mentions freely tolerating ads.",
+          "Reviews skew toward users motivated to complain; no session-level data on ad failure rates.",
+          "Five-star reviews praising the subscription are in the minority in this sample and may not represent typical subscribers.",
+          "These are self-reported US App Store reviews; the actual ad frequency and paywall conditions were not independently verified.",
+          "Only three reviews in this sample describe the ad experience, so the severity for the broader free-user population cannot be quantified."
+        ]
+      },
+      {
+        "id": "finding-4",
+        "topicIds": [
+          "topic-5",
+          "topic-6",
+          "topic-8",
+          "topic-1",
+          "topic-9"
+        ],
+        "focusAreaIds": [
+          "focus-1",
+          "focus-2",
+          "focus-3",
+          "focus-5",
+          "focus-6"
+        ],
+        "sourceFindingIds": [
+          "finding-4@c0",
+          "finding-4@c1",
+          "finding-2@c3",
+          "finding-4@c4",
+          "finding-3@c5",
+          "finding-4@c6",
+          "finding-4@c7",
+          "finding-3@c12",
+          "finding-4@c13",
+          "finding-4@c9",
+          "finding-3@c10"
+        ],
+        "title": "Workout content is polarizing: praised for short, effective, varied sessions, criticized for repetition and AI-generated demos",
+        "summary": "Many reviewers love the core workout experience: short 30–45 second exercises, wide variety, clear demonstrations, and noticeable results (weight loss, soreness, habit building). Others, including long-time users, say newer workouts are repetitive, feel like 'AI slop', that exercise names and animations sometimes mismatch, and that pre-natal or specialized programs contain unsafe moves. The same workout library draws both 5-star praise and strong criticism, making it the clearest polarizing feature.",
+        "supportingReviewIds": [
+          "89d39ff177caa228b26f",
+          "6ad576008e6465adc345",
+          "4a644a56a8619cd8783c",
+          "d331227b060177a24ad3",
+          "6acda9e389faa1143883",
+          "12277142053771f844f1",
+          "2143f3ec8ed35afd12de",
+          "b34f61d4a24155813305",
+          "b6d75605977aad508231",
+          "56230fefae8368124913",
+          "35faa42d589b56ba38f2",
+          "668f40f529d9d0dd21ae",
+          "030127cbe4098673f827",
+          "0b88af6733f38b6a7474",
+          "dcb564f577dabd2fe953",
+          "cd9d8211bc907e7935bc",
+          "a8cafd51b7cbb04b0ad9",
+          "52ecbbc862689ee97897",
+          "89f15c4184fe51fd54d2",
+          "84b6c316e86a35b3fb75",
+          "d2556889c59bcc869614",
+          "5e9ea710a133198a495c",
+          "98fa3a30eb191e9b4f92",
+          "39f537e8298befa28a06",
+          "1a50245eec24db09a48c",
+          "42ab00aa53fb637834a4",
+          "63e3062c81dc6548b47e",
+          "d723d3091dfcb5ebcacb",
+          "fbfc29ddbb6142d2e40f",
+          "55d763820c6068e5fa96",
+          "66fa455a3bc44f182c65",
+          "578366a04f7da6efbe18",
+          "1a8557f142bc630824ef",
+          "f663a47722d240c912da",
+          "d5b25078d199b55fd062",
+          "132cc8f4d54b08bdd560",
+          "af48b9baedefbffda432",
+          "11ac6c75bc4ac9c5920e",
+          "7d290018e8b744dc0b55",
+          "220f3ed1446a518582e3",
+          "0bc5b7f4f0865b6ea4fa",
+          "fc8b82ae91c9af5d52ed",
+          "87ff885886d7b44aeef3",
+          "71e32c64d58bfad69023",
+          "19e1a0f890dbf73868f7",
+          "260bd5452839e68a4f3f",
+          "51011791ca258c6fdc35",
+          "0be01d6dd8107b259c02",
+          "98354308a93a4c48f301",
+          "afb57d488b918ce07a3e",
+          "2ab43939d52907766cb7",
+          "08b6057c7b031c96ceb3",
+          "6b9a8b2549f38820ac25",
+          "9bb957bc7ac2bffa6324",
+          "d8700c43e2e9dba251a6",
+          "1bbb13b96dd31b206a62",
+          "14fabc14069076d22d41",
+          "44a05680839509147fff",
+          "c9cc96aac908f4930191",
+          "5f9f61ab1e8c3690e062",
+          "56d934ec40ab06cc4ff3",
+          "fb2c28b6f7847037b6d6",
+          "199d692c875326528ae9",
+          "e7e013ad6884892b3e7c",
+          "d7b80d28a65603e4ee4b",
+          "969e93553f483c62c09c",
+          "97d4a1a8f0017f08a893",
+          "42c1b6f5d49107735918",
+          "690d7724a001051614d4",
+          "6d48c1054db2b0fa0b13",
+          "721508a4fa8e924ef490",
+          "5779b4c34f5aa5c38b60",
+          "96df9c8523bd7c068198",
+          "abedfa5e640ab8f3589c"
+        ],
+        "supportingSampleCount": 74,
+        "evidenceExcerpts": [
+          {
+            "reviewId": "89d39ff177caa228b26f",
+            "excerpt": "this app made me feel the burn and so far it’s been great"
+          },
+          {
+            "reviewId": "6ad576008e6465adc345",
+            "excerpt": "great app can already feel it working within just two days"
+          },
+          {
+            "reviewId": "4a644a56a8619cd8783c",
+            "excerpt": "diferente routine every time never dull"
+          },
+          {
+            "reviewId": "d331227b060177a24ad3",
+            "excerpt": "i love that each exercise is only 30-45 seconds. i can do (almost) anything for 30-45 seconds!"
+          },
+          {
+            "reviewId": "6acda9e389faa1143883",
+            "excerpt": "this is a great at-home workout with lots of variety and great instructions"
+          },
+          {
+            "reviewId": "12277142053771f844f1",
+            "excerpt": "my favorite right now is the dumbbell workout! i’m sweating and feeling the burn!"
+          },
+          {
+            "reviewId": "2143f3ec8ed35afd12de",
+            "excerpt": "overall i loved my first workout!"
+          },
+          {
+            "reviewId": "b34f61d4a24155813305",
+            "excerpt": "all exercises are not impossible to do…and they are also very effective"
+          },
+          {
+            "reviewId": "b6d75605977aad508231",
+            "excerpt": "it helped loose weight"
+          },
+          {
+            "reviewId": "56230fefae8368124913",
+            "excerpt": "finally i’m motivated"
+          },
+          {
+            "reviewId": "35faa42d589b56ba38f2",
+            "excerpt": "all types of exercises"
+          },
+          {
+            "reviewId": "668f40f529d9d0dd21ae",
+            "excerpt": "very easy to follow good music and great workouts"
+          },
+          {
+            "reviewId": "030127cbe4098673f827",
+            "excerpt": "short workouts perfect for anyday"
+          },
+          {
+            "reviewId": "0b88af6733f38b6a7474",
+            "excerpt": "warm ups and cool downs and demonstrations"
+          },
+          {
+            "reviewId": "dcb564f577dabd2fe953",
+            "excerpt": "great for beginners"
+          },
+          {
+            "reviewId": "cd9d8211bc907e7935bc",
+            "excerpt": "the workouts are great"
+          },
+          {
+            "reviewId": "a8cafd51b7cbb04b0ad9",
+            "excerpt": "great workouts for all ages"
+          },
+          {
+            "reviewId": "52ecbbc862689ee97897",
+            "excerpt": "the work outs are better than i could have imagined"
+          },
+          {
+            "reviewId": "89f15c4184fe51fd54d2",
+            "excerpt": "great app with easy to follow workouts"
+          },
+          {
+            "reviewId": "84b6c316e86a35b3fb75",
+            "excerpt": "best app for daily workout"
+          },
+          {
+            "reviewId": "d2556889c59bcc869614",
+            "excerpt": "i love the music that they put it’s so motivating!!"
+          },
+          {
+            "reviewId": "5e9ea710a133198a495c",
+            "excerpt": "this app customizes your workouts based off needs, age, weight, and any struggles that you face"
+          },
+          {
+            "reviewId": "98fa3a30eb191e9b4f92",
+            "excerpt": "it shows you an actual person doing the workout with you while playing music and motivating you"
+          },
+          {
+            "reviewId": "39f537e8298befa28a06",
+            "excerpt": "it shows you what to do and the workouts aren’t super long"
+          },
+          {
+            "reviewId": "1a50245eec24db09a48c",
+            "excerpt": "shows you exactly what to do. music is motivating"
+          },
+          {
+            "reviewId": "42ab00aa53fb637834a4",
+            "excerpt": "i do the daily 8 minute workout and it’s been a literal life saver"
+          },
+          {
+            "reviewId": "63e3062c81dc6548b47e",
+            "excerpt": "moves look easy but they work for women!"
+          },
+          {
+            "reviewId": "d723d3091dfcb5ebcacb",
+            "excerpt": "it actually made me work and i felt the burn"
+          },
+          {
+            "reviewId": "fbfc29ddbb6142d2e40f",
+            "excerpt": "quick workouts that really get you moving!"
+          },
+          {
+            "reviewId": "55d763820c6068e5fa96",
+            "excerpt": "wide variety of workouts for every level. ability to play your own music"
+          },
+          {
+            "reviewId": "66fa455a3bc44f182c65",
+            "excerpt": "i have never found a app that actually makes you muscle feel strong"
+          },
+          {
+            "reviewId": "578366a04f7da6efbe18",
+            "excerpt": "get the app. do what you can and you will see results."
+          },
+          {
+            "reviewId": "1a8557f142bc630824ef",
+            "excerpt": "this app consistently provides short steady workouts, great for building a habit"
+          },
+          {
+            "reviewId": "f663a47722d240c912da",
+            "excerpt": "great workouts and user friendly interface"
+          },
+          {
+            "reviewId": "d5b25078d199b55fd062",
+            "excerpt": "the workouts r great"
+          },
+          {
+            "reviewId": "132cc8f4d54b08bdd560",
+            "excerpt": "thank you so much for these workouts during this coronavirus time!"
+          },
+          {
+            "reviewId": "af48b9baedefbffda432",
+            "excerpt": "i lost 25 pounds in 3 months it's amazing"
+          },
+          {
+            "reviewId": "61cabebf911229cac631",
+            "excerpt": "most of the workouts are just ai slop now"
+          },
+          {
+            "reviewId": "b4e7ccd6da5e64cc4de3",
+            "excerpt": "i don’t really feel the burn sometime"
+          },
+          {
+            "reviewId": "11ac6c75bc4ac9c5920e",
+            "excerpt": "even the free version is great. keeps me consistent in bite size chunks."
+          },
+          {
+            "reviewId": "7d290018e8b744dc0b55",
+            "excerpt": "the short workouts definitely helps to stay on track"
+          },
+          {
+            "reviewId": "220f3ed1446a518582e3",
+            "excerpt": "love that it has so many different types and styles of workouts to choose from!!"
+          },
+          {
+            "reviewId": "0bc5b7f4f0865b6ea4fa",
+            "excerpt": "great workouts for short amount of time"
+          },
+          {
+            "reviewId": "fc8b82ae91c9af5d52ed",
+            "excerpt": "workouts are skill level appropriate but challenging! targets the areas you want."
+          },
+          {
+            "reviewId": "87ff885886d7b44aeef3",
+            "excerpt": "the illustrated workout demos can be tough to follow"
+          },
+          {
+            "reviewId": "71e32c64d58bfad69023",
+            "excerpt": "blatantly ai-generated pictures"
+          },
+          {
+            "reviewId": "19e1a0f890dbf73868f7",
+            "excerpt": "before all the ads & ai ruined the app"
+          },
+          {
+            "reviewId": "260bd5452839e68a4f3f",
+            "excerpt": "add real people on this in the workout tab. cuz it would be easier to follow for me."
+          },
+          {
+            "reviewId": "51011791ca258c6fdc35",
+            "excerpt": "the workouts are awesome! quick and easy and with great instructions!"
+          },
+          {
+            "reviewId": "0be01d6dd8107b259c02",
+            "excerpt": "very quick but effective variety of workouts"
+          },
+          {
+            "reviewId": "98354308a93a4c48f301",
+            "excerpt": "this is the first app that actually gets me sweaty in 7 minutes"
+          },
+          {
+            "reviewId": "afb57d488b918ce07a3e",
+            "excerpt": "workouts are short and sweet and to the point!"
+          },
+          {
+            "reviewId": "2ab43939d52907766cb7",
+            "excerpt": "there’s different workouts with different amounts of time and levels and target body areas!"
+          },
+          {
+            "reviewId": "08b6057c7b031c96ceb3",
+            "excerpt": "they even have video showing you how to properly do a work out"
+          },
+          {
+            "reviewId": "6b9a8b2549f38820ac25",
+            "excerpt": "options for every level of fitness and lifestyle"
+          },
+          {
+            "reviewId": "9bb957bc7ac2bffa6324",
+            "excerpt": "love the options of types of workouts and time of length depending on how much time i can work out!"
+          },
+          {
+            "reviewId": "d8700c43e2e9dba251a6",
+            "excerpt": "this app gave me very easy start"
+          },
+          {
+            "reviewId": "1bbb13b96dd31b206a62",
+            "excerpt": "something i can comfortably do at home....awesome"
+          },
+          {
+            "reviewId": "14fabc14069076d22d41",
+            "excerpt": "this was great to help me get my body back in shape"
+          },
+          {
+            "reviewId": "44a05680839509147fff",
+            "excerpt": "i do the 9 minutes gym and i see improvements for such a short time."
+          },
+          {
+            "reviewId": "c9cc96aac908f4930191",
+            "excerpt": "this workout was just what i needed to get a quick morning sweat in"
+          },
+          {
+            "reviewId": "5f9f61ab1e8c3690e062",
+            "excerpt": "i did it while listening to my apple music and you can listen to anything on here"
+          },
+          {
+            "reviewId": "56d934ec40ab06cc4ff3",
+            "excerpt": "i can focus on whole body, arms, legs, butt, or even a relaxing yoga."
+          },
+          {
+            "reviewId": "fb2c28b6f7847037b6d6",
+            "excerpt": "i love how it sends reminders"
+          },
+          {
+            "reviewId": "199d692c875326528ae9",
+            "excerpt": "it’s much cheaper than a gym membership and i can do everything in the price of my home with no equipment"
+          },
+          {
+            "reviewId": "e7e013ad6884892b3e7c",
+            "excerpt": "beginner and advanced training in not only work outs but stretching and yoga too."
+          },
+          {
+            "reviewId": "d7b80d28a65603e4ee4b",
+            "excerpt": "lots of varied short workouts to mix and match"
+          },
+          {
+            "reviewId": "969e93553f483c62c09c",
+            "excerpt": "this app has been a great habit builder for me"
+          },
+          {
+            "reviewId": "97d4a1a8f0017f08a893",
+            "excerpt": "the 7 mins a day keeps me fantastic!!!!"
+          },
+          {
+            "reviewId": "42c1b6f5d49107735918",
+            "excerpt": "i use this app solely for the daily 8 minute work out. love it!!!"
+          },
+          {
+            "reviewId": "690d7724a001051614d4",
+            "excerpt": "knowing i have instructions for next exercise and a time limit makes exercising manageable"
+          },
+          {
+            "reviewId": "6d48c1054db2b0fa0b13",
+            "excerpt": "i love the programs, target areas, and the little one off sessions"
+          },
+          {
+            "reviewId": "721508a4fa8e924ef490",
+            "excerpt": "this app is helpful for all levels of exercise experience from beginner to advanced"
+          },
+          {
+            "reviewId": "5779b4c34f5aa5c38b60",
+            "excerpt": "i went with beginner and i’m loving these daily 30 minutes"
+          },
+          {
+            "reviewId": "96df9c8523bd7c068198",
+            "excerpt": "this is hands down the best workout program i’ve ever tried"
+          },
+          {
+            "reviewId": "abedfa5e640ab8f3589c",
+            "excerpt": "these workouts have so far helped me lose 19 pounds"
+          }
+        ],
+        "conflictingReviewIds": [
+          "22362f152de51b719e6f",
+          "bd7a17c7711d6f478c76",
+          "43f4266f074eaa80d2fc",
+          "1cf18baaa2b920a6718d",
+          "da94522481a8a19ff685",
+          "b13ecc45b66030acc2d7",
+          "d12437b2f22497298e1b",
+          "cb1ac0588b2aee125248",
+          "98a39e78a98fde68f2ad",
+          "61cabebf911229cac631",
+          "b4e7ccd6da5e64cc4de3",
+          "c8d0383c0e9865fc14dd",
+          "684e6330b8fac437b13e",
+          "14a2b9bf9e8ff94963e8",
+          "c81a093be52c57fc2b5a",
+          "af6dea73394933ffbeea",
+          "a8554d7d712031f35dd7",
+          "3150865688fdafebfb79",
+          "042a4233d01a3034db7a",
+          "3a2ad51141abce2878c6",
+          "5a0648615586f7b1c905",
+          "4289773519b7cb245f09",
+          "e812fa21d893153c612f",
+          "61b1749c64043a0baa9c",
+          "797ffad899d35f87407e",
+          "701a3f34985f078b3214",
+          "866cb162f4975f95e12a",
+          "a031cd5604fc2b37c2e2"
+        ],
+        "confidence": {
+          "level": "medium",
+          "method": "deterministic-v1",
+          "reasons": [
+            "74 distinct supporting review(s)",
+            "source status: complete",
+            "material conflicting evidence present"
+          ]
+        },
+        "evidenceSufficiency": {
+          "status": "sufficient",
+          "corpusReviewCount": 500,
+          "supportRatio": 0.148,
+          "reasons": []
+        },
+        "uncertainties": [
+          "Some negative workout reviews are intertwined with paywall complaints, so it is hard to separate dissatisfaction with the workout content itself from dissatisfaction with the overall app changes.",
+          "The 'avoid knees' and 'daily workout inconsistency' complaints may depend on specific user settings and plan choices that are not visible in the review text.",
+          "The phrase 'it really doesn’t work' is ambiguous—it could refer to a technical malfunction rather than workout effectiveness.",
+          "Most positive reviews are brief, so the depth of satisfaction is hard to assess.",
+          "The proportion of users who find content repetitive versus fresh cannot be measured from this sample.",
+          "We cannot quantify how many users hit the difficulty ceiling or find demos insufficient; these are individual 4–5 star reviews with caveats.",
+          "Negative quality complaints come from two reviewers; 'AI slop' may reflect a specific recent update, and 'burn' is highly subjective. Difficulty-selection behavior cannot be confirmed.",
+          "Criticism of AI-generated content likely refers to a specific app version after a redesign; the pilates complaint may reflect program scope rather than bugs. These reviews do not establish which issues persist currently.",
+          "Only a few reviews directly mention AI or illustrated demos, so the proportion of affected users is unclear.",
+          "The same users who criticize AI imagery also complain about paywalls and ads, so their negative sentiment may be compounded.",
+          "Only two reviews in this set complain about voice/demo quality, so the prevalence of these issues is unknown.",
+          "The positive reviews and the negative review come from different users, so the relative prevalence of each view is unknown.",
+          "Positive reviews may skew toward users who have not yet hit the paywall or who don't mind ads; these strengths don't eliminate the monetization frustrations seen elsewhere.",
+          "Positive reviews are self-selected and may over-represent motivated users; 'results' are self-reported without objective verification."
+        ],
+        "limitations": [
+          "Positive workout reviews are mostly short and may not reflect long-term engagement, while negative reviews may over-represent edge cases.",
+          "No objective data (e.g., workout logs, app settings) is available to confirm or refute the personalization failures.",
+          "Positive reviews may be influenced by novelty or short usage time.",
+          "No objective outcome data (e.g., weight loss, fitness gains) is available to validate claims.",
+          "Positive and negative reviews may reflect different app versions or usage durations.",
+          "This dataset skews positive for workout content, so the conflicting viewpoints come from a small minority.",
+          "Review text cannot verify whether workouts are actually AI-generated or whether the selected difficulty level matched the user's fitness.",
+          "Mixed sample is drawn from different time periods and app versions; positive and negative reviews may not be comparing the same experience.",
+          "Subjective judgments like 'easy to follow' vary by user; actual video content was not inspected.",
+          "The request for real people comes from a single 5-star review, not a large user group.",
+          "Positive reviews may be overrepresented, and no objective measure of exercise correctness is available.",
+          "Workout quality is judged from a small set of reviews; 'limited exercises' may reflect a particular plan level rather than the whole catalog.",
+          "No telemetry linking specific features to retention; all claims are self-reported.",
+          "Self-reported outcomes (e.g., weight loss) are not verified.",
+          "Some positive reviews may predate the monetization changes described in negative reviews, so we cannot compare experiences at the same point in time."
+        ]
+      },
+      {
+        "id": "finding-5",
+        "topicIds": [
+          "topic-8",
+          "topic-6",
+          "topic-5"
+        ],
+        "focusAreaIds": [
+          "focus-1",
+          "focus-2",
+          "focus-3",
+          "focus-5",
+          "focus-6"
+        ],
+        "sourceFindingIds": [
+          "finding-2@c6",
+          "finding-4@c8",
+          "finding-3@c9",
+          "finding-4@c11"
+        ],
+        "title": "Personalization and constraint settings are ignored, frustrating users with specific needs",
+        "summary": "Users who specify body areas to avoid, complete the intro quiz, or select no-jumping or pregnancy-safe settings report that the app still serves exercises that violate those constraints. Examples include 'legs every day and no arms' despite avoidance, squats/lunges when 'avoid knees' is set, and prenatal workouts that include lying-on-stomach moves. A single premium user could not find any way to turn off jumping. These failures break trust in the app's customization promises.",
+        "supportingReviewIds": [
+          "23279288b9997ed880fa",
+          "0177e49b6144656eb965",
+          "c8d0383c0e9865fc14dd",
+          "5efc3d31163c9fab303b",
+          "8d353af0268fef0af940",
+          "03d3d30cf79d96f338c8",
+          "6704f08279c3ba6330a8",
+          "55cdddc44d0ba0318019",
+          "0cd4868c0e90859751a4",
+          "d5a0b4ee219a1c840a43",
+          "ed0bff0faf95855c0202",
+          "2eb9612bdbe590f3c131"
+        ],
+        "supportingSampleCount": 12,
+        "evidenceExcerpts": [
+          {
+            "reviewId": "23279288b9997ed880fa",
+            "excerpt": "i stated my abs and there are so many ab workouts in my plan."
+          },
+          {
+            "reviewId": "0177e49b6144656eb965",
+            "excerpt": "asks what to avoid but still includes moves that aggravate that area."
+          },
+          {
+            "reviewId": "c8d0383c0e9865fc14dd",
+            "excerpt": "the quiz you take at the beginning does not affect the exercises you get."
+          },
+          {
+            "reviewId": "5efc3d31163c9fab303b",
+            "excerpt": "the exercises are easy to follow with animation of how to do each exercise."
+          },
+          {
+            "reviewId": "8d353af0268fef0af940",
+            "excerpt": "i love the programs and the intense 7 min workouts. no excuses!"
+          },
+          {
+            "reviewId": "03d3d30cf79d96f338c8",
+            "excerpt": "you can change exercises to your desire incase of injury or discomfort"
+          },
+          {
+            "reviewId": "6704f08279c3ba6330a8",
+            "excerpt": "i love the time frames of these exercises. it helps as a busy mom"
+          },
+          {
+            "reviewId": "21c18ec7ba6b0c18dd73",
+            "excerpt": "i am unable to find any way to turn off the stupid jumping."
+          },
+          {
+            "reviewId": "55cdddc44d0ba0318019",
+            "excerpt": "their prenatal workouts/yoga have you laying on your stomach doing single leg raises or supermans."
+          },
+          {
+            "reviewId": "0cd4868c0e90859751a4",
+            "excerpt": "short sessions makes it easier to complete on a regular basis"
+          },
+          {
+            "reviewId": "d5a0b4ee219a1c840a43",
+            "excerpt": "love that i can decide the type of workout, duration, ability level, and more without the decision fatigue of choosing every exercise"
+          },
+          {
+            "reviewId": "ed0bff0faf95855c0202",
+            "excerpt": "i love the daily 7 workout but i think it should start over at midnight. having to wait the full 24 hours instead is not fair or feasible."
+          },
+          {
+            "reviewId": "2eb9612bdbe590f3c131",
+            "excerpt": "i wish someone would create a program for those of us who are older, much older with muscles that have contracted and joints that are stiff"
+          }
+        ],
+        "conflictingReviewIds": [
+          "fc8b82ae91c9af5d52ed",
+          "9a34eb914a94cfe0a317",
+          "7d290018e8b744dc0b55",
+          "21c18ec7ba6b0c18dd73",
+          "44a05680839509147fff",
+          "c9cc96aac908f4930191",
+          "56d934ec40ab06cc4ff3",
+          "199d692c875326528ae9"
+        ],
+        "confidence": {
+          "level": "medium",
+          "method": "deterministic-v1",
+          "reasons": [
+            "12 distinct supporting review(s)",
+            "source status: complete",
+            "material conflicting evidence present"
+          ]
+        },
+        "evidenceSufficiency": {
+          "status": "sufficient",
+          "corpusReviewCount": 500,
+          "supportRatio": 0.024,
+          "reasons": []
+        },
+        "uncertainties": [
+          "It is unclear how the app weighs avoidance inputs; they may be treated as suggestions rather than strict filters. The quiz may affect other attributes not visible in these reviews.",
+          "The no-jumping setting may exist but be difficult to find; the review only proves that the user could not locate it.",
+          "Single-user report; the prenatal program may have changed since this review.",
+          "Pregnancy-safe exercise classification is a medical question beyond the app review data.",
+          "The Daily 7 timing issue and the request for older-user modifications each come from a single reviewer, so their prevalence is unknown."
+        ],
+        "limitations": [
+          "Only three reviews directly describe this problem; user expectations about personalization may vary.",
+          "The personalization failure is based on a single review in this dataset, while other reviews report the opposite experience.",
+          "Only one review directly addresses prenatal safety; cannot generalize to all specialized programs.",
+          "The positive conflicting reviews do not specifically discuss prenatal content.",
+          "Positive sentiment about workout usability is far more common in this sample, but review ratings alone do not show how many users share the specific usability frustrations."
+        ]
+      },
+      {
+        "id": "finding-6",
+        "topicIds": [
+          "topic-1",
+          "topic-11"
+        ],
+        "focusAreaIds": [
+          "focus-1",
+          "focus-3",
+          "focus-6",
+          "focus-2"
+        ],
+        "sourceFindingIds": [
+          "finding-3@c0",
+          "finding-4@c3",
+          "finding-3@c13"
+        ],
+        "title": "AI-generated body imagery and weight-loss-first framing alienate wellness-focused users",
+        "summary": "A small but vocal set of users criticizes the app's use of AI-generated, hyper-sexualized body imagery instead of real diverse bodies, and an onboarding that forces a weight-loss goal and attaches weight-loss notes to every exercise. One reviewer calls the anti-fat framing 'vile' and harmful for people with eating-disorder histories. These complaints suggest the app's visual identity and messaging conflict with an inclusive, wellness-oriented brand.",
+        "supportingReviewIds": [
+          "cbb69a199b87635d6910",
+          "75d7b5fc1746c4d80026",
+          "7d579ddab7ad9866916e",
+          "1e26434428fd7d297ebd",
+          "51d4b3f25ab831d4417f",
+          "4fcd7c556d01aa9ec1d8"
+        ],
+        "supportingSampleCount": 6,
+        "evidenceExcerpts": [
+          {
+            "reviewId": "cbb69a199b87635d6910",
+            "excerpt": "fake ai women used everywhere"
+          },
+          {
+            "reviewId": "75d7b5fc1746c4d80026",
+            "excerpt": "this app is objectifying women’s bodies rather than focusing on heath or strength"
+          },
+          {
+            "reviewId": "7d579ddab7ad9866916e",
+            "excerpt": "lots of ai use for their workouts"
+          },
+          {
+            "reviewId": "1e26434428fd7d297ebd",
+            "excerpt": "it’s all ai slip and you have to pay"
+          },
+          {
+            "reviewId": "51d4b3f25ab831d4417f",
+            "excerpt": "you can’t even log in and use the app without setting a weight loss goal! every single exercise comes with a note on how much weight you’ll lose"
+          },
+          {
+            "reviewId": "4fcd7c556d01aa9ec1d8",
+            "excerpt": "instead of being full of photos of real women and a diversity of bodies, it has ai bodies (🙄) with exaggerated chests and butts"
+          }
+        ],
+        "conflictingReviewIds": [],
+        "confidence": {
+          "level": "medium",
+          "method": "deterministic-v1",
+          "reasons": [
+            "6 distinct supporting review(s)",
+            "source status: complete"
+          ]
+        },
+        "evidenceSufficiency": {
+          "status": "sufficient",
+          "corpusReviewCount": 500,
+          "supportRatio": 0.012,
+          "reasons": []
+        },
+        "uncertainties": [
+          "The term 'AI' is used loosely across reviews and may refer to avatars, workout generation, or overall content quality, so the specific AI feature being criticized is not uniform.",
+          "It is not clear whether all users who mention AI are also reacting to the paywall changes, since several reviews combine both complaints.",
+          "Single-review basis; other reviews in this sample do not mention weight-loss framing.",
+          "Only one review in this set raises this issue; we cannot tell how many users share the reaction."
+        ],
+        "limitations": [
+          "No positive reviews in this sample mention AI avatars or imagery, so we cannot measure how widespread the dislike is versus silent acceptance.",
+          "Visual claims cannot be independently verified from text alone.",
+          "Cannot assess prevalence or whether the current onboarding still enforces a weight-loss goal.",
+          "No counter-review in the provided data addresses the body-image concern, so no conflicting evidence is available."
+        ]
+      },
+      {
+        "id": "finding-7",
+        "topicIds": [
+          "topic-9"
+        ],
+        "focusAreaIds": [
+          "focus-2",
+          "focus-5"
+        ],
+        "sourceFindingIds": [
+          "finding-3@c3"
+        ],
+        "title": "Users request granular workout controls and specialized routines",
+        "summary": "Reviewers who otherwise like the app ask for concrete improvements: an option to count reps instead of timers, less wordy/less distracting sound cues, Apple Watch calorie integration, pregnancy-safe strength/mobility workouts, and programs for older users with stiff joints. These are actionable opportunities to improve the core workout experience.",
+        "supportingReviewIds": [
+          "feaae9dce2297b34ac2e",
+          "4a9e233a7d40327ddd01",
+          "a5900337c9421dc68dbc"
+        ],
+        "supportingSampleCount": 3,
+        "evidenceExcerpts": [
+          {
+            "reviewId": "feaae9dce2297b34ac2e",
+            "excerpt": "i wish there was a way you could have it switch to reps instead of having a timer for each exercise"
+          },
+          {
+            "reviewId": "4a9e233a7d40327ddd01",
+            "excerpt": "i wished i could connect it to my watch so that i counts the calories i burned"
+          },
+          {
+            "reviewId": "a5900337c9421dc68dbc",
+            "excerpt": "there is a lack of pregnancy safe strength training, mobility and flexibility workouts"
+          }
+        ],
+        "conflictingReviewIds": [],
+        "confidence": {
+          "level": "medium",
+          "method": "deterministic-v1",
+          "reasons": [
+            "3 distinct supporting review(s)",
+            "source status: complete"
+          ]
+        },
+        "evidenceSufficiency": {
+          "status": "insufficient",
+          "corpusReviewCount": 500,
+          "supportRatio": 0.006,
+          "reasons": [
+            "SUPPORT_RATIO_BELOW_MINIMUM"
+          ]
+        },
+        "uncertainties": [
+          "Feature requests come from individual users; no signal on how broadly each request is shared."
+        ],
+        "limitations": [
+          "No data on implementation difficulty, priority, or whether these gaps exist in the latest version."
+        ]
+      }
+    ],
+    "requirements": [
+      {
+        "id": "req-1",
+        "findingIds": [
+          "finding-1"
+        ],
+        "title": "Clarify free tier and prevent surprise paywalls",
+        "description": "Create a transparent free tier where users can access a meaningful set of workouts without subscribing, and premium content is clearly labeled before any interaction. This directly addresses reviewer reports that previously free workouts now require payment and that 'free' labels are misleading.",
+        "sourceReviewIds": [
+          "7d579ddab7ad9866916e",
+          "41dda90bb7c5bf6a5f50",
+          "1e26434428fd7d297ebd",
+          "cbb69a199b87635d6910",
+          "f1d769915693bff365b5",
+          "aa10fd1c007b0ebde89f",
+          "02bfe99c3421d23ff17d",
+          "3c469722f1d0864a64bb",
+          "15adc40ae33fa59c6460",
+          "50dd40e82486e9e93aae",
+          "cd3e775a272561da7d61",
+          "8e1dadc88db3cb1e2d52",
+          "0567acea07a5f230c350",
+          "5388376e53d4eca15c60",
+          "b336d30bd0c5bb4c158b",
+          "ce914d45a09ffcb8351b",
+          "5a40025573b2c55b1963",
+          "c9338a41a33df24b016d",
+          "4f2cf6597c046f4c579d",
+          "19dd801156be88554d22",
+          "1f437acb3f7e7e8c10b3",
+          "53974bcc26a0d788626b",
+          "98de3937a388855366bc",
+          "3c49af9bb0aef09a3fdc",
+          "8221336732d84bbc19bc",
+          "dc4faf66d83960f53218",
+          "abde41fc0222660ff656",
+          "a9a965a3ee3756a838f8",
+          "9209576b87ce4944ca28",
+          "bf3841e67602dc01e0b2",
+          "842e5e0f16697cf1a01a",
+          "a0b0f9da4e31b7a6f52d",
+          "4395008b5af14e4a1615",
+          "0515592adfe6c089a8ea",
+          "4a97f4d4338874d4a871",
+          "8cab578e3ab71d8124a9",
+          "19245404c6e294fa0231",
+          "2c27621158b0b10ba11f",
+          "370a4d8f25cfb867adfb",
+          "1e38cfa729df94fff88e",
+          "85ac9926c35e9ced7bc0",
+          "e5b8843ff3eecb453ed7",
+          "3041a3e4c84f6e84e057",
+          "55bfd9115408f9880868",
+          "f7056bce85c297605c99",
+          "684e6330b8fac437b13e",
+          "5184627d2d5497da6d62",
+          "87ff885886d7b44aeef3",
+          "e4b8fa7ef7269260f815",
+          "8f0ffce208065e602a36",
+          "71e32c64d58bfad69023",
+          "19e1a0f890dbf73868f7",
+          "fb88e60b92da3ec716cb",
+          "6d94ebe28a85a3dcf249",
+          "15f604b02b3ad18f03d0",
+          "5c97738ed20a7c341e5c",
+          "7fdc5eed949ae3a82be7",
+          "99feb7e0845671c5f22e",
+          "ac28cca049c11be5e365",
+          "866cb162f4975f95e12a",
+          "30a5fd6d9dce927d3a10",
+          "fa6f611ee7cc5823b765",
+          "9e1d108f76c21760c330",
+          "0278fa392e7a0cf2059d",
+          "131de1abcd62a356b9df",
+          "b12c48d5085ef0eb06c9",
+          "4c31eadff68fc21e8e1a",
+          "9b88234eeb4203203bc7",
+          "95687878a72648d948ac",
+          "c125965442e6d933940b",
+          "b070bd8f0da66a35b6e9",
+          "8426056257c7ff92c7e3",
+          "62ce5fa08734b0d0990a",
+          "9dc526a4996302308508",
+          "446debb488c9e30a47dd",
+          "453d414ea6a6bf40613e",
+          "cb0cc8ac89a9761a3b16",
+          "d12437b2f22497298e1b",
+          "b87d5108f1c3d560a191",
+          "665cd14c6001dacd0a84",
+          "b5db1fbb2e56d1b56e16",
+          "ea2a981452bdd7fb7f68",
+          "c5cec2597485411001ba",
+          "474aa2e44c378c760f59"
+        ],
+        "priority": "P1",
+        "acceptanceCriteria": [
+          "At least 15 distinct workouts (including 5 each in strength, HIIT, and yoga categories) are available free with ads, without requiring a subscription.",
+          "Any workout requiring Premium is labeled with a 'Premium' badge on the selection screen, before the user taps it.",
+          "No paywall modal appears after a workout has started or after completion; paywalls only appear before starting a premium workout.",
+          "Users who previously accessed a specific workout for free retain access to that workout unless they are shown an in-app notice describing the change and offered an equivalent free alternative.",
+          "Onboarding screens do not state 'free' for any workout that actually requires a subscription."
+        ],
+        "versionId": "ver-1",
+        "planningFactors": {
+          "severity": "critical",
+          "userImpact": "high",
+          "implementationScope": "medium",
+          "dependencyRequirementIds": [],
+          "rationale": "16.8% of reviews describe paywall regression that turns long-time users into detractors. The same evidence also shows a subset of subscribers who love the app, so the fix is not to remove the subscription but to make the free tier and premium boundary honest and valuable.",
+          "evidenceStrength": "medium",
+          "confidence": "medium",
+          "frequency": {
+            "supportingReviewCount": 84,
+            "corpusReviewCount": 500,
+            "supportRatio": 0.168
+          }
+        }
+      },
+      {
+        "id": "req-2",
+        "findingIds": [
+          "finding-2"
+        ],
+        "title": "Restore trust in trials, billing, and cancellation",
+        "description": "Redesign subscription and account flows so free trials don't charge immediately, cancellations are honored, and support can actually help. This addresses the most trust-damaging complaints that label the app a scam.",
+        "sourceReviewIds": [
+          "1cf18baaa2b920a6718d",
+          "a714751ef74be8bea80e",
+          "a4c127668e22552df85d",
+          "c352d86551671d7b8d70",
+          "dd0b01e8efe7359b1089",
+          "4fbc4f72bcfecda65727",
+          "3108668c8b4ee2438bf7",
+          "22935659be45db2172e8",
+          "eeb35f52212cad12f495",
+          "50dd40e82486e9e93aae",
+          "1f584730f8580f6b15bd",
+          "62be00dda9ffd5c8bc7a",
+          "a23ee85600cd3c3ae86f",
+          "3db3756c43b8043720be",
+          "f8eb72f77f1bd83b00c8",
+          "7a160bd56131157f4752",
+          "cc85fc2414bb9b897dfd",
+          "14811281319525325893",
+          "7aaf37a74c0b10a4cc33",
+          "d92cce6e9e7960f75948",
+          "342561b8e8592cc0b63a",
+          "85861b1ae4ea322bed91",
+          "58d6f7a97c358d824e92",
+          "2aedc427e4dd7abdeda2",
+          "7fe3d5c111a39f529034",
+          "7fdc5eed949ae3a82be7",
+          "5b6b6430a07507dd49fd",
+          "a5c8c0fdb39ac4b94d5e",
+          "c362da02203928cb4335",
+          "2af72a3a899103342b9d",
+          "131de1abcd62a356b9df",
+          "b12c48d5085ef0eb06c9",
+          "cecdadc8c8db0243be8b",
+          "471fb1773b65dcc96180",
+          "747ef981eb8af30960a2",
+          "a161abb65a16fbc3092e",
+          "f277dd62f58166319e5e",
+          "360d76f07347c48043fe",
+          "e2b818f9dfbd9186d3ab"
+        ],
+        "priority": "P1",
+        "acceptanceCriteria": [
+          "100% of trial signups display the charge amount, charge date, and cancel method on the confirmation screen before payment is authorized.",
+          "No user is charged during a free trial unless they explicitly confirm enrollment in a paid plan; automated test covers trial-to-charge flow with zero immediate-charge defects.",
+          "Cancellation takes effect immediately and the user receives in-app and email confirmation; no renewal charge occurs after cancellation for 100% of cancel events in QA.",
+          "Accidental/immediate charges are refundable via a self-service 'Request Refund' flow in the app within 14 days, with refund initiated within 5 business days.",
+          "Support inbox rejects no legitimate queries as spam; median first response time is less than 2 business days for billing, cancel, or login issues."
+        ],
+        "versionId": "ver-1",
+        "planningFactors": {
+          "severity": "critical",
+          "userImpact": "high",
+          "implementationScope": "large",
+          "dependencyRequirementIds": [],
+          "rationale": "Billing failures directly break the subscription value proposition and brand trust. 7.8% of reviews report immediate charges, cancellation failures, or account lockouts, often using the word 'scam'. Fixing this is essential before any monetization expansion.",
+          "evidenceStrength": "medium",
+          "confidence": "medium",
+          "frequency": {
+            "supportingReviewCount": 39,
+            "corpusReviewCount": 500,
+            "supportRatio": 0.078
+          }
+        }
+      },
+      {
+        "id": "req-3",
+        "findingIds": [
+          "finding-3"
+        ],
+        "title": "Eliminate disruptive ad experiences",
+        "description": "Fix the free ad-supported experience so ads are a fair trade, not a punishment. This addresses 90-second, unclosable ads, redirects to external sites, and ads that break the workout flow.",
+        "sourceReviewIds": [
+          "3c469722f1d0864a64bb",
+          "3ca751f46d64b8b6d725",
+          "cd3e775a272561da7d61",
+          "0567acea07a5f230c350",
+          "bf6882ede9d60abe6519",
+          "a294f3b4369a18c41112",
+          "cc63855d1f2503b23e1a",
+          "d209ae2dfd97ff0bdb80",
+          "a3219e1290028aaf4834",
+          "b4467727f123a07beea9",
+          "a9a965a3ee3756a838f8",
+          "f65d70e0417408b7a7e4",
+          "db79928046519e7ffdcd",
+          "1e0fb9be01863f607fa3",
+          "72cf0fc6b2f25ec4e1ac",
+          "76e57a90688ac2de17a6",
+          "af48b9baedefbffda432",
+          "7e2302afb4e5dac12a13",
+          "7252a9f2ad243e056c5f",
+          "85ac9926c35e9ced7bc0",
+          "4bb3f46e84c78d125a84",
+          "87ff885886d7b44aeef3",
+          "e4b8fa7ef7269260f815",
+          "fb88e60b92da3ec716cb",
+          "71e32c64d58bfad69023",
+          "19e1a0f890dbf73868f7",
+          "fc8df7a9de28fa4fa19d",
+          "99feb7e0845671c5f22e",
+          "d18171787f9c6072d9d8",
+          "c796ff1aa8f52e33a38c",
+          "2f57299d49c5934daab9",
+          "38950670f6a31d9f5575",
+          "a2e8dff816390c08bd39",
+          "0dac5b4736fc63cc0fe9",
+          "c3b561b8cf472607d744",
+          "1d8d80b4ba6bf55cb7d6",
+          "bc997c31991c7d4722fb",
+          "f1859898316bb44ff620",
+          "a3577b72441328c6e62b",
+          "61b1749c64043a0baa9c",
+          "a031cd5604fc2b37c2e2",
+          "ba7129bae3aa936f5289",
+          "39ccd3f449af85187dac",
+          "9e1d108f76c21760c330",
+          "0ac12ef8e8eb7fc7f400",
+          "f4e3e0d9277894a2b03b",
+          "797ffad899d35f87407e",
+          "701a3f34985f078b3214",
+          "cdab8c157cca90c2a05e",
+          "fded74adaf6576c6fc7a",
+          "0278fa392e7a0cf2059d",
+          "098ae901805499990bf8"
+        ],
+        "priority": "P1",
+        "acceptanceCriteria": [
+          "No ad can redirect out of the app to an external browser or website; automated UI test asserts no external URL launches during a workout session.",
+          "All video ads display a visible close/skip control within 5 seconds after the ad completes; ad-exit button failure rate is less than 0.1% per 10,000 sessions.",
+          "Maximum ad length is 30 seconds for any single ad, and at most one ad is shown per workout session, excluding explicitly opt-in rewarded ads.",
+          "If an ad fails to load or close, the workout resumes automatically without user action within 3 seconds.",
+          "Free users can complete a 7-minute workout with a total of no more than 30 seconds of ad interruption."
+        ],
+        "versionId": "ver-1",
+        "planningFactors": {
+          "severity": "high",
+          "userImpact": "high",
+          "implementationScope": "medium",
+          "dependencyRequirementIds": [],
+          "rationale": "10.4% of reviews cite 90-second or unclosable ads and Shein redirects as churn triggers. Some users explicitly accept ads as a fair trade for free access, so the goal is to keep the ad-supported tier but make it non-abusive and functional.",
+          "evidenceStrength": "medium",
+          "confidence": "medium",
+          "frequency": {
+            "supportingReviewCount": 52,
+            "corpusReviewCount": 500,
+            "supportRatio": 0.104
+          }
+        }
+      },
+      {
+        "id": "req-4",
+        "findingIds": [
+          "finding-5"
+        ],
+        "title": "Honor personalization and safety constraints",
+        "description": "Make onboarding quiz and user settings actually constrain workout generation. This addresses reports of knee-avoidance being ignored, no-jumping being impossible, and pregnancy-unsafe moves.",
+        "sourceReviewIds": [
+          "23279288b9997ed880fa",
+          "0177e49b6144656eb965",
+          "c8d0383c0e9865fc14dd",
+          "5efc3d31163c9fab303b",
+          "8d353af0268fef0af940",
+          "03d3d30cf79d96f338c8",
+          "6704f08279c3ba6330a8",
+          "55cdddc44d0ba0318019",
+          "0cd4868c0e90859751a4",
+          "d5a0b4ee219a1c840a43",
+          "ed0bff0faf95855c0202",
+          "2eb9612bdbe590f3c131"
+        ],
+        "priority": "P1",
+        "acceptanceCriteria": [
+          "When a user selects 'avoid knees', 0% of generated workouts in a QA test set of 100 generated plans contain deep knee bends (squats, lunges, jumps).",
+          "A visible 'No jumps' toggle exists in workout filters; when enabled, 100% of generated exercises have a no-jump alternative or modifier.",
+          "Prenatal mode excludes prone (lying-on-stomach) exercises and supine exercises after the first trimester; all prenatal workouts are reviewed by a certified prenatal fitness specialist before release.",
+          "Users can change avoidance/jump settings at any time, and the next generated workout reflects those changes immediately.",
+          "Post-workout surveys show that at least 85% of users who set constraints agree that the workout respected those constraints."
+        ],
+        "versionId": "ver-2",
+        "planningFactors": {
+          "severity": "high",
+          "userImpact": "medium",
+          "implementationScope": "large",
+          "dependencyRequirementIds": [],
+          "rationale": "Personalization failures are safety-relevant (especially prenatal) and directly contradict the app's customization promise. Frequency is low (2.4%) but the damage to affected users is severe and the feature differentiates the app from competitors.",
+          "evidenceStrength": "medium",
+          "confidence": "medium",
+          "frequency": {
+            "supportingReviewCount": 12,
+            "corpusReviewCount": 500,
+            "supportRatio": 0.024
+          }
+        }
+      },
+      {
+        "id": "req-5",
+        "findingIds": [
+          "finding-4"
+        ],
+        "title": "Balance workout content quality between freshness and consistency",
+        "description": "Preserve the praised short-and-varied workouts while addressing complaints about repetition, AI-generated demos, and name/animation mismatches.",
+        "sourceReviewIds": [
+          "89d39ff177caa228b26f",
+          "6ad576008e6465adc345",
+          "4a644a56a8619cd8783c",
+          "d331227b060177a24ad3",
+          "6acda9e389faa1143883",
+          "12277142053771f844f1",
+          "2143f3ec8ed35afd12de",
+          "b34f61d4a24155813305",
+          "b6d75605977aad508231",
+          "56230fefae8368124913",
+          "35faa42d589b56ba38f2",
+          "668f40f529d9d0dd21ae",
+          "030127cbe4098673f827",
+          "0b88af6733f38b6a7474",
+          "dcb564f577dabd2fe953",
+          "cd9d8211bc907e7935bc",
+          "a8cafd51b7cbb04b0ad9",
+          "52ecbbc862689ee97897",
+          "89f15c4184fe51fd54d2",
+          "84b6c316e86a35b3fb75",
+          "d2556889c59bcc869614",
+          "5e9ea710a133198a495c",
+          "98fa3a30eb191e9b4f92",
+          "39f537e8298befa28a06",
+          "1a50245eec24db09a48c",
+          "42ab00aa53fb637834a4",
+          "63e3062c81dc6548b47e",
+          "d723d3091dfcb5ebcacb",
+          "fbfc29ddbb6142d2e40f",
+          "55d763820c6068e5fa96",
+          "66fa455a3bc44f182c65",
+          "578366a04f7da6efbe18",
+          "1a8557f142bc630824ef",
+          "f663a47722d240c912da",
+          "d5b25078d199b55fd062",
+          "132cc8f4d54b08bdd560",
+          "af48b9baedefbffda432",
+          "11ac6c75bc4ac9c5920e",
+          "7d290018e8b744dc0b55",
+          "220f3ed1446a518582e3",
+          "0bc5b7f4f0865b6ea4fa",
+          "fc8b82ae91c9af5d52ed",
+          "87ff885886d7b44aeef3",
+          "71e32c64d58bfad69023",
+          "19e1a0f890dbf73868f7",
+          "260bd5452839e68a4f3f",
+          "51011791ca258c6fdc35",
+          "0be01d6dd8107b259c02",
+          "98354308a93a4c48f301",
+          "afb57d488b918ce07a3e",
+          "2ab43939d52907766cb7",
+          "08b6057c7b031c96ceb3",
+          "6b9a8b2549f38820ac25",
+          "9bb957bc7ac2bffa6324",
+          "d8700c43e2e9dba251a6",
+          "1bbb13b96dd31b206a62",
+          "14fabc14069076d22d41",
+          "44a05680839509147fff",
+          "c9cc96aac908f4930191",
+          "5f9f61ab1e8c3690e062",
+          "56d934ec40ab06cc4ff3",
+          "fb2c28b6f7847037b6d6",
+          "199d692c875326528ae9",
+          "e7e013ad6884892b3e7c",
+          "d7b80d28a65603e4ee4b",
+          "969e93553f483c62c09c",
+          "97d4a1a8f0017f08a893",
+          "42c1b6f5d49107735918",
+          "690d7724a001051614d4",
+          "6d48c1054db2b0fa0b13",
+          "721508a4fa8e924ef490",
+          "5779b4c34f5aa5c38b60",
+          "96df9c8523bd7c068198",
+          "abedfa5e640ab8f3589c"
+        ],
+        "priority": "P1",
+        "acceptanceCriteria": [
+          "The default workout sequence cannot reuse more than 30% of exercises from the previous day's sequence for the same user.",
+          "Exercise names match animation/instructions for 100% of the top 200 exercises in a manual QA audit.",
+          "All new workout demos use either real human video or internally-validated 3D animation; no visibly AI-generated or distorted body imagery appears in exercise instructions.",
+          "Workout lengths remain 5-15 minutes with 30-45 second exercise intervals as the default, preserving the core praised format.",
+          "A monthly content review removes or replaces the 10 least-positively-rated exercises based on user feedback."
+        ],
+        "versionId": "ver-2",
+        "planningFactors": {
+          "severity": "medium",
+          "userImpact": "high",
+          "implementationScope": "medium",
+          "dependencyRequirementIds": [],
+          "rationale": "The workout library is the most polarizing feature: 14.8% of reviews are split between 5-star praise for short, effective, varied sessions and strong criticism of repetitive or AI-generated content. Improving freshness while keeping the short format serves the largest audience.",
+          "evidenceStrength": "medium",
+          "confidence": "medium",
+          "frequency": {
+            "supportingReviewCount": 74,
+            "corpusReviewCount": 500,
+            "supportRatio": 0.148
+          }
+        }
+      },
+      {
+        "id": "req-6",
+        "findingIds": [
+          "finding-6"
+        ],
+        "title": "Offer inclusive goals and body imagery",
+        "description": "Remove the forced weight-loss framing and replace AI hyper-sexualized body imagery with inclusive, diverse visuals, making the app welcoming for wellness and strength-focused users.",
+        "sourceReviewIds": [
+          "cbb69a199b87635d6910",
+          "75d7b5fc1746c4d80026",
+          "7d579ddab7ad9866916e",
+          "1e26434428fd7d297ebd",
+          "51d4b3f25ab831d4417f",
+          "4fcd7c556d01aa9ec1d8"
+        ],
+        "priority": "P2",
+        "acceptanceCriteria": [
+          "Onboarding goal options include at least 'Strength', 'Mobility', 'Endurance', and 'General Wellness'; none is required to be 'Weight Loss'.",
+          "For users who do not select weight-loss goals, 0% of exercise descriptions or in-workout notes mention calories, weight loss, or body size.",
+          "New onboarding and marketing imagery depicts a diverse range of body types, ages, and abilities; no AI-generated imagery with exaggerated or sexualized features is used.",
+          "Existing AI-generated body images in workout demos are replaced by human video or realistic avatars in the first release after this change."
+        ],
+        "versionId": "ver-3",
+        "planningFactors": {
+          "severity": "low",
+          "userImpact": "low",
+          "implementationScope": "small",
+          "dependencyRequirementIds": [],
+          "rationale": "A small but vocal segment (1.2% of reviews) finds the weight-loss-first framing and AI body imagery actively harmful. The change is low-cost and improves brand inclusivity and alignment with wellness values.",
+          "evidenceStrength": "medium",
+          "confidence": "medium",
+          "frequency": {
+            "supportingReviewCount": 6,
+            "corpusReviewCount": 500,
+            "supportRatio": 0.012
+          }
+        }
+      }
+    ],
+    "versions": [
+      {
+        "id": "ver-1",
+        "name": "1.0.0 - Trust & Stability",
+        "summary": "Fix paywall confusion, billing trust, and ad abuse that are causing churn and 1-star reviews.",
+        "rationale": "Findings 1-3 carry the highest severity and user impact. They directly cause users to abandon the app or label it a scam. Stabilizing these trust surfaces is a prerequisite for any longer-term value work.",
+        "requirementIds": [
+          "req-1",
+          "req-2",
+          "req-3"
+        ]
+      },
+      {
+        "id": "ver-2",
+        "name": "1.1.0 - Core Experience",
+        "summary": "Make personalization honor user constraints and improve workout content quality.",
+        "rationale": "Once trust is restored, the most polarizing feature — the workout library — becomes the focus. Finding 4 and finding 5 show users either love the short/varied workouts or hate repetitions, AI-slop, and ignored safety settings. These are medium-frequency but high-impact issues for retention and safety.",
+        "requirementIds": [
+          "req-4",
+          "req-5"
+        ]
+      },
+      {
+        "id": "ver-3",
+        "name": "1.2.0 - Inclusive Wellness",
+        "summary": "Rebrand onboarding and imagery to be inclusive and wellness-first.",
+        "rationale": "Finding 6 is a small but vocal signal that the app's weight-loss-first framing and AI body imagery alienate wellness-focused users. The change is low-cost and aligns the brand with a broader, more inclusive fitness audience.",
+        "requirementIds": [
+          "req-6"
+        ]
+      }
+    ],
+    "tests": [
+      {
+        "id": "test-1",
+        "requirementIds": [
+          "req-1"
+        ],
+        "findingIds": [
+          "finding-1"
+        ],
+        "sourceReviewIds": [
+          "7d579ddab7ad9866916e"
+        ],
+        "testType": "manual",
+        "precondition": "Fresh install of the app, no existing account, internet available.",
+        "steps": [
+          "Launch app and complete onboarding as a new free user, declining any premium trial.",
+          "Open the workout library/catalog.",
+          "List all available workout cards and their category labels.",
+          "For each workout, tap it to see if it starts or prompts for a purchase.",
+          "Count the workouts that can be started without any subscription, noting categories."
+        ],
+        "expectedResult": "At least 15 distinct workouts are available without subscribing, including at least 5 in each of Strength, HIIT, and Yoga categories. No premium purchase prompt appears when starting these workouts.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-2",
+        "requirementIds": [
+          "req-1"
+        ],
+        "findingIds": [
+          "finding-1"
+        ],
+        "sourceReviewIds": [
+          "7d579ddab7ad9866916e"
+        ],
+        "testType": "manual",
+        "precondition": "Free user account, the app catalog contains at least one workout requiring premium.",
+        "steps": [
+          "Log in as a free user.",
+          "Browse the workout library and locate workouts that require a Premium subscription (e.g., those marked with a crown or 'Premium' in the content system).",
+          "Observe the workout selection screen before tapping any workout.",
+          "For each premium workout, verify if a 'Premium' badge is visible on its card/list item."
+        ],
+        "expectedResult": "Any workout requiring Premium displays a clearly visible 'Premium' badge on the selection screen before the user taps it. No workout is mislabeled as free.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-3",
+        "requirementIds": [
+          "req-1"
+        ],
+        "findingIds": [
+          "finding-1"
+        ],
+        "sourceReviewIds": [
+          "7d579ddab7ad9866916e"
+        ],
+        "testType": "manual",
+        "precondition": "Free user account, a free workout available to start.",
+        "steps": [
+          "Log in as a free user.",
+          "Select and start a free workout.",
+          "Pause and resume the workout at least once.",
+          "Complete the entire workout.",
+          "Observe whether any paywall modal appears during or after the workout."
+        ],
+        "expectedResult": "No paywall modal appears after a workout has started or after completion. Paywalls only appear before starting a premium workout.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-4",
+        "requirementIds": [
+          "req-1"
+        ],
+        "findingIds": [
+          "finding-1"
+        ],
+        "sourceReviewIds": [
+          "7d579ddab7ad9866916e"
+        ],
+        "testType": "manual",
+        "precondition": "A test account with historical entitlement to a workout that is now marked premium (legacy user from before the change).",
+        "steps": [
+          "Log in with the legacy test account.",
+          "Navigate to a workout that was previously free but now requires premium.",
+          "Tap the workout.",
+          "Observe whether the workout starts or if an in-app notice appears.",
+          "If a notice appears, verify it describes the change and offers an equivalent free alternative."
+        ],
+        "expectedResult": "The user either retains access to the workout or sees an in-app notice describing the change and an equivalent free alternative workout, with a clear path to continue with the alternative.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-5",
+        "requirementIds": [
+          "req-1"
+        ],
+        "findingIds": [
+          "finding-1"
+        ],
+        "sourceReviewIds": [
+          "7d579ddab7ad9866916e"
+        ],
+        "testType": "manual",
+        "precondition": "Fresh install of the app.",
+        "steps": [
+          "Start onboarding as a new user.",
+          "Read all onboarding screens, noting any text saying 'free' or 'no cost'.",
+          "If any workout is shown during onboarding, note its actual access level by tapping it (if possible) or later checking the library.",
+          "Complete onboarding and open the workout library to verify access levels of any workouts referenced as 'free'."
+        ],
+        "expectedResult": "No onboarding screen states 'free' for any workout that actually requires a subscription. Any 'free' wording applies only to workouts available without a subscription.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-6",
+        "requirementIds": [
+          "req-2"
+        ],
+        "findingIds": [
+          "finding-2"
+        ],
+        "sourceReviewIds": [
+          "1cf18baaa2b920a6718d"
+        ],
+        "testType": "manual",
+        "precondition": "Payment sandbox, test account, app installed.",
+        "steps": [
+          "Begin the free trial signup flow.",
+          "On the confirmation screen before any payment authorization, read the displayed charge amount, charge date, and cancellation method.",
+          "Capture a screenshot of the confirmation screen.",
+          "Verify that no charge is initiated before this screen is displayed."
+        ],
+        "expectedResult": "The confirmation screen explicitly shows the charge amount, the charge date (e.g., after 7-day trial), and the cancellation method before payment is authorized.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-7",
+        "requirementIds": [
+          "req-2"
+        ],
+        "findingIds": [
+          "finding-2"
+        ],
+        "sourceReviewIds": [
+          "1cf18baaa2b920a6718d"
+        ],
+        "testType": "automated",
+        "precondition": "QA environment with payment processing in sandbox mode, test credit card, test user accounts.",
+        "steps": [
+          "Run automated test suite that signs up for free trial using multiple test accounts.",
+          "For each signup, query the payment system to verify whether any transaction was recorded immediately after signup.",
+          "After trial expiration, simulate explicit confirmation to enroll in paid plan and verify a transaction occurs only at that point."
+        ],
+        "expectedResult": "0% of trial signups have an immediate charge. Transactions occur only after explicit user confirmation to enroll in a paid plan.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-8",
+        "requirementIds": [
+          "req-2"
+        ],
+        "findingIds": [
+          "finding-2"
+        ],
+        "sourceReviewIds": [
+          "1cf18baaa2b920a6718d"
+        ],
+        "testType": "manual",
+        "precondition": "Test account with active subscription (trial or paid), app and platform subscription settings accessible.",
+        "steps": [
+          "Initiate cancellation through the in-app subscription settings or platform (e.g., App Store/Google Play) settings.",
+          "Complete the cancellation flow.",
+          "Check the account status immediately for any active subscription indicator.",
+          "Check for in-app confirmation and email confirmation."
+        ],
+        "expectedResult": "Cancellation takes effect immediately; no renewal is scheduled. User receives in-app and email confirmation; no renewal charge occurs after cancellation.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-9",
+        "requirementIds": [
+          "req-2"
+        ],
+        "findingIds": [
+          "finding-2"
+        ],
+        "sourceReviewIds": [
+          "1cf18baaa2b920a6718d"
+        ],
+        "testType": "manual",
+        "precondition": "Test account that has been charged accidentally (or charge simulated in QA), app installed.",
+        "steps": [
+          "Log in and open Settings > Subscription or Billing.",
+          "Tap 'Request Refund'.",
+          "Follow the self-service refund flow, submit a refund request.",
+          "Verify receipt of the request and check the refund status over the next business days."
+        ],
+        "expectedResult": "A self-service 'Request Refund' flow is available; the request is recorded and the refund is initiated within 5 business days.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-10",
+        "requirementIds": [
+          "req-2"
+        ],
+        "findingIds": [
+          "finding-2"
+        ],
+        "sourceReviewIds": [
+          "1cf18baaa2b920a6718d"
+        ],
+        "testType": "manual",
+        "precondition": "A billing, cancellation, or login issue raised through the in-app support channel.",
+        "steps": [
+          "Submit a support ticket categorized as billing, cancel, or login.",
+          "Record the submission timestamp.",
+          "Monitor the support inbox for automated spam filtering.",
+          "Measure the time until the first agent response.",
+          "Verify the ticket was not rejected as spam."
+        ],
+        "expectedResult": "The first response arrives within 2 business days; the query is not automatically rejected as spam.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-11",
+        "requirementIds": [
+          "req-3"
+        ],
+        "findingIds": [
+          "finding-3"
+        ],
+        "sourceReviewIds": [
+          "3c469722f1d0864a64bb"
+        ],
+        "testType": "automated",
+        "precondition": "Free user with ads enabled, test device with ad network stub that simulates an external redirect attempt.",
+        "steps": [
+          "Run an automated UI test that starts a free workout.",
+          "Trigger the ad in the test environment.",
+          "Monitor whether the app attempts to open an external browser or website.",
+          "Verify that any redirect is blocked and the workout remains in-app."
+        ],
+        "expectedResult": "No ad can redirect the user to an external browser or website during a workout session. The ad stays in-app.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-12",
+        "requirementIds": [
+          "req-3"
+        ],
+        "findingIds": [
+          "finding-3"
+        ],
+        "sourceReviewIds": [
+          "3c469722f1d0864a64bb"
+        ],
+        "testType": "manual",
+        "precondition": "Free user account, ad network test environment with a sample video ad.",
+        "steps": [
+          "Start a free workout that shows a video ad.",
+          "Let the ad play to completion.",
+          "Use a timer to record the time when the ad finishes.",
+          "Observe if a close/skip control appears.",
+          "If present, verify it appears within 5 seconds after the ad finishes and can be tapped."
+        ],
+        "expectedResult": "A visible close/skip control appears within 5 seconds after the ad completes; tapping it closes the ad.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-13",
+        "requirementIds": [
+          "req-3"
+        ],
+        "findingIds": [
+          "finding-3"
+        ],
+        "sourceReviewIds": [
+          "3c469722f1d0864a64bb"
+        ],
+        "testType": "manual",
+        "precondition": "Free user account, app configured to show forced ads, ad SDK logging enabled.",
+        "steps": [
+          "Start a 7-minute workout.",
+          "Record every ad that appears during the session, including duration and whether it is opt-in rewarded or forced.",
+          "Measure the length of each forced ad.",
+          "Count the total number of forced ads per session."
+        ],
+        "expectedResult": "No individual forced ad exceeds 30 seconds, and at most one forced ad appears per workout session, excluding explicitly opt-in rewarded ads.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-14",
+        "requirementIds": [
+          "req-3"
+        ],
+        "findingIds": [
+          "finding-3"
+        ],
+        "sourceReviewIds": [
+          "3c469722f1d0864a64bb"
+        ],
+        "testType": "manual",
+        "precondition": "Free user account, ad network configured to fail loading or fail close button, test mode.",
+        "steps": [
+          "Start a free workout.",
+          "Wait for the ad to attempt to load and fail, or simulate a close button failure.",
+          "Observe the app behavior after the failure.",
+          "Measure the time until the workout resumes."
+        ],
+        "expectedResult": "If an ad fails to load or close, the workout resumes automatically without user action within 3 seconds.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-15",
+        "requirementIds": [
+          "req-3"
+        ],
+        "findingIds": [
+          "finding-3"
+        ],
+        "sourceReviewIds": [
+          "3c469722f1d0864a64bb"
+        ],
+        "testType": "manual",
+        "precondition": "Free user account, ad network configured to show the maximum possible ads (one forced ad up to 30s).",
+        "steps": [
+          "Start a timed 7-minute workout.",
+          "Record the total time the workout is paused or interrupted by ads (sum of forced ad durations and loading delays).",
+          "Note any forced ad longer than 30 seconds."
+        ],
+        "expectedResult": "The total ad interruption time for a 7-minute workout is no more than 30 seconds, and no single forced ad exceeds 30 seconds.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-16",
+        "requirementIds": [
+          "req-4"
+        ],
+        "findingIds": [
+          "finding-5"
+        ],
+        "sourceReviewIds": [
+          "23279288b9997ed880fa"
+        ],
+        "testType": "automated",
+        "precondition": "QA environment with workout generation API, test user profile with 'avoid knees' enabled.",
+        "steps": [
+          "Generate 100 workout plans for the test user using the 'avoid knees' constraint.",
+          "Parse the list of exercises from each plan.",
+          "Check each exercise against a predefined list of known deep knee bend exercises (squats, lunges, jumps, etc.).",
+          "Count any violations.",
+          "Record the percentage of plans containing violations."
+        ],
+        "expectedResult": "0% of the generated workouts contain exercises with deep knee bends; all exercises are knee-friendly alternatives.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-17",
+        "requirementIds": [
+          "req-4"
+        ],
+        "findingIds": [
+          "finding-5"
+        ],
+        "sourceReviewIds": [
+          "23279288b9997ed880fa"
+        ],
+        "testType": "manual",
+        "precondition": "User account with workout generation available.",
+        "steps": [
+          "Open workout filters/options.",
+          "Look for a 'No jumps' toggle.",
+          "Enable the toggle.",
+          "Generate a new workout.",
+          "Review all exercises in the generated workout to see if any involve jumping, or if each jump has a non-jump modifier."
+        ],
+        "expectedResult": "The 'No jumps' toggle is visible and works; generated workouts contain zero jumping movements or each jumping exercise includes a clear non-jump alternative/modifier.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-18",
+        "requirementIds": [
+          "req-4"
+        ],
+        "findingIds": [
+          "finding-5"
+        ],
+        "sourceReviewIds": [
+          "23279288b9997ed880fa"
+        ],
+        "testType": "manual",
+        "precondition": "Test account with prenatal mode available, set to third trimester.",
+        "steps": [
+          "Enable prenatal mode and set the trimester to third.",
+          "Open all prenatal workout content.",
+          "Use a checklist to identify any prone (lying on stomach) exercises or supine (lying on back) exercises after the first trimester.",
+          "Ask a certified prenatal fitness specialist to review the workout list."
+        ],
+        "expectedResult": "No prone exercises appear anywhere; no supine exercises appear after the first trimester. A certified prenatal fitness specialist reviews and confirms safety.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-19",
+        "requirementIds": [
+          "req-4"
+        ],
+        "findingIds": [
+          "finding-5"
+        ],
+        "sourceReviewIds": [
+          "23279288b9997ed880fa"
+        ],
+        "testType": "manual",
+        "precondition": "User account with an active workout history.",
+        "steps": [
+          "Log in and go to Settings.",
+          "Change a constraint, e.g., enable 'avoid knees' or change your goal.",
+          "Return to the workout generation screen and generate a new workout.",
+          "Start the workout and verify it respects the updated constraint."
+        ],
+        "expectedResult": "The next generated workout immediately reflects the changed constraints, without requiring an app restart or cache clear.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-20",
+        "requirementIds": [
+          "req-4"
+        ],
+        "findingIds": [
+          "finding-5"
+        ],
+        "sourceReviewIds": [
+          "23279288b9997ed880fa"
+        ],
+        "testType": "manual",
+        "precondition": "A cohort of at least 100 internal/beta users who have set personalization constraints.",
+        "steps": [
+          "Ensure the cohort completes workouts with their constraints set.",
+          "Automatically collect post-workout survey responses, including the question 'Did this workout respect your constraints?'",
+          "After collecting at least 100 responses, calculate the percentage of users who answered 'Agree' or 'Strongly Agree'."
+        ],
+        "expectedResult": "At least 85% of users agree or strongly agree that the workout respected their constraints.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-21",
+        "requirementIds": [
+          "req-5"
+        ],
+        "findingIds": [
+          "finding-4"
+        ],
+        "sourceReviewIds": [
+          "89d39ff177caa228b26f"
+        ],
+        "testType": "automated",
+        "precondition": "QA environment with workout generation API, fixed user profile.",
+        "steps": [
+          "Generate a workout for Day 1 for the test user.",
+          "Generate a workout for Day 2 for the same user.",
+          "Compare the list of exercises between the two days.",
+          "Calculate the percentage of exercises from Day 1 that are reused in Day 2.",
+          "Repeat for 10 consecutive days and record the maximum reuse percentage."
+        ],
+        "expectedResult": "No day's workout reuses more than 30% of the exercises from the previous day's workout.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-22",
+        "requirementIds": [
+          "req-5"
+        ],
+        "findingIds": [
+          "finding-4"
+        ],
+        "sourceReviewIds": [
+          "89d39ff177caa228b26f"
+        ],
+        "testType": "manual",
+        "precondition": "App with the top 200 exercises available in a test environment.",
+        "steps": [
+          "Obtain the list of the 200 most-used exercises from usage data.",
+          "For each exercise, open its demonstration page.",
+          "Compare the exercise name, the animation, and the text/voice instructions.",
+          "Document any mismatches."
+        ],
+        "expectedResult": "Exercise names match animations/instructions for 100% of the top 200 exercises; any mismatches are flagged and fixed before release.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-23",
+        "requirementIds": [
+          "req-5"
+        ],
+        "findingIds": [
+          "finding-4"
+        ],
+        "sourceReviewIds": [
+          "89d39ff177caa228b26f"
+        ],
+        "testType": "manual",
+        "precondition": "Latest app build including all exercise demos.",
+        "steps": [
+          "Have QA testers browse through all exercise demos in the app.",
+          "Use a checklist for visual distortions: unnatural limbs, extra fingers, morphing bodies, overly modeled features, etc.",
+          "Classify each demo as human real video, clean 3D animation, or AI-generated distorted.",
+          "Record any instances of obviously AI-generated or distorted body imagery."
+        ],
+        "expectedResult": "No visibly AI-generated or distorted body imagery appears in exercise instructions; all demos use real human video or internally-validated 3D animation.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-24",
+        "requirementIds": [
+          "req-5"
+        ],
+        "findingIds": [
+          "finding-4"
+        ],
+        "sourceReviewIds": [
+          "89d39ff177caa228b26f"
+        ],
+        "testType": "manual",
+        "precondition": "Default user profile without custom settings.",
+        "steps": [
+          "Generate and start a default workout.",
+          "Note the total workout duration and the length of exercise intervals.",
+          "For a sample of 10 default workouts, record the durations.",
+          "Verify that each workout is between 5 and 15 minutes long and intervals are 30-45 seconds."
+        ],
+        "expectedResult": "Default workout lengths remain 5-15 minutes, and exercise intervals are 30-45 seconds, preserving the core praised format.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-25",
+        "requirementIds": [
+          "req-5"
+        ],
+        "findingIds": [
+          "finding-4"
+        ],
+        "sourceReviewIds": [
+          "89d39ff177caa228b26f"
+        ],
+        "testType": "manual",
+        "precondition": "QA environment with access to exercise rating/feedback data and content management system.",
+        "steps": [
+          "Access the system that tracks user ratings/feedback per exercise.",
+          "Identify the 10 lowest-rated exercises in the current month.",
+          "Verify that a content review task was created for these exercises.",
+          "Check the next release notes or content updates to confirm that each of these exercises was replaced or removed."
+        ],
+        "expectedResult": "The 10 least-positively-rated exercises are removed or replaced in the monthly content review, and the process is documented in release notes.",
+        "priority": "P1"
+      },
+      {
+        "id": "test-26",
+        "requirementIds": [
+          "req-6"
+        ],
+        "findingIds": [
+          "finding-6"
+        ],
+        "sourceReviewIds": [
+          "cbb69a199b87635d6910"
+        ],
+        "testType": "manual",
+        "precondition": "Fresh install of the app.",
+        "steps": [
+          "Start onboarding as a new user.",
+          "Navigate to the goal selection step.",
+          "Record the list of goal options displayed.",
+          "Verify that 'Strength', 'Mobility', 'Endurance', and 'General Wellness' are present.",
+          "Check whether 'Weight Loss' is the only option or is required; note if it is optional."
+        ],
+        "expectedResult": "Onboarding goal options include at least Strength, Mobility, Endurance, and General Wellness; Weight Loss is not required and may be absent or optional.",
+        "priority": "P2"
+      },
+      {
+        "id": "test-27",
+        "requirementIds": [
+          "req-6"
+        ],
+        "findingIds": [
+          "finding-6"
+        ],
+        "sourceReviewIds": [
+          "cbb69a199b87635d6910"
+        ],
+        "testType": "manual",
+        "precondition": "User account with goal set to 'General Wellness' (not weight loss).",
+        "steps": [
+          "Log in as this user.",
+          "Start a workout and read all exercise descriptions and in-workout prompts.",
+          "After the workout, read any post-workout text.",
+          "Record any mention of calories, weight loss, or body size."
+        ],
+        "expectedResult": "0% of exercise descriptions or in-workout notes mention calories, weight loss, or body size for users who did not select a weight-loss goal.",
+        "priority": "P2"
+      },
+      {
+        "id": "test-28",
+        "requirementIds": [
+          "req-6"
+        ],
+        "findingIds": [
+          "finding-6"
+        ],
+        "sourceReviewIds": [
+          "cbb69a199b87635d6910"
+        ],
+        "testType": "manual",
+        "precondition": "Access to latest onboarding screens, marketing banners, and app store assets.",
+        "steps": [
+          "Review all onboarding screens and marketing imagery.",
+          "Assess diversity of body types, ages, and abilities represented.",
+          "Check for any AI-generated imagery with exaggerated or sexualized features.",
+          "Document any violations."
+        ],
+        "expectedResult": "New onboarding and marketing imagery depicts a diverse range of body types, ages, and abilities; no AI-generated imagery with exaggerated or sexualized features is used.",
+        "priority": "P2"
+      },
+      {
+        "id": "test-29",
+        "requirementIds": [
+          "req-6"
+        ],
+        "findingIds": [
+          "finding-6"
+        ],
+        "sourceReviewIds": [
+          "cbb69a199b87635d6910"
+        ],
+        "testType": "manual",
+        "precondition": "Release that includes the replacement of AI-generated body images.",
+        "steps": [
+          "Browse through all exercise demos in the app.",
+          "Look for any remaining AI-generated body images, especially distorted or hyper-sexualized visuals.",
+          "Verify that each demo uses either real human video or a realistic avatar."
+        ],
+        "expectedResult": "Existing AI-generated body images have been replaced by human video or realistic avatars in the first release after this change; no AI-generated distorted imagery remains.",
+        "priority": "P2"
+      }
+    ],
+    "assumptions": [
+      {
+        "id": "asm-1",
+        "text": "An optional rep-counting mode (instead of only timers) could improve workout usability for strength-oriented users.",
+        "basis": "Finding-7 contains a single user request for reps; evidence is insufficient to form a requirement."
+      },
+      {
+        "id": "asm-2",
+        "text": "Apple Watch calorie integration could increase engagement for users who track activity, but the current evidence is too limited to prioritize it.",
+        "basis": "Finding-7 includes one review asking for watch calorie tracking."
+      },
+      {
+        "id": "asm-3",
+        "text": "Specialized pregnancy-safe strength/mobility routines and programs for older users with stiff joints are likely valuable niche additions.",
+        "basis": "Finding-7 mentions pregnancy-safe workouts and older-user needs, but only 3 supporting reviews are present."
+      },
+      {
+        "id": "asm-4",
+        "text": "Maintaining a meaningful free tier is strategically important, even if current paywall changes were a deliberate business decision with acceptable conversion metrics.",
+        "basis": "Finding-1 shows the free tier draws many long-time users to the app; removing it entirely would likely increase churn."
+      },
+      {
+        "id": "asm-5",
+        "text": "Some immediate charges during trials may originate from App Store billing UI behavior rather than an in-app bug, but the user-visible expectation should still be honored.",
+        "basis": "Finding-2 cannot verify transaction records; acceptance criteria are set to protect user experience regardless of underlying cause."
+      }
+    ],
+    "goalCoverage": {
+      "valid": true,
+      "retried": false,
+      "items": [
+        {
+          "focusAreaId": "focus-1",
+          "label": "Impactful problems",
+          "status": "covered",
+          "findingIds": [
+            "finding-1",
+            "finding-2",
+            "finding-3",
+            "finding-4",
+            "finding-5",
+            "finding-6"
+          ],
+          "requirementIds": [
+            "req-1",
+            "req-2",
+            "req-3",
+            "req-5",
+            "req-4",
+            "req-6"
+          ]
+        },
+        {
+          "focusAreaId": "focus-2",
+          "label": "Opportunities",
+          "status": "covered",
+          "findingIds": [
+            "finding-3",
+            "finding-4",
+            "finding-5",
+            "finding-6"
+          ],
+          "requirementIds": [
+            "req-3",
+            "req-5",
+            "req-4",
+            "req-6"
+          ]
+        },
+        {
+          "focusAreaId": "focus-3",
+          "label": "Polarizing features (loved vs disliked)",
+          "status": "covered",
+          "findingIds": [
+            "finding-1",
+            "finding-3",
+            "finding-4",
+            "finding-5",
+            "finding-6"
+          ],
+          "requirementIds": [
+            "req-1",
+            "req-3",
+            "req-5",
+            "req-4",
+            "req-6"
+          ]
+        },
+        {
+          "focusAreaId": "focus-4",
+          "label": "Subscription value",
+          "status": "covered",
+          "findingIds": [
+            "finding-1",
+            "finding-2",
+            "finding-3"
+          ],
+          "requirementIds": [
+            "req-1",
+            "req-2",
+            "req-3"
+          ]
+        },
+        {
+          "focusAreaId": "focus-5",
+          "label": "Workout usability",
+          "status": "covered",
+          "findingIds": [
+            "finding-2",
+            "finding-3",
+            "finding-4",
+            "finding-5"
+          ],
+          "requirementIds": [
+            "req-2",
+            "req-3",
+            "req-5",
+            "req-4"
+          ]
+        },
+        {
+          "focusAreaId": "focus-6",
+          "label": "Conflicting feedback",
+          "status": "covered",
+          "findingIds": [
+            "finding-1",
+            "finding-2",
+            "finding-3",
+            "finding-4",
+            "finding-5",
+            "finding-6"
+          ],
+          "requirementIds": [
+            "req-1",
+            "req-2",
+            "req-3",
+            "req-5",
+            "req-4",
+            "req-6"
+          ]
+        }
+      ]
+    }
+  },
+  "report": {
+    "valid": true,
+    "violations": []
+  },
+  "limitations": [
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "Cannot filter by app-specific themes like subscription or workout usability because these are not structured fields; they must be inferred from review text.",
+      "stage": "scope"
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "Store territory (US) is not a generic filter; the dataset is assumed to contain US App Store reviews but cannot be explicitly verified.",
+      "stage": "scope"
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "No structured sentiment or intent labels are available; all detection of polarizing features depends on the reliability of raw review language.",
+      "stage": "scope"
+    },
+    {
+      "code": "INSUFFICIENT_EVIDENCE",
+      "message": "1 of 7 findings have insufficient evidence for broad or critical claims",
+      "stage": "findings"
+    }
+  ],
+  "goalCoverage": {
+    "valid": true,
+    "retried": false,
+    "items": [
+      {
+        "focusAreaId": "focus-1",
+        "label": "Impactful problems",
+        "status": "covered",
+        "findingIds": [
+          "finding-1",
+          "finding-2",
+          "finding-3",
+          "finding-4",
+          "finding-5",
+          "finding-6"
+        ],
+        "requirementIds": [
+          "req-1",
+          "req-2",
+          "req-3",
+          "req-5",
+          "req-4",
+          "req-6"
+        ]
+      },
+      {
+        "focusAreaId": "focus-2",
+        "label": "Opportunities",
+        "status": "covered",
+        "findingIds": [
+          "finding-3",
+          "finding-4",
+          "finding-5",
+          "finding-6"
+        ],
+        "requirementIds": [
+          "req-3",
+          "req-5",
+          "req-4",
+          "req-6"
+        ]
+      },
+      {
+        "focusAreaId": "focus-3",
+        "label": "Polarizing features (loved vs disliked)",
+        "status": "covered",
+        "findingIds": [
+          "finding-1",
+          "finding-3",
+          "finding-4",
+          "finding-5",
+          "finding-6"
+        ],
+        "requirementIds": [
+          "req-1",
+          "req-3",
+          "req-5",
+          "req-4",
+          "req-6"
+        ]
+      },
+      {
+        "focusAreaId": "focus-4",
+        "label": "Subscription value",
+        "status": "covered",
+        "findingIds": [
+          "finding-1",
+          "finding-2",
+          "finding-3"
+        ],
+        "requirementIds": [
+          "req-1",
+          "req-2",
+          "req-3"
+        ]
+      },
+      {
+        "focusAreaId": "focus-5",
+        "label": "Workout usability",
+        "status": "covered",
+        "findingIds": [
+          "finding-2",
+          "finding-3",
+          "finding-4",
+          "finding-5"
+        ],
+        "requirementIds": [
+          "req-2",
+          "req-3",
+          "req-5",
+          "req-4"
+        ]
+      },
+      {
+        "focusAreaId": "focus-6",
+        "label": "Conflicting feedback",
+        "status": "covered",
+        "findingIds": [
+          "finding-1",
+          "finding-2",
+          "finding-3",
+          "finding-4",
+          "finding-5",
+          "finding-6"
+        ],
+        "requirementIds": [
+          "req-1",
+          "req-2",
+          "req-3",
+          "req-5",
+          "req-4",
+          "req-6"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "interpretation": "This analysis examines 500 included US App Store reviews to surface the most impactful problems and opportunities highlighted by users. It specifically looks for polarizing features—aspects that receive both strong praise and strong criticism—with concentrated focus on subscription value and workout usability. Conflicting opinions will be preserved and reported explicitly rather than averaged away, so the reader can see where user sentiment diverges. Since no structured topic labels exist, these themes are derived from review text and rating patterns.",
+  "filters": {
+    "rating": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "versions": [],
+    "languages": [],
+    "minDate": null,
+    "maxDate": null
+  },
+  "explicitLimitations": [
+    "Cannot filter by app-specific themes like subscription or workout usability because these are not structured fields; they must be inferred from review text.",
+    "Store territory (US) is not a generic filter; the dataset is assumed to contain US App Store reviews but cannot be explicitly verified.",
+    "No structured sentiment or intent labels are available; all detection of polarizing features depends on the reliability of raw review language."
+  ],
+  "focusAreas": [
+    {
+      "id": "focus-1",
+      "label": "Impactful problems"
+    },
+    {
+      "id": "focus-2",
+      "label": "Opportunities"
+    },
+    {
+      "id": "focus-3",
+      "label": "Polarizing features (loved vs disliked)"
+    },
+    {
+      "id": "focus-4",
+      "label": "Subscription value"
+    },
+    {
+      "id": "focus-5",
+      "label": "Workout usability"
+    },
+    {
+      "id": "focus-6",
+      "label": "Conflicting feedback"
+    }
+  ]
+}
