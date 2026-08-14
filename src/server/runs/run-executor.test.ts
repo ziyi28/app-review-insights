@@ -5,6 +5,7 @@ import path from "node:path";
 import { RunStore } from "@/server/runs/run-store";
 import { executeAnalysisTask, executeReplayTask, registerActive, unregisterActive, isRunActive, resetActiveRuns } from "./run-executor";
 import type { ReplayBundle } from "./replay";
+import { EventPublisher } from "@/server/streaming/event-publisher";
 import { parseImportedReviews } from "@/server/sources/import-parser";
 import type { ImportParseShape } from "@/server/pipeline/orchestrator";
 import type { RunEvent } from "@/domain/contracts/events";
@@ -44,6 +45,7 @@ function importTask(runId: string) {
     executionMode: "import" as const,
     modelConfigured: false,
     metadata: { fileName: "empty.json" },
+    publisher: new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live"),
   };
 }
 
@@ -148,7 +150,7 @@ describe("executeReplayTask", () => {
   it("replays in order and backfills un-referenced artifacts before the terminal event", async () => {
     const runId = store.createRunId();
     registerActive(runId);
-    await executeReplayTask({ runId, store, bundle: replayBundle("src-run"), delayMs: 0 });
+    await executeReplayTask({ runId, store, bundle: replayBundle("src-run"), delayMs: 0, publisher: new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay") });
 
     expect(isRunActive(runId)).toBe(false);
     const manifest = await store.readManifest(runId);
@@ -181,7 +183,7 @@ describe("executeReplayTask", () => {
     const circular: unknown = {};
     (circular as { self?: unknown }).self = circular;
     bundle.artifacts["raw-reviews"] = circular;
-    await executeReplayTask({ runId, store, bundle, delayMs: 0 });
+    await executeReplayTask({ runId, store, bundle, delayMs: 0, publisher: new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay") });
 
     expect(isRunActive(runId)).toBe(false);
     const manifest = await store.readManifest(runId).catch(() => null);

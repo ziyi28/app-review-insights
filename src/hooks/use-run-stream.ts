@@ -132,10 +132,17 @@ export function useRunStream(): RunStreamState & RunStreamActions {
           }
           incoming.push(parsed.data);
         }
-        // Dedupe across polls by sequence: a re-read of a partially-written
-        // window must never yield duplicates.
+        // Dedupe by sequence — across polls AND within a batch. A re-read of a
+        // partially-written window must never yield duplicates, and a legacy
+        // snapshot that already contains a duplicate sequence must not surface
+        // duplicate keys to the renderer.
         const seen = new Set(eventsRef.current.map((e) => e.sequence));
-        const fresh = incoming.filter((e) => !seen.has(e.sequence));
+        const fresh: RunEvent[] = [];
+        for (const e of incoming) {
+          if (seen.has(e.sequence)) continue;
+          seen.add(e.sequence);
+          fresh.push(e);
+        }
         const merged = [...eventsRef.current, ...fresh].sort((a, b) => a.sequence - b.sequence);
         eventsRef.current = merged;
         setEvents(merged);

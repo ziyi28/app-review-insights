@@ -65,6 +65,20 @@ describe("useRunStream", () => {
     expect(result.current.status).toBe("completed");
   });
 
+  it("dedupes a duplicate sequence within a single batch (legacy snapshot)", async () => {
+    // A pre-fix snapshot can carry two events with the same sequence (e.g. a
+    // run.accepted colliding with the first stage event). They arrive in one
+    // poll response and must be collapsed so the renderer never sees a
+    // duplicate key.
+    mockIncremental("run-x", [makeEvent(1, "run.accepted"), makeEvent(1, "stage.started"), makeEvent(2, "run.completed")]);
+    const { result } = renderHook(() => useRunStream());
+    await act(async () => {
+      await result.current.start({});
+    });
+    await waitFor(() => expect(result.current.events.length).toBe(2));
+    expect(result.current.events.map((e) => e.sequence)).toEqual([1, 2]);
+  });
+
   it("drops events that do not conform to the event protocol", async () => {
     const bad = { protocolVersion: "1", sequence: 1, eventId: "bad", runId: "run-x", timestamp: "not-a-date", deliveryMode: "live", type: "run.accepted", data: {} };
     mockIncremental("run-x", [bad, makeEvent(2, "run.accepted"), makeEvent(3, "run.completed")]);

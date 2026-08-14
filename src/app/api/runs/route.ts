@@ -324,7 +324,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
   await publisher.publish({ type: "run.accepted", runId, data: { runId } });
 
   registerActive(runId);
-  after(() => executeAnalysisTask({ runId, request, deps, store, executionMode, modelConfigured, metadata }));
+  after(() => executeAnalysisTask({ runId, request, deps, store, executionMode, modelConfigured, metadata, publisher }));
 
   return NextResponse.json(
     { runId, status: "running", eventsUrl: `/api/runs/${runId}/events` },
@@ -362,7 +362,7 @@ async function startReplay(sourceRunId: string, store: RunStore, cfg: ReturnType
   await publisher.publish({ type: "run.accepted", runId, data: { runId } });
 
   registerActive(runId);
-  after(() => executeReplayTask({ runId, store, bundle, delayMs: cfg.replayEventDelayMs }));
+  after(() => executeReplayTask({ runId, store, bundle, delayMs: cfg.replayEventDelayMs, publisher }));
 
   return NextResponse.json(
     { runId, status: "running", eventsUrl: `/api/runs/${runId}/events` },

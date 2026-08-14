@@ -46,6 +46,7 @@ export type AnalysisTaskInput = {
   executionMode: "live" | "import";
   modelConfigured: boolean;
   metadata: RunMetadata;
+  publisher: EventPublisher;
 };
 
 export type ReplayTaskInput = {
@@ -53,6 +54,7 @@ export type ReplayTaskInput = {
   store: RunStore;
   bundle: ReplayBundle;
   delayMs: number;
+  publisher: EventPublisher;
 };
 
 /**
@@ -64,8 +66,7 @@ export type ReplayTaskInput = {
  * event + failed manifest rather than a silent hang.
  */
 export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<void> {
-  const { runId, request, deps, store, executionMode, modelConfigured, metadata } = input;
-  const publisher = new EventPublisher(store, () => new Date().toISOString(), "live");
+  const { runId, request, deps, store, executionMode, modelConfigured, metadata, publisher } = input;
   try {
     await executeRun(runId, request.goal, request.outputLocale, deps, publisher, store, executionMode, modelConfigured, metadata);
   } catch (err) {
@@ -111,14 +112,12 @@ export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<voi
  * `completed` manifest is written only after every event has been replayed.
  */
 export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
-  const { runId, store, bundle, delayMs } = input;
-  const publisher = new EventPublisher(store, () => new Date().toISOString(), "cached-replay");
+  const { runId, store, bundle, delayMs, publisher } = input;
   const artifactsIndex: Record<string, { attempt: number; file: string }> = {};
   try {
-    // Publish our own run.accepted first so the UI can derive the run id even if
-    // the source snapshot lacked one.
-    await publisher.publish({ type: "run.accepted", runId, data: { runId } });
-
+    // run.accepted is published by the caller before this task is scheduled; the
+    // same publisher is reused so the sequence stays strictly monotonic across
+    // the whole run rather than restarting at 1 (which would duplicate keys).
     const sourceEvents = bundle.events as RunEvent[];
     const referenced = new Set<string>();
     let terminalEvent: RunEvent | null = null;
