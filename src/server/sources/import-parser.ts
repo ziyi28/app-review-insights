@@ -46,12 +46,13 @@ function contentKey(r: { body: string; rating: number; version: string | null; u
 
 function toRawReview(id: string, row: Record<string, unknown>, source: "json-import" | "csv-import"): RawReview {
   const rating = Number(row.rating);
-  const updatedAtRaw = row.updatedAt ? String(row.updatedAt) : null;
-  let updatedAt: string | null = null;
-  if (updatedAtRaw) {
-    const d = new Date(updatedAtRaw);
-    if (!Number.isNaN(d.getTime())) updatedAt = d.toISOString();
-  }
+  // updatedAt is required and must parse; an unparseable or blank value is a
+  // row-level error (the row is excluded, never silently nulled).
+  const updatedAtText = String(row.updatedAt ?? "").trim();
+  if (!updatedAtText) throw new Error("missing updatedAt");
+  const parsedDate = new Date(updatedAtText);
+  if (Number.isNaN(parsedDate.getTime())) throw new Error("invalid updatedAt");
+  const updatedAt = parsedDate.toISOString();
   return RawReviewSchema.parse({
     sourceReviewId: id,
     source,
@@ -128,11 +129,8 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
         errors.push(`row ${index + 1}: invalid rating ${String(row.rating)}`);
         return;
       }
-      // JSON v1 requires a parseable updatedAt per the documented schema.
-      if (!row.updatedAt) {
-        errors.push(`row ${index + 1}: missing required field updatedAt`);
-        return;
-      }
+      // JSON v1 requires a parseable updatedAt per the documented schema;
+      // toRawReview reports missing vs invalid as distinct row errors.
       let raw: RawReview;
       try {
         raw = toRawReview(id, { ...row, body, rating }, "json-import");
@@ -152,7 +150,7 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
       seen.set(key, id);
       seenIds.set(id, index);
       reviews.push(raw);
-      rawRefs.push(`import:${fileName}#row-${index + 1}`);
+      rawRefs.push(`${archivePath}#row-${index + 1}`);
     });
   } else {
     let records: Record<string, string>[];
@@ -174,6 +172,15 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
     }
     if (errors.length > 0) {
       return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence, sourceFiles };
+    }
+    // Unknown columns are tolerated but surfaced once each (not once per row),
+    // and their values never enter RawReview.
+    const allowedCsvColumns = new Set(["id", "title", "body", "rating", "version", "updatedAt", "language"]);
+    for (const col of Object.keys(header)) {
+      const trimmed = col.trim();
+      if (trimmed && !allowedCsvColumns.has(trimmed)) {
+        warnings.push(`CSV unknown column ignored: ${trimmed}`);
+      }
     }
     records.forEach((row, index) => {
       const id = String(row.id ?? "").trim();
@@ -210,7 +217,7 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
       seen.set(key, id);
       seenIds.set(id, index);
       reviews.push(raw);
-      rawRefs.push(`import:${fileName}#row-${index + 2}`);
+      rawRefs.push(`${archivePath}#row-${index + 2}`);
     });
   }
 

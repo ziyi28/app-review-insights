@@ -63,7 +63,14 @@ are kept as warnings (never silently reinterpreted).
 ## Validation behavior
 
 - Missing required column → error with the row/column identified.
-- Invalid rating or unparseable date → row-level error.
+- Invalid rating or unparseable date → row-level error; the offending row is
+  excluded but valid rows in the same file are still analyzed.
+- `updatedAt` is **required and must parse**: a blank value is a `missing
+  updatedAt` row error, an unparseable value is an `invalid updatedAt` row
+  error. Neither is silently treated as "no date".
+- Unknown CSV columns are tolerated: each is warned exactly once
+  (`CSV unknown column ignored: <name>`), never once per row, and its value
+  never reaches the normalized review.
 - Exact-content duplicates are deduplicated deterministically.
 - Same `id` with conflicting body/rating → both rows are kept and flagged as
   `identity-conflict`.
@@ -71,6 +78,13 @@ are kept as warnings (never silently reinterpreted).
 
 ## Import evidence
 
-Every import persists the original file (name, MIME type, byte length,
-SHA-256), the parse report, and row-level warnings/errors alongside the run
-snapshot under `data/runs/<runId>/sources/import/`.
+Every import persists the original file **byte-for-byte** at a fixed, safe
+run-local path — `data/runs/<runId>/sources/import/input.json` for JSON and
+`input.csv` for CSV — never a user-supplied filename. The user's original
+filename appears only as evidence metadata. `rawRefs` in the `raw-reviews`
+artifact point into that archived file (e.g. `sources/import/input.json#row-2`),
+so the exact row that produced each review can always be re-read from the run
+directory. The `source-evidence` artifact carries the full parse evidence:
+original filename, MIME type, UTF-8 byte length, SHA-256 of the original file,
+schema version, row-level errors/warnings, and duplicate/conflict indices. The
+raw bodies are never exposed over the browser API.

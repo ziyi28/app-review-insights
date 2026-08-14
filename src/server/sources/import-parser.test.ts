@@ -154,3 +154,70 @@ describe("parseImportedReviews (CSV)", () => {
     expect(result.evidence.sha256).toMatch(/^[0-9a-f]{64}$/);
   });
 });
+
+describe("import date validation", () => {
+  it("rejects a JSON row with an unparseable updatedAt and keeps valid rows", () => {
+    const content = JSON.stringify({
+      schemaVersion: "1",
+      reviews: [
+        { id: "r1", body: "bad date row", rating: 5, updatedAt: "not-a-date" },
+        { id: "r2", body: "valid row", rating: 5, updatedAt: "2026-07-01T00:00:00Z" },
+      ],
+    });
+    const result = parseImportedReviews({ fileName: "dates.json", mediaType: "application/json", content });
+    expect(result.reviews.map((r) => r.sourceReviewId)).toEqual(["r2"]);
+    expect(result.errors.some((e) => e.includes("row 1") && e.includes("invalid updatedAt"))).toBe(true);
+  });
+
+  it("treats an empty-string updatedAt as an invalid date in JSON", () => {
+    const content = JSON.stringify({
+      schemaVersion: "1",
+      reviews: [{ id: "r1", body: "empty date", rating: 5, updatedAt: "" }],
+    });
+    const result = parseImportedReviews({ fileName: "dates.json", mediaType: "application/json", content });
+    expect(result.reviews).toHaveLength(0);
+    expect(result.errors.some((e) => e.includes("updatedAt"))).toBe(true);
+  });
+
+  it("rejects a CSV row with an unparseable updatedAt with the right row number", () => {
+    const content = [
+      "id,title,body,rating,version,updatedAt,language",
+      "csv-1,Great,Love the workout,5,3.2.1,2026-07-01T10:00:00Z,en",
+      "csv-2,Other,Too expensive,1,3.2.0,not-a-date,en",
+      "csv-3,Good,Nice app,4,3.2.0,2026-07-03T10:00:00Z,en",
+    ].join("\n");
+    const result = parseImportedReviews({ fileName: "dates.csv", mediaType: "text/csv", content });
+    // Header is data row 1; csv-1 is row 2, csv-2 is row 3.
+    expect(result.reviews.map((r) => r.sourceReviewId)).toEqual(["csv-1", "csv-3"]);
+    expect(result.errors.some((e) => e.includes("row 3") && e.includes("invalid updatedAt"))).toBe(true);
+  });
+
+  it("treats a missing updatedAt in a CSV row as an invalid-date row error", () => {
+    const content = [
+      "id,title,body,rating,version,updatedAt,language",
+      "csv-1,Great,Love the workout,5,3.2.1,,en",
+    ].join("\n");
+    const result = parseImportedReviews({ fileName: "dates.csv", mediaType: "text/csv", content });
+    expect(result.reviews).toHaveLength(0);
+    expect(result.errors.some((e) => e.includes("updatedAt"))).toBe(true);
+  });
+});
+
+describe("CSV unknown columns", () => {
+  it("warns once per unknown column without entering RawReview", () => {
+    const content = [
+      "id,title,body,rating,version,updatedAt,language,deviceModel",
+      "csv-1,Great,Love the workout,5,3.2.1,2026-07-01T10:00:00Z,en,iPhone 15",
+      "csv-2,Good,Nice app,4,3.2.0,2026-07-02T10:00:00Z,en,Android",
+    ].join("\n");
+    const result = parseImportedReviews({ fileName: "unknown.csv", mediaType: "text/csv", content });
+    // The unknown column is warned exactly once, not once per row.
+    expect(result.warnings.filter((w) => w.includes("CSV unknown column ignored: deviceModel"))).toHaveLength(1);
+    expect(result.reviews).toHaveLength(2);
+    // The unknown value must never reach the RawReview.
+    for (const r of result.reviews) {
+      expect(JSON.stringify(r)).not.toContain("iPhone 15");
+      expect(JSON.stringify(r)).not.toContain("Android");
+    }
+  });
+});

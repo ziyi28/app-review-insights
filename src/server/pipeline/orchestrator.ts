@@ -195,7 +195,19 @@ async function collectSource(
     rawReviews: parse.reviews,
     rawRefs: parse.rawRefs,
     limitations,
-    sourceSummary: { kind: "import", reviewCount: parse.reviews.length, warnings: parse.warnings },
+    // Full parse evidence so the run snapshot records exactly what happened:
+    // original filename (metadata only), media type, UTF-8 byte length, SHA-256
+    // of the original file, schema version, row errors/warnings and the
+    // duplicate/conflict indices the preparer will report.
+    sourceSummary: {
+      kind: "import",
+      reviewCount: parse.reviews.length,
+      evidence: parse.evidence,
+      errors: parse.errors,
+      warnings: parse.warnings,
+      duplicateIndices: parse.duplicateIndices,
+      conflictIndices: parse.conflictIndices,
+    },
     sourceFiles: parse.sourceFiles ?? [],
   };
 }
