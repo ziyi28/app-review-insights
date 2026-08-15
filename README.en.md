@@ -61,6 +61,33 @@ a model you can still:
   run completes with a `MODEL_NOT_CONFIGURED` limitation (no model call is
   attempted).
 
+## Network Environment
+
+The app runs locally (`http://localhost:3000`), but live collection and model
+analysis need outbound network access to:
+
+- `itunes.apple.com` — the Apple customer-reviews RSS (fallback collection path);
+- `serpapi.com` — the SerpApi Apple Reviews primary source (after `SERPAPI_API_KEY` is configured);
+- your configured `MODEL_BASE_URL` — the model analysis endpoint.
+
+Direct connections to these services from mainland China are usually slow or
+unreachable, so you need network access to US-based services (e.g. a global
+proxy or a US node).
+
+Two points to note:
+
+- **Storefront is independent of your proxy**: the collection URLs are pinned to
+  the US storefront in code (Apple RSS uses `/us/rss/...`, SerpApi uses
+  `country=us`), so reviews always come from the US store regardless of which
+  node you connect through.
+- **Node does not use env-var proxies**: the server uses Node's native `fetch`,
+  which does not read `HTTP_PROXY` / `HTTPS_PROXY` environment variables by
+  default. Use a **TUN / system-level transparent proxy** (recommended); if your
+  proxy only works via environment variables, set `NODE_USE_ENV_PROXY=1` before
+  starting, otherwise collection may time out on direct connections.
+
+Cached replay and import analysis do not need outbound network access or a proxy.
+
 ## Background Tasks and Refresh Recovery
 
 Analysis is decoupled from the browser connection and runs as a background task:
