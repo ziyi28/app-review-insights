@@ -232,6 +232,11 @@ export type Dictionary = {
   requirementsSpecs: string;
   verificationPlan: string;
   noFilteredResults: string;
+  exportPackage: string;
+  downloadCsvTemplate: string;
+  topFindings: string;
+  appSummary: string;
+  dataCleaningDetails: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -467,6 +472,11 @@ export const dictionaries: Record<Locale, Dictionary> = {
     requirementsSpecs: "PRD Requirements Specifications",
     verificationPlan: "Test & Verification Plan",
     noFilteredResults: "No matching items found.",
+    exportPackage: "Export Full Package (Markdown)",
+    downloadCsvTemplate: "Download Sample CSV Template",
+    topFindings: "Top User Findings & Pain Points",
+    appSummary: "App Overview",
+    dataCleaningDetails: "Data Cleaning & Quality Details",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -700,9 +710,36 @@ export const dictionaries: Record<Locale, Dictionary> = {
     requirementsSpecs: "PRD 需求规格与验收准则",
     verificationPlan: "测试用例与验证计划",
     noFilteredResults: "未找到匹配的项目。",
+    exportPackage: "导出完整交付包 (Markdown)",
+    downloadCsvTemplate: "下载示例 CSV 模板",
+    topFindings: "核心用户痛点 Top 发现",
+    appSummary: "分析目标与应用概要",
+    dataCleaningDetails: "数据清洗与质检明细",
   },
 };
 
 export function getDictionary(locale: Locale): Dictionary {
   return dictionaries[locale];
+}
+
+export function translateCode(code: string, locale: Locale = "zh-CN"): string {
+  const zhMap: Record<string, string> = {
+    SCOPE_LIMITATION: "分析范围说明",
+    PLANNING_PRIORITY_CAPPED: "优先级自动调校",
+    TOPIC_CANDIDATES_TRUNCATED: "候选主题集优化",
+    SERPAPI_UPSTREAM_FAILED: "数据源采集降级",
+    MODEL_NON_JSON_OUTPUT: "格式自愈重试",
+    MODEL_NETWORK_ERROR: "网络抖动重试",
+    "evidence-validation": "证据验证",
+    findings: "痛点发现",
+    planning: "产品规划",
+    prepare: "数据准备",
+    scope: "范围划定",
+    source: "数据源采集",
+    tests: "测试用例",
+    topics: "主题聚类",
+    traceability: "全链路追溯",
+  };
+  if (locale === "zh-CN" && zhMap[code]) return zhMap[code];
+  return code;
 }

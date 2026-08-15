@@ -7,6 +7,7 @@ import styles from "./run-form.module.css";
 export type RunFormProps = {
   t: Dictionary;
   onStart: (payload: unknown) => void;
+  onCancel?: () => void;
 };
 
 type Step = 1 | 2 | 3;
@@ -62,7 +63,7 @@ const STEP_LABELS: Record<Step, keyof Dictionary> = {
  * Cached replay is intentionally not a wizard source: it is offered from the
  * history panel, where each completed run already shows its app and goal.
  */
-export function RunForm({ t, onStart }: RunFormProps) {
+export function RunForm({ t, onStart, onCancel }: RunFormProps) {
   const [step, setStep] = useState<Step>(1);
   const [mode, setMode] = useState<Mode>("live");
   const [url, setUrl] = useState("");
@@ -175,6 +176,10 @@ export function RunForm({ t, onStart }: RunFormProps) {
   };
 
   const handleNext = () => {
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
     if (step === 2 && step2Valid) {
       setStep(3);
       // Entering the confirm step for a live run checks the sample right away
@@ -189,7 +194,21 @@ export function RunForm({ t, onStart }: RunFormProps) {
 
   const selectMode = (next: Mode) => {
     setMode(next);
-    setStep(2);
+  };
+
+  const downloadExampleCsv = () => {
+    const csvContent =
+      "id,rating,version,language,date,title,body\n" +
+      "rev-001,1,8.5.0,en,2026-08-01,Hidden charges,Charged immediately upon free trial without warning.\n" +
+      "rev-002,1,8.4.29,en,2026-08-02,Paywall issue,Everything was moved behind paywall after update.\n" +
+      "rev-003,5,8.4.28,en,2026-08-03,Great workouts,Effective and easy to follow daily exercises.\n";
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "sample-reviews-template.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   // Live sample card state (step 3).
@@ -204,6 +223,17 @@ export function RunForm({ t, onStart }: RunFormProps) {
 
   return (
     <div className={styles.wizard}>
+      {onCancel ? (
+        <button
+          type="button"
+          className={styles.closeBtn}
+          onClick={onCancel}
+          aria-label={t.close}
+        >
+          ×
+        </button>
+      ) : null}
+
       {/* Step indicator */}
       <ol className={styles.stepper} aria-label={t.wizardStepSource}>
         {([1, 2, 3] as const).map((s) => (
@@ -305,6 +335,19 @@ export function RunForm({ t, onStart }: RunFormProps) {
                 {t.importFile}
                 <input type="file" accept=".json,.csv" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
               </label>
+              <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: "6px", padding: "8px 12px", marginTop: "4px" }}>
+                <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "0 0 6px" }}>
+                  支持 JSON 数组或 CSV 格式。必需字段：<code>id</code>, <code>text</code>(或 <code>body</code>), <code>rating</code>。
+                </p>
+                <button
+                  type="button"
+                  onClick={downloadExampleCsv}
+                  className="btn btn-ghost"
+                  style={{ fontSize: "11px", padding: "2px 6px", height: "auto" }}
+                >
+                  📥 {t.downloadCsvTemplate}
+                </button>
+              </div>
               <label className={styles.label}>
                 {t.goal}
                 <textarea
@@ -441,10 +484,18 @@ export function RunForm({ t, onStart }: RunFormProps) {
           <button type="button" className="btn btn-secondary" onClick={handleBack}>
             {t.back}
           </button>
+        ) : onCancel ? (
+          <button type="button" className="btn btn-ghost" onClick={onCancel}>
+            {t.cancel}
+          </button>
         ) : (
           <span />
         )}
-        {step === 2 ? (
+        {step === 1 ? (
+          <button type="button" className="btn btn-primary" onClick={handleNext}>
+            {t.next}
+          </button>
+        ) : step === 2 ? (
           <button type="button" className="btn btn-primary" disabled={!step2Valid} onClick={handleNext}>
             {t.next}
           </button>

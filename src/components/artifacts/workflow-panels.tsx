@@ -1,6 +1,6 @@
 "use client";
 
-import type { Dictionary } from "@/i18n";
+import { type Dictionary, translateCode } from "@/i18n";
 import type { Prd, VersionPlanArtifact, PlanningFactors } from "@/domain/contracts/analysis";
 import type { TraceabilityReport } from "@/domain/traceability/validate";
 import type { RunManifest } from "@/server/runs/run-store";
@@ -249,8 +249,70 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
   const retryReasons = Array.isArray(usage?.retryReasons) ? (usage.retryReasons as string[]) : [];
   const promptVersions = Array.isArray(manifest?.promptVersions) ? manifest.promptVersions : Array.isArray(usage?.promptVersions) ? (usage.promptVersions as string[]) : [];
 
+  const handleExportMarkdown = () => {
+    let md = `# App 评论分析与产品规划全案交付包\n\n`;
+    if (manifest?.appName) md += `**应用名称**: ${manifest.appName}\n`;
+    if (manifest?.appUrl) md += `**App Store 链接**: ${manifest.appUrl}\n`;
+    if (manifest?.goal) md += `**分析目标**: ${manifest.goal}\n\n`;
+    md += `---\n\n`;
+
+    if (finalPrd?.versions?.length) {
+      md += `## 1. 版本规划路线图\n\n`;
+      for (const v of finalPrd.versions) {
+        md += `### 版本 ${v.versionName}: ${v.theme}\n`;
+        md += `- **发布理由**: ${v.rationale}\n`;
+        md += `- **包含需求**: ${v.requirementIds.join(", ")}\n\n`;
+      }
+    }
+
+    if (finalPrd?.requirements?.length) {
+      md += `## 2. PRD 需求规格与验收准则\n\n`;
+      for (const r of finalPrd.requirements) {
+        md += `### [${r.priority}] ${r.id}: ${r.title}\n`;
+        md += `${r.description}\n\n`;
+        md += `**验收标准**:\n`;
+        for (const ac of r.acceptanceCriteria) {
+          md += `- ${ac}\n`;
+        }
+        md += `\n**支撑评论 ID**: ${r.sourceReviewIds.join(", ")}\n\n`;
+      }
+    }
+
+    if (finalPrd?.tests?.length) {
+      md += `## 3. 测试用例与验证计划\n\n`;
+      for (const tc of finalPrd.tests) {
+        md += `### ${tc.id} (对应 ${tc.requirementIds.join(", ")})\n`;
+        md += `- **前置条件**: ${tc.precondition || "无"}\n`;
+        md += `- **测试步骤**:\n`;
+        tc.steps.forEach((s, idx) => {
+          md += `  ${idx + 1}. ${s}\n`;
+        });
+        md += `- **预期结果**: ${tc.expectedResult}\n\n`;
+      }
+    }
+
+    const blob = new Blob([md], { type: "text/markdown;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `app-review-planner-deliverables-${new Date().toISOString().slice(0, 10)}.md`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div style={{ display: "grid", gap: "10px" }}>
+    <div style={{ display: "grid", gap: "12px" }}>
+      {/* Top Action Bar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-panel)", padding: "12px 16px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+        <div>
+          <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>{t.finalDeliverables}</h4>
+          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>包含版本计划、PRD 规格书、测试用例与全链路追溯</span>
+        </div>
+        <button type="button" className="btn btn-primary" onClick={handleExportMarkdown}>
+          📥 {t.exportPackage}
+        </button>
+      </div>
+
       {goalCoverage ? (
         <div className="card">
           <h4 style={{ margin: 0 }}>
@@ -290,23 +352,24 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
         </div>
       ) : null}
       {manifest?.limitations.length ? (
-        <div>
-          <h4>{t.limitations}</h4>
+        <div className="card">
+          <h4 style={{ margin: "0 0 8px" }}>{t.limitations}</h4>
           {manifest.limitations.map((l, i) => (
-            <p key={i} style={{ fontSize: "13px", margin: "4px 0" }}>
-              <ProvenanceBadge kind="limitation" label={l.code} /> {l.message}
+            <p key={i} style={{ fontSize: "13px", margin: "6px 0", display: "flex", gap: "8px", alignItems: "center" }}>
+              <ProvenanceBadge kind="limitation" label={translateCode(l.code)} />
+              <span>{l.message}</span>
             </p>
           ))}
         </div>
       ) : null}
       {manifest ? (
         <div style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <h4>{t.modelStatus}</h4>
+          <h4 style={{ margin: "0 0 6px" }}>{t.modelStatus}</h4>
           <p style={{ fontSize: "13px", margin: "4px 0" }}>
             {t.logicalCalls}: <strong>{typeof usage?.calls === "number" ? usage.calls : 0}</strong> · {t.modelAttempts}: <strong>{attempts}</strong> · {t.modelRetries}: <strong>{retries}</strong>
           </p>
           {retryReasons.length > 0 ? (
-            <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.modelRetryReasons}: {retryReasons.join(", ")}</p>
+            <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.modelRetryReasons}: {retryReasons.map((r) => translateCode(r)).join(", ")}</p>
           ) : null}
           {promptVersions.length > 0 ? (
             <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.promptVersions}: {promptVersions.join(", ")}</p>

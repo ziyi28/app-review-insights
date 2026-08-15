@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Locale } from "@/i18n";
-import { getDictionary } from "@/i18n";
+import { getDictionary, translateCode } from "@/i18n";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import type { RunEvent } from "@/domain/contracts/events";
@@ -147,21 +147,78 @@ export function Workbench() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [configStatus, setConfigStatus] = useState<ConfigStatus>({ modelConfigured: false, serpApiConfigured: false });
 
+  // URL state persistence (tab & mode)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const search = new URLSearchParams(window.location.search);
+    const urlTab = search.get("tab") as Tab | null;
+    const urlMode = search.get("mode") as ViewMode | null;
+    if (urlTab) {
+      setTab(urlTab);
+      userNavigated.current = true;
+    }
+    if (urlMode === "report" || urlMode === "workbench") {
+      setViewMode(urlMode);
+    }
+  }, []);
+
+  const updateUrlState = useCallback((nextTab: Tab, nextMode: ViewMode) => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", nextTab);
+    url.searchParams.set("mode", nextMode);
+    window.history.pushState({ tab: nextTab, mode: nextMode }, "", url.toString());
+  }, []);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const search = new URLSearchParams(window.location.search);
+      const urlTab = search.get("tab") as Tab | null;
+      const urlMode = search.get("mode") as ViewMode | null;
+      if (urlTab) {
+        setTab(urlTab);
+        userNavigated.current = true;
+      }
+      if (urlMode === "report" || urlMode === "workbench") {
+        setViewMode(urlMode);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  const handleSelectTab = useCallback((nextTab: Tab) => {
+    setTab(nextTab);
+    updateUrlState(nextTab, viewMode);
+  }, [viewMode, updateUrlState]);
+
+  const handleSelectViewMode = useCallback((nextMode: ViewMode) => {
+    setViewMode(nextMode);
+    updateUrlState(tab, nextMode);
+  }, [tab, updateUrlState]);
+
   const jumpToReview = useCallback((reviewId: string) => {
     setReviewSearchQuery(reviewId);
-    setTab("cleaned");
-    setViewMode("workbench");
-  }, []);
+    handleSelectTab("cleaned");
+    handleSelectViewMode("workbench");
+  }, [handleSelectTab, handleSelectViewMode]);
 
   const jumpToTests = useCallback(() => {
-    setTab("tests");
-    setViewMode("workbench");
-  }, []);
+    handleSelectTab("tests");
+    handleSelectViewMode("workbench");
+  }, [handleSelectTab, handleSelectViewMode]);
 
   const jumpToPrd = useCallback(() => {
-    setTab("prd");
-    setViewMode("workbench");
-  }, []);
+    handleSelectTab("prd");
+    handleSelectViewMode("workbench");
+  }, [handleSelectTab, handleSelectViewMode]);
+
+  const handleCancelNewRun = useCallback(() => {
+    const lastRunId = typeof window !== "undefined" ? localStorage.getItem(LAST_RUN_ID_KEY) : null;
+    if (lastRunId) {
+      loadHistory(lastRunId);
+    }
+  }, [loadHistory]);
 
   // Non-secret config status for the header badges. Fetched once on mount and
   // refreshed after the settings panel saves/clears.
@@ -543,7 +600,12 @@ export function Workbench() {
           <button
             type="button"
             className={`${styles.modeBtn} ${viewMode === "workbench" ? styles.modeBtnActive : ""}`}
-            onClick={() => setViewMode("workbench")}
+            onClick={() => {
+              handleSelectViewMode("workbench");
+              if (idle) {
+                handleCancelNewRun();
+              }
+            }}
           >
             <Icon name="overview" size={13} />
             <span>{t.viewModeWorkbench}</span>
@@ -551,7 +613,12 @@ export function Workbench() {
           <button
             type="button"
             className={`${styles.modeBtn} ${viewMode === "report" ? styles.modeBtnActive : ""}`}
-            onClick={() => setViewMode("report")}
+            onClick={() => {
+              handleSelectViewMode("report");
+              if (idle) {
+                handleCancelNewRun();
+              }
+            }}
           >
             <Icon name="report" size={13} />
             <span>{t.viewModeReport}</span>
@@ -614,7 +681,7 @@ export function Workbench() {
       {idle ? (
         <div className={styles.idle}>
           <div className={styles.wizardCard}>
-            <RunForm t={t} onStart={start} />
+            <RunForm t={t} onStart={start} onCancel={handleCancelNewRun} />
             <p className={styles.waiting}>{t.waiting}</p>
           </div>
         </div>
@@ -630,9 +697,9 @@ export function Workbench() {
           {/* Left: Sidebar Navigation */}
           <Sidebar
             activeTab={tab}
-            onSelectTab={(id) => setTab(id)}
+            onSelectTab={handleSelectTab}
             viewMode={viewMode}
-            onSelectViewMode={(mode) => setViewMode(mode)}
+            onSelectViewMode={handleSelectViewMode}
             t={t}
             onUserNavigate={() => {
               userNavigated.current = true;
@@ -685,13 +752,44 @@ export function Workbench() {
               <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
               {tab === "overview" ? (
                 <div style={{ display: "grid", gap: "14px" }}>
+                  {/* App & Goal Banner */}
+                  {(versions.manifest?.appName || versions.manifest?.appUrl || versions.manifest?.goal) ? (
+                    <div className="card" style={{ background: "linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-elevated) 100%)", border: "1px solid var(--border)", display: "grid", gap: "8px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
+                        <div>
+                          <h3 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span>{versions.manifest?.appName || t.appSummary}</span>
+                            {versions.manifest?.appUrl ? (
+                              <a
+                                href={versions.manifest.appUrl}
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{ fontSize: "12px", color: "var(--accent)", textDecoration: "none" }}
+                                title={t.openInAppStore}
+                              >
+                                ↗ App Store
+                              </a>
+                            ) : null}
+                          </h3>
+                          {versions.manifest?.goal ? (
+                            <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+                              <strong>{t.goal}:</strong> {versions.manifest.goal}
+                            </p>
+                          ) : null}
+                        </div>
+                        <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Core Business Metrics */}
                   {stats ? (
                     <div className="stat-grid">
                       {[
                         { k: t.rawReviews, v: stats.rawCount },
                         { k: t.cleanedData, v: stats.includedCount },
-                        { k: t.duplicates, v: stats.duplicateCount },
-                        { k: t.identityConflicts, v: stats.identityConflictCount },
+                        { k: t.findings, v: cache.findings?.findings.length ?? 0 },
+                        { k: t.requirementsSpecs, v: (activePrd?.requirements.length ?? 0) },
                       ].map((s) => (
                         <div key={s.k} className="stat-card">
                           <div className="stat-value">{s.v}</div>
@@ -700,6 +798,53 @@ export function Workbench() {
                       ))}
                     </div>
                   ) : null}
+
+                  {/* Top Key Findings Highlight */}
+                  {cache.findings?.findings && cache.findings.findings.length > 0 ? (
+                    <div className="card" style={{ borderLeft: "3px solid var(--accent)" }}>
+                      <div className="card-header" style={{ marginBottom: "8px" }}>
+                        <div className="card-title-wrap">
+                          <h4 className="card-title" style={{ fontSize: "14px", fontWeight: 600 }}>
+                            {t.topFindings} ({cache.findings.findings.length})
+                          </h4>
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-ghost"
+                          style={{ fontSize: "12px", padding: "2px 8px" }}
+                          onClick={() => handleSelectTab("findings")}
+                        >
+                          {t.findings} →
+                        </button>
+                      </div>
+                      <div style={{ display: "grid", gap: "8px" }}>
+                        {cache.findings.findings.slice(0, 3).map((f) => (
+                          <div
+                            key={f.id}
+                            style={{
+                              padding: "10px 12px",
+                              borderRadius: "6px",
+                              background: "var(--bg-elevated)",
+                              border: "1px solid var(--border)",
+                            }}
+                          >
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "4px" }}>
+                              <strong style={{ fontSize: "13px", color: "var(--text)" }}>{f.title}</strong>
+                              <ProvenanceBadge
+                                kind="ai-generated"
+                                label={`${t.confidence}: ${typeof f.confidence === "object" && f.confidence !== null ? f.confidence.level : f.confidence}`}
+                              />
+                            </div>
+                            <p style={{ margin: 0, fontSize: "12.5px", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                              {(f.summary ?? "").length > 120 ? `${f.summary.slice(0, 120)}…` : (f.summary ?? "")}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {/* Distributions */}
                   {stats && (stats.ratingDistribution || stats.versionDistribution || stats.languageDistribution) ? (
                     <div className="card" style={{ display: "grid", gap: "16px" }}>
                       <div>
@@ -716,21 +861,8 @@ export function Workbench() {
                       </div>
                     </div>
                   ) : null}
-                  {cache.analysisSample ? (
-                    <div className="card">
-                      <div className="card-header">
-                        <div className="card-title-wrap">
-                          <h4 className="card-title">
-                            {t.sampleAnalyzed}: {cache.analysisSample.selectedCount} {t.sampleOf} {cache.analysisSample.eligibleCount}
-                          </h4>
-                        </div>
-                        <ProvenanceBadge kind="computed" label={cache.analysisSample.strategy} />
-                      </div>
-                      <p className="card-desc muted" style={{ fontSize: "12.5px" }}>
-                        {t.sampleStratified}
-                      </p>
-                    </div>
-                  ) : null}
+
+                  {/* Goal Coverage */}
                   {cache.goalCoverage ? (
                     <div className="card">
                       <div className="card-header">
@@ -760,15 +892,17 @@ export function Workbench() {
                       </div>
                     </div>
                   ) : null}
+
+                  {/* Collapsible Data Quality Details */}
                   {(() => {
                     const cleaning = (cache.cleaned as { cleaning?: { unicodeNormalizedCount: number; whitespaceCollapsedCount: number; caseFoldedCount: number; exactDuplicateRemovedCount: number; identityConflictCount: number; keptShortUniqueCount: number; languageLabels: { tag: string; count: number }[] } } | undefined)?.cleaning;
                     if (!cleaning) return null;
                     return (
-                      <div className="card">
-                        <div className="card-header">
-                          <h4 className="card-title">{t.cleaningUnicode}</h4>
-                        </div>
-                        <div className="card-metadata-grid">
+                      <details className="card" style={{ cursor: "pointer" }} open>
+                        <summary style={{ fontWeight: 600, fontSize: "14px", outline: "none" }}>
+                          {t.dataCleaningDetails}
+                        </summary>
+                        <div className="card-metadata-grid" style={{ marginTop: "12px" }}>
                           <div className="card-metadata-item">
                             <span className="card-metadata-label">{t.cleaningUnicode}</span>
                             <span className="card-metadata-value">{cleaning.unicodeNormalizedCount}</span>
@@ -795,7 +929,7 @@ export function Workbench() {
                           </div>
                         </div>
                         {cleaning.languageLabels.length > 0 ? (
-                          <div className="card-section">
+                          <div className="card-section" style={{ marginTop: "10px" }}>
                             <span className="card-section-title">{t.cleaningLanguages}</span>
                             <div className="card-badges">
                               {cleaning.languageLabels.map((l) => (
@@ -806,9 +940,11 @@ export function Workbench() {
                             </div>
                           </div>
                         ) : null}
-                      </div>
+                      </details>
                     );
                   })()}
+
+                  {/* Limitations with translation */}
                   {cache.finalReport ? (
                     <div className="card">
                       <div className="card-header">
@@ -817,7 +953,7 @@ export function Workbench() {
                       <div style={{ display: "grid", gap: "6px" }}>
                         {(cache.finalReport as { limitations?: { code: string; message: string }[] }).limitations?.map((l, i) => (
                           <div key={i} style={{ fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
-                            <ProvenanceBadge kind="limitation" label={l.code} />
+                            <ProvenanceBadge kind="limitation" label={translateCode(l.code)} />
                             <span>{l.message}</span>
                           </div>
                         ))}
@@ -876,7 +1012,17 @@ export function Workbench() {
               {tab === "traceability" ? (
                 <>
                   <ArtifactPhaseSelector revised={traceFinal !== null} phase={tracePhase} onSelect={setTracePhase} t={t} />
-                  <TraceabilityPanel report={activeTrace} t={t} />
+                  <TraceabilityPanel
+                    report={activeTrace}
+                    findings={cache.findings?.findings}
+                    prd={activePrd}
+                    tests={activeTests}
+                    versionPlan={activeVersionPlan}
+                    t={t}
+                    onJumpToReview={jumpToReview}
+                    onJumpToPrd={jumpToPrd}
+                    onJumpToTests={jumpToTests}
+                  />
                 </>
               ) : null}
               {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} goalCoverage={cache.goalCoverage} t={t} /> : null}

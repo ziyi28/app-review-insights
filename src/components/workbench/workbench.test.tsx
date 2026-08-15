@@ -124,6 +124,9 @@ describe("Workbench settings integration", () => {
       fireEvent.click(screen.getByRole("radio", { name: new RegExp(tZh.liveMode) }));
     });
     await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tZh.next }));
+    });
+    await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: tZh.useExampleApp }));
     });
     await act(async () => {

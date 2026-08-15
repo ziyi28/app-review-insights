@@ -18,10 +18,6 @@ describe("Sidebar", () => {
       />
     );
 
-    // Should render mode switch buttons
-    expect(screen.getByRole("button", { name: new RegExp(t.viewModeWorkbench) })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: new RegExp(t.viewModeReport) })).toBeInTheDocument();
-
     // Overview tab should be selected
     const overviewTab = screen.getByRole("tab", { name: new RegExp(t.overview) });
     expect(overviewTab).toHaveAttribute("aria-selected", "true");
@@ -53,25 +49,5 @@ describe("Sidebar", () => {
 
     expect(onSelectTab).toHaveBeenCalledWith("prd");
     expect(onUserNavigate).toHaveBeenCalled();
-  });
-
-  it("switches view mode when clicking mode buttons", async () => {
-    const onSelectViewMode = vi.fn();
-    const user = userEvent.setup();
-
-    render(
-      <Sidebar
-        activeTab="overview"
-        onSelectTab={vi.fn()}
-        viewMode="workbench"
-        onSelectViewMode={onSelectViewMode}
-        t={t}
-      />
-    );
-
-    const reportBtn = screen.getByRole("button", { name: new RegExp(t.viewModeReport) });
-    await user.click(reportBtn);
-
-    expect(onSelectViewMode).toHaveBeenCalledWith("report");
   });
 });

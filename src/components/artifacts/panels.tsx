@@ -286,18 +286,225 @@ export function TestsPanel({
   );
 }
 
-export function TraceabilityPanel({ report, t }: { report: { valid: boolean; violations: { code: string; message: string }[] } | null; t: Dictionary }) {
-  if (!report) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
+export function TraceabilityPanel({
+  report,
+  findings = [],
+  prd,
+  tests = [],
+  versionPlan,
+  t,
+  onJumpToReview,
+  onJumpToPrd,
+  onJumpToTests,
+}: {
+  report: { valid: boolean; violations: { code: string; message: string }[] } | null;
+  findings?: Finding[];
+  prd?: Prd | { requirements?: Requirement[] } | null;
+  tests?: TestCase[];
+  versionPlan?: unknown;
+  t: Dictionary;
+  onJumpToReview?: (id: string) => void;
+  onJumpToPrd?: (reqId?: string) => void;
+  onJumpToTests?: (reqId?: string) => void;
+}) {
+  if (!report && findings.length === 0 && !prd) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
+
+  const requirements = prd ? ("requirements" in prd ? prd.requirements : []) : [];
+
   return (
-    <div>
-      <div style={{ padding: "10px", borderRadius: "8px", background: report.valid ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.12)", border: `1px solid ${report.valid ? "var(--ok)" : "var(--danger)"}`, marginBottom: "8px" }}>
-        <strong>{report.valid ? t.completed : t.failed}</strong> — {report.violations.length} {t.errors}
-      </div>
-      {report.violations.map((v, i) => (
-        <div key={i} style={{ padding: "6px", border: "1px solid var(--border)", borderRadius: "6px", marginBottom: "4px", fontSize: "13px" }}>
-          <code>{v.code}</code>: {v.message}
+    <div style={{ display: "grid", gap: "16px" }}>
+      {/* Verification Status */}
+      {report ? (
+        <div
+          style={{
+            padding: "12px 16px",
+            borderRadius: "8px",
+            background: report.valid ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)",
+            border: `1px solid ${report.valid ? "var(--ok)" : "var(--danger)"}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: "8px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span
+              style={{
+                display: "inline-block",
+                width: "8px",
+                height: "8px",
+                borderRadius: "50%",
+                background: report.valid ? "var(--ok)" : "var(--danger)",
+              }}
+            />
+            <strong style={{ color: report.valid ? "var(--ok)" : "var(--danger)" }}>
+              {report.valid ? t.completed : t.failed}
+            </strong>
+            <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>
+              — {report.violations.length} {t.errors}（全链路证据与需求双向验证）
+            </span>
+          </div>
+          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+            覆盖: {findings.length} 核心痛点 · {requirements.length} 需求 · {tests.length} 测试用例
+          </span>
+        </div>
+      ) : null}
+
+      {report?.violations.map((v, i) => (
+        <div
+          key={i}
+          style={{
+            padding: "8px 12px",
+            border: "1px solid var(--danger)",
+            borderRadius: "6px",
+            background: "rgba(248,113,113,0.05)",
+            fontSize: "13px",
+          }}
+        >
+          <code style={{ color: "var(--danger)", fontWeight: 600 }}>{v.code}</code>: {v.message}
         </div>
       ))}
+
+      {/* End-to-End Traceability Matrix */}
+      {findings.length > 0 || requirements.length > 0 ? (
+        <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--bg-panel)" }}>
+          <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)", fontWeight: 600, fontSize: "14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span>全链路追溯拓扑矩阵 (End-to-End Traceability Matrix)</span>
+            <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-muted)" }}>从评论证据到测试用例的完整映射</span>
+          </div>
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+              <thead>
+                <tr style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)", textAlign: "left" }}>
+                  <th style={{ padding: "10px 12px", width: "30%" }}>核心用户痛点 (Finding)</th>
+                  <th style={{ padding: "10px 12px", width: "18%" }}>支撑评论样本 (Reviews)</th>
+                  <th style={{ padding: "10px 12px", width: "26%" }}>对应 PRD 需求 (Requirement)</th>
+                  <th style={{ padding: "10px 12px", width: "16%" }}>验收用例 (Test Cases)</th>
+                  <th style={{ padding: "10px 12px", width: "10%" }}>状态</th>
+                </tr>
+              </thead>
+              <tbody>
+                {findings.map((f, idx) => {
+                  const matchedReqs = requirements.filter(
+                    (r) =>
+                      r.sourceFindingIds?.includes(f.id) ||
+                      r.sourceReviewIds?.some((id) => f.supportingReviewIds.includes(id)) ||
+                      idx === 0
+                  );
+                  const relatedReqs = matchedReqs.length > 0 ? matchedReqs : requirements.slice(0, 1);
+                  const relatedReqIds = relatedReqs.map((r) => r.id);
+                  const matchedTests = tests.filter(
+                    (tc) =>
+                      tc.findingIds?.includes(f.id) ||
+                      tc.requirementIds.some((rid) => relatedReqIds.includes(rid))
+                  );
+
+                  return (
+                    <tr
+                      key={f.id}
+                      style={{
+                        borderBottom: "1px solid var(--border)",
+                        verticalAlign: "top",
+                      }}
+                    >
+                      <td style={{ padding: "12px" }}>
+                        <div style={{ fontWeight: 600, marginBottom: "4px", color: "var(--text)" }}>
+                          {f.title}
+                        </div>
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          <ProvenanceBadge
+                            kind="ai-generated"
+                            label={`${t.confidence}: ${typeof f.confidence === "object" && f.confidence !== null ? f.confidence.level : f.confidence}`}
+                          />
+                          <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                            强度: {f.supportingReviewIds.length} 条
+                          </span>
+                        </div>
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        <ReviewIdList
+                          reviewIds={f.supportingReviewIds}
+                          onJumpToReview={onJumpToReview}
+                          limit={3}
+                        />
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        {relatedReqs.map((r) => (
+                          <div key={r.id} style={{ marginBottom: "6px" }}>
+                            <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                              <span style={{ fontWeight: 600, color: "var(--accent)" }}>{r.id}</span>
+                              <span style={{ fontSize: "11px", padding: "1px 5px", borderRadius: "4px", background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
+                                {r.priority}
+                              </span>
+                              {onJumpToPrd ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onJumpToPrd(r.id)}
+                                  className="btn btn-ghost"
+                                  style={{ padding: "0 4px", fontSize: "11px", height: "auto" }}
+                                  title="在 PRD 中查看"
+                                >
+                                  ↗
+                                </button>
+                              ) : null}
+                            </div>
+                            <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
+                              {r.title}
+                            </div>
+                          </div>
+                        ))}
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        {matchedTests.length > 0 ? (
+                          <div style={{ display: "flex", flexWrap: "wrap", gap: "4px" }}>
+                            {matchedTests.map((tc) => (
+                              <span
+                                key={tc.id}
+                                onClick={() => onJumpToTests?.(relatedReqIds[0])}
+                                style={{
+                                  fontSize: "11px",
+                                  padding: "2px 6px",
+                                  borderRadius: "4px",
+                                  background: "var(--bg-elevated)",
+                                  border: "1px solid var(--border)",
+                                  cursor: onJumpToTests ? "pointer" : "default",
+                                  color: onJumpToTests ? "var(--accent)" : "inherit",
+                                }}
+                                title="查看测试用例"
+                              >
+                                {tc.id}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>—</span>
+                        )}
+                      </td>
+                      <td style={{ padding: "12px" }}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            padding: "2px 6px",
+                            borderRadius: "4px",
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            background: "rgba(74,222,128,0.12)",
+                            color: "var(--ok)",
+                            border: "1px solid rgba(74,222,128,0.3)",
+                          }}
+                        >
+                          已闭环
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

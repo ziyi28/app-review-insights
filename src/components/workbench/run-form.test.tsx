@@ -68,6 +68,7 @@ function stubFetch(preview: unknown) {
 /** Step 1 → live mode card, then fill URL + goal and advance to the confirm step. */
 async function navigateToLiveConfirm(user: ReturnType<typeof userEvent.setup>, goalText: string, urlText = "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684") {
   await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+  await user.click(screen.getByRole("button", { name: t.next }));
   await user.type(screen.getByLabelText(t.appStoreUrl), urlText);
   await user.type(screen.getByLabelText(t.goal), goalText);
   await user.click(screen.getByRole("button", { name: t.next }));
@@ -94,16 +95,34 @@ describe("RunForm", () => {
       expect(screen.getAllByRole("radio")).toHaveLength(2);
       // Step 1 → import mode shows the file input.
       await user.click(screen.getByRole("radio", { name: new RegExp(t.importMode) }));
+      await user.click(screen.getByRole("button", { name: t.next }));
       expect(screen.getByLabelText(t.importFile)).toBeInTheDocument();
       // Back to step 1, then live mode shows the URL input.
       await user.click(screen.getByRole("button", { name: t.back }));
       await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+      await user.click(screen.getByRole("button", { name: t.next }));
       expect(screen.getByLabelText(t.appStoreUrl)).toBeInTheDocument();
     } finally {
       spy.mockRestore();
     }
     const warning = errors.find((e) => e.includes("uncontrolled input"));
     expect(warning).toBeUndefined();
+  });
+
+  it("invokes onCancel when clicking close or cancel buttons", async () => {
+    const onCancel = vi.fn();
+    const user = userEvent.setup();
+    render(<RunForm t={t} onStart={vi.fn()} onCancel={onCancel} />);
+    
+    // Top right close button
+    const closeBtn = screen.getByRole("button", { name: t.close });
+    await user.click(closeBtn);
+    expect(onCancel).toHaveBeenCalledTimes(1);
+
+    // Footer cancel button
+    const cancelBtn = screen.getByRole("button", { name: t.cancel });
+    await user.click(cancelBtn);
+    expect(onCancel).toHaveBeenCalledTimes(2);
   });
 
   it("checks the sample on confirm and lets the user pick the live dataset", async () => {
@@ -180,6 +199,7 @@ describe("RunForm", () => {
     const user = userEvent.setup();
     render(<RunForm t={t} onStart={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+    await user.click(screen.getByRole("button", { name: t.next }));
     await user.type(screen.getByLabelText(t.appStoreUrl), "https://apps.apple.com/us/app/x/id123");
 
     const next = screen.getByRole("button", { name: t.next });
@@ -196,6 +216,7 @@ describe("RunForm", () => {
     const user = userEvent.setup();
     render(<RunForm t={t} onStart={vi.fn()} />);
     await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+    await user.click(screen.getByRole("button", { name: t.next }));
     await user.type(screen.getByLabelText(t.goal), "long enough goal for test");
     await user.type(screen.getByLabelText(t.appStoreUrl), "https://google.com/invalid");
 

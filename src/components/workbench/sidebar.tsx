@@ -33,16 +33,10 @@ export interface NavGroup {
 
 export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
   {
-    id: "core",
-    labelKey: "overview",
-    items: [
-      { id: "overview", labelKey: "overview", icon: "overview" },
-    ],
-  },
-  {
     id: "data",
     labelKey: "groupData",
     items: [
+      { id: "overview", labelKey: "overview", icon: "overview" },
       { id: "cleaned", labelKey: "cleanedData", icon: "data" },
       { id: "raw", labelKey: "rawReviews", icon: "table" },
     ],
@@ -80,8 +74,8 @@ export const SIDEBAR_NAV_GROUPS: NavGroup[] = [
 export interface SidebarProps {
   activeTab: TabId;
   onSelectTab: (id: TabId) => void;
-  viewMode: ViewMode;
-  onSelectViewMode: (mode: ViewMode) => void;
+  viewMode?: ViewMode;
+  onSelectViewMode?: (mode: ViewMode) => void;
   t: Dictionary;
   onUserNavigate?: () => void;
 }
@@ -89,47 +83,21 @@ export interface SidebarProps {
 export function Sidebar({
   activeTab,
   onSelectTab,
-  viewMode,
+  viewMode = "workbench",
   onSelectViewMode,
   t,
   onUserNavigate,
 }: SidebarProps) {
   const handleTabClick = (id: TabId) => {
     if (viewMode === "report") {
-      onSelectViewMode("workbench");
+      onSelectViewMode?.("workbench");
     }
     onSelectTab(id);
     onUserNavigate?.();
   };
 
-  const handleModeToggle = (mode: ViewMode) => {
-    onSelectViewMode(mode);
-    onUserNavigate?.();
-  };
-
   return (
     <aside className={styles.sidebar} aria-label={t.appTitle}>
-      <div className={styles.viewModeSection}>
-        <div className={styles.modeToggle} role="group" aria-label={t.viewModeWorkbench}>
-          <button
-            type="button"
-            className={`${styles.modeBtn} ${viewMode === "workbench" ? styles.modeBtnActive : ""}`}
-            onClick={() => handleModeToggle("workbench")}
-          >
-            <Icon name="overview" size={14} />
-            <span>{t.viewModeWorkbench}</span>
-          </button>
-          <button
-            type="button"
-            className={`${styles.modeBtn} ${viewMode === "report" ? styles.modeBtnActive : ""}`}
-            onClick={() => handleModeToggle("report")}
-          >
-            <Icon name="report" size={14} />
-            <span>{t.viewModeReport}</span>
-          </button>
-        </div>
-      </div>
-
       <nav className={styles.navSection}>
         {SIDEBAR_NAV_GROUPS.map((group) => (
           <div key={group.id} className={styles.group}>

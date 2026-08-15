@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { Dictionary } from "@/i18n";
+import { type Dictionary, translateCode } from "@/i18n";
 import type { RunEvent } from "@/domain/contracts/events";
 import { RunDiagnosticsPanel } from "@/components/artifacts/workflow-panels";
 import styles from "./run-log-panel.module.css";
@@ -13,7 +13,7 @@ function eventMessage(e: RunEvent): string {
   if (e.type === "run.failed") return typeof data.error === "string" ? data.error : "";
   if (e.type === "stage.progress") return typeof data.message === "string" ? data.message : "";
   if (e.type === "limitation.reported") {
-    const code = typeof data.code === "string" ? data.code : "";
+    const code = typeof data.code === "string" ? translateCode(data.code) : "";
     const msg = typeof data.message === "string" ? data.message : "";
     return [code, msg].filter(Boolean).join(" — ");
   }
