@@ -10,4 +10,5 @@ data/
 *.tsbuildinfo
 .superpowers/
 .tmp_*
+*.docx
 
