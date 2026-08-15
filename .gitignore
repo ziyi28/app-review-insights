@@ -9,6 +9,8 @@ test-results/
 data/
 *.tsbuildinfo
 .superpowers/
+docs/superpowers/
+docs/goal.md
 .tmp_*
 *.docx
 
