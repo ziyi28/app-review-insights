@@ -45,7 +45,8 @@ RULES
   finding serves one of them, reference its exact id in "focusAreaIds". Prefer
   findings that serve a goal dimension.
 - Return AT MOST 4 findings, the highest-signal ones. Excess findings are
-  discarded deterministically by the pipeline, so return only what matters.`;
+  discarded deterministically by the pipeline, so return only what matters.
+- Respond ONLY with a valid JSON object matching the requested schema. Do not write markdown text or explanations outside the JSON.`;
 
 export const findingsPrompt: PromptDefinition<FindingOutput> = {
   id: "findings",

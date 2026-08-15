@@ -21,7 +21,8 @@ RULES
   uncertainties/limitations.
 - You MUST NOT add any new citation pair, new review ID, or new evidence
   excerpt. The resulting citation ledger must be a SUBSET of the frozen ledger.
-- Keep the shape of each entity identical to what was provided.`;
+- Keep the shape of each entity identical to what was provided.
+- Respond ONLY with a valid JSON object matching the requested schema. Do not write markdown text or explanations outside the JSON.`;
 
 export const revisionPrompt: PromptDefinition<RevisionOutput> = {
   id: "revision",

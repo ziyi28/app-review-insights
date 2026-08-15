@@ -361,7 +361,7 @@ export function Workbench() {
         goal?: string;
         appName?: string;
         appUrl?: string;
-        startRequest?: { source?: { kind: string; appStoreUrl?: string; previewId?: string; reviewSelection?: string } };
+        startRequest?: { source?: { kind: string; appStoreUrl?: string; previewId?: string; reviewSelection?: string; reviewLimit?: 100 | 300 | 500 } };
       };
       if (manifest.startRequest) {
         const req = manifest.startRequest;
@@ -373,6 +373,7 @@ export function Workbench() {
                 kind: "live",
                 appStoreUrl: req.source.appStoreUrl,
                 ...(req.source.reviewSelection ? { reviewSelection: req.source.reviewSelection } : {}),
+                ...(req.source.reviewLimit ? { reviewLimit: req.source.reviewLimit } : {}),
               }
             : req.source,
         };

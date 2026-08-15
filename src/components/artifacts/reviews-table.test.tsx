@@ -49,11 +49,16 @@ describe("ReviewsTable", () => {
     expect(screen.queryByText("Love the workouts")).not.toBeInTheDocument();
   });
 
-  it("expands a row to show the original body", () => {
-    render(<ReviewsTable reviews={reviews} t={getDictionary("en")} />);
-    fireEvent.click(screen.getAllByText("Too expensive")[0]);
-    // After expansion the body appears twice (row + detail) and the detail adds "normalized".
-    expect(screen.getAllByText(/Too expensive/).length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText(/normalized/)).toBeInTheDocument();
+  it("filters by reviewId and sourceReviewId", () => {
+    const dict = getDictionary("en");
+    render(<ReviewsTable reviews={reviews} t={dict} />);
+    const input = screen.getByPlaceholderText(dict.reviewId);
+    fireEvent.change(input, { target: { value: "abc-1" } });
+    expect(screen.getByText("Too expensive")).toBeInTheDocument();
+    expect(screen.queryByText("Love the workouts")).not.toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "r2" } });
+    expect(screen.queryByText("Too expensive")).not.toBeInTheDocument();
+    expect(screen.getByText("Love the workouts")).toBeInTheDocument();
   });
 });

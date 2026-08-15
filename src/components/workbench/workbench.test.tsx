@@ -191,7 +191,7 @@ describe("Workbench settings integration", () => {
               uiLocale: "zh-CN",
               outputLocale: "zh-CN",
               goal: "Analyze login dropoff",
-              source: { kind: "live", appStoreUrl: "https://apps.apple.com/us/app/test-app/id839285684" },
+              source: { kind: "live", appStoreUrl: "https://apps.apple.com/us/app/test-app/id839285684", reviewLimit: 300 },
             },
           }),
         });
@@ -214,14 +214,14 @@ describe("Workbench settings integration", () => {
     const retryBtn = await screen.findByRole("button", { name: tZh.retry });
     await user.click(retryBtn);
 
-    // Verify it fetched the manifest and started a new run with startRequest
+    // Verify it fetched the manifest and started a new run with startRequest and preserved reviewLimit
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/api/runs/run-failed-1", expect.anything());
       expect(fetchMock).toHaveBeenCalledWith(
         "/api/runs",
         expect.objectContaining({
           method: "POST",
-          body: expect.stringContaining("Analyze login dropoff"),
+          body: expect.stringMatching(/"reviewLimit":\s*300/),
         }),
       );
     });

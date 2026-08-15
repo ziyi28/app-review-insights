@@ -35,7 +35,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ runId: 
     if (!manifest.appName || !manifest.appUrl || !manifest.startRequest) {
       try {
         const evidence = (await store.readArtifact(runId, "source-evidence", 1)) as
-          | { kind?: string; appId?: string; canonicalUrl?: string; fileName?: string }
+          | { kind?: string; appId?: string; canonicalUrl?: string; fileName?: string; reviewLimit?: 100 | 300 | 500 }
           | undefined;
         if (evidence?.kind === "app-store-reviews" && evidence.appId) {
           const appUrl = evidence.canonicalUrl || `https://apps.apple.com/us/app/id${evidence.appId}`;
@@ -49,11 +49,30 @@ export async function GET(_req: Request, { params }: { params: Promise<{ runId: 
               uiLocale: "zh-CN",
               outputLocale: "zh-CN",
               goal: manifest.goal,
-              source: { kind: "live", appStoreUrl: appUrl },
+              source: { kind: "live", appStoreUrl: appUrl, reviewLimit: evidence.reviewLimit },
             };
           }
         } else if (evidence?.kind === "import" && evidence.fileName) {
           manifest.fileName = manifest.fileName || evidence.fileName;
+        }
+      } catch {
+        // ignore artifact read error
+      }
+    }
+
+    // If startRequest exists but has no reviewLimit on its live source, backfill it from source-evidence
+    if (
+      manifest.startRequest &&
+      manifest.startRequest.mode === "analyze" &&
+      manifest.startRequest.source.kind === "live" &&
+      !manifest.startRequest.source.reviewLimit
+    ) {
+      try {
+        const evidence = (await store.readArtifact(runId, "source-evidence", 1)) as
+          | { reviewLimit?: 100 | 300 | 500 }
+          | undefined;
+        if (evidence?.reviewLimit) {
+          manifest.startRequest.source.reviewLimit = evidence.reviewLimit;
         }
       } catch {
         // ignore artifact read error

@@ -184,7 +184,7 @@ describe("OpenAiCompatibleClient", () => {
     }
   });
 
-  it("retries a non-JSON response and succeeds", async () => {
+  it("retries a non-JSON response and succeeds with retry notice injected", async () => {
     vi.useFakeTimers();
     try {
       const { client, fetchMock } = makeClient();
@@ -197,6 +197,8 @@ describe("OpenAiCompatibleClient", () => {
       const result = await pending;
       expect(result.ok).toBe(true);
       expect(fetchMock).toHaveBeenCalledTimes(2);
+      const secondCallBody = JSON.parse(fetchMock.mock.calls[1][1].body);
+      expect(secondCallBody.messages[1].content).toContain("CRITICAL RETRY NOTICE");
       warn.mockRestore();
     } finally {
       vi.useRealTimers();

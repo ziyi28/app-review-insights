@@ -19,6 +19,7 @@ type SourcePreviewSummary = {
   canonicalUrl: string;
   createdAt: string;
   expiresAt: string;
+  reviewLimit?: 100 | 300 | 500;
   live: {
     provider: "serpapi" | "apple-rss";
     forcedRefresh: boolean;
@@ -114,9 +115,24 @@ export function RunForm({ t, onStart }: RunFormProps) {
     setPreviewError(null);
   };
 
+  const isAppStoreUrlValid = (input: string) => {
+    const trimmed = input.trim();
+    if (!trimmed) return false;
+    try {
+      const parsed = new URL(trimmed);
+      if (parsed.protocol !== "https:" || parsed.hostname !== "apps.apple.com") return false;
+      const segments = parsed.pathname.split("/").filter(Boolean);
+      return segments.some((s) => /^id\d+$/.test(s));
+    } catch {
+      return false;
+    }
+  };
+
+  const urlValid = isAppStoreUrlValid(url);
+  const urlHasInput = url.trim().length > 0;
   const goalOk = goal.trim().length >= 10;
   // Step 2 can advance only when the mode's required input is filled.
-  const step2Valid = mode === "import" ? file !== null && goalOk : url.trim().length > 0 && goalOk;
+  const step2Valid = mode === "import" ? file !== null && goalOk : urlValid && goalOk;
 
   const startWithPreview = (selection: "live" | "stable") => {
     if (preview === null || preview === "loading") return;
@@ -131,6 +147,7 @@ export function RunForm({ t, onStart }: RunFormProps) {
         appStoreUrl: url.trim(),
         previewId: preview.previewId,
         reviewSelection: selection,
+        reviewLimit: preview.reviewLimit ?? reviewLimit,
       },
     });
   };
@@ -237,6 +254,11 @@ export function RunForm({ t, onStart }: RunFormProps) {
                   {t.useExampleApp}
                 </button>
               </div>
+              {urlHasInput && !urlValid ? (
+                <p className={styles.hintWarn}>
+                  {t.invalidAppStoreUrl}
+                </p>
+              ) : null}
               <label className={styles.label}>
                 {t.reviewLimit}
                 <select className={styles.input} value={reviewLimit} onChange={(e) => handleReviewLimitChange(e.target.value)}>
@@ -257,11 +279,18 @@ export function RunForm({ t, onStart }: RunFormProps) {
                   aria-describedby={goal.trim().length > 0 && !goalOk ? "run-form-goal-hint" : undefined}
                 />
               </label>
-              {goal.trim().length > 0 && !goalOk ? (
-                <p id="run-form-goal-hint" className={styles.hintWarn}>
-                  {t.goalTooShort}
-                </p>
-              ) : null}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2px" }}>
+                {goal.trim().length > 0 && !goalOk ? (
+                  <p id="run-form-goal-hint" className={styles.hintWarn}>
+                    {t.goalTooShort}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <span style={{ fontSize: "11px", color: goalOk ? "var(--text-muted)" : "var(--warn)" }}>
+                  {goal.trim().length} {t.goalCharCount}
+                </span>
+              </div>
               <label className={styles.label}>
                 {t.outputLocale}
                 <select className={styles.input} value={outputLocale} onChange={(e) => setOutputLocale(e.target.value as Locale)}>
@@ -287,11 +316,18 @@ export function RunForm({ t, onStart }: RunFormProps) {
                   aria-describedby={goal.trim().length > 0 && !goalOk ? "run-form-goal-hint" : undefined}
                 />
               </label>
-              {goal.trim().length > 0 && !goalOk ? (
-                <p id="run-form-goal-hint" className={styles.hintWarn}>
-                  {t.goalTooShort}
-                </p>
-              ) : null}
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2px" }}>
+                {goal.trim().length > 0 && !goalOk ? (
+                  <p id="run-form-goal-hint" className={styles.hintWarn}>
+                    {t.goalTooShort}
+                  </p>
+                ) : (
+                  <span />
+                )}
+                <span style={{ fontSize: "11px", color: goalOk ? "var(--text-muted)" : "var(--warn)" }}>
+                  {goal.trim().length} {t.goalCharCount}
+                </span>
+              </div>
               <label className={styles.label}>
                 {t.outputLocale}
                 <select className={styles.input} value={outputLocale} onChange={(e) => setOutputLocale(e.target.value as Locale)}>
@@ -309,7 +345,19 @@ export function RunForm({ t, onStart }: RunFormProps) {
         <div className={styles.stepBody}>
           {mode === "live" ? (
             preview === "loading" ? (
-              <p className={styles.checking}>{t.checkingSample}</p>
+              <div className={styles.sampleGrid}>
+                <div className={`${styles.sampleCard} ${styles.skeletonCard}`}>
+                  <div className={styles.skeletonLine} style={{ width: "40%", height: "16px" }} />
+                  <div className={styles.skeletonLine} style={{ width: "70%", height: "24px", margin: "8px 0" }} />
+                  <div className={styles.skeletonLine} style={{ width: "50%", height: "14px" }} />
+                  <p className={styles.checking} style={{ marginTop: "12px" }}>{t.checkingSample}</p>
+                </div>
+                <div className={`${styles.sampleCard} ${styles.skeletonCard}`}>
+                  <div className={styles.skeletonLine} style={{ width: "40%", height: "16px" }} />
+                  <div className={styles.skeletonLine} style={{ width: "60%", height: "24px", margin: "8px 0" }} />
+                  <div className={styles.skeletonLine} style={{ width: "50%", height: "14px" }} />
+                </div>
+              </div>
             ) : previewError ? (
               <div className={styles.errorBox} role="alert">
                 <p className={styles.errorText}>{previewError}</p>

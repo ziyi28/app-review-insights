@@ -208,6 +208,27 @@
   align-content: start;
 }
 
+.skeletonCard {
+  border-style: dashed;
+  background: var(--bg-subtle);
+  animation: pulse 1.5s ease-in-out infinite;
+  min-height: 160px;
+}
+
+.skeletonLine {
+  background: var(--bg-elevated);
+  border-radius: var(--radius-sm);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
 .sampleCardDisabled {
   opacity: 0.55;
 }

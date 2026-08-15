@@ -70,7 +70,7 @@ export class OpenAiCompatibleClient {
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       this.usageLog.attempts += 1;
       try {
-        return await this.generateOnce(request);
+        return await this.generateOnce(request, attempt, lastError);
       } catch (err) {
         lastError = err instanceof Error ? err : new Error(String(err));
         // Never retry once the client disconnected; otherwise the pipeline would
@@ -96,17 +96,22 @@ export class OpenAiCompatibleClient {
     throw lastError ?? new Error("model generate failed");
   }
 
-  private async generateOnce<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
+  private async generateOnce<T>(request: ModelRequest<T>, attempt = 0, lastError: Error | null = null): Promise<ModelResult<T>> {
     const url = `${this.baseUrl}/chat/completions`;
     const headers: Record<string, string> = { "content-type": "application/json" };
     if (this.apiKey) headers.authorization = `Bearer ${this.apiKey}`;
+
+    let userContent = request.user;
+    if (attempt > 0 && lastError && (lastError.message.includes("MODEL_NON_JSON_OUTPUT") || lastError.message.includes("MODEL_INVALID_RESPONSE"))) {
+      userContent += "\n\nCRITICAL RETRY NOTICE: Your previous response was rejected because it did not return valid JSON. You MUST respond with ONLY a single, valid RFC 8259 JSON object matching the required schema. Do NOT include reasoning, markdown commentary, or any text outside the JSON.";
+    }
 
     const payload: Record<string, unknown> = {
       model: this.model,
       temperature: this.temperature,
       messages: [
         { role: "system", content: request.system },
-        { role: "user", content: request.user },
+        { role: "user", content: userContent },
       ],
     };
     if (this.jsonMode === "json_object") {

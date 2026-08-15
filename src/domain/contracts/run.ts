@@ -15,6 +15,7 @@ export const AnalyzeSourceSchema = z.discriminatedUnion("kind", [
     // reviewSelection must be provided together (validated in the route).
     previewId: z.string().min(1).max(128).optional(),
     reviewSelection: z.enum(["live", "stable"]).optional(),
+    reviewLimit: z.union([z.literal(100), z.literal(300), z.literal(500)]).optional(),
   }),
   z.object({
     kind: z.literal("import"),

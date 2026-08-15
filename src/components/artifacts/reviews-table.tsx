@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import type { NormalizedReview } from "@/domain/contracts/review";
 import type { Dictionary } from "@/i18n";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
@@ -10,24 +10,47 @@ export function ReviewsTable({ reviews, t }: { reviews: NormalizedReview[]; t: D
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
-  const filtered = useMemo(
-    () =>
-      reviews.filter((r) => {
-        if (query && !r.bodyNormalized.includes(query.toLowerCase()) && !r.bodyOriginal.toLowerCase().includes(query.toLowerCase())) return false;
-        if (ratingFilter !== "all" && r.rating !== Number(ratingFilter)) return false;
-        if (statusFilter === "unique" && r.dedupeStatus !== "unique") return false;
-        if (statusFilter === "duplicate" && r.dedupeStatus !== "duplicate") return false;
-        if (statusFilter === "conflict" && r.dedupeStatus !== "identity-conflict") return false;
-        return true;
-      }),
-    [reviews, query, ratingFilter, statusFilter],
-  );
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    return reviews.filter((r) => {
+      if (q) {
+        const matchId =
+          r.reviewId.toLowerCase().includes(q) ||
+          (r.sourceReviewId && r.sourceReviewId.toLowerCase().includes(q));
+        const matchBody =
+          r.bodyNormalized.toLowerCase().includes(q) ||
+          r.bodyOriginal.toLowerCase().includes(q) ||
+          (r.titleOriginal && r.titleOriginal.toLowerCase().includes(q));
+        if (!matchId && !matchBody) return false;
+      }
+      if (ratingFilter !== "all" && r.rating !== Number(ratingFilter)) return false;
+      if (statusFilter === "unique" && r.dedupeStatus !== "unique") return false;
+      if (statusFilter === "duplicate" && r.dedupeStatus !== "duplicate") return false;
+      if (statusFilter === "conflict" && r.dedupeStatus !== "identity-conflict") return false;
+      return true;
+    });
+  }, [reviews, query, ratingFilter, statusFilter]);
+
+  const copyId = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      void navigator.clipboard.writeText(id);
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 1500);
+    }
+  };
 
   return (
     <div>
-      <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap" }}>
-        <input placeholder={t.reviewId} value={query} onChange={(e) => setQuery(e.target.value)} style={{ padding: "6px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }} />
+      <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap", alignItems: "center" }}>
+        <input
+          placeholder={t.reviewId}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)", minWidth: "220px" }}
+        />
         <select aria-label="rating" value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)} style={{ padding: "6px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}>
           <option value="all">{t.rating} *</option>
           {[1, 2, 3, 4, 5].map((r) => (
@@ -57,45 +80,55 @@ export function ReviewsTable({ reviews, t }: { reviews: NormalizedReview[]; t: D
             </tr>
           </thead>
           <tbody>
-            {filtered.map((r) => (
-              <tr key={r.reviewId} onClick={() => setExpanded(expanded === r.reviewId ? null : r.reviewId)} style={{ cursor: "pointer" }}>
-                <td>
-                  <code>{r.reviewId.slice(0, 8)}</code>
-                </td>
-                <td>{r.rating}★</td>
-                <td>{r.version ?? "—"}</td>
-                <td>{r.language}</td>
-                <td>
-                  <ProvenanceBadge kind="computed" label={r.dedupeStatus} />
-                </td>
-                <td>{r.bodyOriginal.slice(0, 120)}</td>
-              </tr>
-            ))}
+            {filtered.map((r) => {
+              const isExpanded = expanded === r.reviewId;
+              return (
+                <Fragment key={r.reviewId}>
+                  <tr
+                    onClick={() => setExpanded(isExpanded ? null : r.reviewId)}
+                    style={{ cursor: "pointer", background: isExpanded ? "var(--bg-elevated)" : undefined }}
+                  >
+                    <td>
+                      <code
+                        title="点击复制完整 ID"
+                        onClick={(e) => copyId(r.reviewId, e)}
+                        style={{ cursor: "copy" }}
+                      >
+                        {copiedId === r.reviewId ? "✓" : r.reviewId.slice(0, 8)}
+                      </code>
+                    </td>
+                    <td>{r.rating}★</td>
+                    <td>{r.version ?? "—"}</td>
+                    <td>{r.language}</td>
+                    <td>
+                      <ProvenanceBadge kind="computed" label={r.dedupeStatus} />
+                    </td>
+                    <td>{r.bodyOriginal.slice(0, 120)}</td>
+                  </tr>
+                  {isExpanded ? (
+                    <tr key={`${r.reviewId}-detail`}>
+                      <td colSpan={6} style={{ padding: "12px 16px", background: "var(--bg-panel)", borderBottom: "1px solid var(--border)" }}>
+                        <div style={{ display: "grid", gap: "6px" }}>
+                          <h4 style={{ margin: "0 0 4px" }}>{t.title}: {r.titleOriginal || "—"}</h4>
+                          <p style={{ margin: 0 }}>
+                            <strong>{t.body}:</strong> {r.bodyOriginal}
+                          </p>
+                          <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "13px" }}>
+                            <strong>{t.normalized}:</strong> {r.bodyNormalized}
+                          </p>
+                          <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
+                            <strong>{t.sourceId}:</strong> {r.sourceReviewId} · <strong>{t.source}:</strong> {r.rawRef} · <strong>完整 ID:</strong> <code>{r.reviewId}</code>
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : null}
+                </Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
-
-      {expanded ? (
-        <div style={{ marginTop: "10px", padding: "12px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          {(() => {
-            const r = reviews.find((x) => x.reviewId === expanded);
-            return r ? (
-              <>
-                <h4>{t.title}: {r.titleOriginal || "—"}</h4>
-                <p>
-                  <strong>{t.body}:</strong> {r.bodyOriginal}
-                </p>
-                <p style={{ color: "var(--text-muted)" }}>
-                  <strong>{t.normalized}:</strong> {r.bodyNormalized}
-                </p>
-                <p style={{ color: "var(--text-muted)" }}>
-                  <strong>{t.sourceId}:</strong> {r.sourceReviewId} · <strong>{t.source}:</strong> {r.rawRef}
-                </p>
-              </>
-            ) : null;
-          })()}
-        </div>
-      ) : null}
     </div>
   );
 }

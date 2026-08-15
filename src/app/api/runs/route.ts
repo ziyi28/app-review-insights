@@ -223,12 +223,13 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
         // Direct or historical retry without preview snapshot: build a fresh preview snapshot with dual-source fallback & local cache
         const previewId = `preview-${randomUUID()}`;
         const now = new Date().toISOString();
+        const reviewLimit = request.source.reviewLimit ?? 500;
         selected = await buildPreviewSnapshot({
           previewId,
           appId: parsed.appId,
           canonicalUrl: parsed.canonicalUrl,
           now,
-          reviewLimit: 500,
+          reviewLimit,
           serpApiCollector: cfg.serpApiKey
             ? {
                 fetchFn: fetch,
@@ -264,8 +265,11 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
         }
       }
 
-      const reviews = selection === "live" ? selected.live.reviews : selected.stable.reviews;
-      const rawRefs = selection === "live" ? selected.live.rawRefs : selected.stable.reviews.map((r) => `cache:${r.sourceReviewId}`);
+      const effectiveLimit = request.source.reviewLimit ?? selected.reviewLimit;
+      const fullReviews = selection === "live" ? selected.live.reviews : selected.stable.reviews;
+      const fullRawRefs = selection === "live" ? selected.live.rawRefs : selected.stable.reviews.map((r) => `cache:${r.sourceReviewId}`);
+      const reviews = fullReviews.slice(0, effectiveLimit);
+      const rawRefs = fullRawRefs.slice(0, effectiveLimit);
       const limitations: Limitation[] = [...selected.live.limitations];
       if (selection === "stable") {
         limitations.push({
@@ -309,7 +313,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
               liveCount: selected.live.reviewCount,
               stableCount: selected.stable.reviewCount,
               reviewCount: reviews.length,
-              reviewLimit: selected.reviewLimit,
+              reviewLimit: effectiveLimit,
               collectedAt: selected.live.collectedAt,
               forcedRefresh: selected.live.forcedRefresh,
               providerCached: selected.live.cached,

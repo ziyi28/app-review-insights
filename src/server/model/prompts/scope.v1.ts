@@ -41,7 +41,8 @@ RULES
   cover (e.g. "cost concerns", "conversion", "usability", "a specific version").
   Only split out dimensions the user explicitly mentioned; do not invent
   dimensions. Return AT MOST 8, the most important ones. Excess areas are
-  discarded deterministically by the pipeline.`;
+  discarded deterministically by the pipeline.
+- Respond ONLY with a valid JSON object matching the requested schema. Do not write markdown text or explanations outside the JSON.`;
 
 export const scopePrompt: PromptDefinition<ScopeOutput> = {
   id: "scope",

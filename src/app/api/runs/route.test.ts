@@ -350,6 +350,41 @@ describe("POST /api/runs preview-backed live", () => {
     const sourceEvidence = (await store.readArtifact(body.runId, "source-evidence", 1)) as Record<string, unknown>;
     expect(sourceEvidence).toBeDefined();
     expect(sourceEvidence.kind).toBe("app-store-reviews");
+    expect(sourceEvidence.reviewLimit).toBe(500);
+  });
+
+  it("respects and enforces request reviewLimit when auto-building preview snapshot", async () => {
+    delete process.env.MODEL_BASE_URL;
+    delete process.env.MODEL_NAME;
+    const req = new Request("http://localhost/api/runs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        protocolVersion: "1",
+        mode: "analyze",
+        uiLocale: "en",
+        outputLocale: "en",
+        goal: "Understand why users love this app",
+        source: {
+          kind: "live",
+          appStoreUrl: "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684",
+          reviewLimit: 100,
+        },
+      }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    const body = (await res.json()) as { runId: string };
+    expect(body.runId).toMatch(/^run-/);
+
+    const callback = afterMock.mock.calls.at(-1)?.[0] as (() => Promise<void>) | undefined;
+    expect(callback).toBeTypeOf("function");
+    await callback!();
+
+    expect(isRunActive(body.runId)).toBe(false);
+    const store = new RunStore(process.env.RUNS_DIR!);
+    const sourceEvidence = (await store.readArtifact(body.runId, "source-evidence", 1)) as Record<string, unknown>;
+    expect(sourceEvidence.reviewLimit).toBe(100);
   });
 });
 

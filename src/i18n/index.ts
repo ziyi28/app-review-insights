@@ -43,6 +43,8 @@ export type Dictionary = {
   reconnecting: string;
   someEventsDropped: string;
   goalTooShort: string;
+  invalidAppStoreUrl: string;
+  goalCharCount: string;
   history: string;
   historyEmpty: string;
   historyLoadFailed: string;
@@ -274,6 +276,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     reconnecting: "Reconnecting…",
     someEventsDropped: "Some stream events were dropped — check the browser console.",
     goalTooShort: "Analysis goal must be at least 10 characters.",
+    invalidAppStoreUrl: "Please enter a valid Apple App Store URL (e.g. https://apps.apple.com/us/app/.../id123456789)",
+    goalCharCount: "characters (min 10)",
     history: "History",
     historyEmpty: "No past runs yet.",
     historyLoadFailed: "Failed to load history.",
@@ -505,6 +509,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     reconnecting: "正在重新连接…",
     someEventsDropped: "部分流事件被丢弃 — 请查看浏览器控制台。",
     goalTooShort: "分析目标至少需要 10 个字符。",
+    invalidAppStoreUrl: "请输入有效的苹果 App Store 链接（例如 https://apps.apple.com/us/app/.../id123456789）",
+    goalCharCount: "字符（至少需要 10 字符）",
     history: "历史",
     historyEmpty: "暂无历史运行。",
     historyLoadFailed: "加载历史失败。",
