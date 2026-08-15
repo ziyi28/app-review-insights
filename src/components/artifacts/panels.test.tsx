@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { getDictionary } from "@/i18n";
 import { TestsPanel, FindingsPanel } from "./panels";
@@ -100,5 +100,14 @@ describe("FindingsPanel", () => {
     expect(screen.queryByText(/Insufficient Evidence/i)).not.toBeInTheDocument();
     // Legacy artifacts still show the confidence badge.
     expect(screen.getByText(/low/i)).toBeInTheDocument();
+  });
+
+  it("calls onJumpToReview when a review code is clicked", async () => {
+    const { fireEvent } = await import("@testing-library/react");
+    const onJumpToReview = vi.fn();
+    render(<FindingsPanel findings={[sufficientFinding]} t={t} onJumpToReview={onJumpToReview} />);
+    const code = screen.getAllByText("review-1")[0];
+    fireEvent.click(code);
+    expect(onJumpToReview).toHaveBeenCalledWith("review-1");
   });
 });

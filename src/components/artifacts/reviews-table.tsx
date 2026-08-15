@@ -5,12 +5,28 @@ import type { NormalizedReview } from "@/domain/contracts/review";
 import type { Dictionary } from "@/i18n";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 
-export function ReviewsTable({ reviews, t }: { reviews: NormalizedReview[]; t: Dictionary }) {
-  const [query, setQuery] = useState("");
+export function ReviewsTable({
+  reviews,
+  t,
+  searchQuery,
+  onSearchChange,
+}: {
+  reviews: NormalizedReview[];
+  t: Dictionary;
+  searchQuery?: string;
+  onSearchChange?: (q: string) => void;
+}) {
+  const [internalQuery, setInternalQuery] = useState("");
   const [ratingFilter, setRatingFilter] = useState<string>("all");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const query = searchQuery !== undefined ? searchQuery : internalQuery;
+  const handleQueryChange = (val: string) => {
+    setInternalQuery(val);
+    onSearchChange?.(val);
+  };
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -33,6 +49,9 @@ export function ReviewsTable({ reviews, t }: { reviews: NormalizedReview[]; t: D
     });
   }, [reviews, query, ratingFilter, statusFilter]);
 
+  // If query is an exact or single match, auto expand it
+  const activeExpanded = expanded ?? (query.trim().length >= 6 && filtered.length === 1 ? filtered[0].reviewId : null);
+
   const copyId = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     if (typeof navigator !== "undefined" && navigator.clipboard) {
@@ -45,12 +64,24 @@ export function ReviewsTable({ reviews, t }: { reviews: NormalizedReview[]; t: D
   return (
     <div>
       <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap", alignItems: "center" }}>
-        <input
-          placeholder={t.reviewId}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          style={{ padding: "6px 10px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)", minWidth: "220px" }}
-        />
+        <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+          <input
+            placeholder={t.reviewId}
+            value={query}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            style={{ padding: "6px 28px 6px 10px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)", minWidth: "240px" }}
+          />
+          {query ? (
+            <button
+              type="button"
+              onClick={() => handleQueryChange("")}
+              title="清除搜索"
+              style={{ position: "absolute", right: "6px", background: "none", border: "none", color: "var(--text-muted)", padding: "2px", fontSize: "12px", display: "flex", alignItems: "center" }}
+            >
+              ✕
+            </button>
+          ) : null}
+        </div>
         <select aria-label="rating" value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)} style={{ padding: "6px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}>
           <option value="all">{t.rating} *</option>
           {[1, 2, 3, 4, 5].map((r) => (
@@ -81,7 +112,7 @@ export function ReviewsTable({ reviews, t }: { reviews: NormalizedReview[]; t: D
           </thead>
           <tbody>
             {filtered.map((r) => {
-              const isExpanded = expanded === r.reviewId;
+              const isExpanded = activeExpanded === r.reviewId;
               return (
                 <Fragment key={r.reviewId}>
                   <tr

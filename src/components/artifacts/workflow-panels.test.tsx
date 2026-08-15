@@ -48,17 +48,23 @@ const FACTORS: PlanningFactors = {
 
 describe("ClassificationPanel", () => {
   it("shows candidate label, exact quote and review ids", () => {
+    const onJumpToReview = vi.fn();
     render(
       <ClassificationPanel
         t={t}
         candidates={[
           { id: "topic-candidate-1", label: "Workout quality", description: "d", supportingReviewIds: ["r1", "r2"], quote: "workout variety" },
         ]}
+        onJumpToReview={onJumpToReview}
       />,
     );
     expect(screen.getByText("Workout quality")).toBeInTheDocument();
     expect(screen.getByText(/workout variety/)).toBeInTheDocument();
-    expect(screen.getByText(/r1, r2/)).toBeInTheDocument();
+    expect(screen.getByText("r1")).toBeInTheDocument();
+    expect(screen.getByText("r2")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("r1"));
+    expect(onJumpToReview).toHaveBeenCalledWith("r1");
   });
 });
 

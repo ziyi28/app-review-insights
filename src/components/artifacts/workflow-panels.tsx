@@ -10,7 +10,15 @@ import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 
 type TopicCandidate = { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string };
 
-export function ClassificationPanel({ candidates, t }: { candidates: TopicCandidate[]; t: Dictionary }) {
+export function ClassificationPanel({
+  candidates,
+  t,
+  onJumpToReview,
+}: {
+  candidates: TopicCandidate[];
+  t: Dictionary;
+  onJumpToReview?: (id: string) => void;
+}) {
   if (!candidates.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
   return (
     <div style={{ display: "grid", gap: "8px" }}>
@@ -20,7 +28,25 @@ export function ClassificationPanel({ candidates, t }: { candidates: TopicCandid
             {c.label} <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
           </h4>
           <p style={{ margin: "0 0 4px", fontSize: "13px" }}>“{c.quote}”</p>
-          <p style={{ color: "var(--text-muted)", fontSize: "12px" }}>{t.reviewId}: {c.supportingReviewIds.join(", ")}</p>
+          <div style={{ color: "var(--text-muted)", fontSize: "12px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
+            <span>{t.reviewId}:</span>
+            {c.supportingReviewIds.map((id, i) => (
+              <span key={id}>
+                {i > 0 ? ", " : ""}
+                <code
+                  onClick={() => onJumpToReview?.(id)}
+                  title={onJumpToReview ? `跳转到评论 ${id}` : undefined}
+                  style={{
+                    color: onJumpToReview ? "var(--accent)" : "inherit",
+                    cursor: onJumpToReview ? "pointer" : "default",
+                    textDecoration: onJumpToReview ? "underline" : "none",
+                  }}
+                >
+                  {id.length > 8 ? id.slice(0, 8) : id}
+                </code>
+              </span>
+            ))}
+          </div>
         </div>
       ))}
     </div>

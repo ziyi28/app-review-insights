@@ -142,9 +142,26 @@ export function Workbench() {
   const { runId, status, events, running, reconnecting, error, canRetry, start, reset, retry, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [viewMode, setViewMode] = useState<ViewMode>("workbench");
+  const [reviewSearchQuery, setReviewSearchQuery] = useState<string>("");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
   const [historyOpen, setHistoryOpen] = useState(false);
   const [configStatus, setConfigStatus] = useState<ConfigStatus>({ modelConfigured: false, serpApiConfigured: false });
+
+  const jumpToReview = useCallback((reviewId: string) => {
+    setReviewSearchQuery(reviewId);
+    setTab("cleaned");
+    setViewMode("workbench");
+  }, []);
+
+  const jumpToTests = useCallback(() => {
+    setTab("tests");
+    setViewMode("workbench");
+  }, []);
+
+  const jumpToPrd = useCallback(() => {
+    setTab("prd");
+    setViewMode("workbench");
+  }, []);
 
   // Non-secret config status for the header badges. Fetched once on mount and
   // refreshed after the settings panel saves/clears.
@@ -661,6 +678,8 @@ export function Workbench() {
                 } : undefined}
                 goalCoverage={cache.goalCoverage}
                 t={t}
+                onJumpToReview={jumpToReview}
+                onSwitchToWorkbench={() => setViewMode("workbench")}
               />
             ) : (
               <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
@@ -809,14 +828,19 @@ export function Workbench() {
               ) : null}
 
               {(tab === "raw" || tab === "cleaned") && cleanedReviews.length > 0 ? (
-                <ReviewsTable reviews={cleanedReviews} t={t} />
+                <ReviewsTable
+                  reviews={cleanedReviews}
+                  t={t}
+                  searchQuery={reviewSearchQuery}
+                  onSearchChange={setReviewSearchQuery}
+                />
               ) : (tab === "raw" || tab === "cleaned") && !running ? (
                 <p className="muted">{t.noData}</p>
               ) : null}
 
-              {tab === "classification" ? <ClassificationPanel candidates={cache.topicCandidates?.candidates ?? []} t={t} /> : null}
-              {tab === "topics" ? <TopicsPanel topics={cache.topics?.topics ?? []} t={t} /> : null}
-              {tab === "findings" ? <FindingsPanel findings={cache.findings?.findings ?? []} t={t} /> : null}
+              {tab === "classification" ? <ClassificationPanel candidates={cache.topicCandidates?.candidates ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
+              {tab === "topics" ? <TopicsPanel topics={cache.topics?.topics ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
+              {tab === "findings" ? <FindingsPanel findings={cache.findings?.findings ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
               {tab === "evidence" ? <EvidenceValidationPanel report={cache.evidenceValidation as never} t={t} /> : null}
               {tab === "versions" ? (
                 <>
@@ -827,13 +851,26 @@ export function Workbench() {
               {tab === "prd" ? (
                 <>
                   <ArtifactPhaseSelector revised={prdFinal !== null} phase={prdPhase} onSelect={setPrdPhase} t={t} />
-                  <RequirementsPanel requirements={activePrd?.requirements ?? []} versions={activePrd?.versions ?? []} assumptions={activePrd?.assumptions ?? []} t={t} />
+                  <RequirementsPanel
+                    requirements={activePrd?.requirements ?? []}
+                    versions={activePrd?.versions ?? []}
+                    assumptions={activePrd?.assumptions ?? []}
+                    t={t}
+                    onJumpToReview={jumpToReview}
+                    onJumpToTests={jumpToTests}
+                  />
                 </>
               ) : null}
               {tab === "tests" ? (
                 <>
                   <ArtifactPhaseSelector revised={testsFinal.length > 0} phase={testsPhase} onSelect={setTestsPhase} t={t} />
-                  <TestsPanel tests={activeTests} requirements={activePrd?.requirements ?? []} t={t} />
+                  <TestsPanel
+                    tests={activeTests}
+                    requirements={activePrd?.requirements ?? []}
+                    t={t}
+                    onJumpToReview={jumpToReview}
+                    onJumpToPrd={jumpToPrd}
+                  />
                 </>
               ) : null}
               {tab === "traceability" ? (

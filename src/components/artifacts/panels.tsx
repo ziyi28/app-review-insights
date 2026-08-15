@@ -5,7 +5,49 @@ import type { Finding, Requirement, TestCase } from "@/domain/contracts/analysis
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 import { findingIdsForRequirements, priorityForRequirements } from "@/domain/traceability/evidence-sources";
 
-export function TopicsPanel({ topics, t }: { topics: { id: string; label: string; description: string; reviewIds: string[] }[]; t: Dictionary }) {
+function ReviewIdList({
+  reviewIds,
+  onJumpToReview,
+  limit = 5,
+}: {
+  reviewIds: string[];
+  onJumpToReview?: (id: string) => void;
+  limit?: number;
+}) {
+  const displayed = reviewIds.slice(0, limit);
+  if (displayed.length === 0) return <span>—</span>;
+  return (
+    <span>
+      {displayed.map((id, i) => (
+        <span key={id}>
+          {i > 0 ? ", " : ""}
+          <code
+            onClick={() => onJumpToReview?.(id)}
+            title={onJumpToReview ? `跳转并查看评论 ${id}` : undefined}
+            style={{
+              cursor: onJumpToReview ? "pointer" : "default",
+              color: onJumpToReview ? "var(--accent)" : "inherit",
+              textDecoration: onJumpToReview ? "underline" : "none",
+            }}
+          >
+            {id.length > 8 ? id.slice(0, 8) : id}
+          </code>
+        </span>
+      ))}
+      {reviewIds.length > limit ? <span style={{ color: "var(--text-faint)", fontSize: "11px" }}> +{reviewIds.length - limit}</span> : null}
+    </span>
+  );
+}
+
+export function TopicsPanel({
+  topics,
+  t,
+  onJumpToReview,
+}: {
+  topics: { id: string; label: string; description: string; reviewIds: string[] }[];
+  t: Dictionary;
+  onJumpToReview?: (id: string) => void;
+}) {
   if (!topics.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
   return (
     <div style={{ display: "grid", gap: "8px" }}>
@@ -15,14 +57,25 @@ export function TopicsPanel({ topics, t }: { topics: { id: string; label: string
             {topic.label} <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
           </h4>
           <p style={{ margin: "0 0 4px" }}>{topic.description}</p>
-          <code style={{ color: "var(--text-muted)", fontSize: "12px" }}>{topic.id} · {topic.reviewIds.length} {t.supportCount}</code>
+          <div style={{ color: "var(--text-muted)", fontSize: "12px", display: "flex", gap: "6px", alignItems: "center" }}>
+            <code>{topic.id}</code> · <span>{topic.reviewIds.length} {t.supportCount}:</span>
+            <ReviewIdList reviewIds={topic.reviewIds} onJumpToReview={onJumpToReview} limit={4} />
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-export function FindingsPanel({ findings, t }: { findings: Finding[]; t: Dictionary }) {
+export function FindingsPanel({
+  findings,
+  t,
+  onJumpToReview,
+}: {
+  findings: Finding[];
+  t: Dictionary;
+  onJumpToReview?: (id: string) => void;
+}) {
   if (!findings.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
   return (
     <div style={{ display: "grid", gap: "10px" }}>
@@ -43,7 +96,8 @@ export function FindingsPanel({ findings, t }: { findings: Finding[]; t: Diction
           </div>
           <p style={{ margin: "0 0 6px" }}>{f.summary}</p>
           <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
-            {t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}: {f.supportingReviewIds.slice(0, 5).join(", ")}
+            {t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}:{" "}
+            <ReviewIdList reviewIds={f.supportingReviewIds} onJumpToReview={onJumpToReview} limit={5} />
           </p>
           {f.evidenceSufficiency ? (
             <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
@@ -56,14 +110,26 @@ export function FindingsPanel({ findings, t }: { findings: Finding[]; t: Diction
             <ul style={{ margin: "4px 0", paddingLeft: "20px" }}>
               {f.evidenceExcerpts.slice(0, 3).map((e, i) => (
                 <li key={i} style={{ fontSize: "13px" }}>
-                  “{e.excerpt}” <code style={{ color: "var(--text-muted)" }}>{e.reviewId.slice(0, 8)}</code>
+                  “{e.excerpt}”{" "}
+                  <code
+                    onClick={() => onJumpToReview?.(e.reviewId)}
+                    title={onJumpToReview ? `跳转到评论 ${e.reviewId}` : undefined}
+                    style={{
+                      color: onJumpToReview ? "var(--accent)" : "var(--text-muted)",
+                      cursor: onJumpToReview ? "pointer" : "default",
+                      textDecoration: onJumpToReview ? "underline" : "none",
+                    }}
+                  >
+                    {e.reviewId.slice(0, 8)}
+                  </code>
                 </li>
               ))}
             </ul>
           ) : null}
           {f.conflictingReviewIds.length > 0 ? (
             <p style={{ color: "var(--danger)", fontSize: "13px" }}>
-              <ProvenanceBadge kind="conflict" label={t.conflict} /> {f.conflictingReviewIds.join(", ")}
+              <ProvenanceBadge kind="conflict" label={t.conflict} />{" "}
+              <ReviewIdList reviewIds={f.conflictingReviewIds} onJumpToReview={onJumpToReview} limit={4} />
             </p>
           ) : null}
           {f.uncertainties.length > 0 ? (
@@ -82,7 +148,21 @@ export function FindingsPanel({ findings, t }: { findings: Finding[]; t: Diction
   );
 }
 
-export function RequirementsPanel({ requirements, versions, assumptions, t }: { requirements: Requirement[]; versions: { id: string; name: string; summary: string; requirementIds: string[] }[]; assumptions: { id: string; text: string; basis: string }[]; t: Dictionary }) {
+export function RequirementsPanel({
+  requirements,
+  versions,
+  assumptions,
+  t,
+  onJumpToReview,
+  onJumpToTests,
+}: {
+  requirements: Requirement[];
+  versions: { id: string; name: string; summary: string; requirementIds: string[] }[];
+  assumptions: { id: string; text: string; basis: string }[];
+  t: Dictionary;
+  onJumpToReview?: (id: string) => void;
+  onJumpToTests?: (reqId?: string) => void;
+}) {
   return (
     <div style={{ display: "grid", gap: "10px" }}>
       {versions.length > 0 ? (
@@ -98,13 +178,27 @@ export function RequirementsPanel({ requirements, versions, assumptions, t }: { 
       ) : null}
       {requirements.map((r) => (
         <div key={r.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <h4 style={{ margin: 0 }}>{r.title}</h4>
-            <ProvenanceBadge kind="computed" label={`${r.priority}`} />
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              <h4 style={{ margin: 0 }}>{r.title}</h4>
+              <ProvenanceBadge kind="computed" label={`${r.priority}`} />
+              <code style={{ fontSize: "12px", color: "var(--text-muted)" }}>{r.id}</code>
+            </div>
+            {onJumpToTests ? (
+              <button
+                type="button"
+                onClick={() => onJumpToTests(r.id)}
+                className="btn btn-ghost"
+                style={{ fontSize: "12px", padding: "2px 8px" }}
+                title={`查看 ${r.id} 对应的测试用例`}
+              >
+                {t.testCases} →
+              </button>
+            ) : null}
           </div>
           <p style={{ margin: "4px 0" }}>{r.description}</p>
           <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
-            {t.reviewId}: {r.sourceReviewIds.slice(0, 5).join(", ")}
+            {t.reviewId}: <ReviewIdList reviewIds={r.sourceReviewIds} onJumpToReview={onJumpToReview} limit={5} />
           </p>
           <ul style={{ margin: "4px 0", fontSize: "13px", paddingLeft: "20px" }}>
             {r.acceptanceCriteria.map((c, i) => (
@@ -132,10 +226,14 @@ export function TestsPanel({
   tests,
   requirements,
   t,
+  onJumpToReview,
+  onJumpToPrd,
 }: {
   tests: TestCase[];
   requirements: Requirement[];
   t: Dictionary;
+  onJumpToReview?: (id: string) => void;
+  onJumpToPrd?: (reqId?: string) => void;
 }) {
   if (!tests.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
   return (
@@ -148,13 +246,27 @@ export function TestsPanel({
         const priority = test.priority ?? priorityForRequirements(test.requirementIds, requirements) ?? "P2";
         return (
           <div key={test.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              <h4 style={{ margin: 0 }}>{test.id}</h4>
-              <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
-              <ProvenanceBadge kind="computed" label={`${t.priority}: ${priority}`} />
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                <h4 style={{ margin: 0 }}>{test.id}</h4>
+                <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
+                <ProvenanceBadge kind="computed" label={`${t.priority}: ${priority}`} />
+              </div>
+              {onJumpToPrd ? (
+                <button
+                  type="button"
+                  onClick={() => onJumpToPrd(test.requirementIds[0])}
+                  className="btn btn-ghost"
+                  style={{ fontSize: "12px", padding: "2px 8px" }}
+                  title="查看对应 PRD 需求"
+                >
+                  PRD →
+                </button>
+              ) : null}
             </div>
             <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
-              {t.requirementId}: {test.requirementIds.join(", ")} · {t.findingId}: {findingIds.join(", ")} · {t.reviewId}: {test.sourceReviewIds.slice(0, 4).join(", ")}
+              {t.requirementId}: {test.requirementIds.join(", ")} · {t.findingId}: {findingIds.join(", ")} · {t.reviewId}:{" "}
+              <ReviewIdList reviewIds={test.sourceReviewIds} onJumpToReview={onJumpToReview} limit={4} />
             </p>
             <p style={{ margin: "4px 0", fontSize: "13px" }}>
               <strong>{t.precondition}:</strong> {test.precondition || "—"}

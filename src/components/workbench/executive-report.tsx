@@ -27,6 +27,8 @@ export interface ExecutiveReportProps {
   };
   goalCoverage?: GoalCoverageSummary | null;
   t: Dictionary;
+  onJumpToReview?: (reviewId: string) => void;
+  onSwitchToWorkbench?: () => void;
 }
 
 function buildMarkdownReport(props: ExecutiveReportProps): string {
@@ -114,7 +116,7 @@ function buildMarkdownReport(props: ExecutiveReportProps): string {
 }
 
 export function ExecutiveReport(props: ExecutiveReportProps) {
-  const { manifest, findings, versionPlan, prd, stats, goalCoverage, t } = props;
+  const { manifest, findings, versionPlan, prd, stats, goalCoverage, t, onJumpToReview, onSwitchToWorkbench } = props;
   const [copied, setCopied] = useState(false);
 
   const handleCopyMarkdown = async () => {
@@ -131,6 +133,13 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
   const handlePrint = () => {
     if (typeof window !== "undefined") {
       window.print();
+    }
+  };
+
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
 
@@ -165,6 +174,17 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
         </div>
 
         <div className={styles.actions}>
+          {onSwitchToWorkbench ? (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={onSwitchToWorkbench}
+              title={t.viewModeWorkbench}
+            >
+              <Icon name="overview" size={13} />
+              <span>{t.viewModeWorkbench}</span>
+            </button>
+          ) : null}
           {copied ? <span className={styles.toast}>✓ {t.copied}</span> : null}
           <button
             type="button"
@@ -187,9 +207,37 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
         </div>
       </header>
 
+      {/* Table of Contents Quick Nav */}
+      <nav className={styles.tocBar} aria-label="Report Table of Contents">
+        <span style={{ color: "var(--text-faint)", fontSize: "12px" }}>目录:</span>
+        {stats?.ratingDistribution ? (
+          <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-ratings")}>
+            {t.ratingDistribution}
+          </button>
+        ) : null}
+        <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-findings")}>
+          {t.keyFindings} ({findings.length})
+        </button>
+        {versionPlan && versionPlan.versions.length > 0 ? (
+          <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-versions")}>
+            {t.roadmapMilestones}
+          </button>
+        ) : null}
+        {prd && prd.requirements.length > 0 ? (
+          <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-prd")}>
+            {t.requirementsSpecs} ({prd.requirements.length})
+          </button>
+        ) : null}
+        {prd && prd.tests.length > 0 ? (
+          <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-tests")}>
+            {t.verificationPlan} ({prd.tests.length})
+          </button>
+        ) : null}
+      </nav>
+
       {/* Stats Summary if present */}
       {stats?.ratingDistribution ? (
-        <section className={styles.section}>
+        <section id="report-ratings" className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
               <Icon name="table" size={16} />
@@ -201,7 +249,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
       ) : null}
 
       {/* 1. Key Findings */}
-      <section className={styles.section}>
+      <section id="report-findings" className={styles.section}>
         <div className={styles.sectionHeader}>
           <h3 className={styles.sectionTitle}>
             <Icon name="findings" size={16} />
@@ -225,8 +273,24 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                   ) : null}
                 </div>
                 <p className={styles.findingSummary}>{f.summary}</p>
-                <div style={{ color: "var(--text-muted)", fontSize: "12px", marginBottom: "6px" }}>
-                  {t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}: {f.supportingReviewIds.slice(0, 6).join(", ")}
+                <div style={{ color: "var(--text-muted)", fontSize: "12px", marginBottom: "6px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
+                  <span>{t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}:</span>
+                  {f.supportingReviewIds.slice(0, 6).map((id, i) => (
+                    <span key={id}>
+                      {i > 0 ? ", " : ""}
+                      <code
+                        onClick={() => onJumpToReview?.(id)}
+                        title={onJumpToReview ? `跳转到评论 ${id}` : undefined}
+                        style={{
+                          color: onJumpToReview ? "var(--accent)" : "inherit",
+                          cursor: onJumpToReview ? "pointer" : "default",
+                          textDecoration: onJumpToReview ? "underline" : "none",
+                        }}
+                      >
+                        {id.length > 8 ? id.slice(0, 8) : id}
+                      </code>
+                    </span>
+                  ))}
                 </div>
 
                 {f.evidenceExcerpts.length > 0 ? (
@@ -235,7 +299,20 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                       <div key={idx} className="quote-box">
                         “{e.excerpt}”
                         <div className="quote-meta">
-                          <span>{t.reviewId}: {e.reviewId.slice(0, 8)}</span>
+                          <span>
+                            {t.reviewId}:{" "}
+                            <code
+                              onClick={() => onJumpToReview?.(e.reviewId)}
+                              title={onJumpToReview ? `跳转到评论 ${e.reviewId}` : undefined}
+                              style={{
+                                color: onJumpToReview ? "var(--accent)" : "inherit",
+                                cursor: onJumpToReview ? "pointer" : "default",
+                                textDecoration: onJumpToReview ? "underline" : "none",
+                              }}
+                            >
+                              {e.reviewId.slice(0, 8)}
+                            </code>
+                          </span>
                         </div>
                       </div>
                     ))}
@@ -249,7 +326,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
 
       {/* 2. Version Roadmap */}
       {versionPlan && versionPlan.versions.length > 0 ? (
-        <section className={styles.section}>
+        <section id="report-versions" className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
               <Icon name="versions" size={16} />
@@ -276,7 +353,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
 
       {/* 3. PRD Requirements */}
       {prd && prd.requirements.length > 0 ? (
-        <section className={styles.section}>
+        <section id="report-prd" className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
               <Icon name="prd" size={16} />
@@ -313,7 +390,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
 
       {/* 4. Test Verification Plan */}
       {prd && prd.tests.length > 0 ? (
-        <section className={styles.section}>
+        <section id="report-tests" className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
               <Icon name="tests" size={16} />

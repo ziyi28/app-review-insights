@@ -50,6 +50,35 @@
   flex-wrap: wrap;
 }
 
+.tocBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.tocItem {
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: all 120ms ease;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font: inherit;
+}
+
+.tocItem:hover {
+  color: var(--text);
+  background: var(--bg-hover);
+}
+
 .section {
   display: grid;
   gap: 12px;
@@ -58,6 +87,7 @@
   background: var(--bg-panel);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
+  scroll-margin-top: 70px;
 }
 
 .sectionHeader {

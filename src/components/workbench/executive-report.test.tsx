@@ -145,4 +145,29 @@ describe("ExecutiveReport", () => {
       expect(screen.getByText(/已复制到剪贴板/)).toBeDefined();
     });
   });
+
+  it("handles switch to workbench and jump to review clicks", () => {
+    const onSwitchToWorkbench = vi.fn();
+    const onJumpToReview = vi.fn();
+
+    render(
+      <ExecutiveReport
+        manifest={mockManifest}
+        findings={mockFindings}
+        versionPlan={mockVersionPlan}
+        prd={mockPrd}
+        t={t}
+        onSwitchToWorkbench={onSwitchToWorkbench}
+        onJumpToReview={onJumpToReview}
+      />,
+    );
+
+    const switchBtn = screen.getByRole("button", { name: t.viewModeWorkbench });
+    fireEvent.click(switchBtn);
+    expect(onSwitchToWorkbench).toHaveBeenCalledTimes(1);
+
+    const reviewIdCodes = screen.getAllByText("r-1");
+    fireEvent.click(reviewIdCodes[0]);
+    expect(onJumpToReview).toHaveBeenCalledWith("r-1");
+  });
 });
