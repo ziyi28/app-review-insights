@@ -1,0 +1,175 @@
+.container {
+  display: grid;
+  gap: 20px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+}
+
+.reportHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-md);
+  flex-wrap: wrap;
+}
+
+.headerContent {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.reportTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.reportMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.section {
+  display: grid;
+  gap: 12px;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gridCards {
+  display: grid;
+  gap: 12px;
+}
+
+.findingCard {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.findingHead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.findingTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.findingSummary {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.reqCard {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.reqCardP0 {
+  border-left: 4px solid var(--p0);
+}
+
+.reqCardP1 {
+  border-left: 4px solid var(--p1);
+}
+
+.reqCardP2 {
+  border-left: 4px solid var(--p2);
+}
+
+.criteriaList {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  font-size: 13px;
+  display: grid;
+  gap: 4px;
+}
+
+.testCard {
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.stepList {
+  margin: 6px 0;
+  padding-left: 20px;
+  font-size: 13px;
+}
+
+.toast {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ok);
+  background: var(--ok-soft);
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--ok-border);
+}
+
+@media print {
+  .actions {
+    display: none !important;
+  }
+  .container {
+    max-width: 100% !important;
+  }
+}

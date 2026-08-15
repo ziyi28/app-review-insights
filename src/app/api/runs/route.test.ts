@@ -15,6 +15,31 @@ vi.mock("next/server", async (importOriginal) => {
   return { ...mod, after: vi.fn() };
 });
 
+vi.mock("@/server/sources/apple-rss-collector", async (importOriginal) => {
+  const mod = await importOriginal<typeof import("@/server/sources/apple-rss-collector")>();
+  return {
+    ...mod,
+    collectAppleReviews: vi.fn().mockResolvedValue({
+      status: "complete",
+      reviews: [
+        {
+          sourceReviewId: "mock-1",
+          source: "apple-rss",
+          title: "Great",
+          body: "Good app",
+          rating: 5,
+          version: "1.0",
+          updatedAt: "2026-08-01T00:00:00Z",
+        },
+      ],
+      rawRefs: ["sources/apple/page-01.json#entry-mock-1"],
+      limitations: [],
+      pages: [],
+      sourceFiles: [],
+    }),
+  };
+});
+
 import { GET, POST } from "./route";
 import { after } from "next/server";
 
@@ -291,6 +316,40 @@ describe("POST /api/runs preview-backed live", () => {
       searchId: "search_page_1",
     });
     expect(JSON.stringify(sourceEvidence)).not.toContain("serp_");
+  });
+
+  it("auto-builds preview snapshot for direct live request without previewId (e.g. historical retry)", async () => {
+    delete process.env.MODEL_BASE_URL;
+    delete process.env.MODEL_NAME;
+    const req = new Request("http://localhost/api/runs", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        protocolVersion: "1",
+        mode: "analyze",
+        uiLocale: "en",
+        outputLocale: "en",
+        goal: "Understand why users love this app",
+        source: {
+          kind: "live",
+          appStoreUrl: "https://apps.apple.com/us/app/workout-for-women-home-gym/id839285684",
+        },
+      }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(202);
+    const body = (await res.json()) as { runId: string };
+    expect(body.runId).toMatch(/^run-/);
+
+    const callback = afterMock.mock.calls.at(-1)?.[0] as (() => Promise<void>) | undefined;
+    expect(callback).toBeTypeOf("function");
+    await callback!();
+
+    expect(isRunActive(body.runId)).toBe(false);
+    const store = new RunStore(process.env.RUNS_DIR!);
+    const sourceEvidence = (await store.readArtifact(body.runId, "source-evidence", 1)) as Record<string, unknown>;
+    expect(sourceEvidence).toBeDefined();
+    expect(sourceEvidence.kind).toBe("app-store-reviews");
   });
 });
 

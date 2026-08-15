@@ -207,6 +207,29 @@ export type Dictionary = {
   deleteConfirm: string;
   cancel: string;
   deleteFailed: string;
+  viewModeReport: string;
+  viewModeWorkbench: string;
+  groupProduct: string;
+  groupEvidence: string;
+  groupData: string;
+  filterAll: string;
+  filterSearchPlaceholder: string;
+  filterPriority: string;
+  filterSufficiency: string;
+  filterResultsCount: string;
+  copyMarkdownReport: string;
+  copied: string;
+  copyFailed: string;
+  printReport: string;
+  userQuote: string;
+  confidenceLevel: string;
+  acceptanceCriteria: string;
+  executiveSummary: string;
+  keyFindings: string;
+  roadmapMilestones: string;
+  requirementsSpecs: string;
+  verificationPlan: string;
+  noFilteredResults: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -417,6 +440,29 @@ export const dictionaries: Record<Locale, Dictionary> = {
     deleteConfirm: "Delete this run? This cannot be undone.",
     cancel: "Cancel",
     deleteFailed: "Failed to delete the run.",
+    viewModeReport: "Executive Report",
+    viewModeWorkbench: "Workspace",
+    groupProduct: "Product Specs",
+    groupEvidence: "Evidence & Trace",
+    groupData: "Data & Logs",
+    filterAll: "All",
+    filterSearchPlaceholder: "Search keywords or ID...",
+    filterPriority: "Priority",
+    filterSufficiency: "Evidence",
+    filterResultsCount: "Showing",
+    copyMarkdownReport: "Copy Markdown Report",
+    copied: "Copied to clipboard",
+    copyFailed: "Failed to copy",
+    printReport: "Print / PDF",
+    userQuote: "User Quote",
+    confidenceLevel: "Confidence",
+    acceptanceCriteria: "Acceptance Criteria",
+    executiveSummary: "Executive Summary",
+    keyFindings: "Key Findings & Insights",
+    roadmapMilestones: "Version Roadmap & Milestones",
+    requirementsSpecs: "PRD Requirements Specifications",
+    verificationPlan: "Test & Verification Plan",
+    noFilteredResults: "No matching items found.",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -625,6 +671,29 @@ export const dictionaries: Record<Locale, Dictionary> = {
     deleteConfirm: "确定删除该运行？此操作不可恢复。",
     cancel: "取消",
     deleteFailed: "删除失败。",
+    viewModeReport: "执行报告",
+    viewModeWorkbench: "结构工作台",
+    groupProduct: "产品规划",
+    groupEvidence: "证据溯源",
+    groupData: "数据与日志",
+    filterAll: "全部",
+    filterSearchPlaceholder: "搜索关键词或 ID...",
+    filterPriority: "优先级",
+    filterSufficiency: "证据充分度",
+    filterResultsCount: "显示",
+    copyMarkdownReport: "复制 Markdown 报告",
+    copied: "已复制到剪贴板",
+    copyFailed: "复制失败",
+    printReport: "打印 / 导出 PDF",
+    userQuote: "用户原声",
+    confidenceLevel: "置信度",
+    acceptanceCriteria: "验收准则",
+    executiveSummary: "执行概要与评级",
+    keyFindings: "核心用户痛点与发现",
+    roadmapMilestones: "版本规划路线图与里程碑",
+    requirementsSpecs: "PRD 需求规格与验收准则",
+    verificationPlan: "测试用例与验证计划",
+    noFilteredResults: "未找到匹配的项目。",
   },
 };
 

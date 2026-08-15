@@ -1,4 +1,5 @@
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 import { NextResponse, after } from "next/server";
 import { RunStartRequestSchema, type AnalyzeRequest } from "@/domain/contracts/run";
 import { RunStore } from "@/server/runs/run-store";
@@ -11,7 +12,7 @@ import { OpenAiCompatibleClient } from "@/server/model/openai-compatible-client"
 import { loadConfig, isModelConfigured } from "@/server/config";
 import { parseImportedReviews } from "@/server/sources/import-parser";
 import type { Limitation } from "@/server/sources/apple-rss-collector";
-import { readPreview, isPreviewExpired, type SourcePreview } from "@/server/sources/source-preview";
+import { readPreview, isPreviewExpired, buildPreviewSnapshot, type SourcePreview } from "@/server/sources/source-preview";
 import { extractAppNameFromUrl, parseAppStoreUrl } from "@/server/sources/app-store-url";
 
 export const runtime = "nodejs";
@@ -208,88 +209,125 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
       if (request.source.reviewSelection !== undefined && request.source.previewId === undefined) {
         return problem("422", "previewId and reviewSelection must be provided together");
       }
+      let selected: SourcePreview;
+      let selection: "live" | "stable";
+
       if (hasPreview) {
         const preview = await loadValidPreview(cfg.sourcePreviewsDir, request.source.previewId!, parsed.appId, request.source.reviewSelection!);
         if ("problem" in preview) {
           return problem(preview.problem, preview.title, preview.detail);
         }
-        const selected = preview;
-        const selection = request.source.reviewSelection!;
-        const reviews = selection === "live" ? selected.live.reviews : selected.stable.reviews;
-        const rawRefs = selection === "live" ? selected.live.rawRefs : selected.stable.reviews.map((r) => `cache:${r.sourceReviewId}`);
-        const limitations: Limitation[] = [...selected.live.limitations];
-        if (selection === "stable") {
-          limitations.push({
-            code: "LOCAL_HISTORY_SELECTED",
-            message: "Analysis used the stable local-history review sample; it was not re-collected and is not freshly forced",
-            stage: "source",
-          });
-        }
-        // The run's source status comes from the preview's authoritative live
-        // collection status — never re-derived from limitation codes. A stable
-        // (local-history) selection with a previously-complete live collection
-        // stays complete: the cached sample is valid even though it was not
-        // re-collected. A stable selection over a partial/failed live can never
-        // be upgraded to complete.
-        const status: "complete" | "suspect-empty" | "partial" | "failed" =
-          selection === "live"
-            ? selected.live.status
-            : selected.live.status === "complete"
-              ? "complete"
-              : "partial";
-        deps = {
-          model: buildModel(),
-          source: {
-            kind: "preview",
-            data: {
-              previewId: request.source.previewId!,
-              appId: parsed.appId,
-              canonicalUrl: parsed.canonicalUrl,
-              selection,
-              reviews,
-              rawRefs,
-              limitations,
-              sourceFiles: selected.live.sourceFiles,
-              sourceSummary: {
-                kind: "app-store-reviews",
-                provider: selected.live.provider,
+        selected = preview;
+        selection = request.source.reviewSelection!;
+      } else {
+        // Direct or historical retry without preview snapshot: build a fresh preview snapshot with dual-source fallback & local cache
+        const previewId = `preview-${randomUUID()}`;
+        const now = new Date().toISOString();
+        selected = await buildPreviewSnapshot({
+          previewId,
+          appId: parsed.appId,
+          canonicalUrl: parsed.canonicalUrl,
+          now,
+          reviewLimit: 500,
+          serpApiCollector: cfg.serpApiKey
+            ? {
+                fetchFn: fetch,
+                now: () => new Date().toISOString(),
+                baseUrl: cfg.serpApiBaseUrl,
+                apiKey: cfg.serpApiKey,
                 appId: parsed.appId,
-                storefront: "US",
-                status,
-                selection,
-                liveCount: selected.live.reviewCount,
-                stableCount: selected.stable.reviewCount,
-                reviewCount: reviews.length,
-                reviewLimit: selected.reviewLimit,
-                collectedAt: selected.live.collectedAt,
-                forcedRefresh: selected.live.forcedRefresh,
-                providerCached: selected.live.cached,
-                requestCount: selected.live.requestCount,
-                searchCount: "searchIds" in selected.live.evidence ? selected.live.evidence.requestCount : 0,
-                searchId: "searchIds" in selected.live.evidence ? (selected.live.evidence.searchIds.at(-1) ?? null) : null,
-                ...("pages" in selected.live.evidence && selected.live.evidence.pages
-                  ? { pages: selected.live.evidence.pages }
-                  : {}),
-              },
+                timeoutMs: cfg.serpApiTimeoutMs,
+              }
+            : null,
+          rssCollector: {
+            fetchFn: fetch,
+            sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
+            now: () => new Date().toISOString(),
+            baseUrl: cfg.appleRssBaseUrl,
+            appId: parsed.appId,
+            maxPages: cfg.appleRssMaxPages,
+            pageDelayMs: cfg.appleRssPageDelayMs,
+            timeoutMs: cfg.appleRssTimeoutMs,
+          },
+          previewsDir: cfg.sourcePreviewsDir,
+          cacheDir: cfg.sourceCacheDir,
+          historyRoots: [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")],
+          runsDir: cfg.runsDir,
+        });
+
+        if (selected.live.reviewCount > 0) {
+          selection = selected.recommendedSelection ?? "live";
+        } else if (selected.stable.available && selected.stable.reviewCount > 0) {
+          selection = "stable";
+        } else {
+          selection = "live";
+        }
+      }
+
+      const reviews = selection === "live" ? selected.live.reviews : selected.stable.reviews;
+      const rawRefs = selection === "live" ? selected.live.rawRefs : selected.stable.reviews.map((r) => `cache:${r.sourceReviewId}`);
+      const limitations: Limitation[] = [...selected.live.limitations];
+      if (selection === "stable") {
+        limitations.push({
+          code: "LOCAL_HISTORY_SELECTED",
+          message: "Analysis used the stable local-history review sample; it was not re-collected and is not freshly forced",
+          stage: "source",
+        });
+      }
+      // The run's source status comes from the preview's authoritative live
+      // collection status — never re-derived from limitation codes. A stable
+      // (local-history) selection with a previously-complete live collection
+      // stays complete: the cached sample is valid even though it was not
+      // re-collected. A stable selection over a partial/failed live can never
+      // be upgraded to complete.
+      const status: "complete" | "suspect-empty" | "partial" | "failed" =
+        selection === "live"
+          ? selected.live.status
+          : selected.live.status === "complete"
+            ? "complete"
+            : "partial";
+      deps = {
+        model: buildModel(),
+        source: {
+          kind: "preview",
+          data: {
+            previewId: selected.previewId,
+            appId: parsed.appId,
+            canonicalUrl: parsed.canonicalUrl,
+            selection,
+            reviews,
+            rawRefs,
+            limitations,
+            sourceFiles: selected.live.sourceFiles,
+            sourceSummary: {
+              kind: "app-store-reviews",
+              provider: selected.live.provider,
+              appId: parsed.appId,
+              storefront: "US",
+              status,
+              selection,
+              liveCount: selected.live.reviewCount,
+              stableCount: selected.stable.reviewCount,
+              reviewCount: reviews.length,
+              reviewLimit: selected.reviewLimit,
+              collectedAt: selected.live.collectedAt,
+              forcedRefresh: selected.live.forcedRefresh,
+              providerCached: selected.live.cached,
+              requestCount: selected.live.requestCount,
+              searchCount: "searchIds" in selected.live.evidence ? selected.live.evidence.requestCount : 0,
+              searchId: "searchIds" in selected.live.evidence ? (selected.live.evidence.searchIds.at(-1) ?? null) : null,
+              ...("pages" in selected.live.evidence && selected.live.evidence.pages
+                ? { pages: selected.live.evidence.pages }
+                : {}),
             },
           },
-          sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
-          now: () => new Date().toISOString(),
-          pageDelayMs: cfg.appleRssPageDelayMs,
-          maxPages: cfg.appleRssMaxPages,
-          timeoutMs: cfg.appleRssTimeoutMs,
-        };
-      } else {
-        deps = {
-          model: buildModel(),
-          source: { kind: "apple-rss" as const, appleRssBaseUrl: cfg.appleRssBaseUrl, appId: parsed.appId, canonicalUrl: parsed.canonicalUrl },
-          sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
-          now: () => new Date().toISOString(),
-          pageDelayMs: cfg.appleRssPageDelayMs,
-          maxPages: cfg.appleRssMaxPages,
-          timeoutMs: cfg.appleRssTimeoutMs,
-        };
-      }
+        },
+        sleep: (ms: number) => new Promise<void>((r) => setTimeout(r, ms)),
+        now: () => new Date().toISOString(),
+        pageDelayMs: cfg.appleRssPageDelayMs,
+        maxPages: cfg.appleRssMaxPages,
+        timeoutMs: cfg.appleRssTimeoutMs,
+      };
     } else {
       fileName = request.source.fileName;
       const parseResult = parseImportedReviews({

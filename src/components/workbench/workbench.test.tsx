@@ -226,4 +226,23 @@ describe("Workbench settings integration", () => {
       );
     });
   });
+
+  it("switches between workbench and executive report modes", async () => {
+    stubConfigFetch();
+    const user = userEvent.setup();
+    render(<Workbench />);
+
+    const reportModeBtn = screen.getByRole("button", { name: new RegExp(tZh.viewModeReport) });
+    const workbenchModeBtn = screen.getByRole("button", { name: new RegExp(tZh.viewModeWorkbench) });
+
+    expect(reportModeBtn).toBeInTheDocument();
+    expect(workbenchModeBtn).toBeInTheDocument();
+
+    await user.click(reportModeBtn);
+    expect(reportModeBtn.className).toContain("modeBtnActive");
+
+    await user.click(workbenchModeBtn);
+    expect(workbenchModeBtn.className).toContain("modeBtnActive");
+  });
 });
+

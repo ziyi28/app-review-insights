@@ -3,24 +3,45 @@
   grid-template-rows: auto 1fr;
   height: 100vh;
   min-height: 0;
+  background: var(--bg);
 }
 
 .header {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 16px;
+  padding: 0 18px;
   height: var(--header-height);
   border-bottom: 1px solid var(--border);
   background: var(--bg-panel);
   flex-shrink: 0;
+  z-index: 10;
+}
+
+.brandWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.brandLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  background: var(--text);
+  color: var(--bg);
 }
 
 .brand {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 600;
   white-space: nowrap;
+  letter-spacing: -0.01em;
+  color: var(--text);
 }
 
 .spacer {
@@ -33,94 +54,144 @@
   gap: 6px;
 }
 
+.modeSwitcher {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  gap: 2px;
+}
+
+.modeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: calc(var(--radius-sm) - 2px);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.modeBtn:hover {
+  color: var(--text);
+}
+
+.modeBtnActive {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  color: var(--text);
+  box-shadow: var(--shadow-sm);
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.langSelect {
+  width: auto;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 120ms ease, background-color 120ms ease;
+}
+
+.langSelect:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+}
+
+.langSelect:focus-visible {
+  box-shadow: var(--focus);
+  border-color: var(--accent);
+}
+
 /* Idle: centered wizard */
 .idle {
   overflow-y: auto;
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 48px 20px;
+  background: radial-gradient(circle at 50% 15%, var(--bg-subtle) 0%, var(--bg) 75%);
 }
 
 .wizardCard {
   width: 100%;
-  max-width: 640px;
-  padding: 24px;
+  max-width: 620px;
+  padding: 28px;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   background: var(--bg-panel);
+  box-shadow: var(--shadow-lg);
 }
 
 .waiting {
   color: var(--text-muted);
   margin: 16px 0 0;
   font-size: 13px;
+  text-align: center;
 }
 
-/* Starting (run in flight, no accepted event yet) */
+/* Starting */
 .startingWrap {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
 }
 
 .starting {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
+  gap: 10px;
+  padding: 12px 20px;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--bg-panel);
   font-size: 13px;
+  color: var(--text);
+  box-shadow: var(--shadow-md);
 }
 
 .startingDot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--accent);
   flex-shrink: 0;
   animation: pulse 1.2s ease-in-out infinite;
 }
 
-/* Active run: stage rail + content */
+/* Active run: modern 2-pane workbench layout */
 .workbench {
-  display: grid;
-  grid-template-columns: var(--stage-rail-width) 1fr;
+  display: flex;
   min-height: 0;
+  height: 100%;
   overflow: hidden;
 }
 
-.rail {
-  border-right: 1px solid var(--border);
-  padding: 14px;
-  overflow-y: auto;
-  background: var(--bg-panel);
-}
-
-.railError {
-  color: var(--danger);
-  font-size: 13px;
-}
-
-.railRunning {
-  color: var(--accent);
-  font-size: 13px;
-}
-
-.railDropped {
-  color: var(--warn);
-  font-size: 12px;
-}
-
 .content {
-  padding: 16px;
+  flex: 1;
+  padding: 20px 28px;
   overflow-y: auto;
   min-width: 0;
+  background: var(--bg);
 }
 
 .progressRow {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }

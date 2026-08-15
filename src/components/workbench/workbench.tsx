@@ -5,6 +5,7 @@ import type { Dictionary, Locale } from "@/i18n";
 import { getDictionary } from "@/i18n";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
+import type { RunEvent } from "@/domain/contracts/events";
 import { useRunStream, LAST_RUN_ID_KEY, TERMINAL_STATUSES } from "@/hooks/use-run-stream";
 import { useArtifactVersions } from "@/hooks/use-artifact-versions";
 import { RunForm } from "./run-form";
@@ -12,23 +13,22 @@ import { StageRail } from "./stage-rail";
 import { LiveProgress } from "./live-progress";
 import { SettingsPanel } from "./settings-panel";
 import { HistoryPanel } from "./history-panel";
-import { TabList } from "./tab-list";
+import { Sidebar, type TabId } from "./sidebar";
+import { Icon } from "@/components/ui/icons";
 import { RunLogPanel } from "./run-log-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
 import { RatingDistribution, VersionDistribution, LanguageDistribution } from "@/components/artifacts/stats-panels";
 import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, ArtifactPhaseSelector, FinalDeliverablesPanel } from "@/components/artifacts/workflow-panels";
 import { ProvenanceBadge } from "./provenance-badge";
+import { ExecutiveReport } from "./executive-report";
 import type { VersionPlanArtifact } from "@/domain/contracts/analysis";
 import styles from "./workbench.module.css";
 
-type Tab = "overview" | "raw" | "cleaned" | "classification" | "topics" | "findings" | "evidence" | "versions" | "prd" | "tests" | "traceability" | "deliverables" | "diagnostics";
+type Tab = TabId;
 
-// Stage order for auto-advancing the tab as artifacts land. When a run is in
-// flight and the user has not taken over by clicking a tab, the UI follows the
-// newest artifact to its tab so results appear without manual clicks. Only
-// applies while a live run is `running` — viewing a completed history run stays
-// pinned to Overview.
+type ViewMode = "workbench" | "report";
+
 const AUTO_ADVANCE_ORDER: { key: keyof ArtifactCache; tab: Tab }[] = [
   { key: "topicCandidates", tab: "classification" },
   { key: "topics", tab: "topics" },
@@ -39,22 +39,6 @@ const AUTO_ADVANCE_ORDER: { key: keyof ArtifactCache; tab: Tab }[] = [
   { key: "tests", tab: "tests" },
   { key: "traceability", tab: "traceability" },
   { key: "finalReport", tab: "deliverables" },
-];
-
-const TABS: { id: Tab; labelKey: keyof Dictionary }[] = [
-  { id: "overview", labelKey: "overview" },
-  { id: "raw", labelKey: "rawReviews" },
-  { id: "cleaned", labelKey: "cleanedData" },
-  { id: "classification", labelKey: "classification" },
-  { id: "topics", labelKey: "topics" },
-  { id: "findings", labelKey: "findings" },
-  { id: "evidence", labelKey: "evidenceValidation" },
-  { id: "versions", labelKey: "versionPlan" },
-  { id: "prd", labelKey: "prd" },
-  { id: "tests", labelKey: "testCases" },
-  { id: "traceability", labelKey: "traceability" },
-  { id: "deliverables", labelKey: "finalDeliverables" },
-  { id: "diagnostics", labelKey: "runLog" },
 ];
 
 type SourceEvidence = {
@@ -77,6 +61,38 @@ type GoalCoverageArtifact = {
   retried: boolean;
   items: { focusAreaId: string; label: string; status: "covered" | "unsupported" | "uncovered"; findingIds: string[]; requirementIds: string[] }[];
 };
+
+function RunDuration({ events, running }: { events: RunEvent[]; running: boolean }) {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    if (!running) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [running]);
+
+  const durationStr = useMemo(() => {
+    if (events.length === 0) return null;
+    const startEvent = events.find((e) => e.type === "run.accepted") ?? events[0];
+    const endEvent = events.find((e) => e.type === "run.completed" || e.type === "run.failed");
+    const startTime = new Date(startEvent.timestamp).getTime();
+    const endTime = endEvent ? new Date(endEvent.timestamp).getTime() : now;
+    const elapsed = Math.max(0, endTime - startTime);
+    const min = Math.floor(elapsed / 60000);
+    const sec = Math.floor((elapsed % 60000) / 1000);
+    return `${min}m ${sec}s`;
+  }, [events, now]);
+
+  if (!durationStr) return null;
+  return (
+    <span className="chip chip-muted" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <polyline points="12 6 12 12 16 14" />
+      </svg>
+      {durationStr}
+    </span>
+  );
+}
 
 type ArtifactCache = {
   runId: string | null;
@@ -112,6 +128,7 @@ export function Workbench() {
 
   const { runId, status, events, running, reconnecting, error, droppedEvents, canRetry, start, reset, retry, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
+  const [viewMode, setViewMode] = useState<ViewMode>("workbench");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
   const [historyOpen, setHistoryOpen] = useState(false);
   const [configStatus, setConfigStatus] = useState<ConfigStatus>({ modelConfigured: false, serpApiConfigured: false });
@@ -259,12 +276,15 @@ export function Workbench() {
   useEffect(() => {
     if (!running) return;
     if (userNavigated.current) return;
+    let jumpedTarget: Tab | null = null;
     for (const { key, tab: target } of AUTO_ADVANCE_ORDER) {
       if (cache[key] !== undefined && !autoJumpedKeys.current.has(key)) {
         autoJumpedKeys.current.add(key);
-        setTab(target);
-        break;
+        jumpedTarget = target;
       }
+    }
+    if (jumpedTarget) {
+      setTab(jumpedTarget);
     }
   }, [cache, running]);
 
@@ -345,11 +365,15 @@ export function Workbench() {
       };
       if (manifest.startRequest) {
         const req = manifest.startRequest;
-        // If retrying a historical live run, strip previewId so it freshly collects from App Store without stale preview snapshot issues
+        // If retrying a historical live run, strip previewId so it freshly collects or leverages local cache without stale preview snapshot issues
         requestToStart = {
           ...req,
           source: req.source?.kind === "live" && req.source.appStoreUrl
-            ? { kind: "live", appStoreUrl: req.source.appStoreUrl }
+            ? {
+                kind: "live",
+                appStoreUrl: req.source.appStoreUrl,
+                ...(req.source.reviewSelection ? { reviewSelection: req.source.reviewSelection } : {}),
+              }
             : req.source,
         };
       } else if (manifest.appUrl && manifest.goal) {
@@ -463,7 +487,13 @@ export function Workbench() {
 
       {/* Header */}
       <header className={styles.header}>
-        <h1 className={styles.brand}>{t.appTitle}</h1>
+        <div className={styles.brandWrap}>
+          <div className={styles.brandLogo}>
+            <Icon name="sparkles" size={14} />
+          </div>
+          <h1 className={styles.brand}>{t.appTitle}</h1>
+        </div>
+
         <div className={styles.headerStatus}>
           <span className={configStatus.modelConfigured ? "chip chip-ok" : "chip chip-muted"} title={t.modelStatus}>
             {t.modelStatus}: {configStatus.modelConfigured ? t.modelConfigured : t.modelNotConfigured}
@@ -471,27 +501,62 @@ export function Workbench() {
           <span className="chip chip-accent" title={t.collectionStatus}>
             {t.collectionStatus}: {t.collectionConfigured}
           </span>
+          <RunDuration events={events} running={running} />
         </div>
+
         <span className={styles.spacer} />
+
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
-        {runFailed ? (
-          <button className="btn btn-primary" onClick={handleRetryCurrent} disabled={isRetrying}>
-            {isRetrying ? t.retrying : t.retry}
+
+        <div className={styles.modeSwitcher} role="group" aria-label={t.viewModeWorkbench}>
+          <button
+            type="button"
+            className={`${styles.modeBtn} ${viewMode === "workbench" ? styles.modeBtnActive : ""}`}
+            onClick={() => setViewMode("workbench")}
+          >
+            <Icon name="overview" size={13} />
+            <span>{t.viewModeWorkbench}</span>
           </button>
-        ) : null}
-        <button className="btn btn-primary" onClick={handleNewRun} disabled={isRetrying}>
-          {t.newRun}
-        </button>
-        <button className="btn btn-secondary" onClick={() => setHistoryOpen(true)}>
-          {t.history}
-        </button>
-        <button className="btn btn-secondary" onClick={() => setSettingsOpen(true)}>
-          {t.settings}
-        </button>
-        <select className="field" value={uiLocale} onChange={(e) => setUiLocale(e.target.value as Locale)} aria-label={t.language} style={{ width: "auto", padding: "6px 8px" }}>
-          <option value="en">English</option>
-          <option value="zh-CN">中文</option>
-        </select>
+          <button
+            type="button"
+            className={`${styles.modeBtn} ${viewMode === "report" ? styles.modeBtnActive : ""}`}
+            onClick={() => setViewMode("report")}
+          >
+            <Icon name="report" size={13} />
+            <span>{t.viewModeReport}</span>
+          </button>
+        </div>
+
+        <div className={styles.headerActions}>
+          {runFailed ? (
+            <button className="btn btn-danger" onClick={handleRetryCurrent} disabled={isRetrying}>
+              <Icon name="refresh" size={13} />
+              <span>{isRetrying ? t.retrying : t.retry}</span>
+            </button>
+          ) : null}
+          <button className="btn btn-primary" onClick={handleNewRun} disabled={isRetrying}>
+            <Icon name="plus" size={13} />
+            <span>{t.newRun}</span>
+          </button>
+          <button className="btn btn-ghost" onClick={() => setHistoryOpen(true)} title={t.history}>
+            <Icon name="history" size={13} />
+            <span>{t.history}</span>
+          </button>
+          <button className="btn btn-ghost" onClick={() => setSettingsOpen(true)} title={t.settings}>
+            <Icon name="settings" size={13} />
+            <span>{t.settings}</span>
+          </button>
+          <select
+            className={styles.langSelect}
+            value={uiLocale}
+            onChange={(e) => setUiLocale(e.target.value as Locale)}
+            aria-label={t.language}
+          >
+            <option value="en">English</option>
+            <option value="zh-CN">中文</option>
+          </select>
+        </div>
+
         <SettingsPanel
           t={t}
           open={settingsOpen}
@@ -531,28 +596,31 @@ export function Workbench() {
         </div>
       ) : (
         <div className={styles.workbench}>
-          {/* Left: stage rail */}
-          <aside className={styles.rail}>
-            <StageRail events={events} t={t} />
-            {error ? <p className={styles.railError}>{error}</p> : null}
-            {running ? <p className={styles.railRunning}>{t.running}</p> : null}
-            {reconnecting ? <p className={styles.railRunning}>{t.reconnecting}</p> : null}
-            {!running && droppedEvents > 0 ? <p className={styles.railDropped}>{t.someEventsDropped}</p> : null}
-          </aside>
+          {/* Left: Sidebar Navigation */}
+          <Sidebar
+            activeTab={tab}
+            onSelectTab={(id) => setTab(id)}
+            viewMode={viewMode}
+            onSelectViewMode={(mode) => setViewMode(mode)}
+            t={t}
+            onUserNavigate={() => {
+              userNavigated.current = true;
+            }}
+          />
 
-          {/* Right: tabs + content */}
+          {/* Right: main content */}
           <main className={styles.content}>
             {runFailed ? (
-              <div className="card" style={{ borderLeft: "4px solid var(--danger)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "12px" }}>
+              <div className="card" style={{ borderLeft: "3px solid var(--danger)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
                 <div style={{ display: "grid", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, color: "var(--danger)" }}>
-                    <span>✗</span>
+                    <Icon name="alertCircle" size={16} />
                     <span>{t.runFailed}</span>
                   </div>
                   {runFailedMessage ? <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)" }}>{runFailedMessage}</p> : null}
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button type="button" className="btn btn-primary" onClick={handleRetryCurrent} disabled={isRetrying}>
+                  <button type="button" className="btn btn-danger" onClick={handleRetryCurrent} disabled={isRetrying}>
                     {isRetrying ? t.retrying : t.retry}
                   </button>
                   <button type="button" className="btn btn-secondary" onClick={handleNewRun} disabled={isRetrying}>
@@ -566,21 +634,26 @@ export function Workbench() {
               <LiveProgress events={events} running={running} t={t} />
             </div>
 
-            <TabList
-              tabs={TABS.map((tabDef) => ({ id: tabDef.id, label: t[tabDef.labelKey] }))}
-              active={tab}
-              label={t.overview}
-              onSelect={(id) => setTab(id as Tab)}
-              onUserNavigate={() => {
-                userNavigated.current = true;
-              }}
-            />
-
-            <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
+            {viewMode === "report" ? (
+              <ExecutiveReport
+                manifest={versions.manifest}
+                findings={cache.findings?.findings ?? []}
+                versionPlan={activeVersionPlan}
+                prd={activePrd}
+                stats={stats ? {
+                  rawCount: stats.rawCount,
+                  includedCount: stats.includedCount,
+                  ratingDistribution: stats.ratingDistribution,
+                } : undefined}
+                goalCoverage={cache.goalCoverage}
+                t={t}
+              />
+            ) : (
+              <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
               {tab === "overview" ? (
-                <div style={{ display: "grid", gap: "12px" }}>
+                <div style={{ display: "grid", gap: "14px" }}>
                   {stats ? (
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "8px" }}>
+                    <div className="stat-grid">
                       {[
                         { k: t.rawReviews, v: stats.rawCount },
                         { k: t.cleanedData, v: stats.includedCount },
@@ -595,45 +668,58 @@ export function Workbench() {
                     </div>
                   ) : null}
                   {stats && (stats.ratingDistribution || stats.versionDistribution || stats.languageDistribution) ? (
-                    <div className="card" style={{ display: "grid", gap: "14px" }}>
+                    <div className="card" style={{ display: "grid", gap: "16px" }}>
                       <div>
-                        <h4 style={{ margin: "0 0 8px" }}>{t.ratingDistribution}</h4>
+                        <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.ratingDistribution}</h4>
                         <RatingDistribution distribution={stats.ratingDistribution ?? {}} t={t} />
                       </div>
                       <div>
-                        <h4 style={{ margin: "0 0 8px" }}>{t.versionDistribution}</h4>
+                        <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.versionDistribution}</h4>
                         <VersionDistribution distribution={stats.versionDistribution ?? {}} t={t} />
                       </div>
                       <div>
-                        <h4 style={{ margin: "0 0 8px" }}>{t.languageDistribution}</h4>
+                        <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.languageDistribution}</h4>
                         <LanguageDistribution distribution={stats.languageDistribution ?? {}} t={t} />
                       </div>
                     </div>
                   ) : null}
                   {cache.analysisSample ? (
                     <div className="card">
-                      <h4 style={{ margin: 0 }}>
-                        {t.sampleAnalyzed}: {cache.analysisSample.selectedCount} {t.sampleOf} {cache.analysisSample.eligibleCount}
-                      </h4>
-                      <p className="muted" style={{ fontSize: "12px", margin: "4px 0 0" }}>
-                        {t.sampleStratified} · {cache.analysisSample.strategy}
+                      <div className="card-header">
+                        <div className="card-title-wrap">
+                          <h4 className="card-title">
+                            {t.sampleAnalyzed}: {cache.analysisSample.selectedCount} {t.sampleOf} {cache.analysisSample.eligibleCount}
+                          </h4>
+                        </div>
+                        <ProvenanceBadge kind="computed" label={cache.analysisSample.strategy} />
+                      </div>
+                      <p className="card-desc muted" style={{ fontSize: "12.5px" }}>
+                        {t.sampleStratified}
                       </p>
                     </div>
                   ) : null}
                   {cache.goalCoverage ? (
                     <div className="card">
-                      <h4 style={{ margin: 0 }}>
-                        {t.goalCoverage} {cache.goalCoverage.valid ? <ProvenanceBadge kind="computed" label={t.goalCoverageCovered} /> : <ProvenanceBadge kind="conflict" label={t.goalCoverageGap} />}
-                      </h4>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "6px", marginTop: "6px" }}>
+                      <div className="card-header">
+                        <div className="card-title-wrap">
+                          <h4 className="card-title">{t.goalCoverage}</h4>
+                        </div>
+                        <ProvenanceBadge
+                          kind={cache.goalCoverage.valid ? "computed" : "conflict"}
+                          label={cache.goalCoverage.valid ? t.goalCoverageCovered : t.goalCoverageGap}
+                        />
+                      </div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px", marginTop: "4px" }}>
                         {cache.goalCoverage.items.map((item) => (
-                          <div key={item.focusAreaId} style={{ padding: "8px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--bg-panel)" }}>
+                          <div key={item.focusAreaId} className="card card-elevated" style={{ padding: "10px 12px", gap: "6px" }}>
                             <div style={{ fontSize: "13px", fontWeight: 600 }}>{item.label}</div>
-                            <ProvenanceBadge
-                              kind={item.status === "covered" ? "computed" : item.status === "uncovered" ? "conflict" : "limitation"}
-                              label={item.status === "covered" ? t.goalCoverageCovered : item.status === "uncovered" ? t.goalCoverageUncovered : t.goalCoverageUnsupported}
-                            />
-                            <div className="muted" style={{ fontSize: "12px", marginTop: "4px" }}>
+                            <div>
+                              <ProvenanceBadge
+                                kind={item.status === "covered" ? "computed" : item.status === "uncovered" ? "conflict" : "limitation"}
+                                label={item.status === "covered" ? t.goalCoverageCovered : item.status === "uncovered" ? t.goalCoverageUncovered : t.goalCoverageUnsupported}
+                              />
+                            </div>
+                            <div className="muted" style={{ fontSize: "12px" }}>
                               {t.findingId}: {item.findingIds.length} · {t.requirementId}: {item.requirementIds.length}
                             </div>
                           </div>
@@ -646,27 +732,63 @@ export function Workbench() {
                     if (!cleaning) return null;
                     return (
                       <div className="card">
-                        <h4 style={{ margin: 0 }}>{t.cleaningUnicode}</h4>
-                        <p className="muted" style={{ fontSize: "13px", margin: "4px 0" }}>
-                          {cleaning.unicodeNormalizedCount} {t.cleaningUnicode} · {cleaning.whitespaceCollapsedCount} {t.cleaningWhitespace} · {cleaning.caseFoldedCount} {t.cleaningCaseFolded}
-                        </p>
-                        <p className="muted" style={{ fontSize: "13px", margin: "4px 0" }}>
-                          {t.cleaningExactDuplicates}: {cleaning.exactDuplicateRemovedCount} · {t.cleaningIdentityConflicts}: {cleaning.identityConflictCount} · {t.cleaningShortKept}: {cleaning.keptShortUniqueCount}
-                        </p>
-                        <p className="muted" style={{ fontSize: "12px", margin: "4px 0 0" }}>
-                          {t.cleaningLanguages}: {cleaning.languageLabels.map((l) => `${l.tag} ${l.count}`).join(" · ")}
-                        </p>
+                        <div className="card-header">
+                          <h4 className="card-title">{t.cleaningUnicode}</h4>
+                        </div>
+                        <div className="card-metadata-grid">
+                          <div className="card-metadata-item">
+                            <span className="card-metadata-label">{t.cleaningUnicode}</span>
+                            <span className="card-metadata-value">{cleaning.unicodeNormalizedCount}</span>
+                          </div>
+                          <div className="card-metadata-item">
+                            <span className="card-metadata-label">{t.cleaningWhitespace}</span>
+                            <span className="card-metadata-value">{cleaning.whitespaceCollapsedCount}</span>
+                          </div>
+                          <div className="card-metadata-item">
+                            <span className="card-metadata-label">{t.cleaningCaseFolded}</span>
+                            <span className="card-metadata-value">{cleaning.caseFoldedCount}</span>
+                          </div>
+                          <div className="card-metadata-item">
+                            <span className="card-metadata-label">{t.cleaningExactDuplicates}</span>
+                            <span className="card-metadata-value">{cleaning.exactDuplicateRemovedCount}</span>
+                          </div>
+                          <div className="card-metadata-item">
+                            <span className="card-metadata-label">{t.cleaningIdentityConflicts}</span>
+                            <span className="card-metadata-value">{cleaning.identityConflictCount}</span>
+                          </div>
+                          <div className="card-metadata-item">
+                            <span className="card-metadata-label">{t.cleaningShortKept}</span>
+                            <span className="card-metadata-value">{cleaning.keptShortUniqueCount}</span>
+                          </div>
+                        </div>
+                        {cleaning.languageLabels.length > 0 ? (
+                          <div className="card-section">
+                            <span className="card-section-title">{t.cleaningLanguages}</span>
+                            <div className="card-badges">
+                              {cleaning.languageLabels.map((l) => (
+                                <span key={l.tag} className="chip chip-muted">
+                                  {l.tag}: {l.count}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ) : null}
                       </div>
                     );
                   })()}
                   {cache.finalReport ? (
                     <div className="card">
-                      <h4 style={{ margin: 0 }}>{t.limitations}</h4>
-                      {(cache.finalReport as { limitations?: { code: string; message: string }[] }).limitations?.map((l, i) => (
-                        <p key={i} style={{ fontSize: "13px", margin: "4px 0" }}>
-                          <ProvenanceBadge kind="limitation" label={l.code} /> {l.message}
-                        </p>
-                      ))}
+                      <div className="card-header">
+                        <h4 className="card-title">{t.limitations}</h4>
+                      </div>
+                      <div style={{ display: "grid", gap: "6px" }}>
+                        {(cache.finalReport as { limitations?: { code: string; message: string }[] }).limitations?.map((l, i) => (
+                          <div key={i} style={{ fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
+                            <ProvenanceBadge kind="limitation" label={l.code} />
+                            <span>{l.message}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   ) : null}
                 </div>
@@ -709,9 +831,10 @@ export function Workbench() {
               {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} goalCoverage={cache.goalCoverage} t={t} /> : null}
               {tab === "diagnostics" ? <RunLogPanel events={events} t={t} /> : null}
             </div>
-          </main>
-        </div>
-      )}
+          )}
+        </main>
+      </div>
+        )}
     </div>
   );
 }
