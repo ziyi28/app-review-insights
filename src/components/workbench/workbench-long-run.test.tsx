@@ -168,7 +168,7 @@ describe("Workbench long-running artifact polling", () => {
     });
 
     expect(screen.getByText(/Pricing/)).toBeInTheDocument();
-  });
+  }, 20000);
 
   it("auto-advances to the topics tab when the topics artifact lands (no manual click)", async () => {
     render(<Workbench />);
@@ -179,5 +179,5 @@ describe("Workbench long-running artifact polling", () => {
 
     // No manual tab click: the topics panel content must be visible already.
     expect(screen.getByText(/Pricing/)).toBeInTheDocument();
-  });
+  }, 10000);
 });

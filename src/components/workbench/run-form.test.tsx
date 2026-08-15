@@ -192,6 +192,24 @@ describe("RunForm", () => {
     expect(screen.queryByText(t.goalTooShort)).not.toBeInTheDocument();
   });
 
+  it("disables Next and shows error when App Store URL is invalid", async () => {
+    const user = userEvent.setup();
+    render(<RunForm t={t} onStart={vi.fn()} />);
+    await user.click(screen.getByRole("radio", { name: new RegExp(t.liveMode) }));
+    await user.type(screen.getByLabelText(t.goal), "long enough goal for test");
+    await user.type(screen.getByLabelText(t.appStoreUrl), "https://google.com/invalid");
+
+    const next = screen.getByRole("button", { name: t.next });
+    expect(next).toBeDisabled();
+    expect(screen.getByText(t.invalidAppStoreUrl)).toBeInTheDocument();
+
+    const urlInput = screen.getByLabelText(t.appStoreUrl);
+    await user.clear(urlInput);
+    await user.type(urlInput, "https://apps.apple.com/us/app/my-app/id999");
+    expect(screen.queryByText(t.invalidAppStoreUrl)).not.toBeInTheDocument();
+    expect(next).toBeEnabled();
+  });
+
   it("shows forced-fresh SerpApi reviews and the number of searches", async () => {
     stubFetch(previewSummary({ provider: "serpapi", liveCount: 500, searchCount: 2 }));
     const user = userEvent.setup();

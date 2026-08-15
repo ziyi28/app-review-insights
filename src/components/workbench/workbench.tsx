@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Dictionary, Locale } from "@/i18n";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
+import type { Locale } from "@/i18n";
 import { getDictionary } from "@/i18n";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
@@ -9,7 +9,6 @@ import type { RunEvent } from "@/domain/contracts/events";
 import { useRunStream, LAST_RUN_ID_KEY, TERMINAL_STATUSES } from "@/hooks/use-run-stream";
 import { useArtifactVersions } from "@/hooks/use-artifact-versions";
 import { RunForm } from "./run-form";
-import { StageRail } from "./stage-rail";
 import { LiveProgress } from "./live-progress";
 import { SettingsPanel } from "./settings-panel";
 import { HistoryPanel } from "./history-panel";
@@ -62,13 +61,27 @@ type GoalCoverageArtifact = {
   items: { focusAreaId: string; label: string; status: "covered" | "unsupported" | "uncovered"; findingIds: string[]; requirementIds: string[] }[];
 };
 
+function subscribeTimer(callback: () => void) {
+  const interval = setInterval(callback, 1000);
+  return () => clearInterval(interval);
+}
+
+function getTimerSnapshot() {
+  return Date.now();
+}
+
+function getServerTimerSnapshot() {
+  return 0;
+}
+
+const noopSubscribe = () => () => {};
+
 function RunDuration({ events, running }: { events: RunEvent[]; running: boolean }) {
-  const [now, setNow] = useState(Date.now());
-  useEffect(() => {
-    if (!running) return;
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(interval);
-  }, [running]);
+  const now = useSyncExternalStore(
+    running ? subscribeTimer : noopSubscribe,
+    getTimerSnapshot,
+    getServerTimerSnapshot,
+  );
 
   const durationStr = useMemo(() => {
     if (events.length === 0) return null;
@@ -84,7 +97,7 @@ function RunDuration({ events, running }: { events: RunEvent[]; running: boolean
 
   if (!durationStr) return null;
   return (
-    <span className="chip chip-muted" style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+    <span className={styles.headerDuration}>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="10" />
         <polyline points="12 6 12 12 16 14" />
@@ -126,7 +139,7 @@ export function Workbench() {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
 
-  const { runId, status, events, running, reconnecting, error, droppedEvents, canRetry, start, reset, retry, loadHistory } = useRunStream();
+  const { runId, status, events, running, reconnecting, error, canRetry, start, reset, retry, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [viewMode, setViewMode] = useState<ViewMode>("workbench");
   const [cache, setCache] = useState<ArtifactCache>({ runId: null });
