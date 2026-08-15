@@ -28,13 +28,19 @@ type Tab = TabId;
 
 type ViewMode = "workbench" | "report";
 
+let timerNow = 0;
+
 function subscribeTimer(callback: () => void) {
-  const interval = setInterval(callback, 1000);
+  timerNow = Date.now();
+  const interval = setInterval(() => {
+    timerNow = Date.now();
+    callback();
+  }, 1000);
   return () => clearInterval(interval);
 }
 
 function getTimerSnapshot() {
-  return Date.now();
+  return timerNow;
 }
 
 function getServerTimerSnapshot() {
