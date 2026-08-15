@@ -200,12 +200,16 @@ export function RequirementsPanel({
           <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
             {t.reviewId}: <ReviewIdList reviewIds={r.sourceReviewIds} onJumpToReview={onJumpToReview} limit={5} />
           </p>
+          <div style={{ margin: "4px 0 2px" }}>
+            <ProvenanceBadge kind="computed" label={t.acceptanceCriteriaProvenance} />
+          </div>
           <ul style={{ margin: "4px 0", fontSize: "13px", paddingLeft: "20px" }}>
             {r.acceptanceCriteria.map((c, i) => (
               <li key={i}>{c}</li>
             ))}
           </ul>
         </div>
+
       ))}
       {assumptions.length > 0 ? (
         <div>

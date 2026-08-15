@@ -38,3 +38,19 @@ export function reviewIdsFromFindings(findings: { supportingReviewIds: string[] 
   }
   return [...ids];
 }
+
+/**
+ * Resolves overlap between supporting and conflicting review citations.
+ * When a review is cited in both sets, the conservative policy removes it from
+ * supporting and keeps it in conflicting, preventing inflated positive support.
+ */
+export function resolveSupportConflictOverlap(
+  supportingReviewIds: string[],
+  conflictingReviewIds: string[],
+): { supporting: string[]; conflicting: string[]; removed: string[] } {
+  const conflictSet = new Set(conflictingReviewIds);
+  const removed = supportingReviewIds.filter((id) => conflictSet.has(id));
+  const supporting = supportingReviewIds.filter((id) => !conflictSet.has(id));
+  return { supporting, conflicting: conflictingReviewIds, removed };
+}
+

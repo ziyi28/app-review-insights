@@ -96,7 +96,18 @@ export function validateTraceability(
     if (f.supportingSampleCount !== new Set(f.supportingReviewIds).size) {
       violations.push({ code: "SAMPLE_COUNT_MISMATCH", message: `${f.id} sample count mismatch`, entity: f.id });
     }
+    const conflictSet = new Set(f.conflictingReviewIds);
+    for (const id of f.supportingReviewIds) {
+      if (conflictSet.has(id)) {
+        violations.push({
+          code: "FINDING_CONFLICT_OVERLAP",
+          message: `${f.id} cites ${id} as both supporting and conflicting`,
+          entity: f.id,
+        });
+      }
+    }
     const excerpted = new Set(f.evidenceExcerpts.map((e) => e.reviewId));
+
     for (const id of f.supportingReviewIds) {
       if (!excerpted.has(id)) {
         violations.push({ code: "FINDING_MISSING_EXCERPT", message: `${f.id} supporting review ${id} has no exact excerpt`, entity: f.id });

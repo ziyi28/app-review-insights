@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Locale } from "@/i18n";
 import { getDictionary, translateCode } from "@/i18n";
-import type { Finding, Prd } from "@/domain/contracts/analysis";
-import type { NormalizedReview } from "@/domain/contracts/review";
+
 import type { RunEvent } from "@/domain/contracts/events";
-import { useRunStream, LAST_RUN_ID_KEY, TERMINAL_STATUSES } from "@/hooks/use-run-stream";
-import { useArtifactVersions } from "@/hooks/use-artifact-versions";
+import { useRunStream, LAST_RUN_ID_KEY } from "@/hooks/use-run-stream";
+
+
+import { useRunArtifacts } from "@/hooks/use-run-artifacts";
 import { RunForm } from "./run-form";
 import { LiveProgress } from "./live-progress";
 import { SettingsPanel } from "./settings-panel";
@@ -21,45 +22,11 @@ import { RatingDistribution, VersionDistribution, LanguageDistribution } from "@
 import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, ArtifactPhaseSelector, FinalDeliverablesPanel } from "@/components/artifacts/workflow-panels";
 import { ProvenanceBadge } from "./provenance-badge";
 import { ExecutiveReport } from "./executive-report";
-import type { VersionPlanArtifact } from "@/domain/contracts/analysis";
 import styles from "./workbench.module.css";
 
 type Tab = TabId;
 
 type ViewMode = "workbench" | "report";
-
-const AUTO_ADVANCE_ORDER: { key: keyof ArtifactCache; tab: Tab }[] = [
-  { key: "topicCandidates", tab: "classification" },
-  { key: "topics", tab: "topics" },
-  { key: "findings", tab: "findings" },
-  { key: "evidenceValidation", tab: "evidence" },
-  { key: "versionPlan", tab: "versions" },
-  { key: "prd", tab: "prd" },
-  { key: "tests", tab: "tests" },
-  { key: "traceability", tab: "traceability" },
-  { key: "finalReport", tab: "deliverables" },
-];
-
-type SourceEvidence = {
-  kind: "app-store-reviews" | "apple-rss" | "import";
-  provider?: "serpapi" | "apple-rss" | "socialcrawl";
-  selection?: "live" | "stable";
-};
-
-type AnalysisSampleArtifact = {
-  strategy: string;
-  eligibleCount: number;
-  selectedCount: number;
-  limit: number;
-  selectedReviewIds: string[];
-  layers: { rating: number; language: string; candidates: number; selected: number }[];
-};
-
-type GoalCoverageArtifact = {
-  valid: boolean;
-  retried: boolean;
-  items: { focusAreaId: string; label: string; status: "covered" | "unsupported" | "uncovered"; findingIds: string[]; requirementIds: string[] }[];
-};
 
 function subscribeTimer(callback: () => void) {
   const interval = setInterval(callback, 1000);
@@ -107,25 +74,6 @@ function RunDuration({ events, running }: { events: RunEvent[]; running: boolean
   );
 }
 
-type ArtifactCache = {
-  runId: string | null;
-  scope?: unknown;
-  cleaned?: { reviews: unknown[]; stats?: unknown; cleaning?: unknown };
-  stats?: unknown;
-  analysisSample?: AnalysisSampleArtifact;
-  sourceEvidence?: SourceEvidence;
-  topicCandidates?: { candidates: { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string }[] };
-  topics?: { topics: { id: string; label: string; description: string; reviewIds: string[] }[] };
-  findings?: { findings: Finding[] };
-  evidenceValidation?: unknown;
-  goalCoverage?: GoalCoverageArtifact;
-  versionPlan?: VersionPlanArtifact;
-  prd?: Prd;
-  tests?: { tests: Prd["tests"] };
-  traceability?: { valid: boolean; violations: { code: string; message: string }[] };
-  finalReport?: { prd?: Prd; report?: { valid: boolean; violations: { code: string; message: string }[] }; limitations?: unknown[]; goalCoverage?: GoalCoverageArtifact };
-};
-
 type ConfigStatus = { modelConfigured: boolean; serpApiConfigured: boolean };
 
 export function Workbench() {
@@ -143,16 +91,47 @@ export function Workbench() {
   const [tab, setTab] = useState<Tab>("overview");
   const [viewMode, setViewMode] = useState<ViewMode>("workbench");
   const [reviewSearchQuery, setReviewSearchQuery] = useState<string>("");
-  const [cache, setCache] = useState<ArtifactCache>({ runId: null });
   const [historyOpen, setHistoryOpen] = useState(false);
   const [configStatus, setConfigStatus] = useState<ConfigStatus>({ modelConfigured: false, serpApiConfigured: false });
 
-  // Auto-advance bookkeeping: which artifact keys we already jumped to, and
-  // whether the user has manually chosen a tab (which stops auto-advancing for
-  // the rest of the run). Declared before the URL-restore effect below, which
-  // reads and mutates `userNavigated`.
-  const autoJumpedKeys = useRef<Set<keyof ArtifactCache>>(new Set());
   const userNavigated = useRef(false);
+
+  const {
+    cache,
+    cleanedReviews,
+    stats,
+    versions,
+    prdPhase,
+    setPrdPhase,
+    prdDraft,
+    prdFinal,
+    activePrd,
+    testsPhase,
+    setTestsPhase,
+    testsFinal,
+    activeTests,
+    tracePhase,
+    setTracePhase,
+    traceDraft,
+    traceFinal,
+    activeTrace,
+    versionPhase,
+    setVersionPhase,
+    versionPlanFinal,
+    activeVersionPlan,
+    resetArtifacts,
+  } = useRunArtifacts({
+    runId,
+    status,
+    events,
+    running,
+    tab,
+    userNavigatedRef: userNavigated,
+    onAutoAdvanceTab: (jumpedTab) => {
+      setTab(jumpedTab);
+    },
+  });
+
 
   // URL state persistence (tab & mode). The restore is deferred to a microtask
   // so it isn't a synchronous setState inside the effect (which the compiler
@@ -200,6 +179,7 @@ export function Workbench() {
   }, []);
 
   const handleSelectTab = useCallback((nextTab: Tab) => {
+    userNavigated.current = true;
     setTab(nextTab);
     updateUrlState(nextTab, viewMode);
   }, [viewMode, updateUrlState]);
@@ -283,187 +263,11 @@ export function Workbench() {
     return { kind: "source" as const, label: t.sourceLive };
   }, [events, cache.sourceEvidence, t]);
 
-  // Load artifacts as they become available via the event stream.
-  const artifactNameToKey = useMemo(() => {
-    const map: Record<string, keyof ArtifactCache> = {
-      "scope": "scope",
-      "cleaned-reviews": "cleaned",
-      "stats": "stats",
-      "analysis-sample": "analysisSample",
-      "source-evidence": "sourceEvidence",
-      "topic-candidates": "topicCandidates",
-      "topics": "topics",
-      "findings": "findings",
-      "evidence-validation": "evidenceValidation",
-      "goal-coverage": "goalCoverage",
-      "version-plan": "versionPlan",
-      "prd": "prd",
-      "tests": "tests",
-      "traceability": "traceability",
-      "final-report": "finalReport",
-    };
-    return map;
-  }, []);
-
-  // Derive the artifact attempts that have been announced by the event stream.
-  // The UI only fetches an artifact once its `artifact.available` event has
-  // arrived — never by unconditionally polling every name. A revised attempt 2
-  // replaces attempt 1 because the map tracks the latest announced attempt.
-  const availableArtifacts = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const e of events) {
-      if (e.type === "artifact.available") {
-        const d = e.data as { artifact?: string; attempt?: number };
-        if (d.artifact) map.set(d.artifact, d.attempt ?? 1);
-      }
-    }
-    return map;
-  }, [events]);
-
-  // Fetch each announced artifact exactly once, keyed by name+attempt+runId so a
-  // stale request can never overwrite a newer attempt or a different run.
-  const loadedArtifactKeys = useRef<Set<string>>(new Set());
-  const seenRunId = useRef<string | null>(null);
-
-  // Artifact phase selectors (Draft/Final). Declared before the runId effect
-  // below, which resets them to "draft" whenever the run changes.
-  const [prdPhase, setPrdPhase] = useState<"draft" | "final">("draft");
-  const [testsPhase, setTestsPhase] = useState<"draft" | "final">("draft");
-  const [tracePhase, setTracePhase] = useState<"draft" | "final">("draft");
-  const [versionPhase, setVersionPhase] = useState<"draft" | "final">("draft");
-
-  useEffect(() => {
-    if (!runId) {
-      if (seenRunId.current !== null) {
-        seenRunId.current = null;
-        loadedArtifactKeys.current.clear();
-        setCache({ runId: null });
-        setTab("overview");
-        setPrdPhase("draft");
-        setTestsPhase("draft");
-        setTracePhase("draft");
-        setVersionPhase("draft");
-        autoJumpedKeys.current.clear();
-        userNavigated.current = false;
-      }
-      return;
-    }
-    if (seenRunId.current !== runId) {
-      seenRunId.current = runId;
-      loadedArtifactKeys.current.clear();
-      setCache({ runId });
-      setTab("overview");
-      setPrdPhase("draft");
-      setTestsPhase("draft");
-      setTracePhase("draft");
-      setVersionPhase("draft");
-      autoJumpedKeys.current.clear();
-      userNavigated.current = false;
-    }
-    let cancelled = false;
-    const fetchMissing = async () => {
-      for (const [name, attempt] of availableArtifacts) {
-        const key = artifactNameToKey[name];
-        if (!key) continue;
-        const loadKey = `${runId}:${name}:${attempt}`;
-        if (loadedArtifactKeys.current.has(loadKey)) continue;
-        loadedArtifactKeys.current.add(loadKey);
-        try {
-          const res = await fetch(`/api/runs/${runId}/artifacts/${name}?attempt=${attempt}`, { cache: "no-store" });
-          if (!res.ok) {
-            loadedArtifactKeys.current.delete(loadKey);
-            continue;
-          }
-          const value = await res.json();
-          if (!cancelled) setCache((c) => ({ ...c, runId, [key]: value }));
-        } catch {
-          loadedArtifactKeys.current.delete(loadKey);
-        }
-      }
-    };
-    void fetchMissing();
-    return () => {
-      cancelled = true;
-    };
-  }, [runId, availableArtifacts, artifactNameToKey]);
-
-  // Auto-advance the active tab to the newest artifact as it lands, so a live
-  // run shows results without manual clicking. Stops the moment the user picks
-  // a tab themselves (userNavigated), once a key has already been followed, or
-  // once the run is no longer in flight (a completed history view stays pinned
-  // to Overview rather than jumping to whichever tab loaded last).
-  useEffect(() => {
-    if (!running) return;
-    if (userNavigated.current) return;
-    let jumpedTarget: Tab | null = null;
-    for (const { key, tab: target } of AUTO_ADVANCE_ORDER) {
-      if (cache[key] !== undefined && !autoJumpedKeys.current.has(key)) {
-        autoJumpedKeys.current.add(key);
-        jumpedTarget = target;
-      }
-    }
-    if (jumpedTarget) {
-      setTab(jumpedTarget);
-    }
-  }, [cache, running]);
-
-  const cleanedReviews = useMemo(() => {
-    const prepared = cache.cleaned as { reviews?: NormalizedReview[] } | undefined;
-    if (!prepared?.reviews) return [] as NormalizedReview[];
-    const all = prepared.reviews;
-    const included = all.filter((r) => r.includedInAnalysis);
-    if (tab === "raw") return all;
-    return included;
-  }, [cache.cleaned, tab]);
-
-  const stats = useMemo(() => {
-    const s = (cache.stats ??
-      (cache.cleaned as { stats?: unknown } | undefined)?.stats) as
-      | {
-          rawCount: number;
-          includedCount: number;
-          duplicateCount: number;
-          identityConflictCount: number;
-          ratingDistribution: Record<number, number>;
-          versionDistribution: Record<string, number>;
-          languageDistribution: Record<string, number>;
-        }
-      | undefined;
-    return s;
-  }, [cache.stats, cache.cleaned]);
-
-  // Terminal state: fetch the Draft/Final artifact pairs once the run finishes
-  // so revised runs show attempt 1 vs attempt 2 and never a stale draft.
-  const terminal = status !== null && TERMINAL_STATUSES.includes(status);
-  const versions = useArtifactVersions(runId, terminal);
-
-  // Authoritative panels: during a run use the live cache (marked Draft); at
-  // terminal, prefer the hook's attempt 1/latest pair. A never-revised run
-  // shows the draft as the final (no revision required).
-  const prdDraft = (terminal ? versions.prd.draft : null) ?? cache.prd ?? null;
-  const prdFinal = (terminal ? versions.prd.final : null) ?? cache.finalReport?.prd ?? null;
-  const testsDraft = (terminal ? versions.tests.draft?.tests : null) ?? cache.tests?.tests ?? [];
-  const testsFinal = (terminal ? versions.tests.final?.tests : null) ?? cache.finalReport?.prd?.tests ?? [];
-  const traceDraft = (terminal ? versions.traceability.draft : null) ?? cache.traceability ?? null;
-  const traceFinal = (terminal ? versions.traceability.final : null) ?? cache.finalReport?.report ?? null;
-  const versionPlanDraft = (terminal ? versions.versionPlan.draft : null) ?? cache.versionPlan ?? null;
-  const versionPlanFinal = (terminal ? versions.versionPlan.final : null) ?? null;
-
-  const activePrd = prdPhase === "final" && prdFinal ? prdFinal : prdDraft;
-  const activeTests = testsPhase === "final" && testsFinal.length > 0 ? testsFinal : testsDraft;
-  const activeTrace = tracePhase === "final" && traceFinal ? traceFinal : traceDraft;
-  const activeVersionPlan = versionPhase === "final" && versionPlanFinal ? versionPlanFinal : versionPlanDraft;
 
   const handleNewRun = () => {
     reset();
-    seenRunId.current = null;
-    setCache({ runId: null });
+    resetArtifacts();
     setTab("overview");
-    setPrdPhase("draft");
-    setTestsPhase("draft");
-    setTracePhase("draft");
-    setVersionPhase("draft");
-    autoJumpedKeys.current.clear();
     userNavigated.current = false;
   };
 
@@ -513,16 +317,15 @@ export function Workbench() {
     }
 
     if (requestToStart) {
-      seenRunId.current = null;
-      setCache({ runId: null });
+      resetArtifacts();
       setTab("overview");
-      autoJumpedKeys.current.clear();
       userNavigated.current = false;
       void start(requestToStart);
     } else {
       loadHistory(sourceRunId);
     }
-  }, [start, loadHistory, uiLocale]);
+  }, [start, loadHistory, uiLocale, resetArtifacts]);
+
 
   // Refresh recovery: on mount, restore the latest in-flight run (or the last
   // viewed run) so a page refresh keeps monitoring the same analysis. A stored

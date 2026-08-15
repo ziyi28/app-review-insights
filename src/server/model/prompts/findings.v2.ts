@@ -40,7 +40,9 @@ RULES
   finding look unanimous; a mixed verdict is a valid, more honest finding.
 - Distinguish what is supported by evidence (summary) from what is uncertain or
   limited (uncertainties, limitations).
+- The summary must only state details backed by an exact excerpt; do not name specific examples that are not among the evidenceExcerpts.
 - Do not invent requirements or solutions here.
+
 - "focusAreas" lists the goal dimensions the user asked to cover. When a
   finding serves one of them, reference its exact id in "focusAreaIds". Prefer
   findings that serve a goal dimension.

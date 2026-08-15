@@ -347,4 +347,17 @@ describe("validateTraceability", () => {
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REQUIREMENT_DEPENDENCY_LATE")).toBe(true);
   });
+
+  it("flags a finding citing the same review as both supporting and conflicting", () => {
+    const prd = makePrd();
+    prd.findings[0].conflictingReviewIds = ["r1"];
+    const report = validateTraceability(prd, ["r1", "r2"]);
+    expect(report.valid).toBe(false);
+    expect(report.violations).toContainEqual({
+      code: "FINDING_CONFLICT_OVERLAP",
+      message: "finding-1 cites r1 as both supporting and conflicting",
+      entity: "finding-1",
+    });
+  });
 });
+

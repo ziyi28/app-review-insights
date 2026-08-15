@@ -654,12 +654,15 @@ export async function executeRun(
       await endStage("revision");
     }
 
-    // Final report. A run whose traceability is still invalid after one
-    // constrained revision is a FAILED run (manifest status failed, terminal
-    // run.failed event) — never a "completed" success. goalCoverage is carried
-    // both on the prd bundle and at the report top level (optional, old runs
-    // lack it).
+    // Final report artifact.
+    // Responsibility: Serves as the raw structured deliverable aggregator + traceability report
+    // (combines final PRD, validation report, pipeline limitations, and goal coverage ledger).
+    // Note: Human-facing narrative executive summary is synthesized client-side in executive-report.tsx.
+    // A run whose traceability is still invalid after one constrained revision is a FAILED run
+    // (manifest status failed, terminal run.failed event) — never a "completed" success.
+    // goalCoverage is carried both on the prd bundle and at the report top level (optional, old runs lack it).
     await publishArtifact("final-report", 1, { prd, report, limitations, goalCoverage: goalCoverageArtifact });
+
     if (report.valid) {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "valid", limitations } });
       await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);

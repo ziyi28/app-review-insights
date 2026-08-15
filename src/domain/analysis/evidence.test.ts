@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { NormalizedReview } from "@/domain/contracts/review";
-import { isExactExcerpt, validateCitations } from "./evidence";
+import { isExactExcerpt, resolveSupportConflictOverlap, validateCitations } from "./evidence";
 
 function reviewMap(entries: [string, string][]): Map<string, NormalizedReview> {
   return new Map(
@@ -54,4 +54,15 @@ describe("evidence", () => {
     expect(report.valid).toBe(false);
     expect(report.invalid).toHaveLength(2);
   });
+
+  it("resolves support/conflict overlap by retaining in conflicting and removing from supporting", () => {
+    const { supporting, conflicting, removed } = resolveSupportConflictOverlap(
+      ["r1", "r2", "r3"],
+      ["r2", "r4"],
+    );
+    expect(supporting).toEqual(["r1", "r3"]);
+    expect(conflicting).toEqual(["r2", "r4"]);
+    expect(removed).toEqual(["r2"]);
+  });
 });
+

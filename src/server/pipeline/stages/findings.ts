@@ -1,6 +1,6 @@
 import type { Finding } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
-import { isExactExcerpt } from "@/domain/analysis/evidence";
+import { isExactExcerpt, resolveSupportConflictOverlap } from "@/domain/analysis/evidence";
 import { computeConfidence, type SourceStatus } from "@/domain/analysis/confidence";
 import { assessEvidenceSufficiency } from "@/domain/analysis/sufficiency";
 import {
@@ -104,24 +104,45 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
       return [{ reviewId: review.reviewId, excerpt: e.excerpt }];
     });
 
-    // Every supporting review must be backed by at least one exact excerpt.
-    // A review cited only by ID (no verified excerpt) is not evidence, so it
-    // is removed from the support set rather than counted toward sample size
-    // and confidence. This prevents inflated evidence without valid quotes.
+    // 1. First calculate conflicting citations (normalized to reviewId, deduped).
+    const conflictingReviewIds = [
+      ...new Set(
+        f.conflictingReviewIds.filter((id) => reviewMap.has(id)).map((id) => reviewMap.get(id)!.reviewId),
+      ),
+    ];
+
+    // 2. Every supporting review must be backed by at least one exact excerpt.
+    // Clean mutual exclusion: reviews cited as conflicting are excluded from supporting.
     const excerptedReviewIds = new Set(validExcerpts.map((e) => e.reviewId));
-    const supportingReviewIds = [...new Set(validSupport.map((id) => reviewMap.get(id)!.reviewId))].filter((id) =>
+    const rawSupport = [...new Set(validSupport.map((id) => reviewMap.get(id)!.reviewId))].filter((id) =>
       excerptedReviewIds.has(id),
     );
+    const { supporting: supportingReviewIds, removed } = resolveSupportConflictOverlap(
+      rawSupport,
+      conflictingReviewIds,
+    );
+
+    // 3. Record warning if overlap was resolved.
+    if (removed.length > 0) {
+      warnings.push({
+        code: "FINDING_CONFLICT_OVERLAP_RESOLVED",
+        message: `${f.id}: ${removed.length} review(s) cited as both supporting and conflicting; kept in conflicting only`,
+      });
+    }
+
     if (supportingReviewIds.length === 0) {
       warnings.push({ code: "UNSUPPORTED_FINDING", message: `dropped ${f.id} (no supported reviews have an exact excerpt)` });
       continue;
     }
-    const conflictingReviewIds = f.conflictingReviewIds.filter((id) => reviewMap.has(id)).map((id) => reviewMap.get(id)!.reviewId);
-    const hasConflict = conflictingReviewIds.length > 0;
+
+    // 4. Synchronize excerpts with surviving supporting reviews.
+    const supportingSet = new Set(supportingReviewIds);
+    const finalExcerpts = validExcerpts.filter((e) => supportingSet.has(e.reviewId));
+
     const confidence = computeConfidence({
       supportCount: supportingReviewIds.length,
       sourceStatus: ctx.sourceStatus,
-      hasConflict,
+      conflictCount: conflictingReviewIds.length,
     });
     const evidenceSufficiency = assessEvidenceSufficiency({
       supportCount: supportingReviewIds.length,
@@ -139,7 +160,7 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
       summary: f.summary,
       supportingReviewIds,
       supportingSampleCount: supportingReviewIds.length,
-      evidenceExcerpts: validExcerpts,
+      evidenceExcerpts: finalExcerpts,
       conflictingReviewIds,
       confidence,
       evidenceSufficiency,
@@ -147,6 +168,7 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
       limitations: f.limitations,
     });
   }
+
 
   return {
     findings,
@@ -237,27 +259,45 @@ export function consolidateFindings(
     // Merge evidence deterministically: union of supporting reviews, excerpts,
     // topics, focus areas and conflicting reviews; all counts recomputed.
     const members = fresh.map((id) => index.get(id)!);
-    const supportingReviewIds = [...new Set(members.flatMap((m) => m.supportingReviewIds))];
+    const mergedSupport = [...new Set(members.flatMap((m) => m.supportingReviewIds))];
     const topicIds = [...new Set(members.flatMap((m) => m.topicIds))];
     const focusAreaIds = [...new Set([...members.flatMap((m) => m.focusAreaIds), ...(g.focusAreaIds ?? [])])];
     const conflictingReviewIds = [...new Set(members.flatMap((m) => m.conflictingReviewIds))];
+    const { supporting: supportingReviewIds, removed } = resolveSupportConflictOverlap(
+      mergedSupport,
+      conflictingReviewIds,
+    );
+    if (removed.length > 0) {
+      warnings.push({
+        code: "FINDING_CONFLICT_OVERLAP_RESOLVED",
+        message: `${g.id}: ${removed.length} review(s) cited as both supporting and conflicting across merged candidates; kept in conflicting only`,
+      });
+    }
+
+    const supportingSet = new Set(supportingReviewIds);
     // Merge excerpts, preferring any exact excerpt that already survived
-    // validation; dedupe by reviewId.
+    // validation; dedupe by reviewId, and filter by surviving supporting reviews.
     const excerptByReview = new Map<string, string>();
     for (const m of members) {
       for (const e of m.evidenceExcerpts) {
-        if (!excerptByReview.has(e.reviewId)) excerptByReview.set(e.reviewId, e.excerpt);
+        if (supportingSet.has(e.reviewId) && !excerptByReview.has(e.reviewId)) {
+          excerptByReview.set(e.reviewId, e.excerpt);
+        }
       }
     }
     const evidenceExcerpts = [...excerptByReview.entries()].map(([reviewId, excerpt]) => ({ reviewId, excerpt }));
-    const hasConflict = conflictingReviewIds.length > 0;
-    const confidence = computeConfidence({ supportCount: supportingReviewIds.length, sourceStatus, hasConflict });
+    const confidence = computeConfidence({
+      supportCount: supportingReviewIds.length,
+      sourceStatus,
+      conflictCount: conflictingReviewIds.length,
+    });
     const evidenceSufficiency = assessEvidenceSufficiency({
       supportCount: supportingReviewIds.length,
       corpusCount: Math.max(...members.map((m) => m.evidenceSufficiency.corpusReviewCount)),
       conflictCount: new Set(conflictingReviewIds).size,
       sourceStatus,
     });
+
 
     findings.push({
       id: g.id,

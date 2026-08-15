@@ -226,7 +226,9 @@ export type Dictionary = {
   userQuote: string;
   confidenceLevel: string;
   acceptanceCriteria: string;
+  acceptanceCriteriaProvenance: string;
   executiveSummary: string;
+
   keyFindings: string;
   roadmapMilestones: string;
   requirementsSpecs: string;
@@ -466,7 +468,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     userQuote: "User Quote",
     confidenceLevel: "Confidence",
     acceptanceCriteria: "Acceptance Criteria",
+    acceptanceCriteriaProvenance: "AI-suggested targets (not deterministic review statistics)",
     executiveSummary: "Executive Summary",
+
     keyFindings: "Key Findings & Insights",
     roadmapMilestones: "Version Roadmap & Milestones",
     requirementsSpecs: "PRD Requirements Specifications",
@@ -704,7 +708,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     userQuote: "用户原声",
     confidenceLevel: "置信度",
     acceptanceCriteria: "验收准则",
+    acceptanceCriteriaProvenance: "验收准则由模型生成，具体数值为建议目标，非评论证据推导",
     executiveSummary: "执行概要与评级",
+
     keyFindings: "核心用户痛点与发现",
     roadmapMilestones: "版本规划路线图与里程碑",
     requirementsSpecs: "PRD 需求规格与验收准则",

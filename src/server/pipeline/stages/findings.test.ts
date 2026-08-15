@@ -217,10 +217,10 @@ describe("runFindingsStage", () => {
     expect(result.findings[0].conflictingReviewIds).toEqual(["r3"]);
   });
 
-  it("caps confidence at medium when conflicting evidence is present", () => {
-    // 9 supporting reviews would normally be "high"; a material conflict caps
-    // the deterministic confidence at "medium" and records the reason.
-    const corpus = Array.from({ length: 10 }, (_, i) => review(`r${i}`, `timer resets on restart`));
+  it("caps confidence at medium when material conflicting evidence is present", () => {
+    // 9 supporting reviews would normally be "high"; a material conflict (>=25% ratio, e.g. 3/9)
+    // caps the deterministic confidence at "medium" and records the reason.
+    const corpus = Array.from({ length: 12 }, (_, i) => review(`r${i}`, `timer resets on restart`));
     const output = {
       findings: [
         {
@@ -231,7 +231,7 @@ describe("runFindingsStage", () => {
           summary: "y",
           supportingReviewIds: corpus.slice(0, 9).map((r) => r.reviewId),
           evidenceExcerpts: corpus.slice(0, 9).map((r) => ({ reviewId: r.reviewId, excerpt: "timer resets on restart" })),
-          conflictingReviewIds: ["r9"],
+          conflictingReviewIds: ["r9", "r10", "r11"],
           uncertainties: [],
           limitations: [],
         },
@@ -240,8 +240,9 @@ describe("runFindingsStage", () => {
     const result = normalizeFindings(output, { reviews: corpus, topics, sourceStatus: "complete" });
     expect(result.findings[0].confidence.level).toBe("medium");
     expect(result.findings[0].confidence.reasons).toContain("material conflicting evidence present");
-    expect(result.findings[0].conflictingReviewIds).toEqual(["r9"]);
+    expect(result.findings[0].conflictingReviewIds).toEqual(["r9", "r10", "r11"]);
   });
+
 
   it("returns insufficient evidence status when no supported findings survive", async () => {
     const ctx = context({}, { findings: [] });
@@ -580,4 +581,58 @@ describe("consolidateFindings", () => {
     expect(result.findings[0].evidenceSufficiency.status).toBe("insufficient");
     expect(result.findings[0].evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
   });
+
+  it("normalizeFindings cleans support/conflict overlap and keeps review in conflicting only", () => {
+    const rawOutput = {
+      findings: [
+        {
+          id: "finding-1",
+          topicIds: ["topic-1"],
+          focusAreaIds: [],
+          title: "Pricing overlap",
+          summary: "Mixed pricing opinions",
+          supportingReviewIds: ["r1", "r2"],
+          evidenceExcerpts: [
+            { reviewId: "r1", excerpt: "price is too expensive" },
+            { reviewId: "r2", excerpt: "price too high" },
+          ],
+          conflictingReviewIds: ["r2"], // r2 is cited in both!
+          uncertainties: [],
+          limitations: [],
+        },
+      ],
+    };
+    const normResult = normalizeFindings(rawOutput, {
+      reviews,
+      topics,
+      sourceStatus: "complete",
+    });
+    expect(normResult.findings).toHaveLength(1);
+    const f = normResult.findings[0];
+    expect(f.supportingReviewIds).toEqual(["r1"]);
+    expect(f.conflictingReviewIds).toEqual(["r2"]);
+    expect(f.supportingSampleCount).toBe(1);
+    expect(f.evidenceExcerpts).toEqual([{ reviewId: "r1", excerpt: "price is too expensive" }]);
+    expect(normResult.warnings.some((w) => w.code === "FINDING_CONFLICT_OVERLAP_RESOLVED")).toBe(true);
+  });
+
+  it("consolidateFindings cleans support/conflict overlap across merged candidates", () => {
+    // candidate 1 supports r1, r2
+    // candidate 2 has conflicting r2
+    const c1 = candidateFinding("c1", ["r1", "r2"]);
+    const c2 = { ...candidateFinding("c2", ["r3"]), conflictingReviewIds: ["r2"] };
+    const result = consolidateFindings(
+      [c1, c2],
+      [{ id: "finding-1", title: "Merged", summary: "Merged finding", candidateIds: ["c1", "c2"] }],
+      "complete",
+    );
+    expect(result.findings).toHaveLength(1);
+    const f = result.findings[0];
+    expect(f.supportingReviewIds).toEqual(["r1", "r3"]);
+    expect(f.conflictingReviewIds).toEqual(["r2"]);
+    expect(f.supportingSampleCount).toBe(2);
+    expect(f.evidenceExcerpts.map((e) => e.reviewId)).toEqual(["r1", "r3"]);
+    expect(result.warnings.some((w) => w.code === "FINDING_CONFLICT_OVERLAP_RESOLVED")).toBe(true);
+  });
 });
+
