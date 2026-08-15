@@ -147,19 +147,31 @@ export function Workbench() {
   const [historyOpen, setHistoryOpen] = useState(false);
   const [configStatus, setConfigStatus] = useState<ConfigStatus>({ modelConfigured: false, serpApiConfigured: false });
 
-  // URL state persistence (tab & mode)
+  // Auto-advance bookkeeping: which artifact keys we already jumped to, and
+  // whether the user has manually chosen a tab (which stops auto-advancing for
+  // the rest of the run). Declared before the URL-restore effect below, which
+  // reads and mutates `userNavigated`.
+  const autoJumpedKeys = useRef<Set<keyof ArtifactCache>>(new Set());
+  const userNavigated = useRef(false);
+
+  // URL state persistence (tab & mode). The restore is deferred to a microtask
+  // so it isn't a synchronous setState inside the effect (which the compiler
+  // flags as a cascading-render risk); microtasks run before the next paint, so
+  // the observable timing is unchanged.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const search = new URLSearchParams(window.location.search);
     const urlTab = search.get("tab") as Tab | null;
     const urlMode = search.get("mode") as ViewMode | null;
-    if (urlTab) {
-      setTab(urlTab);
-      userNavigated.current = true;
-    }
-    if (urlMode === "report" || urlMode === "workbench") {
-      setViewMode(urlMode);
-    }
+    queueMicrotask(() => {
+      if (urlTab) {
+        setTab(urlTab);
+        userNavigated.current = true;
+      }
+      if (urlMode === "report" || urlMode === "workbench") {
+        setViewMode(urlMode);
+      }
+    });
   }, []);
 
   const updateUrlState = useCallback((nextTab: Tab, nextMode: ViewMode) => {
@@ -240,12 +252,6 @@ export function Workbench() {
     };
   }, []);
 
-  // Auto-advance bookkeeping: which artifact keys we already jumped to, and
-  // whether the user has manually chosen a tab (which stops auto-advancing for
-  // the rest of the run).
-  const autoJumpedKeys = useRef<Set<keyof ArtifactCache>>(new Set());
-  const userNavigated = useRef(false);
-
   // Source provenance: prefer the structured source-evidence artifact, then the
   // event/limitation signals, over the deliveryMode fallback — so Imported /
   // Partial / Suspect Empty and the SocialCrawl provider are never mislabeled.
@@ -318,13 +324,39 @@ export function Workbench() {
   // stale request can never overwrite a newer attempt or a different run.
   const loadedArtifactKeys = useRef<Set<string>>(new Set());
   const seenRunId = useRef<string | null>(null);
+
+  // Artifact phase selectors (Draft/Final). Declared before the runId effect
+  // below, which resets them to "draft" whenever the run changes.
+  const [prdPhase, setPrdPhase] = useState<"draft" | "final">("draft");
+  const [testsPhase, setTestsPhase] = useState<"draft" | "final">("draft");
+  const [tracePhase, setTracePhase] = useState<"draft" | "final">("draft");
+  const [versionPhase, setVersionPhase] = useState<"draft" | "final">("draft");
+
   useEffect(() => {
-    if (!runId) return;
+    if (!runId) {
+      if (seenRunId.current !== null) {
+        seenRunId.current = null;
+        loadedArtifactKeys.current.clear();
+        setCache({ runId: null });
+        setTab("overview");
+        setPrdPhase("draft");
+        setTestsPhase("draft");
+        setTracePhase("draft");
+        setVersionPhase("draft");
+        autoJumpedKeys.current.clear();
+        userNavigated.current = false;
+      }
+      return;
+    }
     if (seenRunId.current !== runId) {
       seenRunId.current = runId;
       loadedArtifactKeys.current.clear();
       setCache({ runId });
       setTab("overview");
+      setPrdPhase("draft");
+      setTestsPhase("draft");
+      setTracePhase("draft");
+      setVersionPhase("draft");
       autoJumpedKeys.current.clear();
       userNavigated.current = false;
     }
@@ -404,22 +436,18 @@ export function Workbench() {
   // so revised runs show attempt 1 vs attempt 2 and never a stale draft.
   const terminal = status !== null && TERMINAL_STATUSES.includes(status);
   const versions = useArtifactVersions(runId, terminal);
-  const [prdPhase, setPrdPhase] = useState<"draft" | "final">("draft");
-  const [testsPhase, setTestsPhase] = useState<"draft" | "final">("draft");
-  const [tracePhase, setTracePhase] = useState<"draft" | "final">("draft");
-  const [versionPhase, setVersionPhase] = useState<"draft" | "final">("draft");
 
   // Authoritative panels: during a run use the live cache (marked Draft); at
   // terminal, prefer the hook's attempt 1/latest pair. A never-revised run
   // shows the draft as the final (no revision required).
-  const prdDraft = versions.prd.draft ?? cache.prd ?? null;
-  const prdFinal = versions.prd.final ?? cache.finalReport?.prd ?? null;
-  const testsDraft = versions.tests.draft?.tests ?? cache.tests?.tests ?? [];
-  const testsFinal = versions.tests.final?.tests ?? cache.finalReport?.prd?.tests ?? [];
-  const traceDraft = versions.traceability.draft ?? cache.traceability ?? null;
-  const traceFinal = versions.traceability.final ?? cache.finalReport?.report ?? null;
-  const versionPlanDraft = versions.versionPlan.draft ?? cache.versionPlan ?? null;
-  const versionPlanFinal = versions.versionPlan.final ?? null;
+  const prdDraft = (terminal ? versions.prd.draft : null) ?? cache.prd ?? null;
+  const prdFinal = (terminal ? versions.prd.final : null) ?? cache.finalReport?.prd ?? null;
+  const testsDraft = (terminal ? versions.tests.draft?.tests : null) ?? cache.tests?.tests ?? [];
+  const testsFinal = (terminal ? versions.tests.final?.tests : null) ?? cache.finalReport?.prd?.tests ?? [];
+  const traceDraft = (terminal ? versions.traceability.draft : null) ?? cache.traceability ?? null;
+  const traceFinal = (terminal ? versions.traceability.final : null) ?? cache.finalReport?.report ?? null;
+  const versionPlanDraft = (terminal ? versions.versionPlan.draft : null) ?? cache.versionPlan ?? null;
+  const versionPlanFinal = (terminal ? versions.versionPlan.final : null) ?? null;
 
   const activePrd = prdPhase === "final" && prdFinal ? prdFinal : prdDraft;
   const activeTests = testsPhase === "final" && testsFinal.length > 0 ? testsFinal : testsDraft;
@@ -431,6 +459,10 @@ export function Workbench() {
     seenRunId.current = null;
     setCache({ runId: null });
     setTab("overview");
+    setPrdPhase("draft");
+    setTestsPhase("draft");
+    setTracePhase("draft");
+    setVersionPhase("draft");
     autoJumpedKeys.current.clear();
     userNavigated.current = false;
   };
@@ -452,14 +484,13 @@ export function Workbench() {
       };
       if (manifest.startRequest) {
         const req = manifest.startRequest;
-        // If retrying a historical live run, strip previewId so it freshly collects or leverages local cache without stale preview snapshot issues
+        // If retrying a historical live run, strip previewId so it freshly collects or leverages local cache without stale preview snapshot issues. reviewSelection must be stripped together (the server requires previewId + reviewSelection to be paired).
         requestToStart = {
           ...req,
           source: req.source?.kind === "live" && req.source.appStoreUrl
             ? {
                 kind: "live",
                 appStoreUrl: req.source.appStoreUrl,
-                ...(req.source.reviewSelection ? { reviewSelection: req.source.reviewSelection } : {}),
                 ...(req.source.reviewLimit ? { reviewLimit: req.source.reviewLimit } : {}),
               }
             : req.source,
@@ -1017,7 +1048,6 @@ export function Workbench() {
                     findings={cache.findings?.findings}
                     prd={activePrd}
                     tests={activeTests}
-                    versionPlan={activeVersionPlan}
                     t={t}
                     onJumpToReview={jumpToReview}
                     onJumpToPrd={jumpToPrd}

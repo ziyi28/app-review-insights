@@ -24,6 +24,16 @@ const PAIRS: (keyof ArtifactVersionState & ("prd" | "tests" | "traceability" | "
   "versionPlan",
 ];
 
+const EMPTY_STATE: ArtifactVersionState = {
+  manifest: null,
+  prd: { draft: null, final: null, revised: false },
+  tests: { draft: null, final: null, revised: false },
+  traceability: { draft: null, final: null, revised: false },
+  versionPlan: { draft: null, final: null, revised: false },
+  loading: false,
+  error: null,
+};
+
 /**
  * Loads a completed run's Draft/Final artifact pair (attempt 1 vs the manifest's
  * latest attempt) only once the run is terminal. A run that was never revised
@@ -32,23 +42,19 @@ const PAIRS: (keyof ArtifactVersionState & ("prd" | "tests" | "traceability" | "
  * only a manifest fetch failure writes `error`.
  */
 export function useArtifactVersions(runId: string | null, terminal: boolean): ArtifactVersionState {
-  const [state, setState] = useState<ArtifactVersionState>({
-    manifest: null,
-    prd: { draft: null, final: null, revised: false },
-    tests: { draft: null, final: null, revised: false },
-    traceability: { draft: null, final: null, revised: false },
-    versionPlan: { draft: null, final: null, revised: false },
-    loading: false,
-    error: null,
-  });
+  const [state, setState] = useState<ArtifactVersionState>(EMPTY_STATE);
 
   useEffect(() => {
-    if (!runId || !terminal) return;
+    if (!runId || !terminal) {
+      setState(EMPTY_STATE);
+      return;
+    }
     const controller = new AbortController();
     let stale = false;
     const runAtLoad = runId;
 
-    setState((s) => ({ ...s, loading: true, error: null }));
+    setState({ ...EMPTY_STATE, loading: true });
+
 
     void (async () => {
       try {

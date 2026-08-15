@@ -259,7 +259,7 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
     if (finalPrd?.versions?.length) {
       md += `## 1. 版本规划路线图\n\n`;
       for (const v of finalPrd.versions) {
-        md += `### 版本 ${v.versionName}: ${v.theme}\n`;
+        md += `### 版本 ${v.name}: ${v.summary}\n`;
         md += `- **发布理由**: ${v.rationale}\n`;
         md += `- **包含需求**: ${v.requirementIds.join(", ")}\n\n`;
       }

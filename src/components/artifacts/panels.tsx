@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@/i18n";
-import type { Finding, Requirement, TestCase } from "@/domain/contracts/analysis";
+import type { Finding, Requirement, TestCase, Prd } from "@/domain/contracts/analysis";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 import { findingIdsForRequirements, priorityForRequirements } from "@/domain/traceability/evidence-sources";
 
@@ -291,7 +291,6 @@ export function TraceabilityPanel({
   findings = [],
   prd,
   tests = [],
-  versionPlan,
   t,
   onJumpToReview,
   onJumpToPrd,
@@ -301,7 +300,6 @@ export function TraceabilityPanel({
   findings?: Finding[];
   prd?: Prd | { requirements?: Requirement[] } | null;
   tests?: TestCase[];
-  versionPlan?: unknown;
   t: Dictionary;
   onJumpToReview?: (id: string) => void;
   onJumpToPrd?: (reqId?: string) => void;
@@ -309,7 +307,7 @@ export function TraceabilityPanel({
 }) {
   if (!report && findings.length === 0 && !prd) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
 
-  const requirements = prd ? ("requirements" in prd ? prd.requirements : []) : [];
+  const requirements: Requirement[] = prd ? ("requirements" in prd ? (prd.requirements ?? []) : []) : [];
 
   return (
     <div style={{ display: "grid", gap: "16px" }}>
@@ -388,7 +386,7 @@ export function TraceabilityPanel({
                 {findings.map((f, idx) => {
                   const matchedReqs = requirements.filter(
                     (r) =>
-                      r.sourceFindingIds?.includes(f.id) ||
+                      r.findingIds.includes(f.id) ||
                       r.sourceReviewIds?.some((id) => f.supportingReviewIds.includes(id)) ||
                       idx === 0
                   );

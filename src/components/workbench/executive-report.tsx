@@ -65,13 +65,13 @@ function buildMarkdownReport(props: ExecutiveReportProps): string {
   // Version Roadmap
   lines.push(`## 2. ${t.roadmapMilestones}`);
   lines.push("");
-  if (!versionPlan || versionPlan.versions.length === 0) {
+  if (!versionPlan || !Array.isArray(versionPlan.versions) || versionPlan.versions.length === 0) {
     lines.push(`_${t.noData}_`);
   } else {
     versionPlan.versions.forEach((v) => {
       lines.push(`### ${v.name}: ${v.summary}`);
       if (v.rationale) lines.push(`- **${t.versionRationale}**: ${v.rationale}`);
-      lines.push(`- **${t.requirementId}**: ${v.requirementIds.join(", ")}`);
+      lines.push(`- **${t.requirementId}**: ${(v.requirementIds ?? []).join(", ")}`);
       lines.push("");
     });
   }
@@ -79,7 +79,7 @@ function buildMarkdownReport(props: ExecutiveReportProps): string {
   // PRD Requirements
   lines.push(`## 3. ${t.requirementsSpecs}`);
   lines.push("");
-  if (!prd || prd.requirements.length === 0) {
+  if (!prd || !Array.isArray(prd.requirements) || prd.requirements.length === 0) {
     lines.push(`_${t.noData}_`);
   } else {
     prd.requirements.forEach((r) => {
@@ -87,7 +87,7 @@ function buildMarkdownReport(props: ExecutiveReportProps): string {
       lines.push(`${r.description}`);
       lines.push("");
       lines.push(`**${t.acceptanceCriteria}**:`);
-      r.acceptanceCriteria.forEach((ac) => {
+      (r.acceptanceCriteria ?? []).forEach((ac) => {
         lines.push(`- [ ] ${ac}`);
       });
       lines.push("");
@@ -97,14 +97,14 @@ function buildMarkdownReport(props: ExecutiveReportProps): string {
   // Test Verification
   lines.push(`## 4. ${t.verificationPlan}`);
   lines.push("");
-  if (!prd || prd.tests.length === 0) {
+  if (!prd || !Array.isArray(prd.tests) || prd.tests.length === 0) {
     lines.push(`_${t.noData}_`);
   } else {
     prd.tests.forEach((test) => {
       lines.push(`### ${test.id} [${test.priority ?? "P2"}]`);
       if (test.precondition) lines.push(`- **${t.precondition}**: ${test.precondition}`);
       lines.push(`- **${t.stageTests}**:`);
-      test.steps.forEach((step, idx) => {
+      (test.steps ?? []).forEach((step, idx) => {
         lines.push(`  ${idx + 1}. ${step}`);
       });
       lines.push(`- **${t.expected}**: ${test.expectedResult}`);
@@ -218,17 +218,17 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
         <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-findings")}>
           {t.keyFindings} ({findings.length})
         </button>
-        {versionPlan && versionPlan.versions.length > 0 ? (
+        {versionPlan?.versions && versionPlan.versions.length > 0 ? (
           <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-versions")}>
             {t.roadmapMilestones}
           </button>
         ) : null}
-        {prd && prd.requirements.length > 0 ? (
+        {prd?.requirements && prd.requirements.length > 0 ? (
           <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-prd")}>
             {t.requirementsSpecs} ({prd.requirements.length})
           </button>
         ) : null}
-        {prd && prd.tests.length > 0 ? (
+        {prd?.tests && prd.tests.length > 0 ? (
           <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-tests")}>
             {t.verificationPlan} ({prd.tests.length})
           </button>
@@ -325,7 +325,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
       </section>
 
       {/* 2. Version Roadmap */}
-      {versionPlan && versionPlan.versions.length > 0 ? (
+      {versionPlan?.versions && versionPlan.versions.length > 0 ? (
         <section id="report-versions" className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
@@ -343,7 +343,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                   </p>
                 ) : null}
                 <div style={{ fontSize: "12px", color: "var(--text-faint)" }}>
-                  {t.requirementId}: {v.requirementIds.join(", ")}
+                  {t.requirementId}: {(v.requirementIds ?? []).join(", ")}
                 </div>
               </div>
             ))}
@@ -352,7 +352,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
       ) : null}
 
       {/* 3. PRD Requirements */}
-      {prd && prd.requirements.length > 0 ? (
+      {prd?.requirements && prd.requirements.length > 0 ? (
         <section id="report-prd" className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
@@ -371,11 +371,11 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                     <code style={{ fontSize: "12px", color: "var(--text-muted)" }}>{r.id}</code>
                   </div>
                   <p style={{ margin: "4px 0", fontSize: "13px" }}>{r.description}</p>
-                  {r.acceptanceCriteria.length > 0 ? (
+                  {(r.acceptanceCriteria ?? []).length > 0 ? (
                     <div>
                       <strong style={{ fontSize: "12px", color: "var(--text-muted)" }}>{t.acceptanceCriteria}:</strong>
                       <ul className={styles.criteriaList}>
-                        {r.acceptanceCriteria.map((ac, idx) => (
+                        {(r.acceptanceCriteria ?? []).map((ac, idx) => (
                           <li key={idx}>{ac}</li>
                         ))}
                       </ul>
@@ -389,7 +389,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
       ) : null}
 
       {/* 4. Test Verification Plan */}
-      {prd && prd.tests.length > 0 ? (
+      {prd?.tests && prd.tests.length > 0 ? (
         <section id="report-tests" className={styles.section}>
           <div className={styles.sectionHeader}>
             <h3 className={styles.sectionTitle}>
@@ -405,7 +405,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                   <ProvenanceBadge kind="computed" label={test.priority ?? "P2"} />
                 </div>
                 <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>
-                  {t.requirementId}: {test.requirementIds.join(", ")}
+                  {t.requirementId}: {(test.requirementIds ?? []).join(", ")}
                 </div>
                 {test.precondition ? (
                   <div style={{ fontSize: "13px", marginTop: "4px" }}>
@@ -413,7 +413,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                   </div>
                 ) : null}
                 <ol className={styles.stepList}>
-                  {test.steps.map((s, idx) => (
+                  {(test.steps ?? []).map((s, idx) => (
                     <li key={idx}>{s}</li>
                   ))}
                 </ol>

@@ -63,7 +63,12 @@ export async function GET() {
         status: effectiveStatus,
         createdAt: r.manifest.createdAt,
         canReplay: r.manifest.canReplay,
-        canRetry: Boolean(r.manifest.startRequest && effectiveStatus !== "running"),
+        // Only failed or interrupted runs can be retried. A completed run with a
+        // saved startRequest is viewable/replayable, not re-runnable via retry.
+        canRetry: Boolean(
+          r.manifest.startRequest &&
+            (effectiveStatus === "failed" || effectiveStatus === "interrupted")
+        ),
         goal: r.manifest.goal,
         executionMode: r.manifest.executionMode,
         appName,

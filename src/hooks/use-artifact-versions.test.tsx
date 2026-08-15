@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useArtifactVersions } from "./use-artifact-versions";
+import { useArtifactVersions, type ArtifactVersionState } from "./use-artifact-versions";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -76,4 +76,35 @@ describe("useArtifactVersions", () => {
     rerender({ runId: "run-new" });
     await waitFor(() => expect(result.current.manifest?.runId).toBe("run-new"));
   });
+
+  it("resets state and clears stale artifacts when switching from a completed run to a running run or null", async () => {
+    const fetchMock = vi.fn((url: string) => {
+      if (/\/api\/runs\/run-[^/]+$/.test(String(url)) && !String(url).includes("artifacts")) {
+        return jsonResponse({ runId: "run-1", artifacts: { prd: { attempt: 1 } } });
+      }
+      if (String(url).includes("attempt=1")) {
+        return jsonResponse({ requirements: [{ id: "req-old", title: "Old PRD" }] });
+      }
+      return jsonResponse({});
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { result, rerender } = renderHook<ArtifactVersionState, { runId: string | null; terminal: boolean }>(
+      ({ runId, terminal }) => useArtifactVersions(runId, terminal),
+      { initialProps: { runId: "run-1", terminal: true } },
+    );
+    await waitFor(() => expect(result.current.loading).toBe(false));
+    expect(result.current.prd.draft).toEqual({ requirements: [{ id: "req-old", title: "Old PRD" }] });
+    expect(result.current.manifest?.runId).toBe("run-1");
+
+    // Now user starts a new run (in-flight, terminal: false)
+    rerender({ runId: "run-2", terminal: false });
+    expect(result.current.prd.draft).toBeNull();
+    expect(result.current.manifest).toBeNull();
+
+    // Now user resets to null
+    rerender({ runId: null, terminal: false });
+    expect(result.current.prd.draft).toBeNull();
+    expect(result.current.manifest).toBeNull();
+  });
 });
+

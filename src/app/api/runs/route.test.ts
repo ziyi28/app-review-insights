@@ -424,4 +424,43 @@ describe("GET /api/runs listing", () => {
     const demoRun = body.runs.find((r) => r.runId === "run-x-twitter-us");
     expect(demoRun?.deletable).toBe(false);
   });
+
+  it("marks only failed (not completed) runs as retryable", async () => {
+    const store = new RunStore(process.env.RUNS_DIR!);
+    const completedId = store.createRunId();
+    const failedId = store.createRunId();
+    const mk = async (runId: string, status: "completed" | "failed") => {
+      await store.writeManifest(runId, {
+        runId,
+        status,
+        executionMode: "live",
+        createdAt: "2026-08-12T00:00:00Z",
+        updatedAt: "",
+        stages: {},
+        artifacts: {},
+        limitations: [],
+        canReplay: false,
+        startRequest: {
+          protocolVersion: "1",
+          mode: "analyze",
+          uiLocale: "zh-CN",
+          outputLocale: "zh-CN",
+          goal: "Understand why users love this app",
+          source: { kind: "live", appStoreUrl: "https://apps.apple.com/us/app/x/id839285684", reviewLimit: 100 },
+        },
+      });
+    };
+    await mk(completedId, "completed");
+    await mk(failedId, "failed");
+
+    const res = await GET();
+    const body = (await res.json()) as { runs: { runId: string; status: string; canRetry: boolean }[] };
+
+    const completed = body.runs.find((r) => r.runId === completedId);
+    const failed = body.runs.find((r) => r.runId === failedId);
+    expect(completed?.status).toBe("completed");
+    expect(completed?.canRetry).toBe(false);
+    expect(failed?.status).toBe("failed");
+    expect(failed?.canRetry).toBe(true);
+  });
 });
