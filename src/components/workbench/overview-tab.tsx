@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dictionary, translateCode } from "@/i18n";
+import { type Dictionary, type Locale, translateCode } from "@/i18n";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
 import type { RunManifest } from "@/server/runs/run-store";
 import type { GoalCoverageArtifact } from "@/hooks/use-run-artifacts";
@@ -38,6 +38,7 @@ export function OverviewTab({
   activePrd,
   sourceBadge,
   t,
+  locale = "zh-CN",
   onSelectTab,
 }: {
   manifest: RunManifest | null;
@@ -49,6 +50,7 @@ export function OverviewTab({
   activePrd: Prd | null;
   sourceBadge: { kind: Provenance; label: string };
   t: Dictionary;
+  locale?: Locale;
   onSelectTab: (tab: "findings") => void;
 }) {
   const cleaning = (cleaned as { cleaning?: CleaningDetails } | undefined)?.cleaning;
@@ -252,7 +254,7 @@ export function OverviewTab({
           <div style={{ display: "grid", gap: "6px" }}>
             {dedupeLimitations((finalReport as { limitations?: { code: string; message: string }[] }).limitations ?? []).map((l, i) => (
               <div key={i} style={{ fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <ProvenanceBadge kind="limitation" label={translateCode(l.code)} />
+                <ProvenanceBadge kind="limitation" label={translateCode(l.code, locale)} />
                 <span>{l.message}</span>
               </div>
             ))}

@@ -614,6 +614,7 @@ export function Workbench() {
                   activePrd={activePrd}
                   sourceBadge={sourceBadge}
                   t={t}
+                  locale={uiLocale}
                   onSelectTab={handleSelectTab}
                 />
               ) : null}
@@ -679,8 +680,8 @@ export function Workbench() {
                   />
                 </>
               ) : null}
-              {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} goalCoverage={cache.goalCoverage} t={t} /> : null}
-              {tab === "diagnostics" ? <RunLogPanel events={events} t={t} /> : null}
+              {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} goalCoverage={cache.goalCoverage} t={t} locale={uiLocale} /> : null}
+              {tab === "diagnostics" ? <RunLogPanel events={events} t={t} locale={uiLocale} /> : null}
             </div>
           )}
         </main>

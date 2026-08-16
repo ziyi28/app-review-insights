@@ -1,6 +1,6 @@
 "use client";
 
-import { type Dictionary, translateCode } from "@/i18n";
+import { type Dictionary, type Locale, translateCode } from "@/i18n";
 import type { Prd, VersionPlanArtifact, PlanningFactors } from "@/domain/contracts/analysis";
 import type { TraceabilityReport } from "@/domain/traceability/validate";
 import type { RunManifest } from "@/server/runs/run-store";
@@ -243,7 +243,7 @@ type GoalCoveragePanelShape = {
   items: { focusAreaId: string; label: string; status: "covered" | "unsupported" | "uncovered"; findingIds: string[]; requirementIds: string[] }[];
 };
 
-export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverage, t }: { finalPrd: Prd | null; report: TraceabilityReport | null; manifest: RunManifest | null; goalCoverage?: GoalCoveragePanelShape | null; t: Dictionary }) {
+export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverage, t, locale = "zh-CN" }: { finalPrd: Prd | null; report: TraceabilityReport | null; manifest: RunManifest | null; goalCoverage?: GoalCoveragePanelShape | null; t: Dictionary; locale?: Locale }) {
   const usage = manifest?.modelUsage as Record<string, unknown> | undefined;
   const attempts = typeof usage?.attempts === "number" ? usage.attempts : typeof usage?.calls === "number" ? usage.calls : 0;
   const retries = typeof usage?.retries === "number" ? usage.retries : 0;
@@ -359,7 +359,7 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
           <h4 style={{ margin: "0 0 8px" }}>{t.limitations}</h4>
           {dedupeLimitations(manifest.limitations).map((l, i) => (
             <p key={i} style={{ fontSize: "13px", margin: "6px 0", display: "flex", gap: "8px", alignItems: "center" }}>
-              <ProvenanceBadge kind="limitation" label={translateCode(l.code)} />
+              <ProvenanceBadge kind="limitation" label={translateCode(l.code, locale)} />
               <span>{l.message}</span>
             </p>
           ))}
@@ -372,7 +372,7 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
             {t.logicalCalls}: <strong>{typeof usage?.calls === "number" ? usage.calls : 0}</strong> · {t.modelAttempts}: <strong>{attempts}</strong> · {t.modelRetries}: <strong>{retries}</strong>
           </p>
           {retryReasons.length > 0 ? (
-            <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.modelRetryReasons}: {retryReasons.map((r) => translateCode(r)).join(", ")}</p>
+            <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.modelRetryReasons}: {retryReasons.map((r) => translateCode(r, locale)).join(", ")}</p>
           ) : null}
           {promptVersions.length > 0 ? (
             <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.promptVersions}: {promptVersions.join(", ")}</p>

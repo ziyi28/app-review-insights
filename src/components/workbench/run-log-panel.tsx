@@ -1,19 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { type Dictionary, translateCode } from "@/i18n";
+import { type Dictionary, type Locale, translateCode } from "@/i18n";
 import type { RunEvent } from "@/domain/contracts/events";
 import { RunDiagnosticsPanel } from "@/components/artifacts/workflow-panels";
 import styles from "./run-log-panel.module.css";
 
 /** Best-effort human message for an event, empty when none applies. */
-function eventMessage(e: RunEvent): string {
+function eventMessage(e: RunEvent, locale: Locale): string {
   const data = e.data as Record<string, unknown> | null;
   if (!data || typeof data !== "object") return "";
   if (e.type === "run.failed") return typeof data.error === "string" ? data.error : "";
   if (e.type === "stage.progress") return typeof data.message === "string" ? data.message : "";
   if (e.type === "limitation.reported") {
-    const code = typeof data.code === "string" ? translateCode(data.code) : "";
+    const code = typeof data.code === "string" ? translateCode(data.code, locale) : "";
     const msg = typeof data.message === "string" ? data.message : "";
     return [code, msg].filter(Boolean).join(" — ");
   }
@@ -37,7 +37,7 @@ function countMarker(events: RunEvent[], marker: string): number {
   return n;
 }
 
-export function RunLogPanel({ events, t }: { events: RunEvent[]; t: Dictionary }) {
+export function RunLogPanel({ events, t, locale = "zh-CN" }: { events: RunEvent[]; t: Dictionary; locale?: Locale }) {
   const [stageFilter, setStageFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
@@ -139,7 +139,7 @@ export function RunLogPanel({ events, t }: { events: RunEvent[]; t: Dictionary }
               </tr>
             ) : (
               filtered.map((e) => {
-                const msg = eventMessage(e);
+                const msg = eventMessage(e, locale);
                 const fallback = msg ? msg : JSON.stringify(e.data ?? {}).slice(0, 120);
                 return (
                   <tr key={e.sequence}>
