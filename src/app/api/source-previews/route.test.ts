@@ -34,6 +34,9 @@ beforeEach(() => {
   process.env.RUNS_DIR = path.join(baseDir, "runs");
   process.env.SOURCE_CACHE_DIR = path.join(baseDir, "cache");
   process.env.SOURCE_PREVIEWS_DIR = path.join(baseDir, "previews");
+  // Machine-level config isolation (same as runs/route.test.ts): a developer's
+  // real data/config.local.json SerpApi key must not override the test keys.
+  process.env.DATA_CONFIG_FILE = path.join(baseDir, "config.local.json");
   process.env.APPLE_RSS_PAGE_DELAY_MS = "0";
   delete process.env.SERPAPI_API_KEY;
   delete process.env.SERPAPI_BASE_URL;
