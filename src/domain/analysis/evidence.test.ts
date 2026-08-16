@@ -31,6 +31,13 @@ describe("evidence", () => {
     expect(isExactExcerpt("too expensive for me", "the price is too expensive for me to justify")).toBe(true);
   });
 
+  it("accepts an excerpt whose whitespace differs from the folded body", () => {
+    // Both sides get the same NFC + whitespace fold, so quotes spanning line
+    // breaks or doubled spaces are legitimate.
+    expect(isExactExcerpt("too expensive\nfor me", "the price is too expensive for me to justify")).toBe(true);
+    expect(isExactExcerpt("too  expensive   for me", "the price is too expensive for me to justify")).toBe(true);
+  });
+
   it("rejects a fabricated excerpt", () => {
     expect(isExactExcerpt("this was never said", "the price is too expensive")).toBe(false);
   });

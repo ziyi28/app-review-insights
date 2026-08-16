@@ -1,10 +1,13 @@
 import type { NormalizedReview } from "@/domain/contracts/review";
 
 export function isExactExcerpt(excerpt: string, bodyNormalized: string): boolean {
-  const e = excerpt.trim();
+  // The excerpt gets the same NFC + whitespace fold the body received during
+  // normalization, so a legitimate quote spanning a line break or carrying
+  // doubled spaces still matches; case stays lenient. This only widens recall
+  // — the excerpt must still be a substring of the normalized body.
+  const e = excerpt.normalize("NFC").replace(/\s+/g, " ").trim().toLowerCase();
   if (!e) return false;
-  // Exact substring match against the normalized body (same whitespace fold).
-  return bodyNormalized.includes(e) || bodyNormalized.includes(e.toLowerCase());
+  return bodyNormalized.includes(e);
 }
 
 export type CitationCheck = {
