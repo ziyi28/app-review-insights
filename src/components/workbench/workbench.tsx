@@ -2,11 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { Locale } from "@/i18n";
-import { getDictionary, translateCode } from "@/i18n";
+import { getDictionary } from "@/i18n";
 
 import type { RunEvent } from "@/domain/contracts/events";
 import { useRunStream, LAST_RUN_ID_KEY } from "@/hooks/use-run-stream";
-import { dedupeLimitations } from "@/lib/limitations";
 
 
 import { useRunArtifacts } from "@/hooks/use-run-artifacts";
@@ -19,9 +18,9 @@ import { Icon } from "@/components/ui/icons";
 import { RunLogPanel } from "./run-log-panel";
 import { ReviewsTable } from "@/components/artifacts/reviews-table";
 import { TopicsPanel, FindingsPanel, RequirementsPanel, TestsPanel, TraceabilityPanel } from "@/components/artifacts/panels";
-import { RatingDistribution, VersionDistribution, LanguageDistribution } from "@/components/artifacts/stats-panels";
 import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, ArtifactPhaseSelector, FinalDeliverablesPanel } from "@/components/artifacts/workflow-panels";
 import { ProvenanceBadge } from "./provenance-badge";
+import { OverviewTab } from "./overview-tab";
 import { ExecutiveReport } from "./executive-report";
 import styles from "./workbench.module.css";
 
@@ -605,216 +604,18 @@ export function Workbench() {
             ) : (
               <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
               {tab === "overview" ? (
-                <div style={{ display: "grid", gap: "14px" }}>
-                  {/* App & Goal Banner */}
-                  {(versions.manifest?.appName || versions.manifest?.appUrl || versions.manifest?.goal) ? (
-                    <div className="card" style={{ background: "linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-elevated) 100%)", border: "1px solid var(--border)", display: "grid", gap: "8px" }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
-                        <div>
-                          <h3 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span>{versions.manifest?.appName || t.appSummary}</span>
-                            {versions.manifest?.appUrl ? (
-                              <a
-                                href={versions.manifest.appUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ fontSize: "12px", color: "var(--accent)", textDecoration: "none" }}
-                                title={t.openInAppStore}
-                              >
-                                ↗ App Store
-                              </a>
-                            ) : null}
-                          </h3>
-                          {versions.manifest?.goal ? (
-                            <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)", lineHeight: 1.5 }}>
-                              <strong>{t.goal}:</strong> {versions.manifest.goal}
-                            </p>
-                          ) : null}
-                        </div>
-                        <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {/* Core Business Metrics */}
-                  {stats ? (
-                    <div className="stat-grid">
-                      {[
-                        { k: t.rawReviews, v: stats.rawCount },
-                        { k: t.cleanedData, v: stats.includedCount },
-                        { k: t.findings, v: cache.findings?.findings.length ?? 0 },
-                        { k: t.requirementsSpecs, v: (activePrd?.requirements.length ?? 0) },
-                      ].map((s) => (
-                        <div key={s.k} className="stat-card">
-                          <div className="stat-value">{s.v}</div>
-                          <div className="stat-label">{s.k}</div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  {/* Top Key Findings Highlight */}
-                  {cache.findings?.findings && cache.findings.findings.length > 0 ? (
-                    <div className="card" style={{ borderLeft: "3px solid var(--accent)" }}>
-                      <div className="card-header" style={{ marginBottom: "8px" }}>
-                        <div className="card-title-wrap">
-                          <h4 className="card-title" style={{ fontSize: "14px", fontWeight: 600 }}>
-                            {t.topFindings} ({cache.findings.findings.length})
-                          </h4>
-                        </div>
-                        <button
-                          type="button"
-                          className="btn btn-ghost"
-                          style={{ fontSize: "12px", padding: "2px 8px" }}
-                          onClick={() => handleSelectTab("findings")}
-                        >
-                          {t.findings} →
-                        </button>
-                      </div>
-                      <div style={{ display: "grid", gap: "8px" }}>
-                        {cache.findings.findings.slice(0, 3).map((f) => (
-                          <div
-                            key={f.id}
-                            style={{
-                              padding: "10px 12px",
-                              borderRadius: "6px",
-                              background: "var(--bg-elevated)",
-                              border: "1px solid var(--border)",
-                            }}
-                          >
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "4px" }}>
-                              <strong style={{ fontSize: "13px", color: "var(--text)" }}>{f.title}</strong>
-                              <ProvenanceBadge
-                                kind="ai-generated"
-                                label={`${t.confidence}: ${typeof f.confidence === "object" && f.confidence !== null ? f.confidence.level : f.confidence}`}
-                              />
-                            </div>
-                            <p style={{ margin: 0, fontSize: "12.5px", color: "var(--text-muted)", lineHeight: 1.4 }}>
-                              {(f.summary ?? "").length > 120 ? `${f.summary.slice(0, 120)}…` : (f.summary ?? "")}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {/* Distributions */}
-                  {stats && (stats.ratingDistribution || stats.versionDistribution || stats.languageDistribution) ? (
-                    <div className="card" style={{ display: "grid", gap: "16px" }}>
-                      <div>
-                        <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.ratingDistribution}</h4>
-                        <RatingDistribution distribution={stats.ratingDistribution ?? {}} t={t} />
-                      </div>
-                      <div>
-                        <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.versionDistribution}</h4>
-                        <VersionDistribution distribution={stats.versionDistribution ?? {}} t={t} />
-                      </div>
-                      <div>
-                        <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.languageDistribution}</h4>
-                        <LanguageDistribution distribution={stats.languageDistribution ?? {}} t={t} />
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {/* Goal Coverage */}
-                  {cache.goalCoverage ? (
-                    <div className="card">
-                      <div className="card-header">
-                        <div className="card-title-wrap">
-                          <h4 className="card-title">{t.goalCoverage}</h4>
-                        </div>
-                        <ProvenanceBadge
-                          kind={cache.goalCoverage.valid ? "computed" : "conflict"}
-                          label={cache.goalCoverage.valid ? t.goalCoverageCovered : t.goalCoverageGap}
-                        />
-                      </div>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px", marginTop: "4px" }}>
-                        {cache.goalCoverage.items.map((item) => (
-                          <div key={item.focusAreaId} className="card card-elevated" style={{ padding: "10px 12px", gap: "6px" }}>
-                            <div style={{ fontSize: "13px", fontWeight: 600 }}>{item.label}</div>
-                            <div>
-                              <ProvenanceBadge
-                                kind={item.status === "covered" ? "computed" : item.status === "uncovered" ? "conflict" : "limitation"}
-                                label={item.status === "covered" ? t.goalCoverageCovered : item.status === "uncovered" ? t.goalCoverageUncovered : t.goalCoverageUnsupported}
-                              />
-                            </div>
-                            <div className="muted" style={{ fontSize: "12px" }}>
-                              {t.findingId}: {item.findingIds.length} · {t.requirementId}: {item.requirementIds.length}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-
-                  {/* Collapsible Data Quality Details */}
-                  {(() => {
-                    const cleaning = (cache.cleaned as { cleaning?: { unicodeNormalizedCount: number; whitespaceCollapsedCount: number; caseFoldedCount: number; exactDuplicateRemovedCount: number; identityConflictCount: number; keptShortUniqueCount: number; languageLabels: { tag: string; count: number }[] } } | undefined)?.cleaning;
-                    if (!cleaning) return null;
-                    return (
-                      <details className="card" style={{ cursor: "pointer" }} open>
-                        <summary style={{ fontWeight: 600, fontSize: "14px", outline: "none" }}>
-                          {t.dataCleaningDetails}
-                        </summary>
-                        <div className="card-metadata-grid" style={{ marginTop: "12px" }}>
-                          <div className="card-metadata-item">
-                            <span className="card-metadata-label">{t.cleaningUnicode}</span>
-                            <span className="card-metadata-value">{cleaning.unicodeNormalizedCount}</span>
-                          </div>
-                          <div className="card-metadata-item">
-                            <span className="card-metadata-label">{t.cleaningWhitespace}</span>
-                            <span className="card-metadata-value">{cleaning.whitespaceCollapsedCount}</span>
-                          </div>
-                          <div className="card-metadata-item">
-                            <span className="card-metadata-label">{t.cleaningCaseFolded}</span>
-                            <span className="card-metadata-value">{cleaning.caseFoldedCount}</span>
-                          </div>
-                          <div className="card-metadata-item">
-                            <span className="card-metadata-label">{t.cleaningExactDuplicates}</span>
-                            <span className="card-metadata-value">{cleaning.exactDuplicateRemovedCount}</span>
-                          </div>
-                          <div className="card-metadata-item">
-                            <span className="card-metadata-label">{t.cleaningIdentityConflicts}</span>
-                            <span className="card-metadata-value">{cleaning.identityConflictCount}</span>
-                          </div>
-                          <div className="card-metadata-item">
-                            <span className="card-metadata-label">{t.cleaningShortKept}</span>
-                            <span className="card-metadata-value">{cleaning.keptShortUniqueCount}</span>
-                          </div>
-                        </div>
-                        {cleaning.languageLabels.length > 0 ? (
-                          <div className="card-section" style={{ marginTop: "10px" }}>
-                            <span className="card-section-title">{t.cleaningLanguages}</span>
-                            <div className="card-badges">
-                              {cleaning.languageLabels.map((l) => (
-                                <span key={l.tag} className="chip chip-muted">
-                                  {l.tag}: {l.count}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        ) : null}
-                      </details>
-                    );
-                  })()}
-
-                  {/* Limitations with translation */}
-                  {cache.finalReport ? (
-                    <div className="card">
-                      <div className="card-header">
-                        <h4 className="card-title">{t.limitations}</h4>
-                      </div>
-                      <div style={{ display: "grid", gap: "6px" }}>
-                        {dedupeLimitations((cache.finalReport as { limitations?: { code: string; message: string }[] }).limitations ?? []).map((l, i) => (
-                          <div key={i} style={{ fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
-                            <ProvenanceBadge kind="limitation" label={translateCode(l.code)} />
-                            <span>{l.message}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : null}
-                </div>
+                <OverviewTab
+                  manifest={versions.manifest}
+                  stats={stats}
+                  findings={cache.findings?.findings}
+                  goalCoverage={cache.goalCoverage}
+                  cleaned={cache.cleaned}
+                  finalReport={cache.finalReport}
+                  activePrd={activePrd}
+                  sourceBadge={sourceBadge}
+                  t={t}
+                  onSelectTab={handleSelectTab}
+                />
               ) : null}
 
               {(tab === "raw" || tab === "cleaned") && cleanedReviews.length > 0 ? (
