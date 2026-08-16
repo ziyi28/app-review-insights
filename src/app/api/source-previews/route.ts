@@ -87,7 +87,9 @@ export async function POST(req: Request) {
     },
     previewsDir: cfg.sourcePreviewsDir,
     cacheDir: cfg.sourceCacheDir,
-    historyRoots: [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")],
+    // Production cache bootstrap scans only real local runs — bundled demo
+    // fixtures stay viewable/replayable but never seed the stable sample.
+    historyRoots: [cfg.runsDir],
     runsDir: cfg.runsDir,
   });
 

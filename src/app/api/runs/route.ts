@@ -257,7 +257,9 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
           },
           previewsDir: cfg.sourcePreviewsDir,
           cacheDir: cfg.sourceCacheDir,
-          historyRoots: [cfg.runsDir, path.join(process.cwd(), "fixtures", "demo-runs")],
+          // Same policy as the preview route: the stable sample bootstraps from
+          // real local runs only, never from bundled demo fixtures.
+          historyRoots: [cfg.runsDir],
           runsDir: cfg.runsDir,
         });
 

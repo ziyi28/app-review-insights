@@ -156,6 +156,12 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
     }
   }
 
+  // Only reachable when the loop body never ran (a non-positive page cap):
+  // nothing was collected, so the outcome is partial with the same page-cap
+  // caveat rather than a fabricated "complete" dataset.
+  limitations.push({ code: "SERPAPI_PAGE_CAP", message: `SerpApi pagination stopped at ${maxPages} pages (max); collected reviews were kept`, stage: "source" });
+  return { status: "partial", reviews, rawRefs, limitations, evidence: buildEvidence() };
+
   async function fetchPage(page: number): Promise<{ pageReviews: RawReview[]; nextExists: boolean; dropped: number; suspectEmpty: boolean } | null> {
     const url = buildSearchUrl(baseUrl, apiKey, appId, page);
     const controller = new AbortController();
