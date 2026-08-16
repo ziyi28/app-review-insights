@@ -108,7 +108,7 @@ describe("traceability derivation helpers", () => {
 
 describe("validateTraceability", () => {
   it("passes a fully consistent prd", () => {
-    const report = validateTraceability(makePrd(), ["r1", "r2"]);
+    const report = validateTraceability(makePrd(), ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(true);
     expect(report.violations).toHaveLength(0);
   });
@@ -117,7 +117,7 @@ describe("validateTraceability", () => {
     const prd = makePrd();
     prd.findings[0].supportingReviewIds = ["ghost"];
     prd.findings[0].supportingSampleCount = 1;
-    const report = validateTraceability(prd, ["r1"]);
+    const report = validateTraceability(prd, ["r1"], reviewMap(["r1"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REVIEW_NOT_FOUND")).toBe(true);
   });
@@ -125,7 +125,7 @@ describe("validateTraceability", () => {
   it("flags a requirement whose source reviews are not the findings evidence", () => {
     const prd = makePrd();
     prd.requirements[0].sourceReviewIds = ["r1", "r2", "r9"];
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REQUIREMENT_EVIDENCE_MISMATCH")).toBe(true);
   });
@@ -133,7 +133,7 @@ describe("validateTraceability", () => {
   it("flags a requirement with no finding link", () => {
     const prd = makePrd();
     prd.requirements[0].findingIds = [];
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REQUIREMENT_NO_FINDING")).toBe(true);
   });
@@ -141,7 +141,7 @@ describe("validateTraceability", () => {
   it("flags a test citing a review outside the requirement evidence", () => {
     const prd = makePrd();
     prd.tests[0].sourceReviewIds = ["r9"];
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "TEST_REVIEW_OUTSIDE_EVIDENCE")).toBe(true);
   });
@@ -149,7 +149,7 @@ describe("validateTraceability", () => {
   it("flags an uncovered requirement (no test)", () => {
     const prd = makePrd();
     prd.tests = [];
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REQUIREMENT_UNCOVERED")).toBe(true);
   });
@@ -157,7 +157,7 @@ describe("validateTraceability", () => {
   it("rejects an assumption id used as a requirement id (schema enforces prefix)", () => {
     const prd = makePrd();
     prd.requirements[0].id = "asm-1";
-    expect(() => validateTraceability(prd, ["r1", "r2"])).not.toThrow();
+    expect(() => validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]))).not.toThrow();
   });
 
   it("flags a fabricated excerpt", () => {
@@ -171,7 +171,7 @@ describe("validateTraceability", () => {
   it("flags a test whose direct finding ids are not derived from its requirements", () => {
     const prd = makePrd();
     prd.tests[0].findingIds = ["finding-2"];
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "TEST_FINDING_MISMATCH")).toBe(true);
   });
@@ -179,13 +179,13 @@ describe("validateTraceability", () => {
   it("flags a test whose priority is not derived from its requirements", () => {
     const prd = makePrd();
     prd.tests[0].priority = "P2";
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "TEST_PRIORITY_MISMATCH")).toBe(true);
   });
 
   it("passes a test whose finding ids and priority match its requirements", () => {
-    const report = validateTraceability(makePrd(), ["r1", "r2"]);
+    const report = validateTraceability(makePrd(), ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(true);
   });
 
@@ -232,7 +232,7 @@ describe("validateTraceability", () => {
       expectedResult: "ok",
       priority: "P1",
     });
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(true);
   });
 
@@ -268,9 +268,30 @@ describe("validateTraceability", () => {
       dependencyRequirementIds: ["req-2"],
       rationale: "depends on req-2, forming a cycle",
     };
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REQUIREMENT_DEPENDENCY_CYCLE")).toBe(true);
+  });
+
+  it("flags a dependency on an unknown requirement id instead of skipping it", () => {
+    const prd = makePrd();
+    prd.requirements[0].planningFactors = {
+      severity: "high",
+      evidenceStrength: "high",
+      confidence: "high",
+      userImpact: "high",
+      frequency: { supportingReviewCount: 8, corpusReviewCount: 100, supportRatio: 0.08 },
+      implementationScope: "medium",
+      dependencyRequirementIds: ["req-ghost"],
+      rationale: "depends on a requirement that does not exist",
+    };
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(false);
+    expect(report.violations).toContainEqual({
+      code: "REQUIREMENT_UNKNOWN_DEPENDENCY",
+      message: "req-1 depends on unknown requirement req-ghost",
+      entity: "req-1",
+    });
   });
 
   it("flags a dependency on an unscheduled requirement", () => {
@@ -305,7 +326,7 @@ describe("validateTraceability", () => {
         rationale: "x",
       },
     });
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REQUIREMENT_DEPENDENCY_UNSCHEDULED")).toBe(true);
   });
@@ -343,7 +364,7 @@ describe("validateTraceability", () => {
       dependencyRequirementIds: ["req-2"],
       rationale: "depends on a later requirement",
     };
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations.some((v) => v.code === "REQUIREMENT_DEPENDENCY_LATE")).toBe(true);
   });
@@ -351,7 +372,7 @@ describe("validateTraceability", () => {
   it("flags a finding citing the same review as both supporting and conflicting", () => {
     const prd = makePrd();
     prd.findings[0].conflictingReviewIds = ["r1"];
-    const report = validateTraceability(prd, ["r1", "r2"]);
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(false);
     expect(report.violations).toContainEqual({
       code: "FINDING_CONFLICT_OVERLAP",

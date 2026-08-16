@@ -55,7 +55,7 @@ function requirementsInDependencyCycles(requirements: Requirement[]): Set<string
 export function validateTraceability(
   prd: Prd,
   corpusReviewIds: string[],
-  reviewMap?: Map<string, NormalizedReview>,
+  reviewMap: Map<string, NormalizedReview>,
 ): TraceabilityReport {
   const violations: Violation[] = [];
   const corpus = new Set(corpusReviewIds);
@@ -118,7 +118,7 @@ export function validateTraceability(
         violations.push({ code: "REVIEW_NOT_FOUND", message: `${f.id} excerpt cites unknown review ${e.reviewId}`, entity: f.id });
         continue;
       }
-      const review = reviewMap?.get(e.reviewId);
+      const review = reviewMap.get(e.reviewId);
       if (review && !isExactExcerpt(e.excerpt, review.bodyNormalized)) {
         violations.push({ code: "EXCERPT_NOT_EXACT", message: `${f.id} excerpt not exact`, entity: f.id });
       }
@@ -162,7 +162,16 @@ export function validateTraceability(
     }
     for (const dependencyId of requirement.planningFactors?.dependencyRequirementIds ?? []) {
       const dependency = prd.requirements.find((candidate) => candidate.id === dependencyId);
-      if (!dependency) continue; // unknown/self links were removed by normalizer
+      // The planner's normalizer strips unknown/self links, so a dangling id
+      // here means the ledger was tampered with — reported, never skipped.
+      if (!dependency) {
+        violations.push({
+          code: "REQUIREMENT_UNKNOWN_DEPENDENCY",
+          message: `${requirement.id} depends on unknown requirement ${dependencyId}`,
+          entity: requirement.id,
+        });
+        continue;
+      }
       if (requirement.versionId && !dependency.versionId) {
         violations.push({
           code: "REQUIREMENT_DEPENDENCY_UNSCHEDULED",
