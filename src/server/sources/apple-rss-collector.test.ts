@@ -73,6 +73,22 @@ describe("collectAppleReviews", () => {
     expect(deps.fetchFn).toHaveBeenCalledTimes(2);
   });
 
+  it("returns partial with RSS_NON_JSON when page 2 is HTML, keeping page-1 reviews", async () => {
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const url2 = "https://itunes.apple.com/us/rss/customerreviews/page=2/id=839285684/sortBy=mostRecent/json";
+    // Advertise lastPage=5 so page 2 is well before the natural end.
+    const page1 = JSON.parse(fixture("page-01.json"));
+    page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =
+      "https://itunes.apple.com/us/rss/customerreviews/page=5/id=839285684/sortBy=mostRecent/json";
+    const deps = depsFor({ [url1]: JSON.stringify(page1), [url2]: "<html>request blocked</html>" });
+    const result = await collectAppleReviews(deps);
+    // A structural failure beyond page 1 must not silently read as the natural
+    // end of pagination ("complete").
+    expect(result.status).toBe("partial");
+    expect(result.reviews).toHaveLength(2);
+    expect(result.limitations.some((l) => l.code === "RSS_NON_JSON")).toBe(true);
+  });
+
   it("stops paginating and truncates exactly at a requested reviewLimit", async () => {
     // A single page carrying more reviews than the limit (each ~20 chars) and a
     // rel=last advertising more pages, to prove the collector stops early.

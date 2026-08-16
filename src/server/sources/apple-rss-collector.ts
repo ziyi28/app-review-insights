@@ -302,11 +302,21 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
     // Empty pages beyond page 1: the natural end is page >= lastPage (or no
     // lastPage advertised). An empty page while rel=last still advertises more
     // pages is an abnormal early end: confirm once, then partial. A structural
-    // failure (non-JSON etc.) on page > 1 keeps the original behavior of ending
-    // pagination — it is only ever a fatal RSS_NON_JSON on page 1.
+    // failure (non-JSON etc.) on page > 1 is never a trustworthy "natural
+    // end" — the remaining pages are unknowable, so the collection is partial
+    // and the already-collected reviews are kept. Fatal RSS_NON_JSON only
+    // applies to page 1, where nothing has been collected yet.
     if (page > 1 && outcome.parsed.reviews.length === 0) {
+      if (structuralFailure(outcome)) {
+        limitations.push({
+          code: "RSS_NON_JSON",
+          message: `Page ${page} returned HTTP 200 but its body is not a valid Apple RSS feed; ending pagination with the collected reviews`,
+          stage: "source",
+        });
+        return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
+      }
       const lastPage = advertisedLastPage ?? outcome.parsed.lastPage;
-      const abnormalEarlyEnd = lastPage !== null && page < lastPage && !structuralFailure(outcome);
+      const abnormalEarlyEnd = lastPage !== null && page < lastPage;
       if (abnormalEarlyEnd) {
         await sleep(confirmDelayMs);
         let confirm: FetchOutcome;
@@ -332,8 +342,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
           return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
         }
       } else {
-        // Natural end: the advertised last page was reached (or unknown), or
-        // the page is a structural failure treated as the end.
+        // Natural end: the advertised last page was reached (or is unknown).
         break;
       }
     }

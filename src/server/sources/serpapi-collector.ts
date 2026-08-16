@@ -144,14 +144,17 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
       return { status: dropped > 0 ? "partial" : "complete", reviews, rawRefs, limitations, evidence: buildEvidence() };
     }
 
-    if (!nextExists || page >= maxPages) {
+    if (!nextExists) {
       return { status: dropped > 0 ? "partial" : "complete", reviews, rawRefs, limitations, evidence: buildEvidence() };
     }
-  }
 
-  // Reached the page cap while pages kept advertising more.
-  limitations.push({ code: "SERPAPI_PAGE_CAP", message: `SerpApi pagination stopped at ${maxPages} pages (max); collected reviews were kept`, stage: "source" });
-  return { status: "partial", reviews, rawRefs, limitations, evidence: buildEvidence() };
+    if (page >= maxPages) {
+      // The page cap cut pagination short while SerpApi still advertised a
+      // next page — the dataset is intentionally partial, never "complete".
+      limitations.push({ code: "SERPAPI_PAGE_CAP", message: `SerpApi pagination stopped at ${maxPages} pages (max); collected reviews were kept`, stage: "source" });
+      return { status: "partial", reviews, rawRefs, limitations, evidence: buildEvidence() };
+    }
+  }
 
   async function fetchPage(page: number): Promise<{ pageReviews: RawReview[]; nextExists: boolean; dropped: number; suspectEmpty: boolean } | null> {
     const url = buildSearchUrl(baseUrl, apiKey, appId, page);

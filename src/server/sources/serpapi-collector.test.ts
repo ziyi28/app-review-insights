@@ -246,6 +246,20 @@ describe("collectSerpApiReviews", () => {
     expect(result.evidence.pagesFetched).toBe(1);
   });
 
+  it("reports partial with SERPAPI_PAGE_CAP when the page cap is hit while more pages remain", async () => {
+    // Every page advertises a next page, so only maxPages stops the loop.
+    const fetchFn = vi.fn(async (input: RequestInfo | URL) => {
+      const page = Number(new URL(String(input)).searchParams.get("page"));
+      return jsonResponse(serpPage([reviewItem(`r${page}`)], { hasNext: true, page, searchId: `search_page_${page}` }));
+    }) as unknown as typeof fetch;
+
+    const result = await collectSerpApiReviews(deps({ fetchFn, maxPages: 3 }));
+    expect(fetchFn).toHaveBeenCalledTimes(3);
+    expect(result.status).toBe("partial");
+    expect(result.reviews.map((r) => r.sourceReviewId)).toEqual(["r1", "r2", "r3"]);
+    expect(result.limitations).toContainEqual(expect.objectContaining({ code: "SERPAPI_PAGE_CAP" }));
+  });
+
   it("does not auto-retry a failing request (one fetch call per failure)", async () => {
     const fetchFn = vi.fn(async () => {
       throw new TypeError("fetch failed");
