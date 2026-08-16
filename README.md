@@ -30,6 +30,18 @@
 追加到 `events.ndjson`，可离线回放为 **缓存回放（Cached Replay）**。早于这些 P1 产物的
 缓存运行会显示明确的后备提示，而不是捏造的数据。
 
+## 界面截图
+
+以下截图来自一次真实的 Workout for Women（美国区 App Store）分析运行（中文界面）：
+
+| 工作台概览 —— 评分 / 版本 / 语言分布与清洗明细 | 发现与证据 —— 精确摘录 + 评论 ID 徽章 |
+|:---:|:---:|
+| ![工作台概览](docs/screenshots/01-workbench-overview.png) | ![发现与证据](docs/screenshots/02-findings-evidence.png) |
+
+| 追溯拓扑矩阵 —— 评论 → 发现 → 需求 → 测试全链路闭环 | 最终交付物 —— 目标覆盖 + 版本计划 + 导出入口 |
+|:---:|:---:|
+| ![追溯拓扑矩阵](docs/screenshots/03-traceability-matrix.png) | ![最终交付物](docs/screenshots/04-final-deliverables.png) |
+
 ## 快速开始
 
 要求：Node.js 22+。
