@@ -170,6 +170,9 @@ beforeEach(() => {
   process.env.RUNS_DIR = path.join(baseDir, "runs");
   process.env.SOURCE_CACHE_DIR = path.join(baseDir, "cache");
   process.env.SOURCE_PREVIEWS_DIR = path.join(baseDir, "previews");
+  // Same machine-level config isolation as config.test.ts (db53a98): without
+  // this, a developer's real data/config.local.json leaks into these tests.
+  process.env.DATA_CONFIG_FILE = path.join(baseDir, "config.local.json");
   process.env.MODEL_BASE_URL = "https://example.com/v1";
   process.env.MODEL_NAME = "model";
   resetActiveRuns();
