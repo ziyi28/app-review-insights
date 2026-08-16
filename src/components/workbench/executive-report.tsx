@@ -209,7 +209,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
 
       {/* Table of Contents Quick Nav */}
       <nav className={styles.tocBar} aria-label="Report Table of Contents">
-        <span style={{ color: "var(--text-faint)", fontSize: "12px" }}>目录:</span>
+        <span style={{ color: "var(--text-faint)", fontSize: "12px" }}>{t.tableOfContents}:</span>
         {stats?.ratingDistribution ? (
           <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-ratings")}>
             {t.ratingDistribution}
@@ -280,7 +280,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                       {i > 0 ? ", " : ""}
                       <code
                         onClick={() => onJumpToReview?.(id)}
-                        title={onJumpToReview ? `跳转到评论 ${id}` : undefined}
+                        title={onJumpToReview ? `${t.jumpToReview} ${id}` : undefined}
                         style={{
                           color: onJumpToReview ? "var(--accent)" : "inherit",
                           cursor: onJumpToReview ? "pointer" : "default",
@@ -303,7 +303,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                             {t.reviewId}:{" "}
                             <code
                               onClick={() => onJumpToReview?.(e.reviewId)}
-                              title={onJumpToReview ? `跳转到评论 ${e.reviewId}` : undefined}
+                              title={onJumpToReview ? `${t.jumpToReview} ${e.reviewId}` : undefined}
                               style={{
                                 color: onJumpToReview ? "var(--accent)" : "inherit",
                                 cursor: onJumpToReview ? "pointer" : "default",

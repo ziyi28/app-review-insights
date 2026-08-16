@@ -8,10 +8,12 @@ import { findingIdsForRequirements, priorityForRequirements } from "@/domain/tra
 function ReviewIdList({
   reviewIds,
   onJumpToReview,
+  t,
   limit = 5,
 }: {
   reviewIds: string[];
   onJumpToReview?: (id: string) => void;
+  t: Dictionary;
   limit?: number;
 }) {
   const displayed = reviewIds.slice(0, limit);
@@ -23,15 +25,15 @@ function ReviewIdList({
           {i > 0 ? ", " : ""}
           <code
             onClick={() => onJumpToReview?.(id)}
-            title={onJumpToReview ? `跳转并查看评论 ${id}` : undefined}
-            style={{
-              cursor: onJumpToReview ? "pointer" : "default",
-              color: onJumpToReview ? "var(--accent)" : "inherit",
-              textDecoration: onJumpToReview ? "underline" : "none",
-            }}
-          >
-            {id.length > 8 ? id.slice(0, 8) : id}
-          </code>
+                title={onJumpToReview ? `${t.jumpToReview} ${id}` : undefined}
+                style={{
+                  cursor: onJumpToReview ? "pointer" : "default",
+                  color: onJumpToReview ? "var(--accent)" : "inherit",
+                  textDecoration: onJumpToReview ? "underline" : "none",
+                }}
+              >
+                {id.length > 8 ? id.slice(0, 8) : id}
+              </code>
         </span>
       ))}
       {reviewIds.length > limit ? <span style={{ color: "var(--text-faint)", fontSize: "11px" }}> +{reviewIds.length - limit}</span> : null}
@@ -59,7 +61,7 @@ export function TopicsPanel({
           <p style={{ margin: "0 0 4px" }}>{topic.description}</p>
           <div style={{ color: "var(--text-muted)", fontSize: "12px", display: "flex", gap: "6px", alignItems: "center" }}>
             <code>{topic.id}</code> · <span>{topic.reviewIds.length} {t.supportCount}:</span>
-            <ReviewIdList reviewIds={topic.reviewIds} onJumpToReview={onJumpToReview} limit={4} />
+            <ReviewIdList reviewIds={topic.reviewIds} onJumpToReview={onJumpToReview} t={t} limit={4} />
           </div>
         </div>
       ))}
@@ -97,7 +99,7 @@ export function FindingsPanel({
           <p style={{ margin: "0 0 6px" }}>{f.summary}</p>
           <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
             {t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}:{" "}
-            <ReviewIdList reviewIds={f.supportingReviewIds} onJumpToReview={onJumpToReview} limit={5} />
+            <ReviewIdList reviewIds={f.supportingReviewIds} onJumpToReview={onJumpToReview} t={t} limit={5} />
           </p>
           {f.evidenceSufficiency ? (
             <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
@@ -113,7 +115,7 @@ export function FindingsPanel({
                   “{e.excerpt}”{" "}
                   <code
                     onClick={() => onJumpToReview?.(e.reviewId)}
-                    title={onJumpToReview ? `跳转到评论 ${e.reviewId}` : undefined}
+                    title={onJumpToReview ? `${t.jumpToReview} ${e.reviewId}` : undefined}
                     style={{
                       color: onJumpToReview ? "var(--accent)" : "var(--text-muted)",
                       cursor: onJumpToReview ? "pointer" : "default",
@@ -129,7 +131,7 @@ export function FindingsPanel({
           {f.conflictingReviewIds.length > 0 ? (
             <p style={{ color: "var(--danger)", fontSize: "13px" }}>
               <ProvenanceBadge kind="conflict" label={t.conflict} />{" "}
-              <ReviewIdList reviewIds={f.conflictingReviewIds} onJumpToReview={onJumpToReview} limit={4} />
+              <ReviewIdList reviewIds={f.conflictingReviewIds} onJumpToReview={onJumpToReview} t={t} limit={4} />
             </p>
           ) : null}
           {f.uncertainties.length > 0 ? (
@@ -190,7 +192,7 @@ export function RequirementsPanel({
                 onClick={() => onJumpToTests(r.id)}
                 className="btn btn-ghost"
                 style={{ fontSize: "12px", padding: "2px 8px" }}
-                title={`查看 ${r.id} 对应的测试用例`}
+                title={`${t.viewTestCases} ${r.id}`}
               >
                 {t.testCases} →
               </button>
@@ -198,7 +200,7 @@ export function RequirementsPanel({
           </div>
           <p style={{ margin: "4px 0" }}>{r.description}</p>
           <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
-            {t.reviewId}: <ReviewIdList reviewIds={r.sourceReviewIds} onJumpToReview={onJumpToReview} limit={5} />
+            {t.reviewId}: <ReviewIdList reviewIds={r.sourceReviewIds} onJumpToReview={onJumpToReview} t={t} limit={5} />
           </p>
           <div style={{ margin: "4px 0 2px" }}>
             <ProvenanceBadge kind="computed" label={t.acceptanceCriteriaProvenance} />
@@ -262,7 +264,7 @@ export function TestsPanel({
                   onClick={() => onJumpToPrd(test.requirementIds[0])}
                   className="btn btn-ghost"
                   style={{ fontSize: "12px", padding: "2px 8px" }}
-                  title="查看对应 PRD 需求"
+                  title={t.viewPrdRequirement}
                 >
                   PRD →
                 </button>
@@ -270,7 +272,7 @@ export function TestsPanel({
             </div>
             <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>
               {t.requirementId}: {test.requirementIds.join(", ")} · {t.findingId}: {findingIds.join(", ")} · {t.reviewId}:{" "}
-              <ReviewIdList reviewIds={test.sourceReviewIds} onJumpToReview={onJumpToReview} limit={4} />
+              <ReviewIdList reviewIds={test.sourceReviewIds} onJumpToReview={onJumpToReview} t={t} limit={4} />
             </p>
             <p style={{ margin: "4px 0", fontSize: "13px" }}>
               <strong>{t.precondition}:</strong> {test.precondition || "—"}
@@ -344,11 +346,11 @@ export function TraceabilityPanel({
               {report.valid ? t.completed : t.failed}
             </strong>
             <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>
-              — {report.violations.length} {t.errors}（全链路证据与需求双向验证）
+              — {report.violations.length} {t.errors} ({t.traceValidationSummary})
             </span>
           </div>
           <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-            覆盖: {findings.length} 核心痛点 · {requirements.length} 需求 · {tests.length} 测试用例
+            {t.traceCoverageLabel}: {findings.length} {t.traceCoverageFindings} · {requirements.length} {t.traceCoverageRequirements} · {tests.length} {t.testCases}
           </span>
         </div>
       ) : null}
@@ -425,7 +427,7 @@ export function TraceabilityPanel({
                             label={`${t.confidence}: ${typeof f.confidence === "object" && f.confidence !== null ? f.confidence.level : f.confidence}`}
                           />
                           <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                            强度: {f.supportingReviewIds.length} 条
+                            {t.evidenceStrength}: {f.supportingReviewIds.length}
                           </span>
                         </div>
                       </td>
@@ -433,6 +435,7 @@ export function TraceabilityPanel({
                         <ReviewIdList
                           reviewIds={f.supportingReviewIds}
                           onJumpToReview={onJumpToReview}
+                          t={t}
                           limit={3}
                         />
                       </td>
@@ -451,7 +454,7 @@ export function TraceabilityPanel({
                                   onClick={() => onJumpToPrd(r.id)}
                                   className="btn btn-ghost"
                                   style={{ padding: "0 4px", fontSize: "11px", height: "auto" }}
-                                  title="在 PRD 中查看"
+                                  title={t.viewPrdRequirement}
                                 >
                                   ↗
                                 </button>
@@ -482,7 +485,7 @@ export function TraceabilityPanel({
                                   cursor: onJumpToTests ? "pointer" : "default",
                                   color: onJumpToTests ? "var(--accent)" : "inherit",
                                 }}
-                                title="查看测试用例"
+                                title={t.viewTestCases}
                               >
                                 {tc.id}
                               </span>

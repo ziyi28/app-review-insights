@@ -244,6 +244,29 @@ export type Dictionary = {
     traceStatusViolation: string;
     traceStatusMissingTest: string;
     traceStatusUncovered: string;
+    jumpToReview: string;
+    viewTestCases: string;
+    viewPrdRequirement: string;
+    traceValidationSummary: string;
+    traceCoverageLabel: string;
+    traceCoverageFindings: string;
+    traceCoverageRequirements: string;
+    finalDeliverablesSubtitle: string;
+    exportPackageTitle: string;
+    appNameLabel: string;
+    appStoreLinkLabel: string;
+    versionLabel: string;
+    includedRequirements: string;
+    supportingReviewIdsLabel: string;
+    exportCorrespondsTo: string;
+    noneValue: string;
+    testSteps: string;
+    tableOfContents: string;
+    clearSearch: string;
+    copyFullId: string;
+    fullId: string;
+    importFormatHint: string;
+    orWord: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -491,6 +514,29 @@ export const dictionaries: Record<Locale, Dictionary> = {
     traceStatusViolation: "Violations",
     traceStatusMissingTest: "No test",
     traceStatusUncovered: "Uncovered",
+    jumpToReview: "Jump to review",
+    viewTestCases: "View test cases",
+    viewPrdRequirement: "View in PRD",
+    traceValidationSummary: "end-to-end evidence and requirement validation",
+    traceCoverageLabel: "Coverage",
+    traceCoverageFindings: "findings",
+    traceCoverageRequirements: "requirements",
+    finalDeliverablesSubtitle: "Version plan, PRD specs, test cases and end-to-end traceability",
+    exportPackageTitle: "App Review Analysis & Product Plan — Full Deliverables",
+    appNameLabel: "App name",
+    appStoreLinkLabel: "App Store link",
+    versionLabel: "Version",
+    includedRequirements: "Included requirements",
+    supportingReviewIdsLabel: "Supporting review IDs",
+    exportCorrespondsTo: "covers",
+    noneValue: "none",
+    testSteps: "Test steps",
+    tableOfContents: "Contents",
+    clearSearch: "Clear search",
+    copyFullId: "Click to copy the full ID",
+    fullId: "Full ID",
+    importFormatHint: "Supports a JSON array or CSV format. Required fields:",
+    orWord: "or",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -736,6 +782,29 @@ export const dictionaries: Record<Locale, Dictionary> = {
     traceStatusViolation: "校验违规",
     traceStatusMissingTest: "缺测试",
     traceStatusUncovered: "未覆盖",
+    jumpToReview: "跳转到评论",
+    viewTestCases: "查看测试用例",
+    viewPrdRequirement: "查看对应 PRD 需求",
+    traceValidationSummary: "全链路证据与需求双向验证",
+    traceCoverageLabel: "覆盖",
+    traceCoverageFindings: "核心痛点",
+    traceCoverageRequirements: "需求",
+    finalDeliverablesSubtitle: "包含版本计划、PRD 规格书、测试用例与全链路追溯",
+    exportPackageTitle: "App 评论分析与产品规划全案交付包",
+    appNameLabel: "应用名称",
+    appStoreLinkLabel: "App Store 链接",
+    versionLabel: "版本",
+    includedRequirements: "包含需求",
+    supportingReviewIdsLabel: "支撑评论 ID",
+    exportCorrespondsTo: "对应",
+    noneValue: "无",
+    testSteps: "测试步骤",
+    tableOfContents: "目录",
+    clearSearch: "清除搜索",
+    copyFullId: "点击复制完整 ID",
+    fullId: "完整 ID",
+    importFormatHint: "支持 JSON 数组或 CSV 格式。必需字段：",
+    orWord: "或",
   },
 };
 

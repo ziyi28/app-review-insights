@@ -36,7 +36,7 @@ export function ClassificationPanel({
                 {i > 0 ? ", " : ""}
                 <code
                   onClick={() => onJumpToReview?.(id)}
-                  title={onJumpToReview ? `跳转到评论 ${id}` : undefined}
+                  title={onJumpToReview ? `${t.jumpToReview} ${id}` : undefined}
                   style={{
                     color: onJumpToReview ? "var(--accent)" : "inherit",
                     cursor: onJumpToReview ? "pointer" : "default",
@@ -250,45 +250,47 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
   const retryReasons = Array.isArray(usage?.retryReasons) ? (usage.retryReasons as string[]) : [];
   const promptVersions = Array.isArray(manifest?.promptVersions) ? manifest.promptVersions : Array.isArray(usage?.promptVersions) ? (usage.promptVersions as string[]) : [];
 
+  // Mirrors executive-report.tsx buildMarkdownReport: every label goes
+  // through the dictionary so the exported file matches the UI locale.
   const handleExportMarkdown = () => {
-    let md = `# App 评论分析与产品规划全案交付包\n\n`;
-    if (manifest?.appName) md += `**应用名称**: ${manifest.appName}\n`;
-    if (manifest?.appUrl) md += `**App Store 链接**: ${manifest.appUrl}\n`;
-    if (manifest?.goal) md += `**分析目标**: ${manifest.goal}\n\n`;
+    let md = `# ${t.exportPackageTitle}\n\n`;
+    if (manifest?.appName) md += `**${t.appNameLabel}**: ${manifest.appName}\n`;
+    if (manifest?.appUrl) md += `**${t.appStoreLinkLabel}**: ${manifest.appUrl}\n`;
+    if (manifest?.goal) md += `**${t.goal}**: ${manifest.goal}\n\n`;
     md += `---\n\n`;
 
     if (finalPrd?.versions?.length) {
-      md += `## 1. 版本规划路线图\n\n`;
+      md += `## 1. ${t.roadmapMilestones}\n\n`;
       for (const v of finalPrd.versions) {
-        md += `### 版本 ${v.name}: ${v.summary}\n`;
-        md += `- **发布理由**: ${v.rationale}\n`;
-        md += `- **包含需求**: ${v.requirementIds.join(", ")}\n\n`;
+        md += `### ${t.versionLabel} ${v.name}: ${v.summary}\n`;
+        md += `- **${t.versionRationale}**: ${v.rationale}\n`;
+        md += `- **${t.includedRequirements}**: ${v.requirementIds.join(", ")}\n\n`;
       }
     }
 
     if (finalPrd?.requirements?.length) {
-      md += `## 2. PRD 需求规格与验收准则\n\n`;
+      md += `## 2. ${t.requirementsSpecs}\n\n`;
       for (const r of finalPrd.requirements) {
         md += `### [${r.priority}] ${r.id}: ${r.title}\n`;
         md += `${r.description}\n\n`;
-        md += `**验收标准**:\n`;
+        md += `**${t.acceptanceCriteria}**:\n`;
         for (const ac of r.acceptanceCriteria) {
           md += `- ${ac}\n`;
         }
-        md += `\n**支撑评论 ID**: ${r.sourceReviewIds.join(", ")}\n\n`;
+        md += `\n**${t.supportingReviewIdsLabel}**: ${r.sourceReviewIds.join(", ")}\n\n`;
       }
     }
 
     if (finalPrd?.tests?.length) {
-      md += `## 3. 测试用例与验证计划\n\n`;
+      md += `## 3. ${t.verificationPlan}\n\n`;
       for (const tc of finalPrd.tests) {
-        md += `### ${tc.id} (对应 ${tc.requirementIds.join(", ")})\n`;
-        md += `- **前置条件**: ${tc.precondition || "无"}\n`;
-        md += `- **测试步骤**:\n`;
+        md += `### ${tc.id} (${t.exportCorrespondsTo} ${tc.requirementIds.join(", ")})\n`;
+        md += `- **${t.precondition}**: ${tc.precondition || t.noneValue}\n`;
+        md += `- **${t.testSteps}**:\n`;
         tc.steps.forEach((s, idx) => {
           md += `  ${idx + 1}. ${s}\n`;
         });
-        md += `- **预期结果**: ${tc.expectedResult}\n\n`;
+        md += `- **${t.expected}**: ${tc.expectedResult}\n\n`;
       }
     }
 
@@ -307,7 +309,7 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-panel)", padding: "12px 16px", borderRadius: "8px", border: "1px solid var(--border)" }}>
         <div>
           <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>{t.finalDeliverables}</h4>
-          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>包含版本计划、PRD 规格书、测试用例与全链路追溯</span>
+          <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{t.finalDeliverablesSubtitle}</span>
         </div>
         <button type="button" className="btn btn-primary" onClick={handleExportMarkdown}>
           📥 {t.exportPackage}

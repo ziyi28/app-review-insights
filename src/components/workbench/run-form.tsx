@@ -337,7 +337,7 @@ export function RunForm({ t, onStart, onCancel }: RunFormProps) {
               </label>
               <div style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: "6px", padding: "8px 12px", marginTop: "4px" }}>
                 <p style={{ fontSize: "12px", color: "var(--text-muted)", margin: "0 0 6px" }}>
-                  支持 JSON 数组或 CSV 格式。必需字段：<code>id</code>, <code>text</code>(或 <code>body</code>), <code>rating</code>。
+                  {t.importFormatHint} <code>id</code>, <code>text</code> ({t.orWord} <code>body</code>), <code>rating</code>
                 </p>
                 <button
                   type="button"

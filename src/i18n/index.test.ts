@@ -1,11 +1,20 @@
 import { describe, it, expect } from "vitest";
-import { dictionaries } from "./index";
+import { dictionaries, type Locale } from "./index";
 
 describe("i18n dictionaries", () => {
   it("has identical keys across locales", () => {
     const enKeys = Object.keys(dictionaries.en).sort();
     const zhKeys = Object.keys(dictionaries["zh-CN"]).sort();
     expect(zhKeys).toEqual(enKeys);
+  });
+
+  it("has a non-empty string value for every key in every locale", () => {
+    for (const locale of Object.keys(dictionaries) as Locale[]) {
+      for (const [key, value] of Object.entries(dictionaries[locale])) {
+        expect(typeof value, `${locale}.${key}`).toBe("string");
+        expect((value as string).trim().length, `${locale}.${key}`).toBeGreaterThan(0);
+      }
+    }
   });
 
   it("provides all required navigation keys", () => {

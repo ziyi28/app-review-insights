@@ -75,7 +75,7 @@ export function ReviewsTable({
             <button
               type="button"
               onClick={() => handleQueryChange("")}
-              title="清除搜索"
+              title={t.clearSearch}
               style={{ position: "absolute", right: "6px", background: "none", border: "none", color: "var(--text-muted)", padding: "2px", fontSize: "12px", display: "flex", alignItems: "center" }}
             >
               ✕
@@ -121,7 +121,7 @@ export function ReviewsTable({
                   >
                     <td>
                       <code
-                        title="点击复制完整 ID"
+                        title={t.copyFullId}
                         onClick={(e) => copyId(r.reviewId, e)}
                         style={{ cursor: "copy" }}
                       >
@@ -148,7 +148,7 @@ export function ReviewsTable({
                             <strong>{t.normalized}:</strong> {r.bodyNormalized}
                           </p>
                           <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
-                            <strong>{t.sourceId}:</strong> {r.sourceReviewId} · <strong>{t.source}:</strong> {r.rawRef} · <strong>完整 ID:</strong> <code>{r.reviewId}</code>
+                            <strong>{t.sourceId}:</strong> {r.sourceReviewId} · <strong>{t.source}:</strong> {r.rawRef} · <strong>{t.fullId}:</strong> <code>{r.reviewId}</code>
                           </p>
                         </div>
                       </td>
