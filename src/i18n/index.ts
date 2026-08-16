@@ -266,6 +266,7 @@ export type Dictionary = {
     fullId: string;
     importFormatHint: string;
     orWord: string;
+    runNotFound: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -535,6 +536,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     fullId: "Full ID",
     importFormatHint: "Supports a JSON array or CSV format. Required fields:",
     orWord: "or",
+    runNotFound: "Run not found or deleted.",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -802,6 +804,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     fullId: "完整 ID",
     importFormatHint: "支持 JSON 数组或 CSV 格式。必需字段：",
     orWord: "或",
+    runNotFound: "运行不存在或已被删除。",
   },
 };
 

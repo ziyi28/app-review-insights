@@ -130,6 +130,75 @@ describe("useRunStream", () => {
     expect(result.current.error).toBeNull();
   });
 
+  it("stops polling terminally on a 404 events answer (gone run)", async () => {
+    let polls = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url === "/api/runs" && init?.method === "POST") {
+          return { ok: true, json: async () => ({ runId: "run-x" }) };
+        }
+        polls += 1;
+        return { ok: false, status: 404, json: async () => ({}) };
+      }) as unknown as typeof fetch,
+    );
+    const { result } = renderHook(() => useRunStream());
+    await act(async () => {
+      await result.current.start({});
+    });
+    await waitFor(() => expect(result.current.gone).toBe(true));
+    expect(result.current.running).toBe(false);
+    expect(result.current.reconnecting).toBe(false);
+    // No retry is scheduled after the terminal 404.
+    const pollsAtGone = polls;
+    await new Promise((r) => setTimeout(r, 100));
+    expect(polls).toBe(pollsAtGone);
+  });
+
+  it("backs off between failed polls and resets after a success", async () => {
+    vi.useFakeTimers();
+    try {
+      const calls: number[] = [];
+      const start = Date.now();
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = String(input);
+          if (url === "/api/runs" && init?.method === "POST") {
+            return { ok: true, json: async () => ({ runId: "run-x" }) };
+          }
+          calls.push(Date.now() - start);
+          // Failures 1-3, a non-terminal success on 4, then another failure —
+          // the post-success gap must be the base interval again.
+          if (calls.length <= 3 || calls.length === 5) throw new Error("network down");
+          return { ok: true, json: async () => ({ runId: "run-x", status: "running", events: [makeEvent(1, "run.accepted")], lastSequence: 1 }) };
+        }) as unknown as typeof fetch,
+      );
+      const { result } = renderHook(() => useRunStream());
+      await act(async () => {
+        await result.current.start({});
+      });
+      // Failures: 800ms, ×1.5 → 1200ms, ×1.5 → 1800ms gaps…
+      await act(async () => { await vi.advanceTimersByTimeAsync(800); });
+      await act(async () => { await vi.advanceTimersByTimeAsync(1200); });
+      await act(async () => { await vi.advanceTimersByTimeAsync(1800); });
+      expect(calls.length).toBe(4);
+      // …then the successful poll resets the backoff: next failure waits only
+      // the base 800ms again.
+      await act(async () => { await vi.advanceTimersByTimeAsync(800); });
+      expect(calls.length).toBe(5);
+      expect(calls[1] - calls[0]).toBe(800);
+      expect(calls[2] - calls[1]).toBe(1200);
+      expect(calls[3] - calls[2]).toBe(1800);
+      expect(calls[4] - calls[3]).toBe(800);
+      expect(result.current.reconnecting).toBe(true);
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("loadHistory switches to an existing run and records it as last-run-id", async () => {
     mockIncremental("run-history", [makeEvent(1, "run.accepted", "run-history"), makeEvent(2, "run.completed", "run-history")]);
     const { result } = renderHook(() => useRunStream());

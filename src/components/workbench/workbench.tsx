@@ -96,7 +96,7 @@ export function Workbench() {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
 
-  const { runId, status, events, running, reconnecting, error, canRetry, start, reset, retry, loadHistory } = useRunStream();
+  const { runId, status, events, running, reconnecting, gone, error, canRetry, start, reset, retry, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [viewMode, setViewMode] = useState<ViewMode>("workbench");
   const [reviewSearchQuery, setReviewSearchQuery] = useState<string>("");
@@ -367,16 +367,21 @@ export function Workbench() {
   const starting = running && runId === null;
 
   const runFailed = useMemo(() => {
-    if (running || events.length === 0) return false;
+    if (running) return false;
+    // A gone run is terminal even when no event ever arrived (e.g. loading
+    // the history of a since-deleted run).
+    if (gone) return true;
+    if (events.length === 0) return false;
     if (Boolean(error)) return true;
     if (status === "failed") return true;
     if (status === "interrupted") return true;
     if (events.some((e) => e.type === "run.failed")) return true;
     return false;
-  }, [running, error, events, status]);
+  }, [running, error, gone, events, status]);
 
   const runFailedMessage = useMemo(() => {
     if (error) return error;
+    if (gone) return t.runNotFound;
     const failedEvent = events.find((e) => e.type === "run.failed");
     if (failedEvent) {
       const data = failedEvent.data as { error?: string; outcome?: string } | undefined;
@@ -385,7 +390,7 @@ export function Workbench() {
     if (status === "interrupted") return t.interrupted;
     if (status === "failed") return t.failed;
     return null;
-  }, [error, events, status, t]);
+  }, [error, gone, events, status, t]);
 
   const handleRetryCurrent = useCallback(() => {
     if (canRetry) {

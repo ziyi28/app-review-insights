@@ -16,6 +16,11 @@ export type RunStreamState = {
   running: boolean;
   /** A poll failed transiently; the client keeps retrying and has NOT failed. */
   reconnecting: boolean;
+  /**
+   * Terminal: the events endpoint answered 404/410 — the run directory no
+   * longer exists (deleted or never persisted). Polling has stopped.
+   */
+  gone: boolean;
   /** A non-recoverable error (e.g. the start request was rejected). */
   error: string | null;
   lastEvent: RunEvent | null;
@@ -33,13 +38,17 @@ export type RunStreamActions = {
 
 export const LAST_RUN_ID_KEY = "app-review-planner:last-run-id";
 
-const POLL_INTERVAL_MS = 800;
+const POLL_BASE_MS = 800;
+const POLL_MAX_MS = 5000;
+const POLL_BACKOFF_STEP = 1.5;
 
 /**
  * Client-side consumer of the run event API. `POST /api/runs` returns an
  * immediate `202` with a run id; this hook then polls
- * `GET /api/runs/{runId}/events?afterSequence=N` every 800ms for new events
- * until the authoritative status is terminal.
+ * `GET /api/runs/{runId}/events?afterSequence=N` for new events until the
+ * authoritative status is terminal. Failed polls back off (800ms growing by
+ * 1.5× up to 5s) and the delay resets after any successful poll; a 404/410
+ * answer is terminal — the run is gone and polling stops.
  *
  * Switching the monitored run (or starting a new one) only aborts the local
  * polling loop — the server-side task keeps running, so viewing history or
@@ -53,6 +62,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
   const [events, setEvents] = useState<RunEvent[]>([]);
   const [running, setRunning] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
+  const [gone, setGone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasLastBody, setHasLastBody] = useState(false);
 
@@ -85,8 +95,11 @@ export function useRunStream(): RunStreamState & RunStreamActions {
       setStatus(null);
       setEvents([]);
       setError(null);
+      setGone(false);
       setRunning(true);
       setReconnecting(false);
+
+      let delayMs = POLL_BASE_MS;
 
       const poll = async (afterSequence: number) => {
         if (gen !== generation.current) return;
@@ -96,15 +109,26 @@ export function useRunStream(): RunStreamState & RunStreamActions {
         } catch {
           if (gen !== generation.current) return;
           setReconnecting(true);
-          timerRef.current = setTimeout(() => poll(afterSequence), POLL_INTERVAL_MS);
+          timerRef.current = setTimeout(() => poll(afterSequence), delayMs);
+          delayMs = Math.min(delayMs * POLL_BACKOFF_STEP, POLL_MAX_MS);
           return;
         }
         if (!res.ok) {
           if (gen !== generation.current) return;
+          if (res.status === 404 || res.status === 410) {
+            // The run directory is gone (deleted or never persisted). No
+            // amount of retrying can bring it back — stop instead of looping
+            // on "reconnecting" forever.
+            setRunning(false);
+            setReconnecting(false);
+            setGone(true);
+            return;
+          }
           // A transient failure (e.g. the run directory is still being written)
           // is NOT a failed run: keep reconnecting rather than misreporting.
           setReconnecting(true);
-          timerRef.current = setTimeout(() => poll(afterSequence), POLL_INTERVAL_MS);
+          timerRef.current = setTimeout(() => poll(afterSequence), delayMs);
+          delayMs = Math.min(delayMs * POLL_BACKOFF_STEP, POLL_MAX_MS);
           return;
         }
         let json: { status?: string; events?: unknown[]; lastSequence?: number };
@@ -113,11 +137,15 @@ export function useRunStream(): RunStreamState & RunStreamActions {
         } catch {
           if (gen !== generation.current) return;
           setReconnecting(true);
-          timerRef.current = setTimeout(() => poll(afterSequence), POLL_INTERVAL_MS);
+          timerRef.current = setTimeout(() => poll(afterSequence), delayMs);
+          delayMs = Math.min(delayMs * POLL_BACKOFF_STEP, POLL_MAX_MS);
           return;
         }
         if (gen !== generation.current) return;
         setReconnecting(false);
+        // A successful poll resets the backoff so a healthy stream keeps its
+        // snappy base interval.
+        delayMs = POLL_BASE_MS;
 
         const incoming: RunEvent[] = [];
         for (const evt of json.events ?? []) {
@@ -150,7 +178,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
           return;
         }
         const next = json.lastSequence ?? (merged.at(-1)?.sequence ?? afterSequence);
-        timerRef.current = setTimeout(() => poll(next), POLL_INTERVAL_MS);
+        timerRef.current = setTimeout(() => poll(next), delayMs);
       };
 
       void poll(0);
@@ -166,6 +194,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     setStatus(null);
     setEvents([]);
     setError(null);
+    setGone(false);
     eventsRef.current = [];
   }, [stop]);
 
@@ -179,6 +208,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
       setRunId(null);
       setStatus(null);
       setError(null);
+      setGone(false);
       setRunning(true);
 
       try {
@@ -227,6 +257,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     events,
     running,
     reconnecting,
+    gone,
     error,
     lastEvent: events.at(-1) ?? null,
     canRetry: hasLastBody && !running,
