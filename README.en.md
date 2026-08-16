@@ -213,7 +213,7 @@ versions, and failure handling.
 
 ## Prompt and Hallucination Controls
 
-- Prompts in `src/server/model/prompts/*.v1.ts`, versioned (`scope@1`, …).
+- Prompts in `src/server/model/prompts/*.v1.ts`, versioned (`scope@2`, …).
 - Review text is always treated as **untrusted data**; prompts forbid following
   reviewer instructions.
 - Every model result is validated against a Zod schema.

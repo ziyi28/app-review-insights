@@ -41,7 +41,8 @@ snapshots, or git. `.env.example` documents the shape.
 ## Prompt discipline
 
 - Prompts live in `src/server/model/prompts/*.v1.ts` with fixed versions
-  (`scope@1`, `topics.discovery@1`, …) and a stable hash recorded per call.
+  (`scope@2`, `topics.discovery@3`, `findings@4`, …) and a stable hash
+  recorded per call.
 - Review text is always labeled **untrusted data**; prompts forbid following
   reviewer instructions.
 - Each prompt returns a single JSON object validated by a Zod schema. No tool

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { ModelJsonMode, ModelMeta, ModelRequest, ModelResult, ModelUsageLog } from "./types";
 import { extractJsonObject } from "./parse-json";
 
@@ -57,12 +58,12 @@ export class OpenAiCompatibleClient {
     this.signal = deps.signal;
     this.timeoutMs = deps.timeoutMs;
     this.progressIntervalMs = deps.progressIntervalMs ?? PROGRESS_INTERVAL_MS;
-    this.usageLog = { model: deps.model, provider: safeProviderLabel(deps.baseUrl), temperature: this.temperature, calls: 0, attempts: 0, retries: 0, retryReasons: [], promptVersions: [], totalTokens: null, durationsMs: [] };
+    this.usageLog = { model: deps.model, provider: safeProviderLabel(deps.baseUrl), temperature: this.temperature, calls: 0, attempts: 0, retries: 0, retryReasons: [], promptVersions: [], promptHashes: [], totalTokens: null, durationsMs: [] };
   }
 
   /** Aggregated model usage for the run manifest (never contains the API key). */
   getUsageLog(): ModelUsageLog {
-    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions], retryReasons: [...this.usageLog.retryReasons] };
+    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions], promptHashes: [...this.usageLog.promptHashes], retryReasons: [...this.usageLog.retryReasons] };
   }
 
   async generate<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
@@ -198,11 +199,13 @@ export class OpenAiCompatibleClient {
     const usage = (json as { usage?: unknown })?.usage as
       | { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number }
       | undefined;
+    const promptSha256 = createHash("sha256").update(request.system + request.promptVersion).digest("hex");
     const meta: ModelMeta = {
       model: this.model,
       temperature: this.temperature,
       provider: safeProviderLabel(this.baseUrl),
       promptVersion: request.promptVersion,
+      promptSha256,
       status: res.status,
       durationMs,
       finishReason,
@@ -211,6 +214,7 @@ export class OpenAiCompatibleClient {
     // Record aggregated usage (never the API key) for the run manifest.
     this.usageLog.calls += 1;
     this.usageLog.promptVersions.push(request.promptVersion);
+    this.usageLog.promptHashes.push(promptSha256);
     this.usageLog.durationsMs.push(durationMs);
     if (usage?.total_tokens != null) {
       this.usageLog.totalTokens = (this.usageLog.totalTokens ?? 0) + usage.total_tokens;

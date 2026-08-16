@@ -95,8 +95,18 @@ describe("OpenAiCompatibleClient", () => {
     expect(log.calls).toBe(2);
     expect(log.totalTokens).toBe(30);
     expect(log.promptVersions).toEqual(["findings@1", "findings@1"]);
+    expect(log.promptHashes).toHaveLength(2);
+    expect(log.promptHashes[0]).toMatch(/^[0-9a-f]{64}$/);
+    expect(log.promptHashes[0]).toBe(log.promptHashes[1]);
     expect(log.model).toBe("model-x");
     expect(log.durationsMs.length).toBe(2);
+  });
+
+  it("records the prompt hash in the result meta", async () => {
+    const { client, fetchMock } = makeClient();
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+    const result = await client.generate(requestBase()) as ModelResult<{ ok: boolean }> & { __modelMeta?: { promptSha256?: string } };
+    expect(result.__modelMeta?.promptSha256).toMatch(/^[0-9a-f]{64}$/);
   });
 
   it("retries a transient 5xx and succeeds, reporting progress and usage", async () => {

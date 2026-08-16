@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type { ModelRequest, ModelResult, ModelUsageLog } from "./types";
 
 /**
@@ -9,7 +10,7 @@ export class ScriptedModelClient {
   private readonly error?: Error;
   callIndex = 0;
   requests: ModelRequest<unknown>[] = [];
-  private readonly usageLog: ModelUsageLog = { model: "scripted", provider: "test", temperature: 0.1, calls: 0, attempts: 0, retries: 0, retryReasons: [], promptVersions: [], totalTokens: null, durationsMs: [] };
+  private readonly usageLog: ModelUsageLog = { model: "scripted", provider: "test", temperature: 0.1, calls: 0, attempts: 0, retries: 0, retryReasons: [], promptVersions: [], promptHashes: [], totalTokens: null, durationsMs: [] };
 
   constructor(script: string[], error?: Error) {
     this.script = script;
@@ -17,7 +18,7 @@ export class ScriptedModelClient {
   }
 
   getUsageLog(): ModelUsageLog {
-    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions], retryReasons: [...this.usageLog.retryReasons] };
+    return { ...this.usageLog, promptVersions: [...this.usageLog.promptVersions], promptHashes: [...this.usageLog.promptHashes], retryReasons: [...this.usageLog.retryReasons] };
   }
 
   async generate<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
@@ -36,6 +37,7 @@ export class ScriptedModelClient {
     this.usageLog.calls += 1;
     this.usageLog.attempts += 1;
     this.usageLog.promptVersions.push(request.promptVersion);
+    this.usageLog.promptHashes.push(createHash("sha256").update(request.system + request.promptVersion).digest("hex"));
     return {
       ...result.data,
       usage: null,

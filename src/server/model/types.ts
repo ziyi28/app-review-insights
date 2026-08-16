@@ -58,6 +58,8 @@ export type ModelUsageLog = {
   /** MODEL_* reason per retry (never the provider response body). */
   retryReasons: string[];
   promptVersions: string[];
+  /** sha256(system + version) per successful call, aligned with promptVersions. */
+  promptHashes: string[];
   totalTokens: number | null;
   durationsMs: number[];
 };
