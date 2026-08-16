@@ -80,7 +80,9 @@ function RunDuration({ events, running }: { events: RunEvent[]; running: boolean
   );
 }
 
-type ConfigStatus = { modelConfigured: boolean; serpApiConfigured: boolean };
+/** `null` until GET /api/config resolves, so the header shows a neutral
+ *  "checking" chip instead of flashing 未配置 → 已配置 on the first frame. */
+type ConfigStatus = { modelConfigured: boolean; serpApiConfigured: boolean } | null;
 
 export function Workbench() {
   const [uiLocale, setUiLocale] = useState<Locale>("zh-CN");
@@ -98,7 +100,7 @@ export function Workbench() {
   const [viewMode, setViewMode] = useState<ViewMode>("workbench");
   const [reviewSearchQuery, setReviewSearchQuery] = useState<string>("");
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [configStatus, setConfigStatus] = useState<ConfigStatus>({ modelConfigured: false, serpApiConfigured: false });
+  const [configStatus, setConfigStatus] = useState<ConfigStatus>(null);
 
   const userNavigated = useRef(false);
 
@@ -423,9 +425,15 @@ export function Workbench() {
         </div>
 
         <div className={styles.headerStatus}>
-          <span className={configStatus.modelConfigured ? "chip chip-ok" : "chip chip-muted"} title={t.modelStatus}>
-            {t.modelStatus}: {configStatus.modelConfigured ? t.modelConfigured : t.modelNotConfigured}
-          </span>
+          {configStatus === null ? (
+            <span className="chip chip-muted" title={t.modelStatus}>
+              {t.modelStatus}: {t.modelStatusLoading}
+            </span>
+          ) : (
+            <span className={configStatus.modelConfigured ? "chip chip-ok" : "chip chip-muted"} title={t.modelStatus}>
+              {t.modelStatus}: {configStatus.modelConfigured ? t.modelConfigured : t.modelNotConfigured}
+            </span>
+          )}
           <span className="chip chip-accent" title={t.collectionStatus}>
             {t.collectionStatus}: {t.collectionConfigured}
           </span>

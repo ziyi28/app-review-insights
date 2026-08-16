@@ -117,6 +117,18 @@ describe("parseImportedReviews (CSV)", () => {
     expect(result.reviews).toHaveLength(0);
   });
 
+  it("trims padded headers and cells like their clean counterparts", () => {
+    const padded = " id , body , rating , updatedAt \n r1 , hello world , 5 , 2026-07-01T10:00:00Z ";
+    const clean = "id,body,rating,updatedAt\nr1,hello world,5,2026-07-01T10:00:00Z";
+    const paddedResult = parseImportedReviews({ fileName: "x.csv", mediaType: "text/csv", content: padded });
+    const cleanResult = parseImportedReviews({ fileName: "x.csv", mediaType: "text/csv", content: clean });
+    expect(paddedResult.errors).toEqual([]);
+    expect(paddedResult.reviews).toHaveLength(1);
+    expect(paddedResult.reviews[0].sourceReviewId).toBe("r1");
+    expect(paddedResult.reviews[0].rating).toBe(5);
+    expect(paddedResult.reviews).toEqual(cleanResult.reviews);
+  });
+
   it("reports a CSV parse failure as an error", () => {
     // Unterminated quoted field makes csv-parse throw.
     const content = 'id,body,rating\nr1,"unterminated,5';

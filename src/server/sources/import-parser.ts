@@ -162,7 +162,8 @@ export function parseImportedReviews(input: ImportInput): ImportParseResult {
   } else {
     let records: Record<string, string>[];
     try {
-      records = parse(content, { columns: true, skip_empty_lines: true }) as Record<string, string>[];
+      // trim: headers and cells alike, so " id , body " parses like "id,body".
+      records = parse(content, { columns: true, skip_empty_lines: true, trim: true }) as Record<string, string>[];
     } catch (err) {
       errors.push(`CSV parse failed: ${err instanceof Error ? err.message : String(err)}`);
       return { reviews, rawRefs, errors, warnings, duplicateIndices, conflictIndices, evidence, sourceFiles };

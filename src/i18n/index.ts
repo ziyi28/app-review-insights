@@ -15,6 +15,7 @@ export type Dictionary = {
   modelStatus: string;
   modelConfigured: string;
   modelNotConfigured: string;
+  modelStatusLoading: string;
   overview: string;
   rawReviews: string;
   cleanedData: string;
@@ -251,6 +252,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     modelStatus: "Model",
     modelConfigured: "Configured",
     modelNotConfigured: "Not configured",
+    modelStatusLoading: "Checking…",
     overview: "Overview",
     rawReviews: "Raw Reviews",
     cleanedData: "Cleaned Data",
@@ -485,6 +487,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     modelStatus: "模型",
     modelConfigured: "已配置",
     modelNotConfigured: "未配置",
+    modelStatusLoading: "检查中…",
     overview: "概览",
     rawReviews: "原始评论",
     cleanedData: "清洗数据",

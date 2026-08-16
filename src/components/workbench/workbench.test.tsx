@@ -339,8 +339,15 @@ describe("Workbench settings integration", () => {
     // Stage 1: Load a completed run that has a PRD
     localStorage.setItem("app-review-planner:last-run-id", "run-old-completed");
 
-    const fetchMock = vi.fn((url: string) => {
+    const fetchMock = vi.fn((url: string, init?: RequestInit) => {
       const u = String(url);
+      if (u === "/api/runs" && init?.method === "POST") {
+        // Starting the new live run returns the in-flight classifying run.
+        return Promise.resolve({ ok: true, json: async () => ({ runId: "run-live-classifying", status: "running" }) });
+      }
+      if (u.includes("/api/source-previews") && init?.method === "POST") {
+        return Promise.resolve({ ok: true, json: async () => previewResponse() });
+      }
       if (u === "/api/runs") {
         return Promise.resolve({
           ok: true,
@@ -425,15 +432,59 @@ describe("Workbench settings integration", () => {
       expect(screen.getByText("Old Stale Feature")).toBeInTheDocument();
     });
 
-    // Switch back to workbench and click new run
+    // Switch back to workbench and start a NEW live run. Each interaction is
+    // wrapped in act with an async body so React state updates and the fetch
+    // mock's promise chain (microtasks) flush before the next click — plain
+    // awaited userEvent clicks can leave pending work that lands during the
+    // final synchronous assertion, making this test flaky.
     const workbenchModeBtn = screen.getAllByRole("button", { name: new RegExp(tZh.viewModeWorkbench) })[0];
-    await user.click(workbenchModeBtn);
+    await act(async () => {
+      await user.click(workbenchModeBtn);
+    });
 
-    const newRunBtn = screen.getByRole("button", { name: tZh.newRun });
-    await user.click(newRunBtn);
+    await act(async () => {
+      await user.click(screen.getByRole("button", { name: tZh.newRun }));
+    });
 
-    // Switch to Executive Report mode while in idle/new run state
-    await user.click(reportModeBtn);
+    // Walk the wizard: live mode → example app → goal → confirm → analyze.
+    await act(async () => {
+      fireEvent.click(screen.getByRole("radio", { name: new RegExp(tZh.liveMode) }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tZh.next }));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tZh.useExampleApp }));
+    });
+    await act(async () => {
+      fireEvent.change(screen.getByLabelText(tZh.goal), { target: { value: "理解最近的健身可用性问题" } });
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tZh.next }));
+    });
+    // The confirm step auto-checks the sample; wait for the live sample card.
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: tZh.analyzeFresh })).toBeInTheDocument();
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: tZh.analyzeFresh }));
+    });
+
+    // The new run is now in the classification (topics) stage.
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.some(([u2]) => String(u2).includes("run-live-classifying/events"))).toBe(true);
+    });
+
+    // Switch to Executive Report mode while the new run is in flight. Because
+    // the run is running (not idle), the mode switch must NOT restore the old
+    // completed run, so its stale PRD must not appear.
+    await act(async () => {
+      await user.click(reportModeBtn);
+    });
+
+    // Let any pending microtasks (polling, artifact fetches) settle before the
+    // synchronous negative assertion below.
+    await act(async () => {});
 
     // Verify "Old Stale Feature" is NOT in the executive report
     expect(screen.queryByText("Old Stale Feature")).not.toBeInTheDocument();
