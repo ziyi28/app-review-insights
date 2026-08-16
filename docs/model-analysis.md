@@ -19,8 +19,6 @@ understanding is required.
 | Traceability validation | deterministic | full invariant set over the review→finding→requirement→test chain (including direct Finding/Priority checks on tests) |
 | One-shot revision | model | constrained repair of validation violations; output is re-normalized through the same deterministic rules, and the revised artifacts are published as attempt 2 (Draft/Final) |
 | Test cases | model + deterministic | model links tests to requirements and source reviews; code derives each test's direct Finding IDs and Priority from the requirement graph |
-| Traceability validation | deterministic | full invariant set over the review→finding→requirement→test chain (including direct Finding/Priority checks on tests) |
-| One-shot revision | model | constrained repair of validation violations; output is re-normalized through the same deterministic rules |
 
 A purely keyword/taxonomy pipeline cannot generalize to unseen apps and
 reviews; a purely generative pipeline cannot be audited. The hybrid is the
@@ -35,8 +33,10 @@ point of this project.
 | `MODEL_NAME` | model identifier |
 | `MODEL_JSON_MODE` | `prompt` (default, JSON via prompt) or `json_object` (declared response format) |
 
-Secrets are read only from the environment and never written to logs,
-snapshots, or git. `.env.example` documents the shape.
+Secrets come from the environment (`.env` / `.env.local`) or the settings
+panel, which persists to the git-ignored `data/config.local.json`. Either way
+they never enter run snapshots, API responses, or logs. `.env.example`
+documents the env shape.
 
 ## Prompt discipline
 
@@ -87,8 +87,10 @@ snapshots, or git. `.env.example` documents the shape.
   in 1s (MODEL_HTTP_ERROR)`) and is recorded in the manifest's `modelUsage` as
   `attempts`, `retries`, and `retryReasons` (never the provider response body
   or the API key).
-- Without `MODEL_BASE_URL` + `MODEL_NAME`, live/import analysis fails clearly at
-  the first model stage; catalog and cached replay are unaffected.
+- Without `MODEL_BASE_URL` + `MODEL_NAME`, the deterministic stages (collect/
+  import, clean, dedupe, stats) still run and the run completes gracefully with
+  a `MODEL_NOT_CONFIGURED` limitation instead of failing; catalog and cached
+  replay are unaffected.
 
 ## Input normalization
 
