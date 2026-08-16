@@ -1,13 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, readFileSync, existsSync, rmSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { GET, POST } from "./route";
-import { loadConfig, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSerpApiConfig, resetRuntimeSerpApiConfig } from "@/server/config";
+import { loadConfig, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSerpApiConfig, resetRuntimeSerpApiConfig, readPersistedConfig } from "@/server/config";
 import type { RuntimeModelConfig } from "@/server/config";
 
 const saved = { ...process.env };
 let envFile = "";
+let dataFile = "";
 
 beforeEach(() => {
   process.env = { ...saved };
@@ -18,8 +19,12 @@ beforeEach(() => {
   delete process.env.SERPAPI_API_KEY;
   delete process.env.SERPAPI_BASE_URL;
   delete process.env.SERPAPI_TIMEOUT_MS;
-  envFile = path.join(mkdtempSync(path.join(tmpdir(), "cfgroute-")), ".env.local");
+  const envDir = mkdtempSync(path.join(tmpdir(), "cfgroute-"));
+  envFile = path.join(envDir, ".env.local");
+  dataFile = path.join(envDir, "data", "config.local.json");
+  mkdirSync(path.dirname(dataFile), { recursive: true });
   process.env.ENV_LOCAL_FILE = envFile;
+  process.env.DATA_CONFIG_FILE = dataFile;
   resetRuntimeModelConfig();
   resetRuntimeSerpApiConfig();
 });
@@ -43,6 +48,10 @@ function configRequest(body: Record<string, unknown>): Request {
   });
 }
 
+function readDataFile(): Record<string, unknown> {
+  return JSON.parse(readFileSync(dataFile, "utf8")) as Record<string, unknown>;
+}
+
 describe("GET /api/config", () => {
   it("reports model status without exposing the api key", async () => {
     process.env.MODEL_BASE_URL = "https://api.example.com/v1";
@@ -64,16 +73,12 @@ describe("GET /api/config", () => {
 });
 
 describe("POST /api/config", () => {
-  it("applies the update in-process and persists it to .env.local", async () => {
-    const res = await POST(new Request("http://localhost/api/config", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({
-        modelBaseUrl: "https://new.example.com/v1",
-        modelApiKey: "sk-new-key",
-        modelName: "new-model",
-        modelJsonMode: "json_object",
-      }),
+  it("applies the update in-process and persists it to data/config.local.json, never .env.local", async () => {
+    const res = await POST(configRequest({
+      modelBaseUrl: "https://new.example.com/v1",
+      modelApiKey: "sk-new-key",
+      modelName: "new-model",
+      modelJsonMode: "json_object",
     }));
     expect(res.status).toBe(200);
 
@@ -85,50 +90,63 @@ describe("POST /api/config", () => {
     expect(cfg.modelJsonMode).toBe("json_object");
     expect(cfg.modelBaseUrl).toBe((await jsonResponse(res)).modelBaseUrl as string);
 
-    // Persisted: the key lands in the git-ignored .env.local file.
-    const raw = readFileSync(envFile, "utf8");
-    expect(raw).toContain("MODEL_BASE_URL=https://new.example.com/v1");
-    expect(raw).toContain("MODEL_API_KEY=sk-new-key");
-    expect(raw).toContain("MODEL_NAME=new-model");
-    expect(raw).toContain("MODEL_JSON_MODE=json_object");
+    // Persisted to the git-ignored JSON file.
+    expect(readDataFile()).toEqual({
+      MODEL_BASE_URL: "https://new.example.com/v1",
+      MODEL_API_KEY: "sk-new-key",
+      MODEL_NAME: "new-model",
+      MODEL_JSON_MODE: "json_object",
+    });
+
+    // .env.local is never created or touched (touching it would make Next.js
+    // reload env and orphan running background tasks).
+    expect(existsSync(envFile)).toBe(false);
+    // No temp file left behind by the atomic write.
+    expect(existsSync(`${dataFile}.tmp`)).toBe(false);
   });
 
-  it("null clears a field at runtime and in .env.local", async () => {
+  it("null clears a field at runtime and persists an explicit null in the JSON", async () => {
     process.env.MODEL_BASE_URL = "https://old.example.com/v1";
-    writeFileSync(envFile, "MODEL_BASE_URL=https://old.example.com/v1\n", "utf8");
-    const res = await POST(new Request("http://localhost/api/config", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ modelBaseUrl: null }),
-    }));
+    const res = await POST(configRequest({ modelBaseUrl: null }));
     expect(res.status).toBe(200);
     const cfg = loadConfig();
     expect(cfg.modelBaseUrl).toBeNull();
-    expect(readFileSync(envFile, "utf8")).not.toContain("MODEL_BASE_URL");
+    expect(readDataFile()).toEqual({ MODEL_BASE_URL: null });
     expect((await jsonResponse(res)).modelBaseUrl).toBeNull();
   });
 
   it("omitted fields are untouched", async () => {
     process.env.MODEL_NAME = "keep-me";
     setRuntimeModelConfig({ modelBaseUrl: "https://existing.example.com/v1" } satisfies RuntimeModelConfig);
-    const res = await POST(new Request("http://localhost/api/config", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ modelApiKey: "sk-abc" }),
-    }));
+    const res = await POST(configRequest({ modelApiKey: "sk-abc" }));
     expect(res.status).toBe(200);
     const cfg = loadConfig();
     expect(cfg.modelName).toBe("keep-me");
     expect(cfg.modelBaseUrl).toBe("https://existing.example.com/v1");
     expect(cfg.modelApiKey).toBe("sk-abc");
+    expect(readDataFile()).toEqual({ MODEL_API_KEY: "sk-abc" });
+  });
+
+  it("merges into an existing JSON file instead of replacing it", async () => {
+    writeFileSync(dataFile, JSON.stringify({ MODEL_NAME: "prev-model" }), "utf8");
+    const res = await POST(configRequest({ modelBaseUrl: "https://new.example.com/v1" }));
+    expect(res.status).toBe(200);
+    expect(readDataFile()).toEqual({
+      MODEL_NAME: "prev-model",
+      MODEL_BASE_URL: "https://new.example.com/v1",
+    });
+  });
+
+  it("a persisted JSON value survives a simulated restart (no runtime override)", async () => {
+    await POST(configRequest({ modelBaseUrl: "https://saved.example.com/v1", modelName: "saved-model" }));
+    resetRuntimeModelConfig();
+    const cfg = loadConfig();
+    expect(cfg.modelBaseUrl).toBe("https://saved.example.com/v1");
+    expect(cfg.modelName).toBe("saved-model");
   });
 
   it("rejects an invalid url", async () => {
-    const res = await POST(new Request("http://localhost/api/config", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ modelBaseUrl: "not-a-url" }),
-    }));
+    const res = await POST(configRequest({ modelBaseUrl: "not-a-url" }));
     expect(res.status).toBe(422);
   });
 
@@ -162,20 +180,19 @@ describe("SerpApi configuration route", () => {
     const res = await POST(configRequest({ serpApiKey: "serp_saved_from_page" }));
     expect(res.status).toBe(200);
     expect(loadConfig().serpApiKey).toBe("serp_saved_from_page");
-    expect(readFileSync(envFile, "utf8")).toContain("SERPAPI_API_KEY=serp_saved_from_page");
+    expect(readPersistedConfig().SERPAPI_API_KEY).toBe("serp_saved_from_page");
     const json = await jsonResponse(res);
     expect(json.serpApiKeyConfigured).toBe(true);
     expect(JSON.stringify(json)).not.toContain("serp_saved_from_page");
   });
 
   it("clears only the SerpApi key and preserves model configuration", async () => {
-    writeFileSync(envFile, "SERPAPI_API_KEY=serp_old\nMODEL_NAME=keep-me\n", "utf8");
+    writeFileSync(dataFile, JSON.stringify({ SERPAPI_API_KEY: "serp_old", MODEL_NAME: "keep-me" }), "utf8");
     setRuntimeSerpApiConfig({ apiKey: "serp_old" });
     const res = await POST(configRequest({ serpApiKey: null }));
     expect(res.status).toBe(200);
     expect(loadConfig().serpApiKey).toBeNull();
-    expect(readFileSync(envFile, "utf8")).not.toContain("SERPAPI_API_KEY");
-    expect(readFileSync(envFile, "utf8")).toContain("MODEL_NAME=keep-me");
+    expect(readDataFile()).toEqual({ SERPAPI_API_KEY: null, MODEL_NAME: "keep-me" });
   });
 
   it("rejects the removed SocialCrawl setting", async () => {

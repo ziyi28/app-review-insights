@@ -198,14 +198,15 @@ never logged, persisted, or committed. Temperature is fixed at 0.1.
 **You can also configure the model from the UI:** open **Settings** in the
 header to set the API Base URL, API Key, Model Name, and JSON mode. Saving
 applies the values immediately (no restart) and persists them to the local,
-git-ignored `.env.local` so they survive a restart. The API key is never
-returned to the client — the panel only shows whether one is configured, with
-an option to clear it.
+git-ignored `data/config.local.json` so they survive a restart; `.env.local` /
+`.env` still apply as startup configuration, so existing setups need no
+migration. The API key is never returned to the client — the panel only shows
+whether one is configured, with an option to clear it.
 
 **Data collection platform (SerpApi):** save your SerpApi API Key in the
 password field under **Settings → Data collection platform**, or set
-`SERPAPI_API_KEY=` directly in your local `.env.local`. Saving/clearing applies
-immediately without a restart. The key is held server-only and used for
+`SERPAPI_API_KEY=` directly in your local `.env.local` (as startup
+configuration). Saving/clearing applies immediately without a restart. The key is held server-only and used for
 forced-fresh live App Store reviews; it never enters the browser bundle, HTTP
 responses, logs, preview JSON, run snapshots, or git-tracked files — the panel
 only shows "configured / not configured" with no view/copy/masked-tail. Never

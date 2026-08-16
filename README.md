@@ -147,12 +147,13 @@ Apple RSS 也返回 HTTP 200 空体（标记为 `suspect-empty`，绝不解读�
 持久化或提交。Temperature 固定为 0.1。
 
 **你也可以在界面中配置模型：** 打开顶栏的 **设置**，填写 API Base URL、API Key、模型名称
-和 JSON 模式。保存后立即生效（无需重启），并持久化到本地 git-ignore 的 `.env.local`，
-重启后仍保留。API Key 永远不会返回给客户端 —— 面板只显示是否已配置，并提供清除选项。
+和 JSON 模式。保存后立即生效（无需重启），并持久化到本地 git-ignore 的
+`data/config.local.json`，重启后仍保留；`.env.local` / `.env` 仍作为启动配置生效，老用户无需
+迁移。API Key 永远不会返回给客户端 —— 面板只显示是否已配置，并提供清除选项。
 
 **数据采集平台（SerpApi）：** 在 **设置 → 数据采集平台** 的密码输入框中保存
-SerpApi API Key，或直接在本机 `.env.local` 中设置 `SERPAPI_API_KEY=`。保存/清除
-立即生效，无需重启。该 Key 仅由服务端持有并用于强制实时采集 App Store 评论，绝不会进入
+SerpApi API Key，或直接在本机 `.env.local` 中设置 `SERPAPI_API_KEY=`（作为启动配置）。
+保存/清除立即生效，无需重启。该 Key 仅由服务端持有并用于强制实时采集 App Store 评论，绝不会进入
 浏览器 bundle、HTTP 响应、日志、预览 JSON、运行快照或 git 跟踪文件 —— 面板只显示
 「已配置 / 未配置」，不提供查看、复制或掩码尾号。请勿把真实 Key 粘贴进 README、
 `.env.example`、截图或 issue 文本；在本对话中披露过的 Key 应先在 SerpApi 控制台轮换再使用。

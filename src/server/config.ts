@@ -1,11 +1,13 @@
 import path from "node:path";
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync } from "node:fs";
 
 /**
  * Runtime model configuration, set by the UI's settings panel via
  * POST /api/config. It overrides the process environment (which Next.js loads
  * from `.env.local` at startup) without requiring a restart, and is persisted
- * to `.env.local` so it survives a restart.
+ * to the git-ignored `data/config.local.json` so it survives a restart.
+ * (The old behavior of rewriting `.env.local` is gone on purpose: touching it
+ * makes `next dev` reload env files and orphan running background tasks.)
  *
  * `undefined` means "not overridden" (fall back to env); `null` means
  * "explicitly cleared" (force empty even if env has a value).
@@ -93,15 +95,16 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const runsDir = env.RUNS_DIR ? path.resolve(env.RUNS_DIR) : path.resolve(process.cwd(), "data", "runs");
   const sourceCacheDir = env.SOURCE_CACHE_DIR ? path.resolve(env.SOURCE_CACHE_DIR) : path.resolve(process.cwd(), "data", "source-cache");
   const sourcePreviewsDir = env.SOURCE_PREVIEWS_DIR ? path.resolve(env.SOURCE_PREVIEWS_DIR) : path.resolve(process.cwd(), "data", "source-previews");
-  // Runtime overrides (set from the settings panel) take precedence over the
-  // process environment, which was frozen from `.env.local` at startup.
-  const modelBaseUrl = runtimeModelConfig.modelBaseUrl !== undefined ? runtimeModelConfig.modelBaseUrl : (env.MODEL_BASE_URL?.trim() || null);
-  const modelApiKey = runtimeModelConfig.modelApiKey !== undefined ? runtimeModelConfig.modelApiKey : (env.MODEL_API_KEY?.trim() || null);
-  const modelName = runtimeModelConfig.modelName !== undefined ? runtimeModelConfig.modelName : (env.MODEL_NAME?.trim() || null);
-  const effectiveJsonMode = runtimeModelConfig.modelJsonMode ?? jsonMode;
-  const serpApiKey = runtimeSerpApiConfig.apiKey !== undefined
-    ? runtimeSerpApiConfig.apiKey
-    : (env.SERPAPI_API_KEY?.trim() || null);
+  // Precedence: in-process runtime override (settings panel, same process)
+  // > data/config.local.json (settings panel, previous process) > process env
+  // (frozen from .env.local at startup).
+  const persisted = readPersistedConfig(env);
+  const modelBaseUrl = pickPersisted(runtimeModelConfig.modelBaseUrl, persisted.MODEL_BASE_URL, env.MODEL_BASE_URL?.trim() || null);
+  const modelApiKey = pickPersisted(runtimeModelConfig.modelApiKey, persisted.MODEL_API_KEY, env.MODEL_API_KEY?.trim() || null);
+  const modelName = pickPersisted(runtimeModelConfig.modelName, persisted.MODEL_NAME, env.MODEL_NAME?.trim() || null);
+  const persistedJsonMode = persisted.MODEL_JSON_MODE === "json_object" || persisted.MODEL_JSON_MODE === "prompt" ? persisted.MODEL_JSON_MODE : undefined;
+  const effectiveJsonMode = runtimeModelConfig.modelJsonMode ?? persistedJsonMode ?? jsonMode;
+  const serpApiKey = pickPersisted(runtimeSerpApiConfig.apiKey, persisted.SERPAPI_API_KEY, env.SERPAPI_API_KEY?.trim() || null);
   return {
     modelBaseUrl,
     modelApiKey,
@@ -217,4 +220,107 @@ function quoteEnvValue(value: string): string {
   if (!/[ "#=]/.test(value)) return value;
   const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   return `"${escaped}"`;
+}
+
+/** Keys persisted in data/config.local.json (env-style names, JSON values). */
+const PERSISTED_CONFIG_KEYS = ["MODEL_API_KEY", "MODEL_BASE_URL", "MODEL_JSON_MODE", "MODEL_NAME", "SERPAPI_API_KEY"] as const;
+
+export type PersistedConfigKey = (typeof PERSISTED_CONFIG_KEYS)[number];
+
+/** Validated view of data/config.local.json: string = override, null =
+ *  explicitly cleared, absent = fall back to the process env. */
+export type PersistedConfig = Partial<Record<PersistedConfigKey, string | null>>;
+
+/** Path to the local, git-ignored JSON file that settings-panel values persist
+ *  to (overridable via DATA_CONFIG_FILE for tests). */
+export function dataConfigPath(env: NodeJS.ProcessEnv = process.env): string {
+  return env.DATA_CONFIG_FILE ? path.resolve(env.DATA_CONFIG_FILE) : path.resolve(process.cwd(), "data", "config.local.json");
+}
+
+/**
+ * One precedence step: the in-process override (if set) wins, then the
+ * persisted JSON value (string or explicit null), then the env fallback.
+ */
+function pickPersisted(runtime: string | null | undefined, persisted: string | null | undefined, envValue: string | null): string | null {
+  if (runtime !== undefined) return runtime;
+  if (persisted !== undefined) return persisted;
+  return envValue;
+}
+
+/** Raw file read that preserves unknown keys so persisting never drops data
+ *  a newer version may have written. Corrupt JSON reads as empty. */
+function readRawConfigFile(env: NodeJS.ProcessEnv): Record<string, unknown> {
+  const file = dataConfigPath(env);
+  if (!existsSync(file)) return {};
+  try {
+    const parsed: unknown = JSON.parse(readFileSync(file, "utf8"));
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? { ...(parsed as Record<string, unknown>) } : {};
+  } catch {
+    return {};
+  }
+}
+
+/** The validated subset of data/config.local.json used by loadConfig. */
+export function readPersistedConfig(env: NodeJS.ProcessEnv = process.env): PersistedConfig {
+  const raw = readRawConfigFile(env);
+  const out: PersistedConfig = {};
+  for (const key of PERSISTED_CONFIG_KEYS) {
+    const value = raw[key];
+    if (typeof value === "string" || value === null) out[key] = value;
+  }
+  return out;
+}
+
+export type RuntimeConfigUpdate = {
+  model?: RuntimeModelConfig;
+  serpApi?: RuntimeSerpApiConfig;
+};
+
+/**
+ * Applies a settings-panel update in-process (no restart) and persists it to
+ * the git-ignored data/config.local.json so it survives a restart. The write
+ * is atomic (temp file + rename) and skipped entirely when nothing changed.
+ * Unlike the old .env.local persistence this never touches an env file, so
+ * `next dev` does not reload env and running background tasks survive.
+ */
+export function persistRuntimeConfig(update: RuntimeConfigUpdate, env: NodeJS.ProcessEnv = process.env): void {
+  const raw = readRawConfigFile(env);
+  const next = { ...raw };
+  const assign = (key: PersistedConfigKey, value: string | null | undefined): void => {
+    if (value !== undefined) next[key] = value;
+  };
+  if (update.model) {
+    assign("MODEL_BASE_URL", update.model.modelBaseUrl);
+    assign("MODEL_API_KEY", update.model.modelApiKey);
+    assign("MODEL_NAME", update.model.modelName);
+    assign("MODEL_JSON_MODE", update.model.modelJsonMode);
+  }
+  if (update.serpApi) assign("SERPAPI_API_KEY", update.serpApi.apiKey);
+
+  setRuntimeModelConfig(update.model ?? {});
+  setRuntimeSerpApiConfig(update.serpApi ?? {});
+
+  if (canonicalConfigJson(raw) === canonicalConfigJson(next)) return;
+  const file = dataConfigPath(env);
+  mkdirSync(path.dirname(file), { recursive: true });
+  const tmp = `${file}.tmp`;
+  writeFileSync(tmp, `${canonicalConfigJson(next)}\n`, "utf8");
+  renameSync(tmp, file);
+}
+
+/** Deterministic serialization (sorted keys) so unchanged comparisons and the
+ *  on-disk layout are stable regardless of insertion order. */
+function canonicalConfigJson(value: unknown): string {
+  const sorted = (v: unknown): unknown => {
+    if (Array.isArray(v)) return v.map(sorted);
+    if (v && typeof v === "object") {
+      return Object.fromEntries(
+        Object.entries(v as Record<string, unknown>)
+          .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+          .map(([k, val]) => [k, sorted(val)]),
+      );
+    }
+    return v;
+  };
+  return JSON.stringify(sorted(value));
 }

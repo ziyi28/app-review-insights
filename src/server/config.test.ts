@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, writeFileSync, rmSync, existsSync } from "node:fs";
+import { mkdtempSync, writeFileSync, rmSync, existsSync, readFileSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSerpApiConfig, resetRuntimeSerpApiConfig, isSerpApiConfigured, readEnvLocal, persistEnvLocal, envLocalPath } from "./config";
+import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, resetRuntimeModelConfig, setRuntimeSerpApiConfig, resetRuntimeSerpApiConfig, isSerpApiConfigured, readEnvLocal, persistEnvLocal, envLocalPath, readPersistedConfig, persistRuntimeConfig, dataConfigPath } from "./config";
 
 const saved = { ...process.env };
 
@@ -22,6 +22,7 @@ beforeEach(() => {
   delete process.env.APPLE_RSS_PAGE_DELAY_MS;
   delete process.env.REPLAY_EVENT_DELAY_MS;
   delete process.env.ENV_LOCAL_FILE;
+  delete process.env.DATA_CONFIG_FILE;
   delete process.env.SERPAPI_API_KEY;
   delete process.env.SERPAPI_BASE_URL;
   delete process.env.SERPAPI_TIMEOUT_MS;
@@ -245,5 +246,114 @@ describe("env.local read/persist", () => {
     persistEnvLocal("MODEL_NAME", "model-x");
     expect(readEnvLocal()).toEqual({ MODEL_NAME: "model-x" });
     rmSync(path.dirname(path.dirname(path.dirname(nested))), { recursive: true, force: true });
+  });
+});
+
+describe("data/config.local.json persistence and precedence", () => {
+  function tempDataConfig(): string {
+    return path.join(mkdtempSync(path.join(tmpdir(), "cfgjson-")), "config.local.json");
+  }
+
+  it("defaults dataConfigPath to the cwd data dir when DATA_CONFIG_FILE is unset", () => {
+    expect(dataConfigPath()).toBe(path.resolve(process.cwd(), "data", "config.local.json"));
+  });
+
+  it("loadConfig prefers runtime override > persisted json > process env", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    writeFileSync(file, JSON.stringify({ MODEL_BASE_URL: "https://json.example.com/v1" }), "utf8");
+    process.env.MODEL_BASE_URL = "https://env.example.com/v1";
+    process.env.MODEL_API_KEY = "env-key";
+    process.env.MODEL_NAME = "env-model";
+    setRuntimeModelConfig({ modelBaseUrl: "https://runtime.example.com/v1" });
+    try {
+      const cfg = loadConfig();
+      expect(cfg.modelBaseUrl).toBe("https://runtime.example.com/v1");
+      expect(cfg.modelApiKey).toBe("env-key");
+      expect(cfg.modelName).toBe("env-model");
+    } finally {
+      resetRuntimeModelConfig();
+    }
+
+    // Without the runtime override the persisted json wins over env.
+    const cfg = loadConfig();
+    expect(cfg.modelBaseUrl).toBe("https://json.example.com/v1");
+    rmSync(path.dirname(file), { recursive: true, force: true });
+  });
+
+  it("an explicit null in the json clears a field even when env has a value", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    writeFileSync(file, JSON.stringify({ MODEL_API_KEY: null }), "utf8");
+    process.env.MODEL_API_KEY = "env-key";
+    expect(loadConfig().modelApiKey).toBeNull();
+    rmSync(path.dirname(file), { recursive: true, force: true });
+  });
+
+  it("an invalid json mode in the file falls back to env instead of failing", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    writeFileSync(file, JSON.stringify({ MODEL_JSON_MODE: "garbage" }), "utf8");
+    process.env.MODEL_JSON_MODE = "json_object";
+    expect(loadConfig().modelJsonMode).toBe("json_object");
+    rmSync(path.dirname(file), { recursive: true, force: true });
+  });
+
+  it("a corrupt json file is tolerated and reads as empty", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    writeFileSync(file, "{ not json", "utf8");
+    process.env.MODEL_BASE_URL = "https://env.example.com/v1";
+    expect(readPersistedConfig()).toEqual({});
+    expect(loadConfig().modelBaseUrl).toBe("https://env.example.com/v1");
+    rmSync(path.dirname(file), { recursive: true, force: true });
+  });
+
+  it("persistRuntimeConfig merges updates, preserves unknown keys, and writes atomically", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    writeFileSync(file, JSON.stringify({ MODEL_NAME: "prev-model", FUTURE_KEY: "keep-me" }), "utf8");
+
+    persistRuntimeConfig({ model: { modelBaseUrl: "https://new.example.com/v1" }, serpApi: { apiKey: "serp-key" } });
+    const persisted = readPersistedConfig();
+    expect(persisted.MODEL_NAME).toBe("prev-model");
+    expect(persisted.MODEL_BASE_URL).toBe("https://new.example.com/v1");
+    expect(persisted.SERPAPI_API_KEY).toBe("serp-key");
+    // Unknown keys from a newer config version survive the merge.
+    expect(JSON.parse(readFileSync(file, "utf8"))).toMatchObject({ FUTURE_KEY: "keep-me" });
+    // Atomic write leaves no temp file behind.
+    expect(existsSync(`${file}.tmp`)).toBe(false);
+    rmSync(path.dirname(file), { recursive: true, force: true });
+  });
+
+  it("persistRuntimeConfig applies runtime overrides and skips the disk write when nothing changed", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    persistRuntimeConfig({ model: { modelName: "model-x" } });
+    expect(loadConfig().modelName).toBe("model-x");
+
+    // Make the file unwritable: persisting the same value must skip writing
+    // (no throw); persisting a new value attempts the write and throws.
+    chmodSync(file, 0o444);
+    try {
+      expect(() => persistRuntimeConfig({ model: { modelName: "model-x" } })).not.toThrow();
+      expect(() => persistRuntimeConfig({ model: { modelName: "model-y" } })).toThrow();
+    } finally {
+      chmodSync(file, 0o666);
+      rmSync(path.dirname(file), { recursive: true, force: true });
+    }
+  });
+
+  it("a json value applies after a simulated restart (fresh process, empty runtime)", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    persistRuntimeConfig({ model: { modelBaseUrl: "https://saved.example.com/v1", modelJsonMode: "json_object" }, serpApi: { apiKey: "serp-saved" } });
+    resetRuntimeModelConfig();
+    resetRuntimeSerpApiConfig();
+    const cfg = loadConfig();
+    expect(cfg.modelBaseUrl).toBe("https://saved.example.com/v1");
+    expect(cfg.modelJsonMode).toBe("json_object");
+    expect(cfg.serpApiKey).toBe("serp-saved");
+    rmSync(path.dirname(file), { recursive: true, force: true });
   });
 });

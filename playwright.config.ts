@@ -31,11 +31,13 @@ export default defineConfig({
       SOURCE_PREVIEWS_DIR: "./data/source-previews-e2e",
       REPLAY_EVENT_DELAY_MS: "0",
       // Server-process-only test values: the SerpApi key is non-production
-      // and must never equal the operator's real key. The isolated env file
-      // keeps settings-page persistence out of the developer's .env.local.
+      // and must never equal the operator's real key. The isolated env and
+      // data-config files keep settings-page persistence out of the
+      // developer's real .env.local / data/config.local.json.
       SERPAPI_API_KEY: "serp_e2e_only",
       SERPAPI_BASE_URL: "http://127.0.0.1:39876",
       ENV_LOCAL_FILE: "./data/config-e2e/.env.local",
+      DATA_CONFIG_FILE: "./data/config-e2e/config.local.json",
     },
   },
   projects: [

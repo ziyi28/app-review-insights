@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { loadConfig, isModelConfigured, isModelApiKeyConfigured, setRuntimeModelConfig, setRuntimeSerpApiConfig, persistEnvLocal, isSerpApiConfigured, type RuntimeModelConfig } from "@/server/config";
+import { loadConfig, isModelConfigured, isModelApiKeyConfigured, persistRuntimeConfig, isSerpApiConfigured, type RuntimeModelConfig } from "@/server/config";
 import { ConfigUpdateSchema } from "@/domain/contracts/config";
 
 export const runtime = "nodejs";
@@ -31,8 +31,9 @@ export async function GET() {
 /**
  * Updates the model connection from the settings panel. Applies the override
  * in-process immediately (no restart) and persists it to the git-ignored
- * `.env.local` so it survives a restart. The response re-reports status only;
- * the API key is never returned.
+ * `data/config.local.json` so it survives a restart — never to `.env.local`,
+ * which would trigger a Next.js env reload and orphan running background
+ * tasks. The response re-reports status only; the API key is never returned.
  */
 export async function POST(req: Request) {
   let body: unknown;
@@ -49,28 +50,15 @@ export async function POST(req: Request) {
   const update = parsed.data;
 
   const runtime: RuntimeModelConfig = {};
-  if (update.modelBaseUrl !== undefined) {
-    runtime.modelBaseUrl = update.modelBaseUrl;
-    persistEnvLocal("MODEL_BASE_URL", update.modelBaseUrl);
-  }
-  if (update.modelApiKey !== undefined) {
-    runtime.modelApiKey = update.modelApiKey;
-    persistEnvLocal("MODEL_API_KEY", update.modelApiKey);
-  }
-  if (update.modelName !== undefined) {
-    runtime.modelName = update.modelName;
-    persistEnvLocal("MODEL_NAME", update.modelName);
-  }
-  if (update.modelJsonMode !== undefined) {
-    runtime.modelJsonMode = update.modelJsonMode;
-    persistEnvLocal("MODEL_JSON_MODE", update.modelJsonMode);
-  }
-  setRuntimeModelConfig(runtime);
+  if (update.modelBaseUrl !== undefined) runtime.modelBaseUrl = update.modelBaseUrl;
+  if (update.modelApiKey !== undefined) runtime.modelApiKey = update.modelApiKey;
+  if (update.modelName !== undefined) runtime.modelName = update.modelName;
+  if (update.modelJsonMode !== undefined) runtime.modelJsonMode = update.modelJsonMode;
 
-  if (update.serpApiKey !== undefined) {
-    persistEnvLocal("SERPAPI_API_KEY", update.serpApiKey);
-    setRuntimeSerpApiConfig({ apiKey: update.serpApiKey });
-  }
+  persistRuntimeConfig({
+    model: runtime,
+    serpApi: update.serpApiKey !== undefined ? { apiKey: update.serpApiKey } : undefined,
+  });
 
   return NextResponse.json(configStatus(loadConfig()), { headers: { "cache-control": "no-store" } });
 }

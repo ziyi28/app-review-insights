@@ -25,7 +25,7 @@ type ConfigState = {
  * SerpApi key from the UI. On open it loads the current non-secret status
  * from GET /api/config; saving POSTs the changed fields to /api/config, which
  * applies the override in-process and persists it to the git-ignored
- * `.env.local`. Neither API key is ever returned to the client — the form only
+ * `data/config.local.json`. Neither API key is ever returned to the client — the form only
  * shows a "configured" flag and a "clear" action, and the SerpApi input is
  * always blank (no prefilled secret, no reveal).
  */
