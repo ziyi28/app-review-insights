@@ -183,6 +183,11 @@ SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance
 自带的演示 fixture 分析时使用了一个 DeepSeek 兼容端点（`deepseek-v4-flash`）；该配置记录在
 每个 fixture 的 `provenance.json` 里，回放**并不需要**它。
 
+> [!IMPORTANT]
+> **模型选型与兼容性说明：**
+> - **推荐模型**：开发与测试全链路深度基准模型为 **`deepseek-v4-flash`**。该模型对复杂结构化 JSON 规范、严格字段契约（Schema Constraints）以及精确证据引文的遵从度最高，运行最为稳定可靠。
+> - **更换其他模型（如 Qwen 系列等）的注意事项**：当前流水线的各阶段对模型输出实施了严格的 Zod Schema 确定性校验（如要求非空支撑列表、规范 ID 前缀等）。若切换为其他大模型（如通义千问 `qwen`、Llama 等开源或商用模型），可能会因模型在长上下文分块分析中偶发输出空支撑列表（`supportingReviewIds: []`）、缺失字段或格式偏差，触发 `MODEL_SCHEMA_VIOLATION` 导致分析中断。如果遇到运行不稳定，建议优先切回推荐的 `deepseek-v4-flash` 模型。
+
 各阶段的规则 vs 模型权衡、提示词版本和失败处理的说明，见 `docs/model-analysis.md`。
 
 ## 提示词与幻觉控制

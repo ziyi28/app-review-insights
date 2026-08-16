@@ -241,6 +241,11 @@ For the bundled demo fixtures the analysis used a DeepSeek-compatible endpoint
 (`deepseek-v4-flash`); that configuration is documented in each fixture's
 `provenance.json` and is **not** required to replay them.
 
+> [!IMPORTANT]
+> **Model Selection and Compatibility Note:**
+> - **Recommended Model**: The entire development and end-to-end benchmark baseline is built and verified against **`deepseek-v4-flash`**. It delivers the highest fidelity and compliance for structured JSON outputs, strict schema contracts, and exact evidence substrings.
+> - **Switching to Other Models (e.g., Qwen series)**: The analysis pipeline enforces strict deterministic Zod schema validation across all stages (such as requiring non-empty supporting citations and canonical ID prefixes). When switching to other models (such as Alibaba Cloud Qwen, Llama, or other open-weight/commercial models), minor discrepancies—such as empty supporting arrays (`supportingReviewIds: []`), omitted fields, or slight formatting drifts during chunked analysis—can trigger `MODEL_SCHEMA_VIOLATION` errors and cause runs to fail. If you experience instability, switch back to the recommended `deepseek-v4-flash` model.
+
 See `docs/model-analysis.md` for per-stage rules-vs-model rationale, prompt
 versions, and failure handling.
 
