@@ -61,4 +61,52 @@ describe("ReviewsTable", () => {
     expect(screen.queryByText("Too expensive")).not.toBeInTheDocument();
     expect(screen.getByText("Love the workouts")).toBeInTheDocument();
   });
+
+  it("renders duplicate reviews with identical reviewId without React key errors and allows expanding", () => {
+    const duplicateReviews: NormalizedReview[] = [
+      {
+        reviewId: "c1e9de8bd3dcb6c37505",
+        sourceReviewId: "r-dup",
+        source: "apple-rss",
+        titleOriginal: "Good",
+        bodyOriginal: "Great app!",
+        bodyNormalized: "great app",
+        rating: 5,
+        version: "1.0",
+        updatedAt: null,
+        language: "en",
+        rawRef: "raw:r-dup-1",
+        includedInAnalysis: true,
+        dedupeStatus: "unique",
+        duplicateOf: null,
+      },
+      {
+        reviewId: "c1e9de8bd3dcb6c37505",
+        sourceReviewId: "r-dup",
+        source: "apple-rss",
+        titleOriginal: "Good",
+        bodyOriginal: "Great app!",
+        bodyNormalized: "great app",
+        rating: 5,
+        version: "1.0",
+        updatedAt: null,
+        language: "en",
+        rawRef: "raw:r-dup-2",
+        includedInAnalysis: false,
+        dedupeStatus: "duplicate",
+        duplicateOf: "c1e9de8bd3dcb6c37505",
+      },
+    ];
+
+    const dict = getDictionary("en");
+    render(<ReviewsTable reviews={duplicateReviews} t={dict} />);
+
+    const cells = screen.getAllByText("Great app!");
+    expect(cells).toHaveLength(2);
+
+    // Clicking the first row expands only the first row's detail
+    fireEvent.click(cells[0]);
+    expect(screen.getByText(/raw:r-dup-1/)).toBeInTheDocument();
+    expect(screen.queryByText(/raw:r-dup-2/)).not.toBeInTheDocument();
+  });
 });

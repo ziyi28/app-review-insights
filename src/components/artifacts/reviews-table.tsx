@@ -50,7 +50,9 @@ export function ReviewsTable({
   }, [reviews, query, ratingFilter, statusFilter]);
 
   // If query is an exact or single match, auto expand it
-  const activeExpanded = expanded ?? (query.trim().length >= 6 && filtered.length === 1 ? filtered[0].reviewId : null);
+  const isSingleMatch = query.trim().length >= 6 && filtered.length === 1;
+  const autoExpandedKey = isSingleMatch ? `${filtered[0].reviewId}:${filtered[0].rawRef}:0` : null;
+  const activeExpanded = expanded ?? autoExpandedKey;
 
   const copyId = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -111,12 +113,13 @@ export function ReviewsTable({
             </tr>
           </thead>
           <tbody>
-            {filtered.map((r) => {
-              const isExpanded = activeExpanded === r.reviewId;
+            {filtered.map((r, index) => {
+              const rowKey = `${r.reviewId}:${r.rawRef}:${index}`;
+              const isExpanded = activeExpanded === rowKey;
               return (
-                <Fragment key={r.reviewId}>
+                <Fragment key={rowKey}>
                   <tr
-                    onClick={() => setExpanded(isExpanded ? null : r.reviewId)}
+                    onClick={() => setExpanded(isExpanded ? null : rowKey)}
                     style={{ cursor: "pointer", background: isExpanded ? "var(--bg-elevated)" : undefined }}
                   >
                     <td>
@@ -137,7 +140,7 @@ export function ReviewsTable({
                     <td>{r.bodyOriginal.slice(0, 120)}</td>
                   </tr>
                   {isExpanded ? (
-                    <tr key={`${r.reviewId}-detail`}>
+                    <tr key={`${rowKey}-detail`}>
                       <td colSpan={6} style={{ padding: "12px 16px", background: "var(--bg-panel)", borderBottom: "1px solid var(--border)" }}>
                         <div style={{ display: "grid", gap: "6px" }}>
                           <h4 style={{ margin: "0 0 4px" }}>{t.title}: {r.titleOriginal || "—"}</h4>

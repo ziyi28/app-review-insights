@@ -276,7 +276,7 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                 <div style={{ color: "var(--text-muted)", fontSize: "12px", marginBottom: "6px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
                   <span>{t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}:</span>
                   {f.supportingReviewIds.slice(0, 6).map((id, i) => (
-                    <span key={id}>
+                    <span key={`${id}-${i}`}>
                       {i > 0 ? ", " : ""}
                       <code
                         onClick={() => onJumpToReview?.(id)}

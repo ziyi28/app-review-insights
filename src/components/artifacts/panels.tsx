@@ -21,7 +21,7 @@ function ReviewIdList({
   return (
     <span>
       {displayed.map((id, i) => (
-        <span key={id}>
+        <span key={`${id}-${i}`}>
           {i > 0 ? ", " : ""}
           <code
             onClick={() => onJumpToReview?.(id)}

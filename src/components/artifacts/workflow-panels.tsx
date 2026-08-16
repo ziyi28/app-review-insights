@@ -32,7 +32,7 @@ export function ClassificationPanel({
           <div style={{ color: "var(--text-muted)", fontSize: "12px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
             <span>{t.reviewId}:</span>
             {c.supportingReviewIds.map((id, i) => (
-              <span key={id}>
+              <span key={`${id}-${i}`}>
                 {i > 0 ? ", " : ""}
                 <code
                   onClick={() => onJumpToReview?.(id)}
