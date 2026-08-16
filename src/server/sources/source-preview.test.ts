@@ -6,7 +6,7 @@ import type { RawReview } from "@/domain/contracts/review";
 import { collectAppleReviews, type CollectorDeps, type SourceResult } from "./apple-rss-collector";
 import { collectSerpApiReviews, type SerpApiCollectorDeps, type SerpApiCollectionResult, type SerpApiEvidence } from "./serpapi-collector";
 import { AppleReviewCacheStore } from "./apple-review-cache";
-import { runPreviewImpl, type PreviewInput } from "./source-preview";
+import { buildPreviewSnapshot, type PreviewInput } from "./source-preview";
 import { readPreview, isPreviewExpired, pruneExpiredPreviews, PREVIEW_TTL_MS } from "./source-preview";
 
 // The real collectors are exercised by their own tests; here we stub them to
@@ -130,7 +130,7 @@ function makeInput(overrides: Partial<PreviewInput> = {}): PreviewInput {
 describe("source preview dispatch", () => {
   it("uses a complete SerpApi result without calling RSS", async () => {
     mockedSerpApi.mockResolvedValue(serpResult({ reviews: [serpRaw("s1")] }));
-    const preview = await runPreviewImpl(makeInput({ serpApiCollector: serpDeps() }));
+    const preview = await buildPreviewSnapshot(makeInput({ serpApiCollector: serpDeps() }));
     expect(mockedSerpApi).toHaveBeenCalledTimes(1);
     expect(mockedCollect).not.toHaveBeenCalled();
     expect(preview.live.provider).toBe("serpapi");
@@ -145,7 +145,7 @@ describe("source preview dispatch", () => {
       limitations: [limit("SERPAPI_UPSTREAM_FAILED")],
     }));
     mockedCollect.mockResolvedValue(rssResult({ reviews: [rssRaw("rss-only")] }));
-    const preview = await runPreviewImpl(makeInput({ serpApiCollector: serpDeps() }));
+    const preview = await buildPreviewSnapshot(makeInput({ serpApiCollector: serpDeps() }));
     expect(preview.live.provider).toBe("apple-rss");
     expect(preview.live.reviews.map((r) => r.sourceReviewId)).toEqual(["rss-only"]);
     expect(preview.live.limitations.map((l) => l.code)).toContain("SERPAPI_UPSTREAM_FAILED");
@@ -153,7 +153,7 @@ describe("source preview dispatch", () => {
 
   it("keeps partial SerpApi reviews and never mixes RSS", async () => {
     mockedSerpApi.mockResolvedValue(serpResult({ status: "partial", reviews: [serpRaw("valid")], limitations: [limit("SERPAPI_PARTIAL")] }));
-    const preview = await runPreviewImpl(makeInput({ serpApiCollector: serpDeps() }));
+    const preview = await buildPreviewSnapshot(makeInput({ serpApiCollector: serpDeps() }));
     expect(mockedCollect).not.toHaveBeenCalled();
     expect(preview.live.provider).toBe("serpapi");
     expect(preview.live.reviews.map((r) => r.sourceReviewId)).toEqual(["valid"]);
@@ -162,7 +162,7 @@ describe("source preview dispatch", () => {
 
   it("uses RSS when SerpApi is not configured and labels the reason", async () => {
     mockedCollect.mockResolvedValue(rssResult({ reviews: [rssRaw("r1")] }));
-    const preview = await runPreviewImpl(makeInput({ serpApiCollector: null }));
+    const preview = await buildPreviewSnapshot(makeInput({ serpApiCollector: null }));
     expect(mockedSerpApi).not.toHaveBeenCalled();
     expect(mockedCollect).toHaveBeenCalledTimes(1);
     expect(preview.live.provider).toBe("apple-rss");
@@ -172,7 +172,7 @@ describe("source preview dispatch", () => {
   it("falls back to RSS when SerpApi returns an empty first page", async () => {
     mockedSerpApi.mockResolvedValue(serpResult({ status: "suspect-empty", reviews: [], limitations: [limit("SERPAPI_EMPTY")] }));
     mockedCollect.mockResolvedValue(rssResult({ reviews: [rssRaw("rss-after-empty")] }));
-    const preview = await runPreviewImpl(makeInput({ serpApiCollector: serpDeps() }));
+    const preview = await buildPreviewSnapshot(makeInput({ serpApiCollector: serpDeps() }));
     expect(preview.live.provider).toBe("apple-rss");
     expect(preview.live.reviews.map((r) => r.sourceReviewId)).toEqual(["rss-after-empty"]);
     expect(preview.live.limitations.map((l) => l.code)).toContain("SERPAPI_EMPTY");
@@ -186,7 +186,7 @@ describe("source preview", () => {
     const cacheStore = new AppleReviewCacheStore(cacheDir);
     await cacheStore.mergeLive("us", "839285684", [rssRaw("a", "2026-08-01T00:00:00Z"), rssRaw("b", "2026-08-02T00:00:00Z")]);
 
-    const preview = await runPreviewImpl(makeInput());
+    const preview = await buildPreviewSnapshot(makeInput());
     expect(preview.recommendedSelection).toBe("stable");
     expect(preview.live.reviewCount).toBe(1);
     expect(preview.stable.reviewCount).toBe(2);
@@ -194,7 +194,7 @@ describe("source preview", () => {
 
   it("recommends live when live is non-empty and not smaller than stable", async () => {
     mockedCollect.mockResolvedValue(liveResult({ status: "complete", reviews: [rssRaw("a", "2026-08-01T00:00:00Z"), rssRaw("b", "2026-08-02T00:00:00Z")] }));
-    const preview = await runPreviewImpl(makeInput());
+    const preview = await buildPreviewSnapshot(makeInput());
     expect(preview.recommendedSelection).toBe("live");
     expect(preview.live.reviewCount).toBe(2);
     // The live reviews are merged into the cache, so stable echoes them back;
@@ -207,14 +207,14 @@ describe("source preview", () => {
     const cacheStore = new AppleReviewCacheStore(cacheDir);
     await cacheStore.mergeLive("us", "839285684", [rssRaw("a", "2026-08-01T00:00:00Z")]);
 
-    const preview = await runPreviewImpl(makeInput());
+    const preview = await buildPreviewSnapshot(makeInput());
     expect(preview.recommendedSelection).toBe("stable");
     expect(preview.live.status).toBe("suspect-empty");
   });
 
   it("recommends null when both live and stable are empty", async () => {
     mockedCollect.mockResolvedValue(liveResult({ status: "suspect-empty", reviews: [] }));
-    const preview = await runPreviewImpl(makeInput());
+    const preview = await buildPreviewSnapshot(makeInput());
     expect(preview.recommendedSelection).toBeNull();
   });
 
@@ -223,7 +223,7 @@ describe("source preview", () => {
     const cacheStore = new AppleReviewCacheStore(cacheDir);
     await cacheStore.mergeLive("us", "839285684", [rssRaw("old", "2026-08-01T00:00:00Z")]);
 
-    await runPreviewImpl(makeInput());
+    await buildPreviewSnapshot(makeInput());
     const cache = await cacheStore.readCache("us", "839285684");
     expect(cache?.reviews).toHaveLength(2);
   });
@@ -236,7 +236,7 @@ describe("source preview", () => {
     const cacheStore = new AppleReviewCacheStore(cacheDir);
     await cacheStore.mergeLive("us", "839285684", Array.from({ length: 500 }, (_, i) => rssRaw(`stable-${i}`, `2026-08-${String((i % 20) + 1).padStart(2, "0")}T00:00:00Z`)));
 
-    const preview = await runPreviewImpl(makeInput({ reviewLimit: 100 }));
+    const preview = await buildPreviewSnapshot(makeInput({ reviewLimit: 100 }));
     expect(preview.reviewLimit).toBe(100);
     expect(preview.live.reviews).toHaveLength(100);
     expect(preview.live.rawRefs).toHaveLength(100);
@@ -248,7 +248,7 @@ describe("source preview", () => {
   it("persists the snapshot and reads it back", async () => {
     mockedCollect.mockResolvedValue(liveResult({ status: "complete", reviews: [] }));
     const input = makeInput();
-    const preview = await runPreviewImpl(input);
+    const preview = await buildPreviewSnapshot(input);
     const loaded = await readPreview(previewsDir, "preview-1");
     expect(loaded?.previewId).toBe("preview-1");
     expect(loaded?.expiresAt).toBe(preview.expiresAt);
@@ -256,7 +256,7 @@ describe("source preview", () => {
 
   it("computes a 30-minute expiry", async () => {
     mockedCollect.mockResolvedValue(liveResult({ status: "complete", reviews: [] }));
-    const preview = await runPreviewImpl(makeInput());
+    const preview = await buildPreviewSnapshot(makeInput());
     const ms = new Date(preview.expiresAt).getTime() - new Date(preview.createdAt).getTime();
     expect(ms).toBe(PREVIEW_TTL_MS);
   });
@@ -270,7 +270,7 @@ describe("source preview", () => {
 
   it("prunes expired snapshots lazily", async () => {
     mockedCollect.mockResolvedValue(liveResult({ status: "complete", reviews: [] }));
-    await runPreviewImpl(makeInput());
+    await buildPreviewSnapshot(makeInput());
     // Fast-forward past the TTL and prune.
     const removed = await pruneExpiredPreviews(previewsDir, "2026-08-13T00:00:00.000Z");
     expect(removed).toBe(1);
@@ -291,7 +291,7 @@ describe("source preview", () => {
         sourceFiles: [{ relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"x\":1}" }],
       }),
     );
-    const preview = await runPreviewImpl(makeInput());
+    const preview = await buildPreviewSnapshot(makeInput());
     expect(preview.live.sourceFiles).toEqual([{ relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"x\":1}" }]);
   });
 
@@ -309,7 +309,7 @@ describe("source preview", () => {
         ],
       }),
     );
-    const preview = await runPreviewImpl(makeInput());
+    const preview = await buildPreviewSnapshot(makeInput());
     expect(preview.live.requestCount).toBe(3);
     expect(preview.live.pageCount).toBe(1);
   });

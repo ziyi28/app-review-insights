@@ -88,7 +88,6 @@ describe("useRunStream", () => {
     });
     await waitFor(() => expect(result.current.events.length).toBe(2));
     expect(result.current.lastEvent?.type).toBe("run.completed");
-    expect(result.current.droppedEvents).toBe(1);
   });
 
   it("surfaces an error on a non-ok start response", async () => {

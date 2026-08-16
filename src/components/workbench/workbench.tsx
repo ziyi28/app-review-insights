@@ -396,18 +396,18 @@ export function Workbench() {
   }, [canRetry, retry, runId, handleRetryHistory]);
 
   const statusLabel = useMemo(() => {
-    if (status === "running") return running ? t.running : t.running;
+    if (status === "running") return t.running;
     if (status === "interrupted") return t.interrupted;
     if (status === "completed") return t.completed;
     if (status === "failed") return t.failed;
     return null;
-  }, [status, running, t]);
+  }, [status, t]);
 
   const runningStatusText = running
     ? (starting ? t.starting : t.running)
     : reconnecting
       ? t.reconnecting
-      : statusLabel ?? (events.length > 0 ? t.waiting : t.waiting);
+      : statusLabel ?? t.waiting;
 
   return (
     <div className={styles.shell}>

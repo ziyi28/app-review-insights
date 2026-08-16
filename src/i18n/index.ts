@@ -42,7 +42,6 @@ export type Dictionary = {
   stageSkipped: string;
   interrupted: string;
   reconnecting: string;
-  someEventsDropped: string;
   goalTooShort: string;
   invalidAppStoreUrl: string;
   goalCharCount: string;
@@ -310,7 +309,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     running: "Analysis running…",
     interrupted: "Interrupted",
     reconnecting: "Reconnecting…",
-    someEventsDropped: "Some stream events were dropped — check the browser console.",
     goalTooShort: "Analysis goal must be at least 10 characters.",
     invalidAppStoreUrl: "Please enter a valid Apple App Store URL (e.g. https://apps.apple.com/us/app/.../id123456789)",
     goalCharCount: "characters (min 10)",
@@ -578,7 +576,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     running: "分析进行中…",
     interrupted: "已中断",
     reconnecting: "正在重新连接…",
-    someEventsDropped: "部分流事件被丢弃 — 请查看浏览器控制台。",
     goalTooShort: "分析目标至少需要 10 个字符。",
     invalidAppStoreUrl: "请输入有效的苹果 App Store 链接（例如 https://apps.apple.com/us/app/.../id123456789）",
     goalCharCount: "字符（至少需要 10 字符）",

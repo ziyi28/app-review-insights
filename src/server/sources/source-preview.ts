@@ -99,11 +99,7 @@ export type PreviewInput = {
   runsDir: string;
 };
 
-export function buildPreviewSnapshot(input: PreviewInput): Promise<SourcePreview> {
-  return runPreviewImpl(input);
-}
-
-export async function runPreviewImpl(input: PreviewInput): Promise<SourcePreview> {
+export async function buildPreviewSnapshot(input: PreviewInput): Promise<SourcePreview> {
   const { previewId, appId, canonicalUrl, now, serpApiCollector, rssCollector, previewsDir, cacheDir, historyRoots, runsDir } = input;
   // 500 is both the historical default and the hard ceiling.
   const reviewLimit = Math.min(input.reviewLimit ?? 500, 500);

@@ -19,8 +19,6 @@ export type RunStreamState = {
   /** A non-recoverable error (e.g. the start request was rejected). */
   error: string | null;
   lastEvent: RunEvent | null;
-  /** Count of streamed events that failed the event schema and were dropped. */
-  droppedEvents: number;
   /** Whether the last start request is available to be retried. */
   canRetry: boolean;
 };
@@ -56,7 +54,6 @@ export function useRunStream(): RunStreamState & RunStreamActions {
   const [running, setRunning] = useState(false);
   const [reconnecting, setReconnecting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [droppedEvents, setDroppedEvents] = useState(0);
   const [hasLastBody, setHasLastBody] = useState(false);
 
   const generation = useRef(0);
@@ -88,7 +85,6 @@ export function useRunStream(): RunStreamState & RunStreamActions {
       setStatus(null);
       setEvents([]);
       setError(null);
-      setDroppedEvents(0);
       setRunning(true);
       setReconnecting(false);
 
@@ -126,10 +122,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
         const incoming: RunEvent[] = [];
         for (const evt of json.events ?? []) {
           const parsed = RunEventSchema.safeParse(evt);
-          if (!parsed.success) {
-            setDroppedEvents((n) => n + 1);
-            continue;
-          }
+          if (!parsed.success) continue;
           incoming.push(parsed.data);
         }
         // Dedupe by sequence — across polls AND within a batch. A re-read of a
@@ -173,7 +166,6 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     setStatus(null);
     setEvents([]);
     setError(null);
-    setDroppedEvents(0);
     eventsRef.current = [];
   }, [stop]);
 
@@ -187,7 +179,6 @@ export function useRunStream(): RunStreamState & RunStreamActions {
       setRunId(null);
       setStatus(null);
       setError(null);
-      setDroppedEvents(0);
       setRunning(true);
 
       try {
@@ -238,7 +229,6 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     reconnecting,
     error,
     lastEvent: events.at(-1) ?? null,
-    droppedEvents,
     canRetry: hasLastBody && !running,
     start,
     reset,

@@ -24,11 +24,6 @@ export function computeGoalCoverage(
   requirements: { id: string; findingIds: string[] }[],
   retried = false,
 ): GoalCoverageReport {
-  const sufficientById = new Map<string, Finding>();
-  for (const f of findings) {
-    if (f.evidenceSufficiency.status === "sufficient") sufficientById.set(f.id, f);
-  }
-
   // finding -> requirements that reference it
   const requirementsByFinding = new Map<string, string[]>();
   for (const r of requirements) {

@@ -244,8 +244,9 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
 
     // An HTTP 200 page that is not valid JSON (or has no feed object, or a
     // non-array entry) is a distinct source failure, never a "no reviews"
-    // signal. This is evaluated before any empty-page retry.
-    if (structuralFailure(outcome) && page === 1 && outcome.parsed.reviews.length === 0) {
+    // signal. This is evaluated before any empty-page retry. (A structural
+    // failure always parses to zero reviews, so no empty check is needed.)
+    if (structuralFailure(outcome) && page === 1) {
       limitations.push({
         code: "RSS_NON_JSON",
         message: `Page ${page} returned HTTP 200 but its body is not a valid Apple RSS feed`,
