@@ -6,6 +6,7 @@ import { getDictionary, translateCode } from "@/i18n";
 
 import type { RunEvent } from "@/domain/contracts/events";
 import { useRunStream, LAST_RUN_ID_KEY } from "@/hooks/use-run-stream";
+import { dedupeLimitations } from "@/lib/limitations";
 
 
 import { useRunArtifacts } from "@/hooks/use-run-artifacts";
@@ -799,7 +800,7 @@ export function Workbench() {
                         <h4 className="card-title">{t.limitations}</h4>
                       </div>
                       <div style={{ display: "grid", gap: "6px" }}>
-                        {(cache.finalReport as { limitations?: { code: string; message: string }[] }).limitations?.map((l, i) => (
+                        {dedupeLimitations((cache.finalReport as { limitations?: { code: string; message: string }[] }).limitations ?? []).map((l, i) => (
                           <div key={i} style={{ fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
                             <ProvenanceBadge kind="limitation" label={translateCode(l.code)} />
                             <span>{l.message}</span>

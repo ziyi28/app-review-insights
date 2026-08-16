@@ -6,6 +6,7 @@ import type { TraceabilityReport } from "@/domain/traceability/validate";
 import type { RunManifest } from "@/server/runs/run-store";
 import type { EvidenceValidationReport } from "@/domain/analysis/evidence-validation";
 import type { RunEvent } from "@/domain/contracts/events";
+import { dedupeLimitations } from "@/lib/limitations";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 
 type TopicCandidate = { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string };
@@ -354,7 +355,7 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
       {manifest?.limitations.length ? (
         <div className="card">
           <h4 style={{ margin: "0 0 8px" }}>{t.limitations}</h4>
-          {manifest.limitations.map((l, i) => (
+          {dedupeLimitations(manifest.limitations).map((l, i) => (
             <p key={i} style={{ fontSize: "13px", margin: "6px 0", display: "flex", gap: "8px", alignItems: "center" }}>
               <ProvenanceBadge kind="limitation" label={translateCode(l.code)} />
               <span>{l.message}</span>

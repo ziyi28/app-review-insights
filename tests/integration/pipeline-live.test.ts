@@ -266,6 +266,10 @@ describe("executeRun (live pipeline)", () => {
 
     const manifest = await store.readManifest(runId);
     expect(manifest.limitations.some((l) => l.code === "RSS_PARTIAL")).toBe(true);
+    // Source limitations enter the ledger once via the prepare stage — never
+    // doubled by the source stage's own push.
+    const keys = manifest.limitations.map((l) => `${l.code} ${l.message}`);
+    expect(new Set(keys).size).toBe(keys.length);
     // No findings survived validation -> the run short-circuits after
     // scope/topics/findings (callIndex === 3); planning/tests never run.
     expect(model.callIndex).toBe(3);

@@ -185,6 +185,20 @@ describe("FinalDeliverablesPanel", () => {
     expect(screen.getByText(/planning@2/)).toBeInTheDocument();
   });
 
+  it("renders duplicate manifest limitations once (legacy snapshots)", () => {
+    const duplicated: RunManifest = {
+      ...manifest,
+      limitations: [
+        { code: "RSS_PARTIAL", message: "partial feed" },
+        { code: "RSS_PARTIAL", message: "partial feed" },
+        { code: "RSS_SUSPECT_EMPTY", message: "other" },
+      ],
+    };
+    render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={duplicated} t={t} />);
+    expect(screen.getAllByText("partial feed")).toHaveLength(1);
+    expect(screen.getAllByText("other")).toHaveLength(1);
+  });
+
   it("shows a computed-fallback for legacy manifests missing usage fields", () => {
     const legacy: RunManifest = { ...manifest, modelUsage: { calls: 6 } };
     render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={legacy} t={t} />);

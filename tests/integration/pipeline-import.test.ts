@@ -145,6 +145,34 @@ describe("executeRun (import with mixed languages, duplicates, conflicts)", () =
     expect(model.callIndex).toBe(0);
   });
 
+  it("records each import parse error exactly once in the manifest limitations", async () => {
+    const parse = parseImportedReviews({
+      fileName: "partial.json",
+      mediaType: "application/json",
+      content: JSON.stringify({
+        schemaVersion: "1",
+        reviews: [
+          { id: "r1", body: "The price is too high", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "r2", rating: 5, updatedAt: "2026-07-02T00:00:00Z" }, // missing body
+        ],
+      }),
+    });
+    expect(parse.errors.length).toBeGreaterThan(0);
+
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+    const importParse = parse as ImportParseShape;
+    const model = new ScriptedModelClient([], new Error("MODEL should not be called"));
+
+    await executeRun(runId, "Understand pricing", "en", { model, source: { kind: "import", parse: importParse } }, publisher, store, "import", false);
+
+    const manifest = await store.readManifest(runId);
+    // The same error used to be pushed by both the source and prepare stages.
+    expect(manifest.limitations.filter((l) => l.code === "IMPORT_ERROR")).toHaveLength(1);
+    const keys = manifest.limitations.map((l) => `${l.code} ${l.message}`);
+    expect(new Set(keys).size).toBe(keys.length);
+  });
+
   it("archives the original import file and records full parse evidence", async () => {
     const content = JSON.stringify({
       schemaVersion: "1",

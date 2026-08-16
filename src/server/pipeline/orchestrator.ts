@@ -307,7 +307,10 @@ export async function executeRun(
     // a partial source to complete.
     const sourceStatus = source.status;
     await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: `collected ${source.rawReviews.length} reviews` } });
-    limitations.push(...source.limitations);
+    // Source limitations enter the run ledger exactly once: prepareReviews
+    // returns them (collected branch verbatim, import branch re-mapped from
+    // parse errors) and only the prepare stage pushes. Announcing them as
+    // events here must not duplicate the ledger entry.
     for (const l of source.limitations) {
       await publisher.publish({ type: "limitation.reported", runId, stage: "source", data: l });
     }
@@ -326,6 +329,9 @@ export async function executeRun(
     await endStage("source");
 
     if (source.status === "failed") {
+      // The prepare stage (and its limitations push) never runs on this path,
+      // so the source limitations enter the ledger here instead.
+      limitations.push(...source.limitations);
       limitations.push({ code: "SOURCE_FAILED", message: "Source collection failed; no reviews could be analyzed", stage: "source" });
       await publisher.publish({ type: "run.failed", runId, data: { error: "source collection failed" } });
       await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
