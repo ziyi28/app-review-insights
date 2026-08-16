@@ -44,15 +44,23 @@ fallback instead of fabricated data.
 ## Screenshots
 
 From a real analysis run of Workout for Women (US App Store), shown in the
-Chinese UI:
+Chinese UI (captured at 2× resolution — click to view full size):
 
-| Workbench overview — rating / version / language distributions and cleaning details | Findings & evidence — exact excerpts with review-ID badges |
-|:---:|:---:|
-| ![Workbench overview](docs/screenshots/01-workbench-overview.png) | ![Findings and evidence](docs/screenshots/02-findings-evidence.png) |
+**Workbench overview — rating / version / language distributions and cleaning details**
 
-| Traceability matrix — the full review → finding → requirement → test chain | Final deliverables — goal coverage, version plan, and the export entry |
-|:---:|:---:|
-| ![Traceability matrix](docs/screenshots/03-traceability-matrix.png) | ![Final deliverables](docs/screenshots/04-final-deliverables.png) |
+![Workbench overview](docs/screenshots/01-workbench-overview.png)
+
+**Findings & evidence — exact excerpts with review-ID badges and confidence**
+
+![Findings and evidence](docs/screenshots/02-findings-evidence.png)
+
+**Traceability matrix — the full review → finding → requirement → test chain**
+
+![Traceability matrix](docs/screenshots/03-traceability-matrix.png)
+
+**Final deliverables — goal coverage, version plan, and the export entry**
+
+![Final deliverables](docs/screenshots/04-final-deliverables.png)
 
 ## Quick Start
 
