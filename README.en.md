@@ -88,6 +88,17 @@ Two points to note:
 
 Cached replay and import analysis do not need outbound network access or a proxy.
 
+### Known phenomenon: both sources return empty for high-traffic apps
+
+For very high-download apps (Duolingo / Chase scale), live collection can hit
+**both sources returning empty at the same time**: SerpApi reports rate or
+quota exhaustion (`SERPAPI_RATE_OR_QUOTA_EXHAUSTED` — check your quota in the
+console and retry), while the fallback Apple RSS also returns an HTTP 200 with
+an empty body (marked `suspect-empty`, never interpreted as "this app has no
+reviews"). The system records the corresponding limitations honestly and stops
+collection — **it never fabricates data**. For live demos prefer a mid- or
+low-traffic app, or use the cached replay mode (offline and stable).
+
 ## Background Tasks and Refresh Recovery
 
 Analysis is decoupled from the browser connection and runs as a background task:
@@ -219,8 +230,10 @@ versions, and failure handling.
 - Every model result is validated against a Zod schema.
 - The model only ever receives the goal, reviews with stable IDs, deterministic
   stats, and previously-allowed IDs.
-- Evidence excerpts must be exact substrings of the cited review; sample counts
-  and confidence are computed by code, never taken from the model.
+- Evidence excerpts must be exact substrings of the cited review's normalized
+  body (NFC + whitespace-folded + case-folded; the excerpt may differ from the
+  original in letter case); sample counts and confidence are computed by code,
+  never taken from the model.
 - Findings with no valid support are deleted; unsupported ideas become separate
   `assumptions`, never requirements.
 - Traceability is validated deterministically; a single constrained revision

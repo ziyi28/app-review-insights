@@ -56,7 +56,8 @@ snapshots, or git. `.env.example` documents the shape.
 - The model only receives: the user goal, reviews with stable IDs, deterministic
   stats, and the previous stage's *allowed* IDs.
 - Every evidence excerpt must be an exact substring of the cited review's
-  normalized body; fabricated excerpts are dropped by code.
+  normalized body (NFC + whitespace-folded + case-folded; the excerpt may
+  differ in letter case); fabricated excerpts are dropped by code.
 - `supportingSampleCount`, confidence, and the **Evidence Sufficiency** verdict
   are **computed by code**, never trusted from the model. Sufficiency is a
   deterministic v1 policy over support count (≥3), corpus ratio (≥1%),
