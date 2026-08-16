@@ -22,7 +22,10 @@ beforeEach(() => {
   delete process.env.APPLE_RSS_PAGE_DELAY_MS;
   delete process.env.REPLAY_EVENT_DELAY_MS;
   delete process.env.ENV_LOCAL_FILE;
-  delete process.env.DATA_CONFIG_FILE;
+  // Point data/config.local.json at a temp path that does not exist, so a real
+  // settings-panel file saved on this machine can never leak into loadConfig
+  // assertions (deleting the var would fall back to the cwd file).
+  process.env.DATA_CONFIG_FILE = path.join(mkdtempSync(path.join(tmpdir(), "cfgjson-")), "config.local.json");
   delete process.env.SERPAPI_API_KEY;
   delete process.env.SERPAPI_BASE_URL;
   delete process.env.SERPAPI_TIMEOUT_MS;
@@ -255,6 +258,8 @@ describe("data/config.local.json persistence and precedence", () => {
   }
 
   it("defaults dataConfigPath to the cwd data dir when DATA_CONFIG_FILE is unset", () => {
+    // beforeEach redirects the var for isolation; this case tests the unset default.
+    delete process.env.DATA_CONFIG_FILE;
     expect(dataConfigPath()).toBe(path.resolve(process.cwd(), "data", "config.local.json"));
   });
 
