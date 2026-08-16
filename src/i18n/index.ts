@@ -104,7 +104,6 @@ export type Dictionary = {
   serpApiKeyHint: string;
   serpApiKeyConfigured: string;
   serpApiKeyClear: string;
-  checkSample: string;
   checkingSample: string;
   sampleCheckFailed: string;
   liveSample: string;
@@ -113,8 +112,6 @@ export type Dictionary = {
   liveReviews: string;
   stableReviews: string;
   cacheUpdated: string;
-  chooseLive: string;
-  chooseStable: string;
   sourceLiveCache: string;
   noSampleAvailable: string;
   recheck: string;
@@ -172,9 +169,6 @@ export type Dictionary = {
   cleaningExactDuplicates: string;
   cleaningIdentityConflicts: string;
   cleaningShortKept: string;
-  sampleAnalyzed: string;
-  sampleOf: string;
-  sampleStratified: string;
   goalCoverage: string;
   goalCoverageCovered: string;
   goalCoverageUncovered: string;
@@ -346,7 +340,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     serpApiKeyHint: "Stored locally and used only by the server for forced-fresh live App Store reviews.",
     serpApiKeyConfigured: "SerpApi configured",
     serpApiKeyClear: "Clear SerpApi Key",
-    checkSample: "Check review sample",
     checkingSample: "Checking review sample…",
     sampleCheckFailed: "Could not check the review sample.",
     liveSample: "Live sample",
@@ -355,8 +348,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     liveReviews: "Live reviews",
     stableReviews: "Stable reviews",
     cacheUpdated: "Cache updated",
-    chooseLive: "Analyze live sample",
-    chooseStable: "Analyze stable sample",
     sourceLiveCache: "Live + Cache",
     noSampleAvailable: "No reviews available right now — re-check or import a dataset.",
     recheck: "Re-check",
@@ -414,9 +405,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     cleaningExactDuplicates: "exact duplicates removed",
     cleaningIdentityConflicts: "identity conflicts",
     cleaningShortKept: "short unique reviews kept",
-    sampleAnalyzed: "Analyzed",
-    sampleOf: "of scope-matching reviews",
-    sampleStratified: "stratified sample",
     goalCoverage: "Goal Coverage",
     goalCoverageCovered: "Covered",
     goalCoverageUncovered: "Uncovered",
@@ -586,7 +574,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     serpApiKeyHint: "仅保存在本机，并由服务端用于强制实时采集 App Store 评论。",
     serpApiKeyConfigured: "SerpApi 已配置",
     serpApiKeyClear: "清除 SerpApi Key",
-    checkSample: "检查评论样本",
     checkingSample: "正在检查评论样本…",
     sampleCheckFailed: "无法检查评论样本。",
     liveSample: "实时样本",
@@ -595,8 +582,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     liveReviews: "实时评论数",
     stableReviews: "稳定评论数",
     cacheUpdated: "缓存更新时间",
-    chooseLive: "分析实时样本",
-    chooseStable: "分析稳定样本",
     sourceLiveCache: "实时 + 缓存",
     noSampleAvailable: "当前没有可用评论 — 请重新检查或改用导入。",
     recheck: "重新检查",
@@ -654,9 +639,6 @@ export const dictionaries: Record<Locale, Dictionary> = {
     cleaningExactDuplicates: "精确重复已排除",
     cleaningIdentityConflicts: "身份冲突",
     cleaningShortKept: "保留的独立短评",
-    sampleAnalyzed: "已分析",
-    sampleOf: "条范围匹配评论",
-    sampleStratified: "分层样本",
     goalCoverage: "目标覆盖",
     goalCoverageCovered: "已覆盖",
     goalCoverageUncovered: "未覆盖",

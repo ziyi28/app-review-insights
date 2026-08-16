@@ -158,7 +158,7 @@ SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance
 
 ## 提示词与幻觉控制
 
-- 提示词位于 `src/server/model/prompts/*.v1.ts`，带版本号（`scope@2`，……）。
+- 提示词位于 `src/server/model/prompts/*.ts`（一个版本一个文件），带版本号（`scope@2`，……）。
 - 评论正文始终被视为**不可信数据**；提示词禁止遵从评论者的指令。
 - 每个模型结果都按 Zod schema 校验。
 - 模型只会收到目标、带稳定 ID 的评论、确定性统计和此前已允许的 ID。

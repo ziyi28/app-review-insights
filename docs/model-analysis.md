@@ -40,7 +40,8 @@ snapshots, or git. `.env.example` documents the shape.
 
 ## Prompt discipline
 
-- Prompts live in `src/server/model/prompts/*.v1.ts` with fixed versions
+- Prompts live in `src/server/model/prompts/*.ts` (one file per version) with
+  fixed versions
   (`scope@2`, `topics.discovery@3`, `findings@4`, …) and a stable hash
   recorded per call.
 - Review text is always labeled **untrusted data**; prompts forbid following

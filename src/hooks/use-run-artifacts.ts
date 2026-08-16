@@ -15,15 +15,6 @@ export type SourceEvidence = {
   selection?: "live" | "stable";
 };
 
-export type AnalysisSampleArtifact = {
-  strategy: string;
-  eligibleCount: number;
-  selectedCount: number;
-  limit: number;
-  selectedReviewIds: string[];
-  layers: { rating: number; language: string; candidates: number; selected: number }[];
-};
-
 export type GoalCoverageArtifact = {
   valid: boolean;
   retried: boolean;
@@ -35,7 +26,6 @@ export type ArtifactCache = {
   scope?: unknown;
   cleaned?: { reviews: unknown[]; stats?: unknown; cleaning?: unknown };
   stats?: unknown;
-  analysisSample?: AnalysisSampleArtifact;
   sourceEvidence?: SourceEvidence;
   topicCandidates?: { candidates: { id: string; label: string; description: string; supportingReviewIds: string[]; quote: string }[] };
   topics?: { topics: { id: string; label: string; description: string; reviewIds: string[] }[] };
@@ -95,9 +85,8 @@ export function useRunArtifacts({
     const map: Record<string, keyof ArtifactCache> = {
       "scope": "scope",
       "cleaned-reviews": "cleaned",
-      "stats": "stats",
-      "analysis-sample": "analysisSample",
-      "source-evidence": "sourceEvidence",
+  "stats": "stats",
+  "source-evidence": "sourceEvidence",
       "topic-candidates": "topicCandidates",
       "topics": "topics",
       "findings": "findings",
