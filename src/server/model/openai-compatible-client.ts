@@ -179,6 +179,14 @@ export class OpenAiCompatibleClient {
       throw new Error(`MODEL_INVALID_RESPONSE: no message content (finish=${finishReason ?? "n/a"})`);
     }
 
+    if (finishReason === "length") {
+      // The provider cut the completion at its output-token limit, so whatever
+      // arrived is a prefix. Bracket auto-completion in the JSON parser could
+      // "rescue" it into a schema-valid but semantically truncated object —
+      // reject before parsing and let the retry loop try for a full answer.
+      throw new Error(`MODEL_TRUNCATED_RESPONSE: completion cut at the provider token limit (content="${content.slice(0, 200)}")`);
+    }
+
     let parsed: unknown;
     try {
       parsed = extractJsonObject(content);
@@ -246,9 +254,10 @@ function safeProviderLabel(baseUrl: string): string | null {
 
 /**
  * True for failures worth retrying: a transient provider 5xx, a network error,
- * a per-call timeout, or a non-JSON/malformed response (a truncated or garbled
- * stream, same class of hiccup as a 5xx). Deterministic failures must surface
- * immediately (4xx, schema violations, client abort).
+ * a per-call timeout, a truncated completion, or a non-JSON/malformed response
+ * (a truncated or garbled stream, same class of hiccup as a 5xx).
+ * Deterministic failures must surface immediately (4xx, schema violations,
+ * client abort).
  */
 function isTransient(err: Error): boolean {
   const message = err.message;
@@ -257,6 +266,7 @@ function isTransient(err: Error): boolean {
   if (/^MODEL_REQUEST_TIMEOUT:/.test(message)) return true;
   if (/^MODEL_INVALID_RESPONSE:/.test(message)) return true;
   if (/^MODEL_NON_JSON_OUTPUT:/.test(message)) return true;
+  if (/^MODEL_TRUNCATED_RESPONSE:/.test(message)) return true;
   return false;
 }
 

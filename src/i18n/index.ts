@@ -820,6 +820,7 @@ export function translateCode(code: string, locale: Locale = "zh-CN"): string {
     SERPAPI_UPSTREAM_FAILED: "数据源采集降级",
     MODEL_NON_JSON_OUTPUT: "格式自愈重试",
     MODEL_NETWORK_ERROR: "网络抖动重试",
+    MODEL_TRUNCATED_RESPONSE: "输出截断重试",
     REQUIREMENT_UNKNOWN_DEPENDENCY: "未知依赖需求",
     "evidence-validation": "证据验证",
     findings: "痛点发现",

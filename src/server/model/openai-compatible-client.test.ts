@@ -215,7 +215,7 @@ describe("OpenAiCompatibleClient", () => {
     }
   });
 
-  it("surfaces a non-JSON failure with finish_reason and content after retries are exhausted", async () => {
+  it("surfaces a truncated (finish_reason=length) completion as MODEL_TRUNCATED_RESPONSE after retries", async () => {
     vi.useFakeTimers();
     try {
       const { client, fetchMock } = makeClient();
@@ -232,10 +232,37 @@ describe("OpenAiCompatibleClient", () => {
       );
       await vi.advanceTimersByTimeAsync(10_000);
       const message = await messagePromise;
-      expect(message).toMatch(/MODEL_NON_JSON_OUTPUT/);
-      expect(message).toMatch(/finish=length/);
+      expect(message).toMatch(/MODEL_TRUNCATED_RESPONSE/);
       expect(message).toContain("truncated output");
       expect(fetchMock).toHaveBeenCalledTimes(3);
+      warn.mockRestore();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("rejects a finish_reason=length completion even when bracket rescue could fake valid JSON", async () => {
+    vi.useFakeTimers();
+    try {
+      const { client, fetchMock } = makeClient();
+      // A cut-off body that autoCompleteBrackets would complete into
+      // {"ok":true} — semantically a guess, never an artifact.
+      fetchMock.mockImplementation(async () =>
+        new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":tru' }, finish_reason: "length" }] })),
+      );
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const pending = client.generate(requestBase());
+      const messagePromise = pending.then(
+        () => "",
+        (err: Error) => err.message,
+      );
+      await vi.advanceTimersByTimeAsync(10_000);
+      const message = await messagePromise;
+      expect(message).toMatch(/MODEL_TRUNCATED_RESPONSE/);
+      expect(fetchMock).toHaveBeenCalledTimes(3);
+      const usage = client.getUsageLog();
+      expect(usage.retryReasons).toEqual(["MODEL_TRUNCATED_RESPONSE", "MODEL_TRUNCATED_RESPONSE"]);
+      expect(usage.calls).toBe(0); // no fabricated result was ever accepted
       warn.mockRestore();
     } finally {
       vi.useRealTimers();
