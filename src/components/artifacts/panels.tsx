@@ -300,7 +300,7 @@ export function TraceabilityPanel({
   onJumpToPrd,
   onJumpToTests,
 }: {
-  report: { valid: boolean; violations: { code: string; message: string }[] } | null;
+  report: { valid: boolean; violations: { code: string; message: string; entity?: string }[] } | null;
   findings?: Finding[];
   prd?: Prd | { requirements?: Requirement[] } | null;
   tests?: TestCase[];
@@ -372,35 +372,40 @@ export function TraceabilityPanel({
       {findings.length > 0 || requirements.length > 0 ? (
         <div style={{ border: "1px solid var(--border)", borderRadius: "8px", overflow: "hidden", background: "var(--bg-panel)" }}>
           <div style={{ padding: "12px 16px", borderBottom: "1px solid var(--border)", background: "var(--bg-elevated)", fontWeight: 600, fontSize: "14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span>全链路追溯拓扑矩阵 (End-to-End Traceability Matrix)</span>
-            <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-muted)" }}>从评论证据到测试用例的完整映射</span>
+            <span>{t.traceMatrixTitle}</span>
+            <span style={{ fontSize: "12px", fontWeight: "normal", color: "var(--text-muted)" }}>{t.traceMatrixSubtitle}</span>
           </div>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
               <thead>
                 <tr style={{ background: "var(--bg-elevated)", borderBottom: "1px solid var(--border)", textAlign: "left" }}>
-                  <th style={{ padding: "10px 12px", width: "30%" }}>核心用户痛点 (Finding)</th>
-                  <th style={{ padding: "10px 12px", width: "18%" }}>支撑评论样本 (Reviews)</th>
-                  <th style={{ padding: "10px 12px", width: "26%" }}>对应 PRD 需求 (Requirement)</th>
-                  <th style={{ padding: "10px 12px", width: "16%" }}>验收用例 (Test Cases)</th>
-                  <th style={{ padding: "10px 12px", width: "10%" }}>状态</th>
+                  <th style={{ padding: "10px 12px", width: "30%" }}>{t.traceColFinding}</th>
+                  <th style={{ padding: "10px 12px", width: "18%" }}>{t.traceColReviews}</th>
+                  <th style={{ padding: "10px 12px", width: "26%" }}>{t.traceColRequirement}</th>
+                  <th style={{ padding: "10px 12px", width: "16%" }}>{t.traceColTests}</th>
+                  <th style={{ padding: "10px 12px", width: "10%" }}>{t.status}</th>
                 </tr>
               </thead>
               <tbody>
-                {findings.map((f, idx) => {
-                  const matchedReqs = requirements.filter(
-                    (r) =>
-                      r.findingIds.includes(f.id) ||
-                      r.sourceReviewIds?.some((id) => f.supportingReviewIds.includes(id)) ||
-                      idx === 0
-                  );
-                  const relatedReqs = matchedReqs.length > 0 ? matchedReqs : requirements.slice(0, 1);
+                {findings.map((f) => {
+                  // The matrix joins only on the declared findingIds links —
+                  // the same single source of truth the validator enforces.
+                  const relatedReqs = requirements.filter((r) => r.findingIds.includes(f.id));
                   const relatedReqIds = relatedReqs.map((r) => r.id);
-                  const matchedTests = tests.filter(
-                    (tc) =>
-                      tc.findingIds?.includes(f.id) ||
-                      tc.requirementIds.some((rid) => relatedReqIds.includes(rid))
+                  // Legacy cached tests predate findingIds; derive them the
+                  // same way the TestsPanel does instead of guessing through
+                  // requirement overlap.
+                  const matchedTests = tests.filter((tc) =>
+                    (tc.findingIds ?? findingIdsForRequirements(tc.requirementIds, requirements)).includes(f.id),
                   );
+                  const hasViolation = report?.violations.some((v) => v.entity === f.id) ?? false;
+                  const traceStatus = hasViolation
+                    ? "violation"
+                    : relatedReqs.length === 0
+                      ? "uncovered"
+                      : matchedTests.length === 0
+                        ? "missing-test"
+                        : "closed";
 
                   return (
                     <tr
@@ -432,8 +437,9 @@ export function TraceabilityPanel({
                         />
                       </td>
                       <td style={{ padding: "12px" }}>
-                        {relatedReqs.map((r) => (
-                          <div key={r.id} style={{ marginBottom: "6px" }}>
+                        {relatedReqs.length > 0 ? (
+                          relatedReqs.map((r) => (
+                            <div key={r.id} style={{ marginBottom: "6px" }}>
                             <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
                               <span style={{ fontWeight: 600, color: "var(--accent)" }}>{r.id}</span>
                               <span style={{ fontSize: "11px", padding: "1px 5px", borderRadius: "4px", background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
@@ -454,8 +460,11 @@ export function TraceabilityPanel({
                             <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "2px" }}>
                               {r.title}
                             </div>
-                          </div>
-                        ))}
+                            </div>
+                          ))
+                        ) : (
+                          <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>—</span>
+                        )}
                       </td>
                       <td style={{ padding: "12px" }}>
                         {matchedTests.length > 0 ? (
@@ -491,12 +500,22 @@ export function TraceabilityPanel({
                             borderRadius: "4px",
                             fontSize: "11px",
                             fontWeight: 600,
-                            background: "rgba(74,222,128,0.12)",
-                            color: "var(--ok)",
-                            border: "1px solid rgba(74,222,128,0.3)",
+                            ...(traceStatus === "violation"
+                              ? { background: "rgba(248,113,113,0.12)", color: "var(--danger)", border: "1px solid rgba(248,113,113,0.3)" }
+                              : traceStatus === "missing-test"
+                                ? { background: "rgba(251,191,36,0.12)", color: "var(--warn)", border: "1px solid rgba(251,191,36,0.3)" }
+                                : traceStatus === "uncovered"
+                                  ? { background: "var(--bg-elevated)", color: "var(--text-muted)", border: "1px solid var(--border)" }
+                                  : { background: "rgba(74,222,128,0.12)", color: "var(--ok)", border: "1px solid rgba(74,222,128,0.3)" }),
                           }}
                         >
-                          已闭环
+                          {traceStatus === "violation"
+                            ? t.traceStatusViolation
+                            : traceStatus === "missing-test"
+                              ? t.traceStatusMissingTest
+                              : traceStatus === "uncovered"
+                                ? t.traceStatusUncovered
+                                : t.traceStatusClosed}
                         </span>
                       </td>
                     </tr>

@@ -231,9 +231,19 @@ export type Dictionary = {
   noFilteredResults: string;
   exportPackage: string;
   downloadCsvTemplate: string;
-  topFindings: string;
-  appSummary: string;
-  dataCleaningDetails: string;
+    topFindings: string;
+    appSummary: string;
+    dataCleaningDetails: string;
+    traceMatrixTitle: string;
+    traceMatrixSubtitle: string;
+    traceColFinding: string;
+    traceColReviews: string;
+    traceColRequirement: string;
+    traceColTests: string;
+    traceStatusClosed: string;
+    traceStatusViolation: string;
+    traceStatusMissingTest: string;
+    traceStatusUncovered: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -471,6 +481,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
     topFindings: "Top User Findings & Pain Points",
     appSummary: "App Overview",
     dataCleaningDetails: "Data Cleaning & Quality Details",
+    traceMatrixTitle: "End-to-End Traceability Matrix",
+    traceMatrixSubtitle: "Full mapping from review evidence to test cases",
+    traceColFinding: "Finding",
+    traceColReviews: "Reviews",
+    traceColRequirement: "Requirement",
+    traceColTests: "Test Cases",
+    traceStatusClosed: "Closed",
+    traceStatusViolation: "Violations",
+    traceStatusMissingTest: "No test",
+    traceStatusUncovered: "Uncovered",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -706,6 +726,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
     topFindings: "核心用户痛点 Top 发现",
     appSummary: "分析目标与应用概要",
     dataCleaningDetails: "数据清洗与质检明细",
+    traceMatrixTitle: "全链路追溯拓扑矩阵",
+    traceMatrixSubtitle: "从评论证据到测试用例的完整映射",
+    traceColFinding: "核心用户痛点 (Finding)",
+    traceColReviews: "支撑评论样本 (Reviews)",
+    traceColRequirement: "对应 PRD 需求 (Requirement)",
+    traceColTests: "验收用例 (Test Cases)",
+    traceStatusClosed: "已闭环",
+    traceStatusViolation: "校验违规",
+    traceStatusMissingTest: "缺测试",
+    traceStatusUncovered: "未覆盖",
   },
 };
 
