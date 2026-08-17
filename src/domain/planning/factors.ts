@@ -38,13 +38,20 @@ export function derivePlanningFactors(
     .map((id) => findingIndex.get(id))
     .filter((f): f is Finding => f !== undefined);
 
-  const supportingReviewIds = new Set<string>();
+  const supportingContentGroupIds = new Set<string>();
   let corpusReviewCount = 0;
   const sufficientConfidences: ConfidenceLevel[] = [];
   const allConfidences: ConfidenceLevel[] = [];
 
   for (const finding of linked) {
-    for (const id of finding.supportingReviewIds) supportingReviewIds.add(id);
+    // Frequency counts distinct content groups, not review ids, so a finding
+    // whose support includes re-synced copies of the same body is not inflated.
+    // Legacy findings without group ids fall back to their review ids.
+    const groupIds =
+      finding.supportingContentGroupIds && finding.supportingContentGroupIds.length > 0
+        ? finding.supportingContentGroupIds
+        : finding.supportingReviewIds;
+    for (const gid of groupIds) supportingContentGroupIds.add(gid);
     corpusReviewCount = Math.max(corpusReviewCount, finding.evidenceSufficiency.corpusReviewCount);
     allConfidences.push(finding.confidence.level);
     if (finding.evidenceSufficiency.status === "sufficient") {
@@ -52,7 +59,7 @@ export function derivePlanningFactors(
     }
   }
 
-  const supportingReviewCount = supportingReviewIds.size;
+  const supportingReviewCount = supportingContentGroupIds.size;
   const confidence = mostConservative(allConfidences) ?? "low";
   const evidenceStrength = sufficientConfidences.length > 0
     ? mostConservative(sufficientConfidences)!

@@ -93,7 +93,20 @@ export function validateTraceability(
         violations.push({ code: "REVIEW_NOT_FOUND", message: `${f.id} cites unknown review ${id}`, entity: f.id });
       }
     }
-    if (f.supportingSampleCount !== new Set(f.supportingReviewIds).size) {
+    // Sample count is measured in distinct content groups, not review ids: a
+    // re-synced/adversarial copy of the same body shares a group, so a finding
+    // citing N distinct groups may legitimately carry more supporting review
+    // ids. `?? id` keeps the unknown-review case safe (REVIEW_NOT_FOUND below
+    // already reports it) by falling back to the raw id.
+    const distinctGroups = new Set(
+      f.supportingReviewIds.map((id) => {
+        const gid = reviewMap.get(id)?.contentGroupId;
+        // Empty contentGroupId marks a legacy review (schema default); fall back
+        // to the review id so old snapshots keep the reviewId-count rule.
+        return gid ? gid : id;
+      }),
+    );
+    if (f.supportingSampleCount !== distinctGroups.size) {
       violations.push({ code: "SAMPLE_COUNT_MISMATCH", message: `${f.id} sample count mismatch`, entity: f.id });
     }
     const conflictSet = new Set(f.conflictingReviewIds);

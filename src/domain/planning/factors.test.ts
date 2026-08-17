@@ -10,10 +10,11 @@ const SUFFICIENT_FINDING: Finding = {
   title: "Pricing complaints",
   summary: "Users dislike the subscription cost",
   supportingReviewIds: ["r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8"],
+  supportingContentGroupIds: ["g1", "g2", "g3", "g4", "g5", "g6", "g7", "g8"],
   supportingSampleCount: 8,
   evidenceExcerpts: [{ reviewId: "r1", excerpt: "too expensive" }],
   conflictingReviewIds: [],
-  confidence: { level: "high", method: "deterministic-v1", reasons: [] },
+  confidence: { level: "high", method: "deterministic-v2", reasons: [] },
   evidenceSufficiency: {
     status: "sufficient",
     corpusReviewCount: 100,
@@ -28,8 +29,9 @@ const INSUFFICIENT_FINDING: Finding = {
   ...SUFFICIENT_FINDING,
   id: "finding-2",
   supportingReviewIds: ["r9", "r10"],
+  supportingContentGroupIds: ["g9", "g10"],
   supportingSampleCount: 2,
-  confidence: { level: "low", method: "deterministic-v1", reasons: [] },
+  confidence: { level: "low", method: "deterministic-v2", reasons: [] },
   evidenceSufficiency: {
     status: "insufficient",
     corpusReviewCount: 100,

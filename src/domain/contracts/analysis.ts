@@ -37,7 +37,9 @@ export type EvidenceExcerpt = z.infer<typeof EvidenceExcerptSchema>;
 
 export const ConfidenceSchema = z.object({
   level: ConfidenceLevelSchema,
-  method: z.string().min(1),
+  // Deterministic code output, never model output. `deterministic-v1` is kept
+  // only so old cached runs/fixtures still parse; new code always emits v2.
+  method: z.enum(["deterministic-v1", "deterministic-v2"]),
   reasons: z.array(z.string()).default([]),
 });
 export type Confidence = z.infer<typeof ConfidenceSchema>;
@@ -109,6 +111,11 @@ export const FindingSchema = z
     title: z.string().min(1).max(500),
     summary: z.string().min(1).max(5_000),
     supportingReviewIds: z.array(z.string()).min(1),
+    // Distinct content-group ids of the supporting reviews (see
+    // deriveContentGroupId). A re-synced/adversarial copy of the same body
+    // shares a group, so support counts are not inflated by duplicated text.
+    // Optional: legacy artifacts carry no field.
+    supportingContentGroupIds: z.array(z.string()).default([]).optional(),
     supportingSampleCount: z.number().int().min(0),
     evidenceExcerpts: z.array(EvidenceExcerptSchema).default([]),
     conflictingReviewIds: z.array(z.string()).default([]),
@@ -118,11 +125,16 @@ export const FindingSchema = z
     limitations: z.array(z.string()).default([]),
   })
   .superRefine((f, ctx) => {
-    if (f.supportingSampleCount !== f.supportingReviewIds.length) {
+    // New artifacts carry content-group ids and count support in distinct
+    // groups; legacy artifacts (empty ids) keep the old reviewId-count rule so
+    // cached runs and fixtures still parse.
+    const groupCount = new Set(f.supportingContentGroupIds ?? []).size;
+    const expected = groupCount > 0 ? groupCount : f.supportingReviewIds.length;
+    if (f.supportingSampleCount !== expected) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ["supportingSampleCount"],
-        message: "supportingSampleCount must equal the number of distinct supportingReviewIds",
+        message: "supportingSampleCount must equal the number of distinct supporting content groups",
       });
     }
     const seen = new Set<string>();

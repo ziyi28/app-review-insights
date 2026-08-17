@@ -38,6 +38,10 @@ export const NormalizedReviewSchema = z.object({
   titleOriginal: z.string().max(10_000),
   bodyOriginal: z.string().max(20_000),
   bodyNormalized: z.string().max(20_000),
+  // Stable id for the normalized body (see deriveContentGroupId). Duplicate
+  // bodies collapsed to the same group so support counts are not inflated by
+  // re-synced/adversarial copies. Optional: old cached runs carry no field.
+  contentGroupId: z.string().min(1).max(64).default("").optional(),
   rating: z.number().int().min(1).max(5),
   version: z.string().max(128).nullable(),
   updatedAt: z.string().datetime().nullable(),

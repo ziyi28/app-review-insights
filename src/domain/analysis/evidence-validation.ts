@@ -29,7 +29,7 @@ export type EvidenceValidationReport = {
 export function buildEvidenceValidationReport(result: FindingsStageResult): EvidenceValidationReport {
   const findings: EvidenceValidationReport["findings"] = result.findings.map((f: Finding) => ({
     findingId: f.id,
-    supportCount: f.supportingReviewIds.length,
+    supportCount: f.supportingSampleCount,
     corpusCount: f.evidenceSufficiency.corpusReviewCount,
     supportRatio: f.evidenceSufficiency.supportRatio,
     conflictCount: new Set(f.conflictingReviewIds).size,

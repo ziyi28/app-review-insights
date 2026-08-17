@@ -59,6 +59,22 @@ function isInsufficientEvidence(findings: Finding[]): boolean {
   return findings.length === 0 || findings.every((f) => f.evidenceSufficiency.status === "insufficient");
 }
 
+/** Mean normalized-body length (chars) of the given supporting reviews. */
+function meanBodyLengthOf(reviewMap: Map<string, NormalizedReview>, reviewIds: string[]): number {
+  if (reviewIds.length === 0) return 0;
+  let total = 0;
+  for (const id of reviewIds) total += (reviewMap.get(id)?.bodyNormalized.length ?? 0);
+  return total / reviewIds.length;
+}
+
+/** Population variance of the ratings of the given supporting reviews. */
+function ratingVarianceOf(reviewMap: Map<string, NormalizedReview>, reviewIds: string[]): number {
+  const ratings = reviewIds.map((id) => reviewMap.get(id)?.rating ?? 0);
+  if (ratings.length === 0) return 0;
+  const mean = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+  return ratings.reduce((acc, r) => acc + (r - mean) ** 2, 0) / ratings.length;
+}
+
 /**
  * Normalizes raw model findings into protocol-valid findings. Every citation
  * and excerpt is validated; sample count and confidence are always derived
@@ -139,17 +155,38 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
     const supportingSet = new Set(supportingReviewIds);
     const finalExcerpts = validExcerpts.filter((e) => supportingSet.has(e.reviewId));
 
-    const confidence = computeConfidence({
-      supportCount: supportingReviewIds.length,
-      sourceStatus: ctx.sourceStatus,
-      conflictCount: conflictingReviewIds.length,
-    });
+    // 5. Measure support in distinct content groups so a finding whose evidence
+    // includes re-synced copies of the same body is not inflated.
+    const supportingContentGroupIds = [
+      ...new Set(supportingReviewIds.map((id) => {
+        const gid = reviewMap.get(id)?.contentGroupId;
+        // Empty contentGroupId marks a legacy review (schema default); fall back
+        // to the review id so old corpora keep per-review support semantics.
+        return gid ? gid : id;
+      })),
+    ];
+
     const evidenceSufficiency = assessEvidenceSufficiency({
-      supportCount: supportingReviewIds.length,
+      supportCount: supportingContentGroupIds.length,
       corpusCount: ctx.reviews.length,
       conflictCount: new Set(conflictingReviewIds).size,
       sourceStatus: ctx.sourceStatus,
     });
+    const confidence = computeConfidence({
+      supportCount: supportingContentGroupIds.length,
+      supportRatio: evidenceSufficiency.supportRatio,
+      sourceStatus: ctx.sourceStatus,
+      conflictCount: conflictingReviewIds.length,
+      meanBodyLength: meanBodyLengthOf(reviewMap, supportingReviewIds),
+      ratingVariance: ratingVarianceOf(reviewMap, supportingReviewIds),
+    });
+
+    if (supportingReviewIds.length > supportingContentGroupIds.length) {
+      warnings.push({
+        code: "SUPPORT_CONTENT_GROUP_DEDUPED",
+        message: `${f.id}: ${supportingReviewIds.length} supporting review(s) collapse to ${supportingContentGroupIds.length} distinct content group(s); support count uses ${supportingContentGroupIds.length}`,
+      });
+    }
 
     findings.push({
       id: f.id,
@@ -159,7 +196,8 @@ export function normalizeFindings(output: FindingOutput, ctx: FindingNormalizeCo
       title: f.title,
       summary: f.summary,
       supportingReviewIds,
-      supportingSampleCount: supportingReviewIds.length,
+      supportingContentGroupIds,
+      supportingSampleCount: supportingContentGroupIds.length,
       evidenceExcerpts: finalExcerpts,
       conflictingReviewIds,
       confidence,
@@ -230,12 +268,22 @@ export function consolidateFindings(
   candidates: Finding[],
   groups: { id: string; title: string; summary: string; candidateIds: string[]; focusAreaIds?: string[] }[],
   sourceStatus: SourceStatus,
+  reviews: NormalizedReview[] = [],
 ): { findings: Finding[]; warnings: { code: string; message: string }[]; usedCandidateIds: Set<string>; droppedCandidateIds: string[] } {
   const warnings: { code: string; message: string }[] = [];
   const index = candidateById(candidates);
   const used = new Set<string>();
   const droppedCandidateIds: string[] = [];
   const findings: Finding[] = [];
+  // For content-group dedupe and the v2 confidence signals, map every stable
+  // review id (and the candidate group ids carried by merged findings) to its
+  // review so body length/rating and group collapse can be derived.
+  const reviewIndex = new Map<string, NormalizedReview>();
+  for (const r of reviews) {
+    reviewIndex.set(r.reviewId, r);
+    reviewIndex.set(r.sourceReviewId, r);
+    if (r.contentGroupId) reviewIndex.set(r.contentGroupId, r);
+  }
 
   for (const g of groups) {
     // A group must reference at least one existing, not-yet-used candidate.
@@ -286,18 +334,52 @@ export function consolidateFindings(
       }
     }
     const evidenceExcerpts = [...excerptByReview.entries()].map(([reviewId, excerpt]) => ({ reviewId, excerpt }));
-    const confidence = computeConfidence({
-      supportCount: supportingReviewIds.length,
-      sourceStatus,
-      conflictCount: conflictingReviewIds.length,
-    });
+    // Resolve each surviving supporting review id to its content group: prefer
+    // the review's own contentGroupId, then the candidate's aligned
+    // supportingContentGroupIds, then fall back to the id itself (unknown or
+    // legacy). Only *surviving* supporting reviews contribute — a review
+    // removed as conflicting must not leak its group into the count.
+    const reviewIdToGroup = new Map<string, string>();
+    for (const m of members) {
+      for (let i = 0; i < m.supportingReviewIds.length; i++) {
+        if (!reviewIdToGroup.has(m.supportingReviewIds[i])) {
+          reviewIdToGroup.set(
+            m.supportingReviewIds[i],
+            (m.supportingContentGroupIds && m.supportingContentGroupIds[i]) ?? m.supportingReviewIds[i],
+          );
+        }
+      }
+    }
+    const contentGroupIds = [
+      ...new Set(
+        supportingReviewIds.map((id) => {
+          const fromReview = reviewIndex.get(id)?.contentGroupId;
+          if (fromReview) return fromReview;
+          return reviewIdToGroup.get(id) ?? id;
+        }),
+      ),
+    ];
     const evidenceSufficiency = assessEvidenceSufficiency({
-      supportCount: supportingReviewIds.length,
+      supportCount: contentGroupIds.length,
       corpusCount: Math.max(...members.map((m) => m.evidenceSufficiency.corpusReviewCount)),
       conflictCount: new Set(conflictingReviewIds).size,
       sourceStatus,
     });
+    const confidence = computeConfidence({
+      supportCount: contentGroupIds.length,
+      supportRatio: evidenceSufficiency.supportRatio,
+      sourceStatus,
+      conflictCount: conflictingReviewIds.length,
+      meanBodyLength: meanBodyLengthOf(reviewIndex, supportingReviewIds),
+      ratingVariance: ratingVarianceOf(reviewIndex, supportingReviewIds),
+    });
 
+    if (supportingReviewIds.length > contentGroupIds.length) {
+      warnings.push({
+        code: "SUPPORT_CONTENT_GROUP_DEDUPED",
+        message: `${g.id}: ${supportingReviewIds.length} supporting review(s) collapse to ${contentGroupIds.length} distinct content group(s); support count uses ${contentGroupIds.length}`,
+      });
+    }
 
     findings.push({
       id: g.id,
@@ -307,7 +389,8 @@ export function consolidateFindings(
       title: g.title,
       summary: g.summary,
       supportingReviewIds,
-      supportingSampleCount: supportingReviewIds.length,
+      supportingContentGroupIds: contentGroupIds,
+      supportingSampleCount: contentGroupIds.length,
       evidenceExcerpts,
       conflictingReviewIds,
       confidence,
@@ -448,7 +531,7 @@ export async function runFindingsStage(ctx: FindingsStageContext): Promise<Findi
         message: `consolidation returned ${consolidation.groups.length} groups; kept first ${MAX_FINDINGS_TOTAL} deterministically`,
       });
     }
-    const merged = consolidateFindings(consolidatedCandidates, groups, ctx.sourceStatus);
+    const merged = consolidateFindings(consolidatedCandidates, groups, ctx.sourceStatus, ctx.reviews);
     warnings.push(...merged.warnings);
 
     // Goal-coverage backfill: if a focus area has evidence but the

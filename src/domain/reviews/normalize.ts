@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { franc } from "franc-min";
 import type { LanguageTag } from "@/domain/contracts/review";
 
@@ -10,6 +11,17 @@ export function normalizeBody(text: string): string {
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();
+}
+
+/**
+ * Stable id for the normalized review body, used as the dedupe "content group".
+ * Only the body is hashed — rating/version/updatedAt are deliberately excluded,
+ * so the same text resubmitted across dates (a re-sync or an adversarial copy)
+ * collapses to the same group instead of inflating support counts. Mirrors the
+ * sha256/slice(0,20) scheme already used for stableReviewId in dedupe.ts.
+ */
+export function deriveContentGroupId(bodyNormalized: string): string {
+  return createHash("sha256").update(bodyNormalized).digest("hex").slice(0, 20);
 }
 
 /** Display title: collapse whitespace, keep case. */

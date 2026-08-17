@@ -16,10 +16,11 @@ describe("analysis contracts", () => {
     title: "Pricing complaints",
     summary: "Users dislike the subscription cost",
     supportingReviewIds: ["review-1", "review-2"],
+    supportingContentGroupIds: ["group-1", "group-2"],
     supportingSampleCount: 2,
     evidenceExcerpts: [{ reviewId: "review-1", excerpt: "too expensive" }],
     conflictingReviewIds: [],
-    confidence: { level: "low", method: "deterministic-v1", reasons: ["small sample"] },
+    confidence: { level: "low", method: "deterministic-v2", reasons: ["small sample"] },
     evidenceSufficiency: {
       status: "insufficient",
       corpusReviewCount: 3000,
@@ -32,6 +33,34 @@ describe("analysis contracts", () => {
 
   it("accepts a finding with supporting evidence", () => {
     expect(FindingSchema.parse(validFinding).supportingSampleCount).toBe(2);
+  });
+
+  it("accepts a finding whose sample count equals its distinct content groups", () => {
+    const parsed = FindingSchema.parse({
+      ...validFinding,
+      supportingContentGroupIds: ["group-1"], // two review ids, one group
+      supportingSampleCount: 1,
+    });
+    expect(parsed.supportingSampleCount).toBe(1);
+  });
+
+  it("rejects a finding whose sample count does not match its content groups", () => {
+    expect(() =>
+      FindingSchema.parse({
+        ...validFinding,
+        supportingContentGroupIds: ["group-1", "group-2"],
+        supportingSampleCount: 1,
+      }),
+    ).toThrow();
+  });
+
+  it("accepts a legacy finding with empty content groups (reviewId-count rule)", () => {
+    const parsed = FindingSchema.parse({
+      ...validFinding,
+      supportingContentGroupIds: [],
+      supportingSampleCount: 2,
+    });
+    expect(parsed.supportingSampleCount).toBe(2);
   });
 
   it("rejects a finding with a bad sufficiency status", () => {

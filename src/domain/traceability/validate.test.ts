@@ -15,6 +15,7 @@ function reviewMap(ids: string[]): Map<string, NormalizedReview> {
         titleOriginal: "",
         bodyOriginal: "price is too expensive for me",
         bodyNormalized: "price is too expensive for me",
+        contentGroupId: `group-${id}`,
         rating: 5,
         version: null,
         updatedAt: null,
@@ -42,13 +43,14 @@ function makePrd(): Prd {
         title: "Pricing",
         summary: "cost complaints",
         supportingReviewIds: ["r1", "r2"],
+        supportingContentGroupIds: ["group-r1", "group-r2"],
         supportingSampleCount: 2,
         evidenceExcerpts: [
           { reviewId: "r1", excerpt: "price is too expensive" },
           { reviewId: "r2", excerpt: "price is too expensive" },
         ],
         conflictingReviewIds: [],
-        confidence: { level: "low", method: "deterministic-v1", reasons: [] },
+        confidence: { level: "low", method: "deterministic-v2", reasons: [] },
         evidenceSufficiency: {
           status: "sufficient",
           corpusReviewCount: 100,
@@ -111,6 +113,33 @@ describe("validateTraceability", () => {
     const report = validateTraceability(makePrd(), ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(true);
     expect(report.violations).toHaveLength(0);
+  });
+
+  it("counts support by content group: two review ids of the same body are one sample", () => {
+    const prd = makePrd();
+    // r1 and r2 share one content group; the finding cites both review ids but
+    // only one distinct group, and the sample count follows the group count.
+    const sameGroupMap = reviewMap(["r1", "r2"]);
+    sameGroupMap.get("r1")!.contentGroupId = "group-same";
+    sameGroupMap.get("r2")!.contentGroupId = "group-same";
+    prd.findings[0].supportingContentGroupIds = ["group-same"];
+    prd.findings[0].supportingSampleCount = 1;
+    prd.findings[0].evidenceExcerpts = [
+      { reviewId: "r1", excerpt: "price is too expensive" },
+      { reviewId: "r2", excerpt: "price is too expensive" },
+    ];
+    prd.requirements[0].sourceReviewIds = ["r1", "r2"];
+    const report = validateTraceability(prd, ["r1", "r2"], sameGroupMap);
+    expect(report.valid).toBe(true);
+  });
+
+  it("flags a sample count that does not match the distinct content groups", () => {
+    const prd = makePrd();
+    prd.findings[0].supportingContentGroupIds = ["group-r1", "group-r2"];
+    prd.findings[0].supportingSampleCount = 1; // two distinct groups, count 1
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(false);
+    expect(report.violations.some((v) => v.code === "SAMPLE_COUNT_MISMATCH")).toBe(true);
   });
 
   it("flags a finding citing a non-existent review", () => {
