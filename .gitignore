@@ -8,6 +8,7 @@ test-results/
 .env.local
 data/
 *.tsbuildinfo
+next-env.d.ts
 .superpowers/
 docs/superpowers/
 docs/goal.md
