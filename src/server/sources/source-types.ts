@@ -5,6 +5,10 @@ export type Limitation = {
   code: string;
   message: string;
   stage: string;
+  /** Structured values for the i18n message template (optional; system
+   *  limitations that take params fill these at construction so the render
+   *  layer can localize the message without re-parsing it). */
+  params?: Record<string, string | number>;
 };
 
 /** How much of the requested dataset was collected. */

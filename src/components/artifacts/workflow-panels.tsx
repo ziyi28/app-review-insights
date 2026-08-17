@@ -1,6 +1,7 @@
 "use client";
 
 import { type Dictionary, type Locale, translateCode } from "@/i18n";
+import { translateLimitationMessage } from "@/i18n/limitation-messages";
 import type { Prd, VersionPlanArtifact, PlanningFactors } from "@/domain/contracts/analysis";
 import type { TraceabilityReport } from "@/domain/traceability/validate";
 import type { RunManifest } from "@/server/runs/run-store";
@@ -360,7 +361,7 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
           {dedupeLimitations(manifest.limitations).map((l, i) => (
             <p key={i} style={{ fontSize: "13px", margin: "6px 0", display: "flex", gap: "8px", alignItems: "center" }}>
               <ProvenanceBadge kind="limitation" label={translateCode(l.code, locale)} />
-              <span>{l.message}</span>
+              <span>{translateLimitationMessage(l.code, locale, l.params, l.message)}</span>
             </p>
           ))}
         </div>

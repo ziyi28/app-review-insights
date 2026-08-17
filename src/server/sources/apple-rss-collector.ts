@@ -220,6 +220,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
           code: "RSS_FETCH_FAILED",
           message: `Page ${page} fetch failed: ${err instanceof Error ? err.message : String(err)}`,
           stage: "source",
+          params: { page, detail: err instanceof Error ? err.message : String(err) },
         });
         return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
       }
@@ -227,6 +228,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
         code: "RSS_PARTIAL",
         message: `Page ${page} fetch failed; continuing with collected reviews`,
         stage: "source",
+        params: { page },
       });
       return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
     }
@@ -235,10 +237,10 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
     if (!outcome.res.ok) {
       const message = `Page ${page} returned HTTP ${outcome.httpStatus}`;
       if (page === 1 && pages.length === 1) {
-        limitations.push({ code: "RSS_FETCH_FAILED", message, stage: "source" });
+        limitations.push({ code: "RSS_FETCH_FAILED", message, stage: "source", params: { page, detail: `HTTP ${outcome.httpStatus}` } });
         return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
       }
-      limitations.push({ code: "RSS_PARTIAL", message: `${message}; continuing with collected reviews`, stage: "source" });
+      limitations.push({ code: "RSS_PARTIAL", message: `${message}; continuing with collected reviews`, stage: "source", params: { page } });
       return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
     }
 
@@ -251,6 +253,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
         code: "RSS_NON_JSON",
         message: `Page ${page} returned HTTP 200 but its body is not a valid Apple RSS feed`,
         stage: "source",
+        params: { page },
       });
       return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
     }
@@ -284,6 +287,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             code: "RSS_NON_JSON",
             message: `Page ${page} returned HTTP 200 but its body is not a valid Apple RSS feed`,
             stage: "source",
+            params: { page },
           });
           return { status: "failed", reviews, rawRefs, limitations, pages, sourceFiles };
         }
@@ -313,6 +317,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
           code: "RSS_NON_JSON",
           message: `Page ${page} returned HTTP 200 but its body is not a valid Apple RSS feed; ending pagination with the collected reviews`,
           stage: "source",
+          params: { page },
         });
         return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
       }
@@ -328,6 +333,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             code: "RSS_UNSTABLE_PAGINATION",
             message: `Page ${page} is empty while ${lastPage} pages are advertised; confirmation failed`,
             stage: "source",
+            params: { page, lastPage: lastPage ?? page },
           });
           return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
         }
@@ -339,6 +345,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             code: "RSS_UNSTABLE_PAGINATION",
             message: `Page ${page} is empty while ${lastPage} pages are advertised; ending pagination early`,
             stage: "source",
+            params: { page, lastPage: lastPage ?? page },
           });
           return { status: "partial", reviews, rawRefs, limitations, pages, sourceFiles };
         }
@@ -355,6 +362,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
         code: "RSS_REPEATED_PAGE",
         message: `Page ${page} body is byte-identical to the previous page; stopping pagination`,
         stage: "source",
+        params: { page },
       });
       break;
     }
@@ -371,6 +379,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
             code: "RSS_APP_CAP",
             message: `Apple RSS returned more than ${reviewLimit} reviews; the sample was capped at ${reviewLimit}`,
             stage: "source",
+            params: { limit: reviewLimit },
           });
         }
         break;

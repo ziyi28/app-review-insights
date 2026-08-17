@@ -171,7 +171,7 @@ describe("FinalDeliverablesPanel", () => {
     updatedAt: "2026-08-12T00:00:00Z",
     stages: {},
     artifacts: {},
-    limitations: [{ code: "RSS_PARTIAL", message: "partial feed" }],
+    limitations: [{ code: "UNKNOWN_LIMITATION", message: "partial feed" }],
     canReplay: true,
     modelUsage: { calls: 6, attempts: 6, retries: 0, retryReasons: [], promptVersions: ["planning@2"] },
   };
@@ -181,7 +181,8 @@ describe("FinalDeliverablesPanel", () => {
     // versions/requirements/tests counts each render a "1"
     expect(screen.getAllByText("1")).toHaveLength(3);
     expect(screen.getByText(t.completed)).toBeInTheDocument();
-    expect(screen.getByText(/RSS_PARTIAL/)).toBeInTheDocument();
+    expect(screen.getByText(/UNKNOWN_LIMITATION/)).toBeInTheDocument();
+    expect(screen.getByText(/partial feed/)).toBeInTheDocument();
     expect(screen.getByText(/planning@2/)).toBeInTheDocument();
   });
 
@@ -189,9 +190,9 @@ describe("FinalDeliverablesPanel", () => {
     const duplicated: RunManifest = {
       ...manifest,
       limitations: [
-        { code: "RSS_PARTIAL", message: "partial feed" },
-        { code: "RSS_PARTIAL", message: "partial feed" },
-        { code: "RSS_SUSPECT_EMPTY", message: "other" },
+        { code: "UNKNOWN_LIMITATION", message: "partial feed" },
+        { code: "UNKNOWN_LIMITATION", message: "partial feed" },
+        { code: "UNKNOWN_LIMITATION", message: "other" },
       ],
     };
     render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={duplicated} t={t} />);

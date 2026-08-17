@@ -128,7 +128,7 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
     }
 
     if (dropped > 0) {
-      limitations.push({ code: "SERPAPI_ITEMS_DROPPED", message: `${dropped} SerpApi review(s) were malformed and dropped; valid reviews were kept`, stage: "source" });
+      limitations.push({ code: "SERPAPI_ITEMS_DROPPED", message: `${dropped} SerpApi review(s) were malformed and dropped; valid reviews were kept`, stage: "source", params: { count: dropped } });
     }
 
     if (reviews.length >= reviewLimit) {
@@ -139,6 +139,7 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
           code: "SERPAPI_APP_CAP",
           message: `SerpApi returned more than ${reviewLimit} reviews; the sample was capped at ${reviewLimit}`,
           stage: "source",
+          params: { limit: reviewLimit },
         });
       }
       return { status: dropped > 0 ? "partial" : "complete", reviews, rawRefs, limitations, evidence: buildEvidence() };
@@ -151,7 +152,7 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
     if (page >= maxPages) {
       // The page cap cut pagination short while SerpApi still advertised a
       // next page — the dataset is intentionally partial, never "complete".
-      limitations.push({ code: "SERPAPI_PAGE_CAP", message: `SerpApi pagination stopped at ${maxPages} pages (max); collected reviews were kept`, stage: "source" });
+      limitations.push({ code: "SERPAPI_PAGE_CAP", message: `SerpApi pagination stopped at ${maxPages} pages (max); collected reviews were kept`, stage: "source", params: { limit: maxPages } });
       return { status: "partial", reviews, rawRefs, limitations, evidence: buildEvidence() };
     }
   }
@@ -159,7 +160,7 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
   // Only reachable when the loop body never ran (a non-positive page cap):
   // nothing was collected, so the outcome is partial with the same page-cap
   // caveat rather than a fabricated "complete" dataset.
-  limitations.push({ code: "SERPAPI_PAGE_CAP", message: `SerpApi pagination stopped at ${maxPages} pages (max); collected reviews were kept`, stage: "source" });
+  limitations.push({ code: "SERPAPI_PAGE_CAP", message: `SerpApi pagination stopped at ${maxPages} pages (max); collected reviews were kept`, stage: "source", params: { limit: maxPages } });
   return { status: "partial", reviews, rawRefs, limitations, evidence: buildEvidence() };
 
   async function fetchPage(page: number): Promise<{ pageReviews: RawReview[]; nextExists: boolean; dropped: number; suspectEmpty: boolean } | null> {

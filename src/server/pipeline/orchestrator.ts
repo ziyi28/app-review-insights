@@ -189,7 +189,7 @@ async function collectSource(
     };
   }
   const parse = source.parse as ImportParseShape;
-  const limitations: Limitation[] = parse.errors.map((e) => ({ code: "IMPORT_ERROR", message: e, stage: "source" }));
+  const limitations: Limitation[] = parse.errors.map((e) => ({ code: "IMPORT_ERROR", message: e, stage: "source", params: { detail: e } }));
   return {
     status: parse.errors.length > 0 ? "partial" : "complete",
     rawReviews: parse.reviews,
@@ -403,7 +403,7 @@ export async function executeRun(
     });
     const focusAreas: FocusArea[] = scope.focusAreas;
     for (const l of scope.explicitLimitations) {
-      limitations.push({ code: "SCOPE_LIMITATION", message: l, stage: "scope" });
+      limitations.push({ code: "SCOPE_LIMITATION", message: l, stage: "scope", params: { detail: l } });
     }
     // Apply the model-interpreted scope so later stages only analyze the
     // reviews the user's goal asked for. The FULL scoped set enters the model
@@ -494,6 +494,10 @@ export async function executeRun(
             ? "No evidence-backed findings survived validation"
             : `${insufficientFindings.length} of ${findingsResult.findings.length} findings have insufficient evidence for broad or critical claims`,
         stage: "findings",
+        params:
+          findingsResult.findings.length === 0
+            ? undefined
+            : { count: insufficientFindings.length, total: findingsResult.findings.length },
       };
       limitations.push(limitation);
       await publisher.publish({ type: "limitation.reported", runId, stage: "findings", data: limitation });
@@ -526,6 +530,7 @@ export async function executeRun(
           code: "GOAL_AREA_UNCOVERED",
           message: `Goal dimension "${item.label}" has sufficient findings but no requirement after repair`,
           stage: "planning",
+          params: { area: item.label },
         };
         limitations.push(limitation);
         await publisher.publish({ type: "limitation.reported", runId, stage: "planning", data: limitation });
@@ -534,6 +539,7 @@ export async function executeRun(
           code: "GOAL_AREA_UNSUPPORTED",
           message: `Goal dimension "${item.label}" has no findings with sufficient evidence`,
           stage: "planning",
+          params: { area: item.label },
         };
         limitations.push(limitation);
         await publisher.publish({ type: "limitation.reported", runId, stage: "planning", data: limitation });
@@ -752,7 +758,7 @@ async function finalizeManifest(
     updatedAt: new Date().toISOString(),
     stages,
     artifacts,
-    limitations: limitations.map((l) => ({ code: l.code, message: l.message })),
+    limitations: limitations.map((l) => ({ code: l.code, message: l.message, ...(l.params ? { params: l.params } : {}) })),
     canReplay,
     modelUsage: modelUsageFrom(model),
     promptVersions: modelUsageFrom(model)?.promptVersions as string[] | undefined,

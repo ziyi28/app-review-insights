@@ -51,7 +51,7 @@ export type RunManifest = {
   startRequest?: RunStartRequest;
   stages: Record<string, { status: string; startedAt?: string; finishedAt?: string; attempt?: number }>;
   artifacts: Record<string, { attempt: number; file: string }>;
-  limitations: { code: string; message: string }[];
+  limitations: { code: string; message: string; params?: Record<string, string | number> }[];
   canReplay: boolean;
   modelUsage?: Record<string, unknown>;
   promptVersions?: string[];

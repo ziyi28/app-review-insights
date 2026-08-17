@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { type Dictionary, type Locale, translateCode } from "@/i18n";
+import { translateLimitationMessage } from "@/i18n/limitation-messages";
 import type { RunEvent } from "@/domain/contracts/events";
 import { RunDiagnosticsPanel } from "@/components/artifacts/workflow-panels";
 import styles from "./run-log-panel.module.css";
@@ -14,7 +15,17 @@ function eventMessage(e: RunEvent, locale: Locale): string {
   if (e.type === "stage.progress") return typeof data.message === "string" ? data.message : "";
   if (e.type === "limitation.reported") {
     const code = typeof data.code === "string" ? translateCode(data.code, locale) : "";
-    const msg = typeof data.message === "string" ? data.message : "";
+    const msg =
+      typeof data.code === "string" && typeof data.message === "string"
+        ? translateLimitationMessage(
+            data.code,
+            locale,
+            (data.params as Record<string, string | number> | undefined) ?? undefined,
+            data.message,
+          )
+        : typeof data.message === "string"
+          ? data.message
+          : "";
     return [code, msg].filter(Boolean).join(" — ");
   }
   if (e.type === "validation.failed") {

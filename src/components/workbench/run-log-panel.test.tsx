@@ -25,7 +25,7 @@ const events: RunEvent[] = [
   event({ sequence: 1, type: "run.accepted" }),
   event({ sequence: 2, type: "stage.started", stage: "topics", data: { stage: "topics" } }),
   event({ sequence: 3, type: "stage.progress", stage: "topics", data: { message: "analyzing review batch 2 of 5" } }),
-  event({ sequence: 4, type: "limitation.reported", data: { code: "RSS_PARTIAL", message: "partial data" } }),
+  event({ sequence: 4, type: "limitation.reported", data: { code: "UNKNOWN_LIMITATION", message: "partial data" } }),
   event({ sequence: 5, type: "run.completed" }),
 ];
 

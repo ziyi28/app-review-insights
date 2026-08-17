@@ -31,7 +31,7 @@ function bundleFromCollected(
 function bundleFromImport(parse: ImportParseResult): SourceBundle {
   const limitations: Limitation[] = [];
   for (const err of parse.errors) {
-    limitations.push({ code: "IMPORT_ERROR", message: err, stage: "source" });
+    limitations.push({ code: "IMPORT_ERROR", message: err, stage: "source", params: { detail: err } });
   }
   return {
     rawReviews: parse.reviews,

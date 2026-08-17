@@ -90,7 +90,7 @@ export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<voi
         updatedAt: new Date().toISOString(),
         stages: {},
         artifacts: {},
-        limitations: [{ code: "PIPELINE_ERROR", message }],
+        limitations: [{ code: "PIPELINE_ERROR", message, params: { detail: message } }],
         canReplay: false,
       });
     } catch {

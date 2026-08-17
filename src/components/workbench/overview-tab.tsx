@@ -1,6 +1,7 @@
 "use client";
 
 import { type Dictionary, type Locale, translateCode } from "@/i18n";
+import { translateLimitationMessage } from "@/i18n/limitation-messages";
 import type { Finding, Prd } from "@/domain/contracts/analysis";
 import type { RunManifest } from "@/server/runs/run-store";
 import type { GoalCoverageArtifact } from "@/hooks/use-run-artifacts";
@@ -252,10 +253,10 @@ export function OverviewTab({
             <h4 className="card-title">{t.limitations}</h4>
           </div>
           <div style={{ display: "grid", gap: "6px" }}>
-            {dedupeLimitations((finalReport as { limitations?: { code: string; message: string }[] }).limitations ?? []).map((l, i) => (
+            {dedupeLimitations((finalReport as { limitations?: { code: string; message: string; params?: Record<string, string | number> }[] }).limitations ?? []).map((l, i) => (
               <div key={i} style={{ fontSize: "13px", display: "flex", alignItems: "center", gap: "8px" }}>
                 <ProvenanceBadge kind="limitation" label={translateCode(l.code, locale)} />
-                <span>{l.message}</span>
+                <span>{translateLimitationMessage(l.code, locale, l.params, l.message)}</span>
               </div>
             ))}
           </div>
