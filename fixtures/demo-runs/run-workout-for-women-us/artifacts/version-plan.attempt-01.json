@@ -2,32 +2,29 @@
   "versions": [
     {
       "id": "ver-1",
-      "name": "1.0.0 - Trust & Stability",
-      "summary": "Fix paywall confusion, billing trust, and ad abuse that are causing churn and 1-star reviews.",
-      "rationale": "Findings 1-3 carry the highest severity and user impact. They directly cause users to abandon the app or label it a scam. Stabilizing these trust surfaces is a prerequisite for any longer-term value work.",
+      "name": "1.0 Trust & Monetization Fixes",
+      "summary": "Fix the highest-severity problems: make paywall boundaries explicit, guarantee free-trial and billing integrity, repair the free-tier ad experience, preserve a meaningful free workout path, and make support responsive.",
+      "rationale": "Findings 1, 2, 3, 5, and 8 show that surprise charges, unlabeled paywalls, forced 90-second ads, and unreachable support are the most severe and trust-damaging themes. These issues also drive the polarizing subscription-value split, so they must be addressed before content or personalization work can land effectively.",
       "requirementIds": [
         "req-1",
         "req-2",
-        "req-3"
+        "req-3",
+        "req-4",
+        "req-11"
       ]
     },
     {
       "id": "ver-2",
-      "name": "1.1.0 - Core Experience",
-      "summary": "Make personalization honor user constraints and improve workout content quality.",
-      "rationale": "Once trust is restored, the most polarizing feature — the workout library — becomes the focus. Finding 4 and finding 5 show users either love the short/varied workouts or hate repetitions, AI-slop, and ignored safety settings. These are medium-frequency but high-impact issues for retention and safety.",
+      "name": "2.0 Content, Personalization & Opportunities",
+      "summary": "Resolve the polarizing workout-content split, honor user goals and restrictions, and ship concrete requests: Apple Watch sync, adaptive programs, and workout control options. Rebuild subscription value messaging around outcomes and flexibility.",
+      "rationale": "Findings 4, 6, and 7 show that after trust issues are fixed, the next lever is making the app feel tailored, safe, and genuinely useful. These changes directly address the 'AI slop' vs 'love the variety' split and the unmet needs expressed by older, pregnant, or injury-avoiding users.",
       "requirementIds": [
-        "req-4",
-        "req-5"
-      ]
-    },
-    {
-      "id": "ver-3",
-      "name": "1.2.0 - Inclusive Wellness",
-      "summary": "Rebrand onboarding and imagery to be inclusive and wellness-first.",
-      "rationale": "Finding 6 is a small but vocal signal that the app's weight-loss-first framing and AI body imagery alienate wellness-focused users. The change is low-cost and aligns the brand with a broader, more inclusive fitness audience.",
-      "requirementIds": [
-        "req-6"
+        "req-5",
+        "req-6",
+        "req-7",
+        "req-8",
+        "req-9",
+        "req-10"
       ]
     }
   ],
@@ -37,17 +34,17 @@
       "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "critical",
+        "severity": "high",
         "userImpact": "high",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "16.8% of reviews describe paywall regression that turns long-time users into detractors. The same evidence also shows a subset of subscribers who love the app, so the fix is not to remove the subscription but to make the free tier and premium boundary honest and valuable.",
+        "rationale": "Finding 1 shows this is a frequent reason for churn and trust loss; finding 8 highlights the same feature is praised by subscribers, so transparency is the bridge between the two sides. Scope is medium because it touches UI labels, content metadata, and onboarding flow.",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 84,
+          "supportingReviewCount": 126,
           "corpusReviewCount": 500,
-          "supportRatio": 0.168
+          "supportRatio": 0.252
         }
       }
     },
@@ -58,15 +55,15 @@
       "planningFactors": {
         "severity": "critical",
         "userImpact": "high",
-        "implementationScope": "large",
+        "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "Billing failures directly break the subscription value proposition and brand trust. 7.8% of reviews report immediate charges, cancellation failures, or account lockouts, often using the word 'scam'. Fixing this is essential before any monetization expansion.",
+        "rationale": "Finding 2 and several supporting reviews in finding 8 describe real money being taken without clear consent, which is the highest-severity trust issue. Scope is medium because it involves StoreKit purchase flows, subscription management UI, and notification scheduling.",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 39,
+          "supportingReviewCount": 45,
           "corpusReviewCount": 500,
-          "supportRatio": 0.078
+          "supportRatio": 0.09
         }
       }
     },
@@ -75,36 +72,39 @@
       "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "high",
+        "severity": "critical",
         "userImpact": "high",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "10.4% of reviews cite 90-second or unclosable ads and Shein redirects as churn triggers. Some users explicitly accept ads as a fair trade for free access, so the goal is to keep the ad-supported tier but make it non-abusive and functional.",
+        "rationale": "Finding 3 shows broken ad UX can hijack the app entirely, and finding 1 shows it pushes formerly loyal users away. Scope is medium because it requires ad SDK configuration, close-control handling, and a no-redirect safeguard.",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 52,
+          "supportingReviewCount": 109,
           "corpusReviewCount": 500,
-          "supportRatio": 0.104
+          "supportRatio": 0.218
         }
       }
     },
     {
       "requirementId": "req-4",
       "priority": "P1",
-      "versionId": "ver-2",
+      "versionId": "ver-1",
       "planningFactors": {
         "severity": "high",
-        "userImpact": "medium",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [],
-        "rationale": "Personalization failures are safety-relevant (especially prenatal) and directly contradict the app's customization promise. Frequency is low (2.4%) but the damage to affected users is severe and the feature differentiates the app from competitors.",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [
+          "req-1",
+          "req-3"
+        ],
+        "rationale": "Finding 1 shows the removal of formerly free workouts is the core churn driver; finding 5 shows daily short workouts are the most-loved habit; finding 8 shows some users still find the subscription worth it. This requirement restores the free path without eliminating the paid value proposition.",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 12,
+          "supportingReviewCount": 123,
           "corpusReviewCount": 500,
-          "supportRatio": 0.024
+          "supportRatio": 0.246
         }
       }
     },
@@ -113,36 +113,133 @@
       "priority": "P1",
       "versionId": "ver-2",
       "planningFactors": {
-        "severity": "medium",
+        "severity": "high",
         "userImpact": "high",
-        "implementationScope": "medium",
+        "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "The workout library is the most polarizing feature: 14.8% of reviews are split between 5-star praise for short, effective, varied sessions and strong criticism of repetitive or AI-generated content. Improving freshness while keeping the short format serves the largest audience.",
+        "rationale": "Finding 6 documents ignored preferences and exclusionary content, which damages trust and can pose safety risks. Finding 4 shows content quality is polarizing, so plan generation must at least respect the user's stated constraints. Scope is large because it requires tagging, plan generation logic, and onboarding changes.",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 74,
+          "supportingReviewCount": 55,
           "corpusReviewCount": 500,
-          "supportRatio": 0.148
+          "supportRatio": 0.11
         }
       }
     },
     {
       "requirementId": "req-6",
-      "priority": "P2",
-      "versionId": "ver-3",
+      "priority": "P1",
+      "versionId": "ver-2",
       "planningFactors": {
-        "severity": "low",
-        "userImpact": "low",
-        "implementationScope": "small",
+        "severity": "medium",
+        "userImpact": "high",
+        "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "A small but vocal segment (1.2% of reviews) finds the weight-loss-first framing and AI body imagery actively harmful. The change is low-cost and improves brand inclusivity and alignment with wellness values.",
+        "rationale": "Finding 4 shows the same workout library is beloved by some and criticized by others; finding 7 and finding 5 provide concrete directions for demos and short sessions. Scope is large because it involves content production, demo assets, and plan-generation rotation rules.",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 6,
+          "supportingReviewCount": 70,
           "corpusReviewCount": 500,
-          "supportRatio": 0.012
+          "supportRatio": 0.14
+        }
+      }
+    },
+    {
+      "requirementId": "req-7",
+      "priority": "P2",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "low",
+        "userImpact": "medium",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "Finding 7 contains the direct Apple Watch request, and finding 4 shows a reviewer wishing the app connected to a watch. Scope is medium because HealthKit integration and watch app work are moderate.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 46,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.092
+        }
+      }
+    },
+    {
+      "requirementId": "req-8",
+      "priority": "P2",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "medium",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "Finding 6 documents the pregnancy-safety complaint and forced-goal problem; finding 7 contains the older-adult program request; finding 4 shows no-floor workouts are already appreciated. Scope is medium because it adds new content and filtering logic.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 61,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.122
+        }
+      }
+    },
+    {
+      "requirementId": "req-9",
+      "priority": "P2",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "low",
+        "userImpact": "medium",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "Finding 7 includes the voice-prompt and shorter-ad requests; finding 6 includes the no-jump and longer-interval requests; finding 5 shows the daily short workout is a loved habit that these controls protect. Scope is medium because it touches settings, workout player, and plan substitution.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 50,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.1
+        }
+      }
+    },
+    {
+      "requirementId": "req-10",
+      "priority": "P1",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "medium",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [
+          "req-1"
+        ],
+        "rationale": "Finding 8 explicitly shows the same subscription is seen as transformative by some and as a paywall by others; finding 1 shows former free access is the main complaint; finding 2 shows billing surprises amplify the negative view. This requirement directly addresses the polarizing value perception and depends on transparent labeling first.",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 126,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.252
+        }
+      }
+    },
+    {
+      "requirementId": "req-11",
+      "priority": "P0",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "Finding 2 shows support failures compound billing and login issues, turning a bad moment into a permanent trust loss. Implementable independently as a support workflow and form fix, so it belongs in the trust-focused first version.",
+        "evidenceStrength": "high",
+        "confidence": "high",
+        "frequency": {
+          "supportingReviewCount": 32,
+          "corpusReviewCount": 500,
+          "supportRatio": 0.064
         }
       }
     }

@@ -1,715 +1,1846 @@
 {
   "outputLocale": "zh-CN",
-  "title": "X 应用 12.16 回归修复、安全治理与付费体验提升计划",
-  "overview": "本计划基于 1-2 星评论中的证据，优先修复 12.16 版本引入的功能回归（媒体加载、信息流刷新、回复/登录），同步整治垃圾机器人/诈骗账号泛滥和举报失效问题，并解决 X Premium 付费用户的误限流与客服缺失问题。版本规划为三阶段：ver-1 紧急热修复回归问题；ver-2 开展信任与安全整治；ver-3 优化时间线算法并建设 Premium 人工客服。",
+  "title": "X 客户端回归分析与修复发布计划",
+  "overview": "本计划基于 499 条应用商店评论中的 10 项发现，其中 8 项证据充分。优先修复账号误封/申诉无效、涉未成年有害内容、机器人/冒充诈骗、发帖与登录等核心交互问题；随后处理仇恨/误导内容、信息流算法、媒体播放以及所有权变更带来的信任流失。所有需求均至少引用一项发现，目标数字若为建议值则以 Suggested 标注，基线数字引用对应发现的确定性统计。",
   "findings": [
     {
       "id": "finding-1",
       "topicIds": [
-        "topic-6",
-        "topic-7"
+        "topic-1",
+        "topic-2",
+        "topic-8"
       ],
       "focusAreaIds": [
-        "focus-1",
-        "focus-2"
+        "focus-1"
       ],
       "sourceFindingIds": [
         "finding-1@c0",
-        "finding-4@c1",
+        "finding-2@c1",
         "finding-1@c2",
-        "finding-3@c3",
+        "finding-2@c3",
         "finding-1@c4",
         "finding-1@c5",
-        "finding-3@c6"
+        "finding-4@c6",
+        "finding-1@c7",
+        "finding-1@c8",
+        "finding-1@c9"
       ],
-      "title": "12.16版本及近期更新回归：视频/媒体无法加载、回复与登录故障、信息流自动刷新",
-      "summary": "用户在1-2星评论中集中反映近期更新后出现多项功能回归：视频和GIF显示“内容不可用”或无法加载；部分用户无法回复评论，或更新后账号被登出/锁定；信息流会在打开或离开应用时自动刷新，导致正在阅读的内容丢失；部分视频甚至会被强制跳转到应用下载页。这些问题共同表明近期版本稳定性明显下降，疑似与12.16版本回归相关。",
+      "title": "账号无故被封禁/影子封禁/限流，申诉与客服支持无效",
+      "summary": "大量用户（含付费用户）反映账号被无故或由 AI 误判为“非真实行为”后遭遇封禁、影子封禁、限流、评论/发布限制或反复封禁/解封；申诉仅得到 AI 模板回复、无回应或被要求付费，无法获得有效人工复核。部分用户认为这与平台宣传的言论自由相矛盾；同时也有用户称赞平台能自由表达，正反评价并存。",
       "supportingReviewIds": [
-        "dabc7ca85c6be245ea65",
-        "397b9e8e139c307922dd",
-        "c5e4dd6a49553397b882",
-        "d52e5ce2502c1fb3db3d",
-        "2f62dc8aa63697e7ddf6",
-        "e65585cfcd381a145856",
-        "fe996470ac7cc136390f",
-        "ce55aaf7bdadf6e2ed70",
-        "c238acb8869b86898031",
-        "1d9c03fa7c1752ec039c",
-        "b8ace3ccf5b408696c11",
-        "667138f3e69c5bd452e7",
-        "5ae4adca2a0f08e04b73",
-        "35c199d588e66936a855",
-        "6ad5a5cb80562e87be20",
-        "b680022465b8bd4adbaa",
-        "46f6febe4e287d198214",
-        "903f5975a4fe9b77837f",
-        "975e8a5c7dda6b9c31b0",
-        "8705e89d353623b04cfd",
-        "24ac8cd6c953c4425527",
-        "2afc91dd147c2508799c",
-        "d883b185fdea6916711c",
-        "05d5408e5be132f875bd",
-        "6acd02e50e0dfd677461",
-        "d0e59478c8b751e1fb1a",
-        "187872d2e6ec043bec03"
+        "942e8fb78d4ce7c42fed",
+        "b72cb5b5369ef4acf380",
+        "72854236343f2023e590",
+        "3b4c600e86c460a49186",
+        "9ac8666109691fba5f70",
+        "ff0f3e1c7e16757c275a",
+        "b139645074909b1f5110",
+        "2ff17e156b51002dae7d",
+        "82973717a5a5bd512dcd",
+        "88ceceaf528c6c039adf",
+        "76ef34c426c2633409ac",
+        "eca55a9575da9b7a2349",
+        "1f5a3b69b07ee525be3f",
+        "746d3505931cb1b710d3",
+        "232158cf07f6adc110c2",
+        "5a398934f16ccebe94b5",
+        "f7a386821507debbd09d",
+        "90795ba894f2a774f54e",
+        "1c882652d8542e7608a4",
+        "4529e77929effbb1be08",
+        "554635876b726fcfc341",
+        "e19ce43b965ff170bdd1",
+        "161d9b39015b97ceed5b",
+        "3bf4601dbea80e52a3c5",
+        "a40c3f400f1dc51a59b1",
+        "aa3892c1816c5a6382eb",
+        "cdc731e3b26a01b3cfe7",
+        "d43918cce19fedd740af",
+        "fa97cc1d80cf24c71f4a",
+        "7f29df8debf1154f6328",
+        "ccc8dba9066958a86523",
+        "ea871352e9224a1724c9",
+        "91c24f546aa1f8cd4911",
+        "d60b1ef568edcc06fcfa",
+        "5ae581ab93e56039cfbd",
+        "0ff49f2767eef4a355a2",
+        "3149ea6f88ac1590379d",
+        "cb14681dfe63fb647f2f",
+        "054e4c2d3fe193d45c18",
+        "473cfcbcd75d69d5f2bb",
+        "9c6f8d59ca9d678ce743",
+        "262dea90fefc46097147",
+        "2084d13dd6067f06ebc7",
+        "f3b0221693e72972a8fe",
+        "15140568111aa68e47fe",
+        "1870c553be2429f7eba3",
+        "10e945293704caca02f3",
+        "2b0ef2fe65347a3e8f41",
+        "b598c740a53babfec796",
+        "7983cdc56ccb5f592895",
+        "6e71c35fa56f499e082c",
+        "43ffeb2d101141f64315",
+        "8e99f841ec133d3661d8",
+        "7b81b3a5ce81cd0254cf",
+        "45ed99b74d25be7c5d8c",
+        "4521af5319b8a9f43470",
+        "4938951db0f0641b8e45",
+        "a877aa1d79240560118e",
+        "37d328729ad9b568359c",
+        "c3aec2447f634c7ddc66",
+        "6419d487e20096da58cd"
       ],
-      "supportingSampleCount": 27,
+      "supportingContentGroupIds": [
+        "7ec676b5c5538423c12c",
+        "657438d3a38b6fb10398",
+        "d8b96f2c142c924f4015",
+        "f00da1dcbda36815ec0b",
+        "38fc27754f2553d0c047",
+        "514d3e2571e6dd338bc5",
+        "21eabd921f0666db962a",
+        "df586be3b6d13ef22848",
+        "264528079453a12badae",
+        "42d8e950eb170cc1d681",
+        "13cfa0f21069ab69fa57",
+        "c6315b365d795e875adb",
+        "e24a9732a36ec0087443",
+        "edb9694295bbf79c41e6",
+        "3720d581604fc65cf251",
+        "b3807c9fc80fb3b49a6f",
+        "76c8e8ec794037c09cbb",
+        "6fdcbc9d4ffabf8232ba",
+        "eff48e072d683ee49e67",
+        "b1a6240f8f7dc8a7ea68",
+        "cc91345ed47aaaad12dd",
+        "decb0892e335d707034c",
+        "10d993ae00e8d260c7dc",
+        "6f714a354cb19daf6add",
+        "2822f59ce980f61f55d5",
+        "fd3d1da0eea59b9bfa21",
+        "3fef8f74caeff0ec8cb6",
+        "259fb747dd846517d759",
+        "5d98c35845435c5daf5a",
+        "ee5861925bccc33af8be",
+        "651e5c1caef333c1fc8d",
+        "2486a772e9d75ef32565",
+        "4df3a48182ff59ddd3c6",
+        "cb2458f0ba540c05743c",
+        "806c280baf554adce0e7",
+        "d8c592764ae2cc0ab402",
+        "bdbef7482200cb33a878",
+        "22f89a94b839e0cd45b8",
+        "f58d0ea5c0faa4e55737",
+        "da20bc005af74374f4cb",
+        "d77aa6935fc009d9b709",
+        "7edad47014f7af7115f0",
+        "1032aa571dc9c841b01b",
+        "d62c8d785920ac54b766",
+        "a297d3a14a7cc0dfb7d9",
+        "3677cb946da7dda67d6b",
+        "2b3318c2ecf431382831",
+        "360dff0db3f94b2e372f",
+        "448e126bcd32370368ca",
+        "f0a0d1e18fa7b87a9cc4",
+        "6dd31ebfb275158ba623",
+        "c58e84098a993ffd2357",
+        "dd795cd3058f942a37d6",
+        "2dd447f16386c258e760",
+        "0b102e826e88eab9cd45",
+        "fd53bb0e92407f85e9e3",
+        "da9c04f9621b1b128d04",
+        "b7a4545131915873156f",
+        "1f86cd078bce5851e817",
+        "b79e02cb57e8645d46cc",
+        "4d753d42416767af7b35"
+      ],
+      "supportingSampleCount": 61,
       "evidenceExcerpts": [
         {
-          "reviewId": "dabc7ca85c6be245ea65",
-          "excerpt": "switching between accounts causes the app to lock up maybe 50% of the time. no obvious reason why. it wasn’t doing this a week ago."
+          "reviewId": "942e8fb78d4ce7c42fed",
+          "excerpt": "now my account has been limited with zero explanation, can’t get anyone from support to respond"
         },
         {
-          "reviewId": "397b9e8e139c307922dd",
-          "excerpt": "when i open the app it updates my feed twice, so i end up missing a bunch of stuff."
+          "reviewId": "b72cb5b5369ef4acf380",
+          "excerpt": "i got suspended and i have no clue why. tried writing no response. tried appealing again no response."
         },
         {
-          "reviewId": "c5e4dd6a49553397b882",
-          "excerpt": "when you start reading the tweet, the feed itself is updated and the tweet you read can no longer be found"
+          "reviewId": "72854236343f2023e590",
+          "excerpt": "x has decided to block my freedom of speech"
         },
         {
-          "reviewId": "d52e5ce2502c1fb3db3d",
-          "excerpt": "videos spin then turn to content is not available error. been happening for days"
+          "reviewId": "3b4c600e86c460a49186",
+          "excerpt": "wrongfully banned after i reported a sicko posting illegal content cse and other disgusting content. yet they didn’t ban him"
         },
         {
-          "reviewId": "2f62dc8aa63697e7ddf6",
-          "excerpt": "x doesn’t let me reply or comment on any posts, every time i try to it just says error resend or edit in drafts?"
+          "reviewId": "9ac8666109691fba5f70",
+          "excerpt": "they shadow ban all small accounts and force you to see posts of people you block just to try and trigger you into giving them engagement."
         },
         {
-          "reviewId": "e65585cfcd381a145856",
-          "excerpt": "last update logged me out and locked account. trouble getting back in."
+          "reviewId": "ff0f3e1c7e16757c275a",
+          "excerpt": "кидают nsfw label и успешного обжалования пишут «да, вы ничего не нарушили», а через пару дней опять ставят label который уже не обжаловать"
         },
         {
-          "reviewId": "fe996470ac7cc136390f",
-          "excerpt": "some videos not playing while others are. network connections all stable."
+          "reviewId": "b139645074909b1f5110",
+          "excerpt": "only my followers have seen my posts for a month now"
         },
         {
-          "reviewId": "ce55aaf7bdadf6e2ed70",
-          "excerpt": "every update the app gets worse and this newest update is absolutely dog water"
+          "reviewId": "2ff17e156b51002dae7d",
+          "excerpt": "this is my 7th account since elon bought it."
         },
         {
-          "reviewId": "c238acb8869b86898031",
-          "excerpt": "“content not available “ comes up on videos"
+          "reviewId": "82973717a5a5bd512dcd",
+          "excerpt": "x was banning ordinary people"
         },
         {
-          "reviewId": "1d9c03fa7c1752ec039c",
-          "excerpt": "the videos are just not loading no matter how many times i refresh it. it still doesn’t work."
+          "reviewId": "88ceceaf528c6c039adf",
+          "excerpt": "great app to use if you like the overturned ai to label your account and then suspend you"
         },
         {
-          "reviewId": "b8ace3ccf5b408696c11",
-          "excerpt": "everytime i mute a video, then go to the next video it unmutes."
+          "reviewId": "76ef34c426c2633409ac",
+          "excerpt": "muted me and made me invisible"
         },
         {
-          "reviewId": "667138f3e69c5bd452e7",
-          "excerpt": "the separation of posts and reposts ruined the app indefinitely."
+          "reviewId": "eca55a9575da9b7a2349",
+          "excerpt": "you will be shadow banned, blocked from posting or interacting with anyone if you freely speak your mind"
         },
         {
-          "reviewId": "5ae4adca2a0f08e04b73",
-          "excerpt": "it also refreshes every time you leave the app so good luck trying to read any of those excessively long twitter premium posts that are always ai generated."
+          "reviewId": "1f5a3b69b07ee525be3f",
+          "excerpt": "you may have thoughts"
         },
         {
-          "reviewId": "35c199d588e66936a855",
-          "excerpt": "makes videos and gifs unavailable to view"
+          "reviewId": "746d3505931cb1b710d3",
+          "excerpt": "shadowban"
         },
         {
-          "reviewId": "6ad5a5cb80562e87be20",
-          "excerpt": "videos after a recent update, it’s says “content not available”"
+          "reviewId": "232158cf07f6adc110c2",
+          "excerpt": "suddenly be suspended for no reason given"
         },
         {
-          "reviewId": "b680022465b8bd4adbaa",
-          "excerpt": "content not available or media cannot be loaded"
+          "reviewId": "5a398934f16ccebe94b5",
+          "excerpt": "constantly getting locked out of my acct and unlocked immediately"
         },
         {
-          "reviewId": "46f6febe4e287d198214",
-          "excerpt": "videos haven’t been playing for over a month"
+          "reviewId": "f7a386821507debbd09d",
+          "excerpt": "they ban/demote certain accounts that don’t fit the agenda"
         },
         {
-          "reviewId": "903f5975a4fe9b77837f",
-          "excerpt": "internal error"
+          "reviewId": "90795ba894f2a774f54e",
+          "excerpt": "they’re blocking conservatives just like 2020 all over again"
         },
         {
-          "reviewId": "975e8a5c7dda6b9c31b0",
-          "excerpt": "videos don’t load on the app"
+          "reviewId": "1c882652d8542e7608a4",
+          "excerpt": "you can be banned for just repeating the president"
         },
         {
-          "reviewId": "8705e89d353623b04cfd",
-          "excerpt": "every time i open it im unable to watch any videos"
+          "reviewId": "4529e77929effbb1be08",
+          "excerpt": "lock my account down when i offer a response"
         },
         {
-          "reviewId": "24ac8cd6c953c4425527",
-          "excerpt": "share button behavior does not keep consistent"
+          "reviewId": "554635876b726fcfc341",
+          "excerpt": "been months now of x hiding every single one of my comments with no explanation"
         },
         {
-          "reviewId": "2afc91dd147c2508799c",
-          "excerpt": "search straight up does not work"
+          "reviewId": "e19ce43b965ff170bdd1",
+          "excerpt": "shadow banned me because i posted from a different location while i was on vacation"
         },
         {
-          "reviewId": "d883b185fdea6916711c",
-          "excerpt": "why can’t i reply?"
+          "reviewId": "161d9b39015b97ceed5b",
+          "excerpt": "i have been baned and unbanned 3 times in 7 days"
         },
         {
-          "reviewId": "05d5408e5be132f875bd",
-          "excerpt": "report section always stuck on x logo since 11.13 version"
+          "reviewId": "3bf4601dbea80e52a3c5",
+          "excerpt": "my whole account is different and it saying my account is suspended."
         },
         {
-          "reviewId": "6acd02e50e0dfd677461",
-          "excerpt": "removing the media tab"
+          "reviewId": "a40c3f400f1dc51a59b1",
+          "excerpt": "my account was locked permanently on my 2nd day for violating a rule but without any recourse to correct the violation"
         },
         {
-          "reviewId": "d0e59478c8b751e1fb1a",
-          "excerpt": "you can even load half the content on it"
+          "reviewId": "aa3892c1816c5a6382eb",
+          "excerpt": "the overlords will make your account completely unusable by turning off your ability to comment post or engage. with no way for recourse"
         },
         {
-          "reviewId": "187872d2e6ec043bec03",
-          "excerpt": "been redirected here 6x to download this stupid app i don’t want"
+          "reviewId": "cdc731e3b26a01b3cfe7",
+          "excerpt": "they are still shadowbanning, throttling, hiding comments for no particular reason, no explanation, and no means by which to remedy the situation"
+        },
+        {
+          "reviewId": "d43918cce19fedd740af",
+          "excerpt": "tried to send an appeal and it’s like, it goes into their own spam/junk folder"
+        },
+        {
+          "reviewId": "fa97cc1d80cf24c71f4a",
+          "excerpt": "support has been useless and said they can’t do anything after saying clearly there was sketchy activity"
+        },
+        {
+          "reviewId": "7f29df8debf1154f6328",
+          "excerpt": "you’ll shadow ban people that speak their mind but let the scammers run wild"
+        },
+        {
+          "reviewId": "ccc8dba9066958a86523",
+          "excerpt": "any original posts, 100% unseen. so mainly used as a news source now, since my thoughts and opinions are almost completely drowned out"
+        },
+        {
+          "reviewId": "ea871352e9224a1724c9",
+          "excerpt": "even with a paid star (i wish they had the previous verification), my speech and engagement is throttled"
+        },
+        {
+          "reviewId": "91c24f546aa1f8cd4911",
+          "excerpt": "the system recently mass flagged thousands of accounts and mislabeled many for posting sensitive media."
+        },
+        {
+          "reviewId": "d60b1ef568edcc06fcfa",
+          "excerpt": "i appealed 10 times and i get the same ai agent response."
+        },
+        {
+          "reviewId": "5ae581ab93e56039cfbd",
+          "excerpt": "someone has reported me as a bot or x just randomly restricted my account and it’s supposed to be temporary by now i’m sure they should’ve realized i’m not a bot but my account is still restricted in support does not help !"
+        },
+        {
+          "reviewId": "0ff49f2767eef4a355a2",
+          "excerpt": "all i have ever done was ask a question and i look back on my account and all of sudden i am suspended?"
+        },
+        {
+          "reviewId": "3149ea6f88ac1590379d",
+          "excerpt": "every single time i start a new one it ends up getting canceled or pushed to the back to do some stupid automatic system and algorithm flagging my account for nothing."
+        },
+        {
+          "reviewId": "cb14681dfe63fb647f2f",
+          "excerpt": "shadowbanned while they tell me i’m not shadowbanned."
+        },
+        {
+          "reviewId": "054e4c2d3fe193d45c18",
+          "excerpt": "the app is a joke… labeling and banning just because you prove people wrong. you don’t even need to be rude and they silence you. 😅😅😅"
+        },
+        {
+          "reviewId": "473cfcbcd75d69d5f2bb",
+          "excerpt": "free speech should mean everyone gets to talk, not that the loudest and most aggressive accounts get to run people off the platform while everyone else absorbs the harassment."
+        },
+        {
+          "reviewId": "9c6f8d59ca9d678ce743",
+          "excerpt": "my posts get zero visibility and are blocked from view. it is not suspended or locked, so there is no appeal. i’ve tried everything. there are zero resources."
+        },
+        {
+          "reviewId": "262dea90fefc46097147",
+          "excerpt": "they ban your account for no reason whatsoever. our original count was followers was removed. no reason was given."
+        },
+        {
+          "reviewId": "2084d13dd6067f06ebc7",
+          "excerpt": "they put a temporary “label” on my account… which isn’t visible. but my profile isn’t seen and neither are my comments."
+        },
+        {
+          "reviewId": "f3b0221693e72972a8fe",
+          "excerpt": "you will get suspended for nothing because of ai…"
+        },
+        {
+          "reviewId": "15140568111aa68e47fe",
+          "excerpt": "got flagged for supposedly an account issue. and it’s been several days and haven’t heard anything back!"
+        },
+        {
+          "reviewId": "1870c553be2429f7eba3",
+          "excerpt": "我的两个账户因为违反真实性原则被封，我都不知道发生了什么，就是正常使用号就没了，太垃圾了"
+        },
+        {
+          "reviewId": "10e945293704caca02f3",
+          "excerpt": "if you report scammers, x will filter all your comments and replies so that nobody sees them."
+        },
+        {
+          "reviewId": "2b0ef2fe65347a3e8f41",
+          "excerpt": "shadowbanned from the twitterlands"
+        },
+        {
+          "reviewId": "b598c740a53babfec796",
+          "excerpt": "fix your broken appeal system and give me my account back!"
+        },
+        {
+          "reviewId": "7983cdc56ccb5f592895",
+          "excerpt": "unjustifiably suspended indefinitely"
+        },
+        {
+          "reviewId": "6e71c35fa56f499e082c",
+          "excerpt": "x employees or ai have censored my post as no one can see them and i have not been given a reason or an option to appeal"
+        },
+        {
+          "reviewId": "43ffeb2d101141f64315",
+          "excerpt": "silence regular users who criticize the companies x wants to protect"
+        },
+        {
+          "reviewId": "8e99f841ec133d3661d8",
+          "excerpt": "please review the suspension of @marysc2"
+        },
+        {
+          "reviewId": "7b81b3a5ce81cd0254cf",
+          "excerpt": "why yall lock my account up in lock it now"
+        },
+        {
+          "reviewId": "45ed99b74d25be7c5d8c",
+          "excerpt": "thousands of us have been losing our accounts because of ai determining “inauthentic behavior”. we are being shadowbanned and suspended with absolutely zero explanation and zero way to reach out or appeal unless you pay"
+        },
+        {
+          "reviewId": "4521af5319b8a9f43470",
+          "excerpt": "suddenly two weeks ago i get a label restricting my visibility for “inauthentic behavior” all my replies and posts are invisible. no way to appeal, no one to ask to for help"
+        },
+        {
+          "reviewId": "4938951db0f0641b8e45",
+          "excerpt": "today i had to prove that i was a human to a robot. i didn't do anything other than like a few posts and comments, and my account was \"frozen for authentic behavior\". what the hell are you talking about?"
+        },
+        {
+          "reviewId": "a877aa1d79240560118e",
+          "excerpt": "my account has been suspended twice from retweeting; for some reason that also makes you lose your followed list, followers list, bookmarks and notifications for people you follow."
+        },
+        {
+          "reviewId": "37d328729ad9b568359c",
+          "excerpt": "account has a temporary flag label applied for suspicious activity; no way to appeal, notification for what flagged. no timeline for flag or how to remove the flag."
+        },
+        {
+          "reviewId": "c3aec2447f634c7ddc66",
+          "excerpt": "other profile suspended, the one i verified with a premium subscription. no reason, it’s been days since appeal was filed. why should i pay for premium service?"
+        },
+        {
+          "reviewId": "6419d487e20096da58cd",
+          "excerpt": "my account was hacked and then banned. all i receive is automated responses saying my ban was justified. very annoying"
         }
       ],
-      "conflictingReviewIds": [],
+      "conflictingReviewIds": [
+        "e1566f43246609813bc3",
+        "04d00b860f4d273e1576",
+        "1969615001d1523123e1",
+        "13f53e60689e6c21f5ed",
+        "4808dfdb94d5bf772e93",
+        "79b4a6c86c425bb79da6",
+        "ed1f6a19214fa5fe8949",
+        "993793d19c8513d6495b",
+        "5b5f841111cb511fa779",
+        "ba4cc91c126da820c0d0",
+        "f7f38aa8627aa3b8159e",
+        "b21f76de057a4da51f03",
+        "de967ce61040766f11e6",
+        "46c74738b16b6511b770",
+        "628573a6121250c05d9b",
+        "81b1a27aabc5fda49ea0",
+        "d3f5222bcf9f24c2604e",
+        "ae2bce7d40a4137c3921",
+        "0a22766bc76f26594eec",
+        "6674808ef6ef2e4b4034",
+        "47d7d3113389908cb125"
+      ],
       "confidence": {
-        "level": "high",
-        "method": "deterministic-v1",
+        "level": "medium",
+        "method": "deterministic-v2",
         "reasons": [
-          "27 distinct supporting review(s)",
-          "source status: complete"
+          "61 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present"
         ]
       },
       "evidenceSufficiency": {
         "status": "sufficient",
-        "corpusReviewCount": 233,
-        "supportRatio": 0.11587982832618025,
+        "corpusReviewCount": 499,
+        "supportRatio": 0.12224448897795591,
         "reasons": []
       },
       "uncertainties": [
-        "无法确认这些问题都源于12.16版本；仅 dabc7ca85c6be245ea65 明确提到‘一周前不会这样’。",
-        "评论未标注具体 X 版本号，无法确认是否与 12.16 直接相关。",
-        "未提供设备型号、系统版本或视频来源，无法进一步定位。",
-        "用户未明确提及12.16具体版本号，多个'last update'/'newest update'表述只能指向最近一次更新。",
-        "无法确认这些故障是否由服务器端配置或其他非客户端因素引起。",
-        "评论中未直接标明App版本号，“过去几周”等时间描述只能说明是近期问题，不能严格归因于12.16版。",
-        "评论未直接提及“12.16”版本号，只能确认是“最近更新”后出现的问题",
-        "评论中未直接标注版本号12.16，无法确认这些故障均由最新版本引入。",
-        "评论未注明具体版本号，无法确认是否就是12.16版本引入的回归；跳转可能来自外部网站而非X应用本身。"
+        "无法核实账号是否确实无违规；封禁原因通常未公开，用户描述仅代表个人遭遇。",
+        "封禁是否由统一策略或AI模型造成无法验证；用户声称的“政治倾向”属于主观判断，不能从评论直接证实。",
+        "账号被封的“真实原因”无法核实，用户自述可能带有政治立场偏差。",
+        "无法核实被隐藏/封禁账号是否确实没有违规；用户可能不了解平台规则。",
+        "无法核实被封禁用户的账号历史及平台实际审核规则",
+        "评价中的“shadow ban”等说法是用户主观判断",
+        "评价样本有限，不能代表所有用户的实际封禁/限流比例",
+        "封禁/限制的具体原因主要来自用户单方描述，评论中无法验证平台实际审核依据。",
+        "缺少被贴标签/封禁的具体帖子内容或规则依据。",
+        "对“言论自由”的界定因人而异。",
+        "无法从评论确定触发封禁/降权的具体规则",
+        "申诉链路是否存在人工客服尚不明确",
+        "部分用户反映的是评论/互动降权而非完全封禁",
+        "用户对影子封禁和 AI 客服的描述无法独立验证，封号原因可能涉及未披露的平台规则。",
+        "部分封号可能确有违规，评论中未提供完整证据。",
+        "无法从评论确认 AI 判定为“非真实行为”的具体触发条件，以及是否有成功的申诉后恢复案例。",
+        "有评论提到“unless you pay”，但无法核实付费是否真的影响申诉处理优先级。"
       ],
       "limitations": [
-        "样本量3条，缺少版本号直接证据。",
-        "仅 1 条评论，缺少其他用户对该问题的确认。",
-        "评论未提供设备型号和系统版本，无法进一步定位回归范围。",
-        "本次评论样本中没有直接描述通知或私信投递失败的内容，因此无法对 focus-4/focus-5 形成结论。",
-        "样本集中在1星评论，缺少对照版本数据；视频与布局问题可能受设备/网络影响。",
-        "部分媒体加载失败可能与网络环境（如Wi-Fi）相关，不完全是应用回归；样本全部来自1-2星评论",
-        "这些评论均来自1-2星差评，可能放大负面体验；部分问题可能受网络或设备影响。",
-        "单条评论，且包含对负责人的个人情绪，可能夸大问题严重性。"
+        "样本来自单期评论且数量有限，不能据此推断平台整体审核政策。",
+        "所有证据均为用户单方面陈述；无法核实账号此前行为或是否违反平台规则。",
+        "仅基于少量用户主观描述，无平台审核数据；未覆盖未被封禁用户的体验。",
+        "来自少数极端案例，不能代表整体封禁策略。",
+        "这是应用商店评价，不是平台后台数据",
+        "引用的是用户自述，可能有情绪化或偏颇",
+        "未验证评论者是否为真实活跃用户/付费用户",
+        "该主题的评论以1星为主，缺少成功申诉案例作为对照。",
+        "正反证据均为个人观感，无法客观判定平台审核政策。",
+        "评论者自述无法验证账号真实状态",
+        "负面体验与少量已解封反馈并存，不能推断封禁概率",
+        "仅基于 App Store 评论文本，无法核对真实账号状态和申诉记录。",
+        "样本量有限，不代表所有用户的封号体验。",
+        "负面低星评论更倾向于描述账号问题，可能高估该类事件在全体用户中的比例。",
+        "各评论未提供截图或客服工单等可核查证据。"
       ]
     },
     {
       "id": "finding-2",
       "topicIds": [
-        "topic-1",
-        "topic-2",
-        "topic-3"
+        "topic-3",
+        "topic-4",
+        "topic-5"
       ],
       "focusAreaIds": [
-        "focus-3",
-        "focus-5"
+        "focus-1"
       ],
       "sourceFindingIds": [
         "finding-2@c0",
-        "finding-3@c2",
-        "finding-4@c3",
-        "finding-3@c4",
-        "finding-3@c5",
-        "finding-2@c6"
+        "finding-3@c1",
+        "finding-2@c2",
+        "finding-1@c3",
+        "finding-2@c4",
+        "finding-1@c6",
+        "finding-2@c8"
       ],
-      "title": "垃圾机器人、诈骗/虚假账号泛滥，举报失效且缺少有效治理",
-      "summary": "大量1-2星评论反映X平台被机器人、AI仿冒诈骗账号和虚假账户淹没，真实关注被淹没；举报按钮无法正常工作，或举报后反馈反而被过滤、限流；新用户会很快收到陌生人的垃圾私信和骚扰信息，平台对这些有害账号几乎没有清理效果。",
+      "title": "平台出现涉及未成年人的不当内容与极端内容，审核未及时下架",
+      "summary": "多名用户报告在信息流中遇到涉及未成年人的非法内容（包括儿童色情）、自残/暴力/色情等极端内容，举报后未见处理或仅得到形式化回应；有用户因举报违规内容反被限制账号，还有用户指出 18+ 内容可被儿童看到。另有用户承认平台存在成人向内容，与“有害内容”定性形成冲突。",
       "supportingReviewIds": [
-        "9967c9c6b724e5b8f101",
-        "d1acd46c72b340d99cc8",
-        "087861f6c78d5f58aae4",
-        "13497782d29654cdc8bb",
-        "0a460bd4781c764cf5a7",
-        "4ecb043db74be454e15d",
-        "7f8726384e9d02b8afe1",
-        "11a5c3b5bca434420cbc",
-        "2d9454ce738c332a9df2",
-        "3ddfe92752c385eac585",
-        "0bc98e613ff518920ba4",
-        "2d0bfdaffe85ca8d0abe",
-        "bee7c70a9d15b0768e5e",
-        "94524f8831d5b195494f",
-        "105842b234ac9ce7b4ea",
-        "365c33ad8f340a5946d7",
-        "5e2dd3899347c079a2cc",
-        "3902d86035600c4c4156",
-        "3d4f4d0d519b3cb62272",
-        "58e4985f6594aa009f3f"
+        "9ac8666109691fba5f70",
+        "546311cffcf7b395f8bb",
+        "0a50412c5b9cbdf1b7c6",
+        "3b4c600e86c460a49186",
+        "deac1c70911c5cb0f22f",
+        "e24298a5f578d9fa3f61",
+        "32dc558b884c2448066a",
+        "bc3589f3dd7780b311c2",
+        "592e221cc4ec98801e62",
+        "91adbf478301de28a709",
+        "6c2b03f16b06ee09d803",
+        "bfac1bc5a2cfc0802d74",
+        "17c0b8d4f8b13fcc7e52",
+        "88d9dd0b4204721b2ff7",
+        "3f6d58b7e700fb16f48d",
+        "dbee4e9b3907ee3b5bb3",
+        "5d1071c36f9163b09ec6",
+        "e8c898d885282ce357e9",
+        "f1c1645fa7f5c96016ca",
+        "7f29df8debf1154f6328",
+        "83287b7ba08a98cdd064",
+        "bb4c2a15b6af318bfc15",
+        "f34ec40e0c8f2039b2c4",
+        "6ddf9be60b89194b3cb4",
+        "a405d9b0c641afed8331",
+        "aadedd7ecb352e450339",
+        "0dd37aa757a881c3625a",
+        "f47dd416af749737b5a2",
+        "fbe24ba998bc40507c5b",
+        "e5f57695ae9718cb97fb"
       ],
-      "supportingSampleCount": 20,
+      "supportingContentGroupIds": [
+        "38fc27754f2553d0c047",
+        "e06eb11cf09077fdbd37",
+        "6cf488bd73cafb094ac0",
+        "f00da1dcbda36815ec0b",
+        "972c65525538b28a3d49",
+        "e9e082c14dce8c87fa67",
+        "df9f77e48da5f385aaad",
+        "00496e46a5aed4dccfc3",
+        "e4fdf1154648dc52bf99",
+        "45dae06f6c774f164a7c",
+        "54fae4ed232b1383cf36",
+        "4d2e2a483c398024c261",
+        "d34556cae3bc138c0d64",
+        "0f3a40db474d9e63d61c",
+        "fc112a4169f0a5943c32",
+        "1814e59abf0b4a735c82",
+        "fa5474e1027014ea3bcd",
+        "a1a76e8012024c126341",
+        "3ae6b765296295c5a6bb",
+        "ee5861925bccc33af8be",
+        "661391ac3e646961fd8e",
+        "9fb6612ae19482503962",
+        "81d2609f8fc202a7eaae",
+        "a553a9a196d27e583408",
+        "71d446f277b80783f2b9",
+        "aa54cda5142983a2a628",
+        "906197b86516302fc3a1",
+        "7492665db844e8832e2a",
+        "04ac95808e1ac1982c5a",
+        "123faa4adb1779a06cc3"
+      ],
+      "supportingSampleCount": 30,
       "evidenceExcerpts": [
         {
-          "reviewId": "9967c9c6b724e5b8f101",
+          "reviewId": "9ac8666109691fba5f70",
+          "excerpt": "it’s mainly inappropriate content featuring underage kids which is illegal and they refuse to take anything down."
+        },
+        {
+          "reviewId": "546311cffcf7b395f8bb",
+          "excerpt": "they need to ban graphic content including pornography and abuse."
+        },
+        {
+          "reviewId": "0a50412c5b9cbdf1b7c6",
+          "excerpt": "just randomly came across a post which was extremely disgusting. i do not know how this could even happen in the first place and how is this app is even allowed on the app store wtf."
+        },
+        {
+          "reviewId": "3b4c600e86c460a49186",
+          "excerpt": "reported a sicko posting illegal content cse and other disgusting content. yet they didn’t ban him"
+        },
+        {
+          "reviewId": "deac1c70911c5cb0f22f",
+          "excerpt": "let people post 18+ content, kids can see this!"
+        },
+        {
+          "reviewId": "e24298a5f578d9fa3f61",
+          "excerpt": "stop people on x calling black people the n-word"
+        },
+        {
+          "reviewId": "32dc558b884c2448066a",
+          "excerpt": "i have an overload of democrats socialist and marxist post."
+        },
+        {
+          "reviewId": "bc3589f3dd7780b311c2",
+          "excerpt": "promote your political end goal!"
+        },
+        {
+          "reviewId": "592e221cc4ec98801e62",
+          "excerpt": "the bots are problematic. lots of trolls. lotsmof paid russian propaganda artists"
+        },
+        {
+          "reviewId": "91adbf478301de28a709",
+          "excerpt": "despite reporting it myself, they don’t do anything about it"
+        },
+        {
+          "reviewId": "6c2b03f16b06ee09d803",
+          "excerpt": "grok can’t help itself from enabling csam, sometimes outright creating it"
+        },
+        {
+          "reviewId": "bfac1bc5a2cfc0802d74",
+          "excerpt": "all this app has become is pornography and it ruins children and adults brains"
+        },
+        {
+          "reviewId": "17c0b8d4f8b13fcc7e52",
+          "excerpt": "x is infested by bots that dump down our throats israeli propaganda"
+        },
+        {
+          "reviewId": "88d9dd0b4204721b2ff7",
+          "excerpt": "the comment section is a cesspool of bots"
+        },
+        {
+          "reviewId": "3f6d58b7e700fb16f48d",
+          "excerpt": "there is multiple videos and images of children on this app and twitter is not doing nothing to resolve this issue"
+        },
+        {
+          "reviewId": "dbee4e9b3907ee3b5bb3",
+          "excerpt": "allow porn and all kinds of other stuff"
+        },
+        {
+          "reviewId": "5d1071c36f9163b09ec6",
+          "excerpt": "very bad app and inappropriate content for people"
+        },
+        {
+          "reviewId": "e8c898d885282ce357e9",
+          "excerpt": "self harm and porn and violence put as vfx"
+        },
+        {
+          "reviewId": "f1c1645fa7f5c96016ca",
+          "excerpt": "child exploitation"
+        },
+        {
+          "reviewId": "7f29df8debf1154f6328",
           "excerpt": "let the scammers run wild"
         },
         {
-          "reviewId": "d1acd46c72b340d99cc8",
-          "excerpt": "now it is all spam accounts"
+          "reviewId": "83287b7ba08a98cdd064",
+          "excerpt": "things that should get this app removed from the store won’t get accounts banned"
         },
         {
-          "reviewId": "087861f6c78d5f58aae4",
-          "excerpt": "report button’s broken"
+          "reviewId": "bb4c2a15b6af318bfc15",
+          "excerpt": "horrible things on here don’t download"
         },
         {
-          "reviewId": "13497782d29654cdc8bb",
-          "excerpt": "reporting still does not work right correctly properly"
+          "reviewId": "f34ec40e0c8f2039b2c4",
+          "excerpt": "too many porn pages without sensors"
         },
         {
-          "reviewId": "0a460bd4781c764cf5a7",
-          "excerpt": "there is a lot of scam in it/bots trying to sell it."
+          "reviewId": "6ddf9be60b89194b3cb4",
+          "excerpt": "there is a lot of scam in it/bots trying to sell it. they are also a lot of racists and videos of people killing/cutting themselves and i put my age as 13-15 please take note of this"
         },
         {
-          "reviewId": "4ecb043db74be454e15d",
+          "reviewId": "a405d9b0c641afed8331",
+          "excerpt": "you aren’t doing anything about the fake investment scammers who are impersonating elon musk that i reported."
+        },
+        {
+          "reviewId": "aadedd7ecb352e450339",
+          "excerpt": "there is too much nasty stuff running through. too many bots so you don't know what to believe any more."
+        },
+        {
+          "reviewId": "0dd37aa757a881c3625a",
+          "excerpt": "grok is used to make child pornography"
+        },
+        {
+          "reviewId": "f47dd416af749737b5a2",
+          "excerpt": "my account got suspended for reporting and insulting a guy for spreading cp."
+        },
+        {
+          "reviewId": "fbe24ba998bc40507c5b",
+          "excerpt": "the x platform is full of scamsters, who are using ai to mimic voice, video of even elon himself to scam people."
+        },
+        {
+          "reviewId": "e5f57695ae9718cb97fb",
           "excerpt": "it’s been over ran by bots and weirdos."
-        },
-        {
-          "reviewId": "7f8726384e9d02b8afe1",
-          "excerpt": "too many bots. and you have to basically pay for engagement."
-        },
-        {
-          "reviewId": "11a5c3b5bca434420cbc",
-          "excerpt": "if you report scammers, x will filter all your comments and replies so that nobody sees them."
-        },
-        {
-          "reviewId": "2d9454ce738c332a9df2",
-          "excerpt": "the x platform is full of scamsters, who are using ai to mimic voice, video of even elon himself to scam people"
-        },
-        {
-          "reviewId": "3ddfe92752c385eac585",
-          "excerpt": "this app has become a beacon of hate, bots, and hatred."
-        },
-        {
-          "reviewId": "0bc98e613ff518920ba4",
-          "excerpt": "there are more than on hundred fake accounts in the name elon musk"
-        },
-        {
-          "reviewId": "2d0bfdaffe85ca8d0abe",
-          "excerpt": "most of them turned out to be scammers, liars"
-        },
-        {
-          "reviewId": "bee7c70a9d15b0768e5e",
-          "excerpt": "chatting with bot aacounts"
-        },
-        {
-          "reviewId": "94524f8831d5b195494f",
-          "excerpt": "within a hour of signing i started getting strange messages"
-        },
-        {
-          "reviewId": "105842b234ac9ce7b4ea",
-          "excerpt": "tons of bots"
-        },
-        {
-          "reviewId": "365c33ad8f340a5946d7",
-          "excerpt": "its bots. it’s trolls it’s everything but genuine"
-        },
-        {
-          "reviewId": "5e2dd3899347c079a2cc",
-          "excerpt": "almost everyone on twitter (x) are not human-like"
-        },
-        {
-          "reviewId": "3902d86035600c4c4156",
-          "excerpt": "filled with bots, ragebait merchants, goonslop generators"
-        },
-        {
-          "reviewId": "3d4f4d0d519b3cb62272",
-          "excerpt": "infested with inauthentic “users” and scammers"
-        },
-        {
-          "reviewId": "58e4985f6594aa009f3f",
-          "excerpt": "there are countless spam bots that have no problem keeping their accounts"
         }
       ],
-      "conflictingReviewIds": [],
+      "conflictingReviewIds": [
+        "9d39582dd9833a6399d8",
+        "c5d5425fa9d658c5ea65",
+        "20cbc1e14d8c6976809b",
+        "d76ab90874e0133e77e1",
+        "63548ef43fdf1238c57e",
+        "313326c676fb4ef48f88",
+        "1b6d436249cffd229cb9",
+        "809a1628c0d22ef8b718",
+        "5cfbce3c68375e72c7bc",
+        "8209aac04c02f04e95e6",
+        "9a7e295517b9ce934821",
+        "3e61d5c8b734553ded98"
+      ],
       "confidence": {
-        "level": "high",
-        "method": "deterministic-v1",
+        "level": "medium",
+        "method": "deterministic-v2",
         "reasons": [
-          "20 distinct supporting review(s)",
-          "source status: complete"
+          "30 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present"
         ]
       },
       "evidenceSufficiency": {
         "status": "sufficient",
-        "corpusReviewCount": 233,
-        "supportRatio": 0.08583690987124463,
+        "corpusReviewCount": 499,
+        "supportRatio": 0.06012024048096192,
         "reasons": []
       },
       "uncertainties": [
-        "没有具体说明垃圾账号是否通过私信或通知骚扰，无法确认与私信/通知投递问题的关系。",
-        "无法确认'举报后过滤'是平台故意行为还是自动化误伤。",
-        "用户未提供账号被过滤的具体截图或数据，证据来自主观描述。",
-        "除一条详细描述外，其余关于机器人的表述较笼统；无法量化机器人/诈骗账号占比。",
-        "用户所称虚假账号数量为个人估计，无法核实具体规模",
-        "收到的陌生消息和请求未明确是来自机器人还是真人骗子",
-        "“机器人/不真实”是用户主观判断，无法从评论中量化真实机器人比例。",
-        "该评论只描述“countless”，未提供具体机器人账号示例或统计数据。"
+        "用户对内容是否违法的判断较为主观，无法核实审核后台的实际处理记录。",
+        "评论中提到的具体内容无法回溯验证；儿童看到成人内容的说法来自单一用户，且未提供操作路径。",
+        "成人色情与儿童色情在评论中未被严格区分，部分正面评价可能仅指成人内容；严重指控无法独立核实。",
+        "无法从评论中核实儿童内容的真实性、数量或是否已被平台处理；‘色情内容’的判断依赖用户主观标准。",
+        "无法确认所称有害内容是否真实存在及平台是否处理过",
+        "部分指控仅有一句描述，缺少上下文",
+        "用户对“成人向”与“有害内容”的界定标准不一致",
+        "用户自称年龄为13-15，无法独立验证。",
+        "无法确认举报是否被平台实际收到或处理。",
+        "“grok 用于制作儿童色情”的指控无法验证，且未提供具体内容样本。",
+        "机器人/诈骗账号的规模与普遍性无法从评论中量化。"
       ],
       "limitations": [
-        "样本量4条，部分评论同时涉及其他议题。",
-        "垃圾账号是否确为机器人为用户主观判断，评论样本量较小。",
-        "只有两条直接评论支撑该发现，样本量小，不代表整体比例。",
-        "样本中缺少关于“通知投递失败”的直接证据；私信相关问题主要体现在收到大量陌生人请求和垃圾消息",
-        "评论未提供截图或可验证的账号证据，可能包含情绪化表述。",
-        "来自同一条评论的附带描述，样本量极为有限。"
+        "相关评论数较少，且多为极端个例，不能代表普遍现象。",
+        "内容审核的结论仅基于用户主观报告；平台实际审核策略和删除时效无法从评论获知。",
+        "均来自用户主观报告，无平台审核日志或内容抽样数据；样本量有限。",
+        "评论样本极少且高度情绪化，不能据此推断平台整体内容安全水平。",
+        "无法访问平台审核记录",
+        "应用商店评价无法验证内容是否已被移除",
+        "样本以差评为主，可能放大负面观感",
+        "样本为个别投诉，不能量化问题普遍性。",
+        "评论为个人极端体验，可能不代表整体平台状态。",
+        "缺少平台审核数据或用户报告记录。"
       ]
     },
     {
       "id": "finding-3",
       "topicIds": [
-        "topic-1",
         "topic-5",
-        "topic-4",
-        "topic-6",
-        "topic-8"
+        "topic-3"
       ],
       "focusAreaIds": [
-        "focus-2",
-        "focus-3",
-        "focus-6"
+        "focus-1"
       ],
       "sourceFindingIds": [
-        "finding-2@c1",
-        "finding-3@c1",
-        "finding-2@c2",
-        "finding-2@c3",
-        "finding-4@c4",
-        "finding-2@c5"
+        "finding-3@c0",
+        "finding-3@c3",
+        "finding-3@c5"
       ],
-      "title": "信息流算法强推无关/政治/低质内容，压制原创与小账号曝光",
-      "summary": "用户集中投诉时间线算法体验：首页被无关垃圾内容、广告、AI机器人和特定政治宣传填充；算法偏向付费/头部账号，未订阅或小账号帖子难以获得曝光；滚动时还会重复显示已看过的帖子，正常评论和原创内容被隐藏，用户认为平台推荐的“言论自由”与实际算法行为相矛盾。",
+      "title": "机器人账号、AI 生成内容与冒充/诈骗账号泛滥",
+      "summary": "用户反映平台上机器人账号、AI 生成内容以及冒充他人（包括冒充 Elon Musk）的投资诈骗账号大量存在；机器人不再只是垃圾回复，还会发布指向犯罪/恶劣材料的链接，举报后被告知因外部链接不违规。另有用户认为平台靠机器人刷量欺骗广告商。",
       "supportingReviewIds": [
-        "70f909729a7e468d5626",
-        "08bd931a4e9eae138727",
-        "060188969730e2225952",
-        "4585dd25ef43e3be5d6d",
-        "1bcd2e5bac7de57f7233",
-        "58cb89038c5d95bddd35",
-        "5ac2822d1e3ff900b245",
-        "da53165b290c8253c59d",
-        "29a852c2054a68f546af",
-        "0aab79fc5aa69d2f67a9",
-        "43bd943e44b0442a6774",
-        "bee7c70a9d15b0768e5e",
-        "6d605a081ebe72d7fdcd",
-        "3d4f4d0d519b3cb62272",
-        "c430942dd607d0bd2b3f"
+        "9ac8666109691fba5f70",
+        "783d5c7e1c688ceaa112",
+        "de8e973736535896e045",
+        "fe86a46a4d2b6f2a09b9",
+        "b07730e2f69df620b746",
+        "c2503e3da903dd1a5a94",
+        "737ea4c1e49da874da67",
+        "4ce75633b519bfa509f0",
+        "c17fe3f9f05fb5ce14a2",
+        "2204b955a52689d2ed5e",
+        "cb6d73df662ff5b02fd5"
       ],
-      "supportingSampleCount": 15,
+      "supportingContentGroupIds": [
+        "38fc27754f2553d0c047",
+        "9926f0e2a02d144aea9d",
+        "d5da9a09e20fff02b29c",
+        "852c7b75c54b33417854",
+        "82396a2b1fd14d750394",
+        "e67a805e5fcaf01db49f",
+        "7289221c1b4c3deb0c3b",
+        "8debc34e5c0894eba9c9",
+        "fcfa75ad34c31986f576",
+        "eae4501579ccf6731fbd",
+        "90c37445845974adac7b"
+      ],
+      "supportingSampleCount": 11,
       "evidenceExcerpts": [
         {
-          "reviewId": "70f909729a7e468d5626",
-          "excerpt": "starting approx. two weeks ago has become nothing but slop of no interest to me."
+          "reviewId": "9ac8666109691fba5f70",
+          "excerpt": "the entire app is just bots. they use the bots to defraud advertisers."
         },
         {
-          "reviewId": "08bd931a4e9eae138727",
-          "excerpt": "corrupted by far right ads and ai bots no matter how many times it’s reported. must sieve through endless propaganda."
+          "reviewId": "783d5c7e1c688ceaa112",
+          "excerpt": "way too much ai!🙄 way too many fake people impersonating other others🫣"
         },
         {
-          "reviewId": "060188969730e2225952",
-          "excerpt": "grok is crooked and when you pay for higher limits it’s not worth it."
+          "reviewId": "de8e973736535896e045",
+          "excerpt": "foreign accounts constantly farming views with ai voiceovers and other garbage the apps the video feature is practically useless."
         },
         {
-          "reviewId": "4585dd25ef43e3be5d6d",
-          "excerpt": "if you're not subscribed your posts barely get seen"
+          "reviewId": "fe86a46a4d2b6f2a09b9",
+          "excerpt": "all these people that love me, want to be my, friend, lover, or judge their pretty, divorce, over 55 dating."
         },
         {
-          "reviewId": "1bcd2e5bac7de57f7233",
-          "excerpt": "this trash app now purposefully shows me controversial rage bait posts and automatically closes the 3 dot menu so that i can’t block the posters."
+          "reviewId": "b07730e2f69df620b746",
+          "excerpt": "everyone seems like a scammer or bot"
         },
         {
-          "reviewId": "58cb89038c5d95bddd35",
-          "excerpt": "so tired of these random pics of “fake” post of women asking if they’re beautiful."
+          "reviewId": "c2503e3da903dd1a5a94",
+          "excerpt": "all you see is verified bots engagement farming."
         },
         {
-          "reviewId": "5ac2822d1e3ff900b245",
-          "excerpt": "if you’re scrolling down a feed it will repeat the same posts after a couple of screens so that you cannot see earlier posts"
+          "reviewId": "737ea4c1e49da874da67",
+          "excerpt": "it’s filled with bots"
         },
         {
-          "reviewId": "da53165b290c8253c59d",
-          "excerpt": "it’s all conservative and extreme right wing content now. the algo sucks"
+          "reviewId": "4ce75633b519bfa509f0",
+          "excerpt": "lots of imposter accounts- real people using real names, but using sophisticated tricks"
         },
         {
-          "reviewId": "29a852c2054a68f546af",
-          "excerpt": "due to x changing algorithms that have no value and forcing it upon those that never selected it or even view anything close as so"
+          "reviewId": "c17fe3f9f05fb5ce14a2",
+          "excerpt": "the bots are also no longer simply annoying, random, spam replies, but also posting links to criminal, horrific material. if you report the posts/accounts, you are told they did not violate the rules because it is an external link."
         },
         {
-          "reviewId": "0aab79fc5aa69d2f67a9",
-          "excerpt": "maga voices at the top of my feed"
+          "reviewId": "2204b955a52689d2ed5e",
+          "excerpt": "i did a 4 star because there’s so many robots"
         },
         {
-          "reviewId": "43bd943e44b0442a6774",
-          "excerpt": "pro israel rubbish is nauseating"
-        },
-        {
-          "reviewId": "bee7c70a9d15b0768e5e",
-          "excerpt": "love right wing news"
-        },
-        {
-          "reviewId": "6d605a081ebe72d7fdcd",
-          "excerpt": "you don’t show any of them"
-        },
-        {
-          "reviewId": "3d4f4d0d519b3cb62272",
-          "excerpt": "your content will be buried by the algorithm and your followers will never see it"
-        },
-        {
-          "reviewId": "c430942dd607d0bd2b3f",
-          "excerpt": "certain people always get boosted if they talk about certain subjects that are just propaganda and lies"
+          "reviewId": "cb6d73df662ff5b02fd5",
+          "excerpt": "nothing says trash like an app that forces ai slop"
         }
       ],
       "conflictingReviewIds": [],
       "confidence": {
         "level": "high",
-        "method": "deterministic-v1",
+        "method": "deterministic-v2",
         "reasons": [
-          "15 distinct supporting review(s)",
+          "11 distinct supporting content group(s)",
           "source status: complete"
         ]
       },
       "evidenceSufficiency": {
         "status": "sufficient",
-        "corpusReviewCount": 233,
-        "supportRatio": 0.06437768240343347,
+        "corpusReviewCount": 499,
+        "supportRatio": 0.022044088176352707,
         "reasons": []
       },
       "uncertainties": [
-        "未明确说明是否为 12.16 版本引入；时间线内容变差可能与平台内容生态变化有关，而不只是 App 版本回归。",
-        "涉及政治内容的判断较主观。",
-        "评论未明确说明是 X Premium 还是 Premium+，也未提供订单或订阅类型。",
-        "仅 1 位用户明确提到“付费提额”，样本极有限。",
-        "没有算法内部数据，'偏向付费账号'是用户主观观察。",
-        "部分rage bait内容可能来自用户关注列表而非推荐算法，无法仅凭评论区分。",
-        "无法验证算法排序是否真的有政治偏向；所展示内容可能受用户关注网络影响。",
-        "算法是否刻意偏向某一政治立场无法从用户主观评论中验证",
-        "信息流内容受用户关注、互动历史等因素影响，不能仅凭几条评论判定整体算法行为",
-        "算法变更的具体时间或版本无法从评论中确认。"
+        "无法量化机器人或虚假账号的实际占比，“bots”可能是用户的主观概括。",
+        "无法核实机器人占比；‘像骗子’是主观感受，可能误伤真人账号。",
+        "评论中提到的“犯罪/恶劣材料”链接未被具体验证，无法确认实际内容性质。"
       ],
       "limitations": [
-        "仅有 2 条相关评论，样本较小。",
-        "无法证实算法具体排序规则或推荐机制。",
-        "无法确认该用户实际购买了哪种订阅，且没有其他付费用户评论可交叉验证。",
-        "个别评论未指明是否使用最新版本，算法体验受关注内容和账号权重影响较大。",
-        "时间线算法问题多为用户主观感受，且与账号封禁/垃圾内容投诉交织，难以独立评估。",
-        "均为1-2星用户的负面感知，缺少正面或中性对照",
-        "未包含可量化的时间线数据（如曝光量、覆盖率等）",
-        "样本量较小，且算法推荐是否因付费/账号类型而异无法从现有评论中区分。"
+        "缺乏客观数据佐证，仅基于用户主观评价。",
+        "评论不能提供平台内部数据；此问题普遍性有待量化。",
+        "相关证据集中在一条长篇1星评论，样本较少。"
       ]
     },
     {
       "id": "finding-4",
       "topicIds": [
         "topic-4",
-        "topic-3",
-        "topic-5"
+        "topic-5",
+        "topic-8"
       ],
       "focusAreaIds": [
-        "focus-6"
+        "focus-1"
       ],
       "sourceFindingIds": [
-        "finding-3@c0",
-        "finding-4@c0",
-        "finding-4@c2",
-        "finding-1@c3",
-        "finding-2@c4",
-        "finding-4@c5",
-        "finding-1@c6"
+        "finding-2@c5",
+        "finding-2@c9"
       ],
-      "title": "X Premium/Verified付费用户仍遭限流、封禁，付费客服和申诉形同虚设",
-      "summary": "多条1-2星评论中，付费订阅（Premium/Verified）用户表示即使购买付费服务，仍会被自动系统以“非真实行为”等理由误判、限流、影子禁言甚至封禁；申诉通道只返回自动化模板回复，付费客服也无法提供人工复核，导致付费用户认为订阅未带来对等服务，且账号恢复无门。",
+      "title": "平台内容被仇恨言论、右翼政治宣传与误导信息污染",
+      "summary": "多位用户投诉平台信息流和氛围被种族主义、右翼/法西斯政治内容、仇恨与诽谤言论占据，机器人账号和付费宣传混入其中，反复举报仍无法清除；有用户认为平台所有者乐见种族主义。与此同时，也有用户称赞平台提供言论自由和多元视角，评价明显分裂。",
       "supportingReviewIds": [
-        "4a2debe531e3a0800e6d",
-        "d1acd46c72b340d99cc8",
-        "4b179258c68325d39439",
-        "6968500a7d802fa8b0dd",
-        "5b4dbeab037cbbf05cd1",
-        "ff374fafd3a3a08b1d63",
-        "dac93fd351efa43aa9e5",
-        "9748af67b822016e0d4a",
-        "4585dd25ef43e3be5d6d",
-        "797933af247af55265a5",
-        "31989df8af018c9fc9f7",
-        "c57f2c368b6726c519e5",
-        "35eb895d170e72db7c3f",
-        "e8431ff7989cb9465ae9",
-        "8bc837306e6f1bcaca8d",
-        "285b5cdb7a0fa1328fe7",
-        "7812c4b3b453dc60f772",
-        "a6f427a600fa930f87aa",
-        "58e4985f6594aa009f3f"
+        "c5472d4d2ab4612a6e23",
+        "310412ae643618509453",
+        "fec118d45f0c2f8e91e8",
+        "042264c12441f41ab1da",
+        "565a71d877d4fd6005a7",
+        "5769054c2109799dcdfc",
+        "da428307199cc9ef24b0",
+        "3276c72463c06e9254cf",
+        "e19a4b9a3ddf56e0a9b7",
+        "3a7c99670c5aba0e19b3"
       ],
-      "supportingSampleCount": 19,
+      "supportingContentGroupIds": [
+        "ec113b87184240bc274e",
+        "8517fda4cd7940eafb97",
+        "e0d0389cbd63329b4fb0",
+        "86e218fc896a6b6d1403",
+        "ac04576c4a8aed852175",
+        "a128bd24a3e32d6a3eb8",
+        "9baafb043de2cef899fa",
+        "51d98c64b11c706ab489",
+        "6f673c36659c810b29db",
+        "e96bde7ca92e1c789e34"
+      ],
+      "supportingSampleCount": 10,
       "evidenceExcerpts": [
         {
-          "reviewId": "4a2debe531e3a0800e6d",
-          "excerpt": "they are still shadowbanning, throttling, hiding comments for no particular reason, no explanation, and no means by which to remedy the situation, which is extremely frustrating for a premium+ paying subscriber."
+          "reviewId": "c5472d4d2ab4612a6e23",
+          "excerpt": "too many racism on this app and the owner seems to be loving it"
         },
         {
-          "reviewId": "d1acd46c72b340d99cc8",
-          "excerpt": "even with a paid star (i wish they had the previous verification), my speech and engagement is throttled because i am probably a progressive even though i have thousands of followers."
+          "reviewId": "310412ae643618509453",
+          "excerpt": "app sucks. very racist."
         },
         {
-          "reviewId": "4b179258c68325d39439",
-          "excerpt": "my account was locked permanently on my 2nd day for violating a rule but without any recourse to correct the violation."
+          "reviewId": "fec118d45f0c2f8e91e8",
+          "excerpt": "twitter has become an embodiment of its owner, a right-wing fascist whose only praise is found in endless fascist hatred-cum incil fanboy praise."
         },
         {
-          "reviewId": "6968500a7d802fa8b0dd",
-          "excerpt": "tried to send an appeal and it’s like, it goes into their own spam/junk folder."
+          "reviewId": "042264c12441f41ab1da",
+          "excerpt": "this is sad rightwing circle jerk"
         },
         {
-          "reviewId": "5b4dbeab037cbbf05cd1",
-          "excerpt": "i appealed 10 times and i get the same ai agent response."
+          "reviewId": "565a71d877d4fd6005a7",
+          "excerpt": "full of hate and slander"
         },
         {
-          "reviewId": "ff374fafd3a3a08b1d63",
-          "excerpt": "premium support tina and kelly just kept copying and pasting the same message and closing the ticket."
+          "reviewId": "5769054c2109799dcdfc",
+          "excerpt": "corrupted by far right ads and ai bots no matter how many times it’s reported. must sieve through endless propaganda."
         },
         {
-          "reviewId": "dac93fd351efa43aa9e5",
-          "excerpt": "you will not even be able to contact customer support!"
+          "reviewId": "da428307199cc9ef24b0",
+          "excerpt": "this app has become a beacon of hate, bots, and hatred."
         },
         {
-          "reviewId": "9748af67b822016e0d4a",
-          "excerpt": "premium is a waste. there is no support, terms of service are unequally enforced, and verified accounts are closed for no reason."
+          "reviewId": "3276c72463c06e9254cf",
+          "excerpt": "twitter has become a cesspool of maga propaganda & hate. it’s really creepy but then again, so is its current owner i guess."
         },
         {
-          "reviewId": "4585dd25ef43e3be5d6d",
-          "excerpt": "i actually subscribed once partly to get access to support, and it still didn't help."
+          "reviewId": "e19a4b9a3ddf56e0a9b7",
+          "excerpt": "it’s a hellscape of hate and mis/disinformation. just as elon would have it be."
         },
         {
-          "reviewId": "797933af247af55265a5",
-          "excerpt": "unless you’re willing to pay for this bot fest, don’t waste your time."
-        },
-        {
-          "reviewId": "31989df8af018c9fc9f7",
-          "excerpt": "thousands of us have been losing our accounts because of ai determining “inauthentic behavior”"
-        },
-        {
-          "reviewId": "c57f2c368b6726c519e5",
-          "excerpt": "suddenly two weeks ago i get a label restricting my visibility for “inauthentic behavior” all my replies and posts are invisible"
-        },
-        {
-          "reviewId": "35eb895d170e72db7c3f",
-          "excerpt": "no way to appeal, notification for what flagged"
-        },
-        {
-          "reviewId": "e8431ff7989cb9465ae9",
-          "excerpt": "my accounts keep getting flagged for inauthentic behavior and i haven’t done anything and i can’t even appeal it either!!"
-        },
-        {
-          "reviewId": "8bc837306e6f1bcaca8d",
-          "excerpt": "the one i verified with a premium subscription"
-        },
-        {
-          "reviewId": "285b5cdb7a0fa1328fe7",
-          "excerpt": "my replies and posts don’t show up anymore , i am a premium / verified subscriber"
-        },
-        {
-          "reviewId": "7812c4b3b453dc60f772",
-          "excerpt": "gotta pay for verification just to talk to human support"
-        },
-        {
-          "reviewId": "a6f427a600fa930f87aa",
-          "excerpt": "i’m a paying customer i don’t receive the same & equal services my free speech reach is being limited & occasionally suspended"
-        },
-        {
-          "reviewId": "58e4985f6594aa009f3f",
-          "excerpt": "recently got caught up in an automated ban sweep"
+          "reviewId": "3a7c99670c5aba0e19b3",
+          "excerpt": "it’s all conservative and extreme right wing content now. the algo sucks"
         }
       ],
-      "conflictingReviewIds": [],
+      "conflictingReviewIds": [
+        "d5ca1a5909260be5bcf1",
+        "b2024b1b169ea65e899c",
+        "54d2316cf3aa9814954d",
+        "8d8ae7409ac0c34b962a",
+        "04c1ccfeaa0bfbe8d932",
+        "e2f918e2aec77307517d"
+      ],
       "confidence": {
-        "level": "high",
-        "method": "deterministic-v1",
+        "level": "medium",
+        "method": "deterministic-v2",
         "reasons": [
-          "19 distinct supporting review(s)",
-          "source status: complete"
+          "10 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present",
+          "supporting reviews share a homogeneous rating"
         ]
       },
       "evidenceSufficiency": {
         "status": "sufficient",
-        "corpusReviewCount": 233,
-        "supportRatio": 0.0815450643776824,
+        "corpusReviewCount": 499,
+        "supportRatio": 0.02004008016032064,
         "reasons": []
       },
       "uncertainties": [
-        "只有两条直接提及付费订阅的限流体验，无法推断所有付费用户都受影响。",
-        "无法确认所有封禁都是误判；部分用户可能确实违反规则。",
-        "明确自述为付费订阅者的评论较少，无法量化整体付费用户满意度。",
-        "'必须付费才有曝光'是用户基于个人账号体验的解读，缺少平台侧数据验证。",
-        "评论没有具体说明触发“inauthentic behavior”的行为；“AI审核”是用户归因，无法核实。",
-        "无法验证账号是否真的“无故”被限流或封禁；平台未给出解释",
-        "无法确认这类问题是否由最新版本引入",
-        "仅此1条评论明确提及“付费用户”，无法代表整体X Premium用户体验。",
-        "该评论未明确该封禁是否由12.16版本引发；用户自称从未违规，但无法核实。"
+        "政治倾向和“仇恨内容”属用户主观感受，且存在用户认为平台信息公正的相反评价。",
+        "两派评价可能来自政治立场不同的用户，无法从评论判断平台内容的客观中立性。",
+        "“算法偏向”是一种主观体验，缺少可操作的量化证据。"
       ],
       "limitations": [
-        "评论均为1星，可能存在情绪化表述；未涉及Grok等具体付费功能。",
-        "样本量5条，主要集中在账号限制与客服体验，未覆盖通知/私信投递问题。",
-        "样本来自1-2星评论，天然缺少付费用户的正面反馈。",
-        "本次评论列表未包含对通知或私信投递的具体描述，无法评估 focus-4/focus-5。",
-        "付费相关证据来自“unless you pay”的间接表述，没有评论明确说明购买的是X Premium订阅；本批评论未发现通知投递或私信投递问题的直接证据，focus-4/focus-5没有独立发现。",
-        "样本仅来自1-2星负面评价，不能代表所有付费用户的整体体验",
-        "付费后客服无效的结论主要依赖用户主观陈述",
-        "该评论未说明具体订阅档位或限流/封禁的细节，缺乏可验证证据。",
-        "基于单条1星评论，无法量化此类问题的发生率。"
+        "样本以1星评论为主，可能放大负面观感。",
+        "本组评论多为情绪化表述，难以据此衡量整体内容质量。",
+        "样本中同时存在大量支持“言论自由”的 5 星评价，与负面评价形成强烈对立。"
       ]
     },
     {
       "id": "finding-5",
       "topicIds": [
+        "topic-8",
+        "topic-7",
+        "topic-9",
+        "topic-4"
+      ],
+      "focusAreaIds": [
+        "focus-1"
+      ],
+      "sourceFindingIds": [
+        "finding-4@c2",
+        "finding-4@c4",
+        "finding-4@c7",
+        "finding-4@c8"
+      ],
+      "title": "品牌/所有权变更后用户评价两极分化：老用户认为体验下滑，支持者认可新方向",
+      "summary": "部分老用户将 X 改名及 Elon Musk 接管后的体验下滑归因于所有权变更，认为平台内容、算法、广告和订阅价值全面退步，并怀念旧 Twitter；另一部分用户则感谢新东家带来“言论自由”、更开放的讨论和高质量信息，称 X 是重要新闻来源。正反评价高度对立。",
+      "supportingReviewIds": [
+        "c5e32445431764a8f2e6",
+        "eda1bb73b4994cdbfb86",
+        "ef80bd33b28a8770ffa8",
+        "88d9dd0b4204721b2ff7",
+        "da91b792277ddf42bdd7",
+        "7114993019fac2ca3a53",
+        "b34373ffdbd6bc4e1292",
+        "4845dd35386e00fbe45f",
+        "dc11aec9e4a27d95a62f",
+        "ea871352e9224a1724c9",
+        "25addfc03df0c4796485",
+        "0b989cee732b72f49556",
+        "ae365fbf2ba58b22a0d6",
+        "bcd18c29637efc2d9e8d",
+        "73c9dd1f17e747405858",
+        "d1e889569340e420cfc8",
+        "8e0d37bbe07be0d41afb",
+        "7983cdc56ccb5f592895",
+        "cf34abbca878ce549e4b",
+        "e236540ba39b14a963fc",
+        "c38dc52862e6e066757f",
+        "f8c3df409f3240519ff9",
+        "43ffeb2d101141f64315"
+      ],
+      "supportingContentGroupIds": [
+        "0863fb00a0a39f019f69",
+        "186ae36e52b2c8b9d60f",
+        "865f0ec851dd38200ab6",
+        "0f3a40db474d9e63d61c",
+        "fe9edaef3dc79157c626",
+        "ec8d4713dd9661db9da1",
+        "d3ed075e2397671e765e",
+        "144e1e15feb0daaf6338",
+        "1d044dc4526e66fc0733",
+        "2486a772e9d75ef32565",
+        "d30a02dd36a1c9682619",
+        "9690b0a9e759d84dbe6b",
+        "6ac52fa74d1dc224c666",
+        "f4bcff7cbc184adb2e10",
+        "5e69c077c0a1d86b8ad4",
+        "9530002b40df9de22fd0",
+        "27d3b17dde929b44adbe",
+        "f0a0d1e18fa7b87a9cc4",
+        "fbc5f532b8ecbc6e17c0",
+        "4707dc3405129610bf6c",
+        "92df0a5943b35246b145",
+        "01214d448a6f00881f5c",
+        "c58e84098a993ffd2357"
+      ],
+      "supportingSampleCount": 23,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "c5e32445431764a8f2e6",
+          "excerpt": "it all went downhill once the name change happened"
+        },
+        {
+          "reviewId": "eda1bb73b4994cdbfb86",
+          "excerpt": "i want twitter back"
+        },
+        {
+          "reviewId": "ef80bd33b28a8770ffa8",
+          "excerpt": "every change he’s made to the app has made it worse"
+        },
+        {
+          "reviewId": "88d9dd0b4204721b2ff7",
+          "excerpt": "the ads on the app are political which makes it annoying to use"
+        },
+        {
+          "reviewId": "da91b792277ddf42bdd7",
+          "excerpt": "i barely get 1000 impressions during that time now"
+        },
+        {
+          "reviewId": "7114993019fac2ca3a53",
+          "excerpt": "reasons for me taking off stars in the review: changing the name"
+        },
+        {
+          "reviewId": "b34373ffdbd6bc4e1292",
+          "excerpt": "i miss twitter."
+        },
+        {
+          "reviewId": "4845dd35386e00fbe45f",
+          "excerpt": "this place was great when it was twitter, but fascist musk decided to end fair elections and the great democracy that was the usa"
+        },
+        {
+          "reviewId": "dc11aec9e4a27d95a62f",
+          "excerpt": "the censorship today is far worse than previous ownership"
+        },
+        {
+          "reviewId": "ea871352e9224a1724c9",
+          "excerpt": "all these years of building a nuclear advocacy following just for new ownership to ruin what was clean and professional"
+        },
+        {
+          "reviewId": "25addfc03df0c4796485",
+          "excerpt": "this app is being used as a mouthpiece for billionaires"
+        },
+        {
+          "reviewId": "0b989cee732b72f49556",
+          "excerpt": "this app will make you lose all hope in your government, people and all of humanity"
+        },
+        {
+          "reviewId": "ae365fbf2ba58b22a0d6",
+          "excerpt": "ever since musk bought it"
+        },
+        {
+          "reviewId": "bcd18c29637efc2d9e8d",
+          "excerpt": "it’s just downhill every day since elon took over this app."
+        },
+        {
+          "reviewId": "73c9dd1f17e747405858",
+          "excerpt": "it was better as twitter when it was all totally free!"
+        },
+        {
+          "reviewId": "d1e889569340e420cfc8",
+          "excerpt": "elon destroyed something good because of the excess of democracy it produced."
+        },
+        {
+          "reviewId": "8e0d37bbe07be0d41afb",
+          "excerpt": "premium is a waste."
+        },
+        {
+          "reviewId": "7983cdc56ccb5f592895",
+          "excerpt": "after elon musk bought it and implemented ai as a moderator it’s been downhill since"
+        },
+        {
+          "reviewId": "cf34abbca878ce549e4b",
+          "excerpt": "elon musk did not make this platform any better"
+        },
+        {
+          "reviewId": "e236540ba39b14a963fc",
+          "excerpt": "ever since it was acquired by billionaire, there has been a notable, bigoted uptick in targeted hate and witch-hunt campaigns."
+        },
+        {
+          "reviewId": "c38dc52862e6e066757f",
+          "excerpt": "all you see is racism towards black people and sexism towards women sometimes men"
+        },
+        {
+          "reviewId": "f8c3df409f3240519ff9",
+          "excerpt": "it’s a collection of hate and anger mixed with wild misinformation."
+        },
+        {
+          "reviewId": "43ffeb2d101141f64315",
+          "excerpt": "silence regular users who criticize the companies x wants to protect"
+        }
+      ],
+      "conflictingReviewIds": [
+        "036c6aecdea83a4fd2dd",
+        "d4fb5a9d3d3e6ad55a9b",
+        "4b2ba69f26d232ad0102",
+        "ed1f6a19214fa5fe8949",
+        "52a37519dbfe8bf5794d",
+        "de967ce61040766f11e6",
+        "e446bd3463de45198c8c",
+        "46c74738b16b6511b770",
+        "5a400dab5ac1fc4c9af3",
+        "daccbc983e2375dc87dc",
+        "11e11a355c9ca0cf6d17",
+        "efe35aab6dc3f294fa4f",
+        "0a22766bc76f26594eec",
+        "6674808ef6ef2e4b4034",
+        "8209aac04c02f04e95e6",
+        "9a7e295517b9ce934821",
+        "3e61d5c8b734553ded98",
+        "5cfbce3c68375e72c7bc"
+      ],
+      "confidence": {
+        "level": "medium",
+        "method": "deterministic-v2",
+        "reasons": [
+          "23 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 499,
+        "supportRatio": 0.04609218436873747,
+        "reasons": []
+      },
+      "uncertainties": [
+        "关于算法变化与整体退步的归因无法证实；正反评价可能受政治立场影响。",
+        "评价中夹杂大量政治立场，可能影响对产品本身的判断",
+        "无法确认这些评价是否由真实长期用户发出",
+        "平台实际运营策略与用户主观感受之间缺少可验证数据",
+        "“整体下滑”与“更加自由”的评价相互矛盾，可能与用户立场有关",
+        "无法量化体验变化或确定具体回归点",
+        "“每况愈下”和“仇恨/虚假信息”属于主观感受，缺少客观内容指标。",
+        "无法区分是平台真实变化还是用户个人信息流导致。"
+      ],
+      "limitations": [
+        "评价高度政治化且样本有限；缺少版本号、设备信息和客观使用指标。",
+        "应用商店评价带有强烈情绪和党争色彩",
+        "样本为特定时间窗口内的评价，不能代表全部用户",
+        "未获得官方回应或平台数据",
+        "多为个人观感，缺少客观指标",
+        "评论区存在明显立场分化，样本代表性有限",
+        "评论多数来自不满用户，存在选择性偏差。",
+        "缺少改革前后的对照数据。"
+      ]
+    },
+    {
+      "id": "finding-6",
+      "topicIds": [
+        "topic-9"
+      ],
+      "focusAreaIds": [
+        "focus-1"
+      ],
+      "sourceFindingIds": [
+        "finding-3@c6",
+        "finding-4@c9"
+      ],
+      "title": "付费墙与变现规则引发不满：免费触达受限、订阅价值存疑",
+      "summary": "有老用户详述未订阅时帖子几乎没有曝光、实时客服仅对付费用户开放，订阅后问题仍未解决；另有人反映平台突然修改创作者变现规则且无预告、只有大账号能获益，Grok/Companion 的免费使用额度被大幅压缩，被视为变相收费。少数好评认可平台的付费/变现安排，评价相对对立。",
+      "supportingReviewIds": [
+        "473cfcbcd75d69d5f2bb",
+        "a2dd2b0d98a5623cc92a",
+        "b09c27ab7af124edb13a",
+        "c3aec2447f634c7ddc66"
+      ],
+      "supportingContentGroupIds": [
+        "da20bc005af74374f4cb",
+        "b52ca959e78b4570e870",
+        "7eb80f7eb2274b3c8da4",
+        "b79e02cb57e8645d46cc"
+      ],
+      "supportingSampleCount": 4,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "473cfcbcd75d69d5f2bb",
+          "excerpt": "if you're not subscribed your posts barely get seen, and it feels like the free experience exists mainly to make you want to pay. that's a choice they're allowed to make, but it makes the app noticeably worse for the majority of people using it. it's also turned into pure rage-bait and engagement farming. since payouts got tied to views, the whole timeline is people posting whatever will make you angry enough to reply, because arguing in the comments pays. half of it is recycled content with a bait caption slapped on. honestly it might be worse than instagram at this point, which i didn't think was possible. the reach is completely broken too. i've watched unverified accounts pull 500k views on random memes with zero context or effort behind them while i sit at barely 200 views on posts i actually put thought into. once an account has followers the algorithm just keeps feeding it, and if you're small there's no realistic way to break out of that no matter what you post unless you pay. smaller accounts are essentially invisible by default. support is the worst part. live chat is locked behind premium, so if you're not paying there's no real way to get anything resolved. i actually subscribed once partly to get access to support, and it still didn't help."
+        },
+        {
+          "reviewId": "a2dd2b0d98a5623cc92a",
+          "excerpt": "they just changed the monetization rules today with no warning only the biggest accounts can get monetized."
+        },
+        {
+          "reviewId": "b09c27ab7af124edb13a",
+          "excerpt": "the new limitation limits on grok and on companion are absolutely ridiculous! it’s starting to feel like blackmail pay or get barely anything when the time used to be extremely long and i was wonderful but now almost nothing and it’s no fun."
+        },
+        {
+          "reviewId": "c3aec2447f634c7ddc66",
+          "excerpt": "other profile suspended, the one i verified with a premium subscription. no reason, it’s been days since appeal was filed. why should i pay for premium service?"
+        }
+      ],
+      "conflictingReviewIds": [
+        "f8b7649d85796678eefb"
+      ],
+      "confidence": {
+        "level": "medium",
+        "method": "deterministic-v2",
+        "reasons": [
+          "4 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present",
+          "support covers a negligible share of the corpus"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "insufficient",
+        "corpusReviewCount": 499,
+        "supportRatio": 0.008016032064128256,
+        "reasons": [
+          "SUPPORT_RATIO_BELOW_MINIMUM"
+        ]
+      },
+      "uncertainties": [
+        "仅来自单条长篇评论，算法数据和订阅状态均无法核实。",
+        "用户未说明具体账号数据或客服工单。",
+        "评论未说明“免费额度”之前的准确基线，无法量化缩减幅度。",
+        "变现规则变更的具体适用范围及是否对所有用户生效，无法从评论确认。"
+      ],
+      "limitations": [
+        "单一样本，不能代表所有免费/付费用户。",
+        "本主题相关评论数量较少，不宜据此推断整体用户对付费政策的满意度。",
+        "部分不满可能与账号封禁问题叠加，而非单纯对价格或规则的独立评价。"
+      ]
+    },
+    {
+      "id": "finding-7",
+      "topicIds": [
+        "topic-7",
+        "topic-9",
+        "topic-6",
+        "topic-4",
+        "topic-5"
+      ],
+      "focusAreaIds": [
+        "focus-1"
+      ],
+      "sourceFindingIds": [
+        "finding-4@c1",
+        "finding-3@c4",
+        "finding-2@c7",
+        "finding-3@c8"
+      ],
+      "title": "信息流与算法回归：关注对象少见、时间线自动刷新/重复、广告与强推内容干扰",
+      "summary": "用户反映信息流算法变差：很少出现真正关注的人，反而被广告、媒体账号和付费推广刷屏；时间线打开即自动刷新导致正在阅读的内容消失且难以找回，滚动多屏后重复出现相同帖子；算法还会强制推送用户未选择的内容。部分用户仍称赞算法推荐精准，正反评价并存。",
+      "supportingReviewIds": [
+        "95ff0e5ce2decdad4efa",
+        "d8af87f68e11e39a8cda",
+        "ac8bb5f8c1077854d90e",
+        "6011df5ef4c0a2909598",
+        "d6b99959fd1615834c48",
+        "187dc5dab5a49dac3006",
+        "ccc8dba9066958a86523",
+        "d1e889569340e420cfc8",
+        "af579df018b0361415eb",
+        "39792e4ee95c4db65d91",
+        "97a49cde436933cbc6da",
+        "a118abbc125418b65069",
+        "ca0e44de094a35bc6c68",
+        "841dc9417dbfdfdbb38a",
+        "e236540ba39b14a963fc",
+        "b7de895371da99e77094"
+      ],
+      "supportingContentGroupIds": [
+        "30182bce834918a8767d",
+        "f874eb6000d88ce0c45a",
+        "6a42a3edcf1936e86d29",
+        "57bfc2de61a2540ad986",
+        "8bddbf2cc2cad746b944",
+        "43f409245b1239001b9a",
+        "651e5c1caef333c1fc8d",
+        "9530002b40df9de22fd0",
+        "1dfc74cafbfdd13cc96a",
+        "e3e4f833fb4c29a0859d",
+        "3381ef8181a8803d083a",
+        "65d8dc5d3f6dd45e0b01",
+        "2a6ba2877955ca1a6052",
+        "36b72ed65211c00712c8",
+        "4707dc3405129610bf6c",
+        "797a1033eae932e35e7b"
+      ],
+      "supportingSampleCount": 16,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "95ff0e5ce2decdad4efa",
+          "excerpt": "without premium miss out on a lot"
+        },
+        {
+          "reviewId": "d8af87f68e11e39a8cda",
+          "excerpt": "accounts you actually want to follow will be hidden behind ads and right wing propaganda."
+        },
+        {
+          "reviewId": "ac8bb5f8c1077854d90e",
+          "excerpt": "free speech should remain free and not have a cost associated with it in order to reach the masses"
+        },
+        {
+          "reviewId": "6011df5ef4c0a2909598",
+          "excerpt": "they are scamming people of their money"
+        },
+        {
+          "reviewId": "d6b99959fd1615834c48",
+          "excerpt": "when you start reading the tweet, the feed itself is updated and the tweet you read can no longer be found"
+        },
+        {
+          "reviewId": "187dc5dab5a49dac3006",
+          "excerpt": "reporting still does not work right correctly properly and tweets are disappearing for no reason"
+        },
+        {
+          "reviewId": "ccc8dba9066958a86523",
+          "excerpt": "any original posts, 100% unseen"
+        },
+        {
+          "reviewId": "d1e889569340e420cfc8",
+          "excerpt": "too many bots. and you have to basically pay for engagement."
+        },
+        {
+          "reviewId": "af579df018b0361415eb",
+          "excerpt": "this garbage app shows me posts if the user paid for an ad, even if i blocked them. this trash app now purposefully shows me controversial rage bait posts and automatically closes the 3 dot menu so that i can’t block the posters."
+        },
+        {
+          "reviewId": "39792e4ee95c4db65d91",
+          "excerpt": "so tired of these random pics of “fake” post of women asking if they’re beautiful."
+        },
+        {
+          "reviewId": "97a49cde436933cbc6da",
+          "excerpt": "bigots"
+        },
+        {
+          "reviewId": "a118abbc125418b65069",
+          "excerpt": "if you’re scrolling down a feed it will repeat the same posts after a couple of screens so that you cannot see earlier posts."
+        },
+        {
+          "reviewId": "ca0e44de094a35bc6c68",
+          "excerpt": "forcing it upon those that never selected it or even view anything close as so"
+        },
+        {
+          "reviewId": "841dc9417dbfdfdbb38a",
+          "excerpt": "algorithm is not as efficient as you’d expect"
+        },
+        {
+          "reviewId": "e236540ba39b14a963fc",
+          "excerpt": "it also refreshes every time you leave the app so good luck trying to read any of those excessively long twitter premium posts"
+        },
+        {
+          "reviewId": "b7de895371da99e77094",
+          "excerpt": "first they updated videos section on profiles so you can’t see the videos clearly without scrolling and even then the videos sometimes switch profiles. second they removed highlights which destroyed the entire profiles purpose."
+        }
+      ],
+      "conflictingReviewIds": [
+        "a3ec2503ad92f1b30ebd",
+        "c5a95a9df9c67631b99d",
+        "4b1034a346ece4aa186d",
+        "6e6be64e4e46c335ee95",
+        "716df1efd19752dbc431",
+        "8b41687887045b508d98",
+        "efe35aab6dc3f294fa4f",
+        "c8c5e5ac5747cf67f9be",
+        "11e11a355c9ca0cf6d17",
+        "7e24f7bcb14721ab266d",
+        "8209aac04c02f04e95e6",
+        "9a7e295517b9ce934821",
+        "3e61d5c8b734553ded98",
+        "47d7d3113389908cb125"
+      ],
+      "confidence": {
+        "level": "medium",
+        "method": "deterministic-v2",
+        "reasons": [
+          "16 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 499,
+        "supportRatio": 0.03206412825651302,
+        "reasons": []
+      },
+      "uncertainties": [
+        "关注对象不出现可能与用户互动历史/设置有关，评论未提供具体账号样本；付费墙影响程度缺乏量化证据。",
+        "无法确认信息流刷新和取关动画问题是否影响所有设备/版本",
+        "算法可见性下降是用户主观感受，缺少官方数据",
+        "单个用户报告不代表普遍复现",
+        "无法判断机器人/虚假帖在信息流中的占比",
+        "“拉仇恨帖”“付费绕过屏蔽”是用户主观描述，缺少可复现步骤",
+        "视频区改版和移除 highlights 仅出现在一条评论中，普遍性未知。",
+        "重复帖子与自动刷新可能与网络或推荐策略相关，无法确认是否为版本回归。"
+      ],
+      "limitations": [
+        "广告/付费墙相关判断来自少数评论；无法确认“诈骗”指控所指的具体场景。",
+        "应用商店评价缺少可复现步骤",
+        "未包含版本号或设备型号",
+        "无法与平台内部指标交叉验证",
+        "样本量有限且情绪化",
+        "正负评价并存，不能据此认定平台整体内容质量",
+        "缺乏具体版本号和复现步骤。",
+        "没有平台后台数据佐证“回归”时间点。"
+      ]
+    },
+    {
+      "id": "finding-8",
+      "topicIds": [
+        "topic-6",
         "topic-7"
       ],
       "focusAreaIds": [
-        "focus-1",
-        "focus-4"
+        "focus-1"
+      ],
+      "sourceFindingIds": [
+        "finding-4@c0",
+        "finding-3@c2",
+        "finding-3@c7",
+        "finding-3@c9"
+      ],
+      "title": "客户端媒体功能回归：视频/直播加载失败、播放控制与显示异常",
+      "summary": "多个版本上用户遇到视频/直播功能异常：视频加载后提示“内容不可用”、静音状态被重置、视频被放大/裁切、时长不显示，直播中观众被踢出或随机结束；图片无法滚动。部分问题在更新后长期未修复，影响基本浏览体验。",
+      "supportingReviewIds": [
+        "9d01028f92f6ff731769",
+        "6d8d18acb1fb21835964",
+        "f1123c98dd84fc43b9c2",
+        "c4aeecfc4b469388c984",
+        "ff0f3e1c7e16757c275a",
+        "c630bec5849d84b38015",
+        "ae1ef7d74375b5185bf8",
+        "c88fe14328c584de052c",
+        "4fdc7c480dfcce558d72",
+        "88d9dd0b4204721b2ff7",
+        "0d5d60a6d27024c64c68",
+        "cc8dd93fdecc0ab77a06",
+        "7c30c016cbb55c8eee7d",
+        "586ec3158c80ecadce9e",
+        "dfc19a088cc0b3ddec55",
+        "f3765d35dbe38ed427ac",
+        "79d4e260a78ea687e6b1",
+        "f4c97744699c8542449b",
+        "c407e4257507ef58f352",
+        "93654802b86175f5dd88"
+      ],
+      "supportingContentGroupIds": [
+        "20b533db0db4419f60d0",
+        "bf3b23d9a7a1492c0354",
+        "c2189dad9aa400955de0",
+        "97ae2f8814d2d2f9edf8",
+        "514d3e2571e6dd338bc5",
+        "7a35b47fdd68e6ef3dd6",
+        "41e51c4f478c0aca7168",
+        "4d26105c32f96d584fc7",
+        "c2f925c7bc770e27e809",
+        "0f3a40db474d9e63d61c",
+        "bf5ebabd677d4c339a28",
+        "91bf348e201525cebe3c",
+        "30a79c9026a8bed484f5",
+        "d57f32142724ca5c243d",
+        "1ef98748351d99671c16",
+        "831e75a198ba28156668",
+        "8170362963894e04b988",
+        "5ab308f895a479b70e7c",
+        "272d88be1e91ce4bbd55",
+        "b8cde272d28f2469a4bf"
+      ],
+      "supportingSampleCount": 20,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "9d01028f92f6ff731769",
+          "excerpt": "the live in this app is archaic. you can’t see what percentage of battery you have, my viewers get kicked out of the live, it randomly kicks me out and ends it too"
+        },
+        {
+          "reviewId": "6d8d18acb1fb21835964",
+          "excerpt": "when you scroll down, i always accidentally touch the left to open the home page, hoping for a change"
+        },
+        {
+          "reviewId": "f1123c98dd84fc43b9c2",
+          "excerpt": "i can't figure out how to use it all without it taking me to the download page."
+        },
+        {
+          "reviewId": "c4aeecfc4b469388c984",
+          "excerpt": "nothing gets fixed or resolved"
+        },
+        {
+          "reviewId": "ff0f3e1c7e16757c275a",
+          "excerpt": "постоянно делают обновления которые не имеют пользы"
+        },
+        {
+          "reviewId": "c630bec5849d84b38015",
+          "excerpt": "any video you click on the app is slightly zoomed in, you have to pinch to zoom out"
+        },
+        {
+          "reviewId": "ae1ef7d74375b5185bf8",
+          "excerpt": "unable to scroll pictures"
+        },
+        {
+          "reviewId": "c88fe14328c584de052c",
+          "excerpt": "some things seem to have been cut off mid way thru the message"
+        },
+        {
+          "reviewId": "4fdc7c480dfcce558d72",
+          "excerpt": "keeps telling me to login to the official app"
+        },
+        {
+          "reviewId": "88d9dd0b4204721b2ff7",
+          "excerpt": "the constant refreshing is frustrating"
+        },
+        {
+          "reviewId": "0d5d60a6d27024c64c68",
+          "excerpt": "some videos not playing while others are. network connections all stable."
+        },
+        {
+          "reviewId": "cc8dd93fdecc0ab77a06",
+          "excerpt": "last update logged me out and locked account. trouble getting back in."
+        },
+        {
+          "reviewId": "7c30c016cbb55c8eee7d",
+          "excerpt": "too hard to edit"
+        },
+        {
+          "reviewId": "586ec3158c80ecadce9e",
+          "excerpt": "no puedo ver los mensajes en los que escribo"
+        },
+        {
+          "reviewId": "dfc19a088cc0b3ddec55",
+          "excerpt": "everytime i mute a video, then go to the next video it unmutes. and please put the video time lengths back on the videos"
+        },
+        {
+          "reviewId": "f3765d35dbe38ed427ac",
+          "excerpt": "hasn’t been working properly for the past few weeks. “content not available “ comes up on videos"
+        },
+        {
+          "reviewId": "79d4e260a78ea687e6b1",
+          "excerpt": "something has been wrong with it lately. the videos are just not loading no matter how many times i refresh it. it still doesn’t work."
+        },
+        {
+          "reviewId": "f4c97744699c8542449b",
+          "excerpt": "it won’t let me sign into"
+        },
+        {
+          "reviewId": "c407e4257507ef58f352",
+          "excerpt": "the separation of posts and reposts ruined the app indefinitely. if there were options for that sort of thing, fine, but many accounts are repost heavy, so now it just looks incredibly empty when you look at your own account or others."
+        },
+        {
+          "reviewId": "93654802b86175f5dd88",
+          "excerpt": "this app comes out with so many damn updates that don’t do anything."
+        }
+      ],
+      "conflictingReviewIds": [],
+      "confidence": {
+        "level": "high",
+        "method": "deterministic-v2",
+        "reasons": [
+          "20 distinct supporting content group(s)",
+          "source status: complete"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 499,
+        "supportRatio": 0.04008016032064128,
+        "reasons": []
+      },
+      "uncertainties": [
+        "部分故障可能受设备型号、网络环境或登录方式影响，无法确认是否为普遍回归。",
+        "无法确认这些问题是否为特定设备、系统版本或账号状态导致；缺少复现步骤。",
+        "视频不播放可能与具体内容/编码有关；“编辑太难”未说明具体交互细节",
+        "“看不到消息”是用户自述，难以定位是输入框还是显示层问题",
+        "无法判断这些回归由哪个具体版本引入，也未能确认是否为特定设备/网络环境下的偶发问题。",
+        "“内容不可用”可能受版权或区域限制影响，不完全是客户端缺陷。"
+      ],
+      "limitations": [
+        "评论样本有限，不能确认所有问题均为本次版本更新引入。",
+        "每项问题通常只有一到两例用户报告，样本量较小。",
+        "无法复现或定位具体版本",
+        "缺少同一功能的正面/负面对照样本",
+        "评论未提供设备型号、系统版本或复现步骤，难以定位根因。",
+        "低星评论更容易集中描述故障，实际影响面未知。"
+      ]
+    },
+    {
+      "id": "finding-9",
+      "topicIds": [
+        "topic-6",
+        "topic-7",
+        "topic-8"
+      ],
+      "focusAreaIds": [
+        "focus-1"
+      ],
+      "sourceFindingIds": [
+        "finding-4@c3",
+        "finding-4@c5",
+        "finding-2@c6"
+      ],
+      "title": "客户端核心交互回归：发帖/回复失败、登录/切换账号卡死",
+      "summary": "用户报告无法回复或评论帖子（需改用浏览器或重新安装 App 才能恢复），发帖提示重试或新手机无法发布；切换账号时应用卡死，更新后会被登出并锁定账号；另有用户反馈搜索无法找回内容、问题长期得不到解决。",
+      "supportingReviewIds": [
+        "21939e7bf5014b13bbfd",
+        "750460473c64435ba9ae",
+        "247e9b0a937e729b9977",
+        "b530d2b11e958946a3b9",
+        "a24b43e2b8b9823bc392",
+        "5c1e7af4dca29c2bd4f8",
+        "737ea4c1e49da874da67",
+        "4b6bda04e3fb4dfd383b",
+        "d92e6c9e95887d5bad5f",
+        "9a1dbbd58ae5a27478bb",
+        "c17fe3f9f05fb5ce14a2",
+        "921983d712bf9f485f91",
+        "84b0df5bcbb1364b99f7",
+        "e10388d70666172946b7",
+        "c960b6784d3aa6b0e358",
+        "9d6fedc64164a94d4833",
+        "a8f76924121f54475f2a",
+        "e4d0bbe3b9ffc5b684a8"
+      ],
+      "supportingContentGroupIds": [
+        "218b645fa5fe0a587c9d",
+        "6009d1e0501dfa8600af",
+        "db1e0779967bcea84495",
+        "db9d80e42c77d7474120",
+        "fd559358b35f503ec79d",
+        "fa835678175d066355fd",
+        "7289221c1b4c3deb0c3b",
+        "2e5992171583c4ca99d3",
+        "4882546232f9e55b7898",
+        "5fb53b263c0f4c5d57a5",
+        "fcfa75ad34c31986f576",
+        "5de8d11f5ca04c310b58",
+        "802668a57ac26e1a4b60",
+        "a96a592ec1e68067369b",
+        "1091ce3a7a38aabafc4d",
+        "71f379c3fff0b33207f8",
+        "53c2d29f6db8b130b4a4",
+        "30ed7390d917bdcabb61"
+      ],
+      "supportingSampleCount": 18,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "21939e7bf5014b13bbfd",
+          "excerpt": "still can’t access media content on wifi but works fine on my mobile 5g service"
+        },
+        {
+          "reviewId": "750460473c64435ba9ae",
+          "excerpt": "have bug sometimes post doesn’t work says to retry"
+        },
+        {
+          "reviewId": "247e9b0a937e729b9977",
+          "excerpt": "will not post anything on my new phone & no clear way to fix it"
+        },
+        {
+          "reviewId": "b530d2b11e958946a3b9",
+          "excerpt": "switching between accounts causes the app to lock up maybe 50% of the time"
+        },
+        {
+          "reviewId": "a24b43e2b8b9823bc392",
+          "excerpt": "there’s no tech support"
+        },
+        {
+          "reviewId": "5c1e7af4dca29c2bd4f8",
+          "excerpt": "definitely miss the old twitter"
+        },
+        {
+          "reviewId": "737ea4c1e49da874da67",
+          "excerpt": "90% of the time you open the damn app stuff just doesn’t work"
+        },
+        {
+          "reviewId": "4b6bda04e3fb4dfd383b",
+          "excerpt": "allow us to search our own posts"
+        },
+        {
+          "reviewId": "d92e6c9e95887d5bad5f",
+          "excerpt": "there’s way too much of the same ideas, people, etc."
+        },
+        {
+          "reviewId": "9a1dbbd58ae5a27478bb",
+          "excerpt": "product way downhill for last 5-6 years"
+        },
+        {
+          "reviewId": "c17fe3f9f05fb5ce14a2",
+          "excerpt": "recently, i have been incapable of replying to posts on the app and i have to switch to browser in order to respond under posts. everything i read states that it usually resolved in a few days, however this was not the case. i had to delete and redownload the app in order to reply."
+        },
+        {
+          "reviewId": "921983d712bf9f485f91",
+          "excerpt": "videos spin then turn to content is not available error. been happening for days"
+        },
+        {
+          "reviewId": "84b0df5bcbb1364b99f7",
+          "excerpt": "when i open the app it updates my feed twice, so i end up missing a bunch of stuff."
+        },
+        {
+          "reviewId": "e10388d70666172946b7",
+          "excerpt": "why is the pause button so hard to hit?"
+        },
+        {
+          "reviewId": "c960b6784d3aa6b0e358",
+          "excerpt": "the work they produce is riddled with bugs."
+        },
+        {
+          "reviewId": "9d6fedc64164a94d4833",
+          "excerpt": "x doesn’t let me reply or comment on any posts, every time i try to it just says error resend or edit in drafts?"
+        },
+        {
+          "reviewId": "a8f76924121f54475f2a",
+          "excerpt": "every update the app gets worse and this newest update is absolutely dog water and the name x is stupid"
+        },
+        {
+          "reviewId": "e4d0bbe3b9ffc5b684a8",
+          "excerpt": "awful updates😩😤👎🏻👎🏻👎🏻"
+        }
+      ],
+      "conflictingReviewIds": [
+        "806edb6b92feed615ece",
+        "9d4218bc1c350e43351b",
+        "b245902f09fec0e7360f"
+      ],
+      "confidence": {
+        "level": "high",
+        "method": "deterministic-v2",
+        "reasons": [
+          "18 distinct supporting content group(s)",
+          "source status: complete"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 499,
+        "supportRatio": 0.036072144288577156,
+        "reasons": []
+      },
+      "uncertainties": [
+        "评论未提供设备型号/系统版本，无法确认是否为特定版本或配置文件导致。",
+        "时间线自动刷新与搜索问题可能是不同版本上的独立缺陷，现有评论不能区分。",
+        "无法从评论确认这些故障与具体App版本、设备或系统版本的对应关系。",
+        "未提供 App 版本号或设备信息。",
+        "未说明“更新”具体指哪个版本。"
+      ],
+      "limitations": [
+        "样本以负面体验为主，可能高估问题普遍性；无法验证所有问题在最新版本中仍存在。",
+        "评论未提供复现步骤，故障可能由不同原因导致。",
+        "缺少可复现步骤，只能反映少数用户的主观体验。"
+      ]
+    },
+    {
+      "id": "finding-10",
+      "topicIds": [
+        "topic-6"
+      ],
+      "focusAreaIds": [
+        "focus-1"
       ],
       "sourceFindingIds": [
         "finding-1@c1"
       ],
-      "title": "点击通知会清空其余通知并跳转首页，12.16仍未修复",
-      "summary": "用户反馈点击任意一条通知后，其余通知会被全部清除，且打开通知时常跳到个性化首页而非通知列表；该行为自多个版本持续存在，并在12.16版本更新后依旧复现，也引发了首页刷新和内容丢失。",
+      "title": "通知/消息功能回归：查看一条通知清除其余通知，未读消息无法打开",
+      "summary": "用户长期跟踪反馈：从通知列表点开一条通知会同时清除其余未读通知，且该问题跨版本持续存在；点开通知还可能强制刷新首页并跳到不同帖子。另有用户因拒绝强制更新而无法读取未读消息。",
       "supportingReviewIds": [
-        "4bcaf2e9d2315cf29425"
+        "497a88d5fbe0c5acac1b",
+        "f8abedeec2426686243d"
       ],
-      "supportingSampleCount": 1,
+      "supportingContentGroupIds": [
+        "d8f71639809c06718bd0",
+        "f98edaef84c7373e68cf"
+      ],
+      "supportingSampleCount": 2,
       "evidenceExcerpts": [
         {
-          "reviewId": "4bcaf2e9d2315cf29425",
+          "reviewId": "497a88d5fbe0c5acac1b",
           "excerpt": "tapping to view one will dismiss the rest, forcing you to scroll through your notification tab to see what you missed"
+        },
+        {
+          "reviewId": "f8abedeec2426686243d",
+          "excerpt": "i have 7 unread messages, and i can’t read them because i won’t conform and be constantly updating my app"
         }
       ],
       "conflictingReviewIds": [],
       "confidence": {
         "level": "low",
-        "method": "deterministic-v1",
+        "method": "deterministic-v2",
         "reasons": [
-          "1 distinct supporting review(s)",
-          "source status: complete"
+          "2 distinct supporting content group(s)",
+          "source status: complete",
+          "support covers a negligible share of the corpus",
+          "supporting reviews share a homogeneous rating"
         ]
       },
       "evidenceSufficiency": {
         "status": "insufficient",
-        "corpusReviewCount": 233,
-        "supportRatio": 0.004291845493562232,
+        "corpusReviewCount": 499,
+        "supportRatio": 0.004008016032064128,
         "reasons": [
           "SUPPORT_BELOW_MINIMUM",
           "SUPPORT_RATIO_BELOW_MINIMUM"
         ]
       },
       "uncertainties": [
-        "无法确认该缺陷是否为 12.16 新引入，用户记录显示它已跨多个版本持续存在。",
-        "单一用户的长篇更新记录，缺少其他独立评论直接佐证同一问题。"
+        "通知被清除是否覆盖所有iOS版本/设备无法从评论确认；用户的长篇更新记录证明跨版本复现，但缺少官方复现说明。"
       ],
       "limitations": [
-        "样本仅 1 条评论，无法估算受影响用户规模。"
+        "该问题主要来自单一用户的连续版本记录，样本量很小；未读消息问题与通知清除可能由不同原因导致。"
       ]
     }
   ],
@@ -719,158 +1850,434 @@
       "findingIds": [
         "finding-1"
       ],
-      "title": "修复视频/GIF 无法加载的问题",
-      "description": "解决 12.16 版本更新后出现的视频、GIF 显示『内容不可用』或持续加载失败的问题，确保在稳定网络下媒体内容可正常播放；同时消除部分视频强制跳转至应用下载页的异常行为。",
+      "title": "账号执法透明化与申诉复核机制",
+      "description": "针对账号无故封禁、影子封禁、限流、AI 误判为“非真实行为”以及申诉无效的问题，建立可解释、可申诉、可人工复核的账号执法流程。所有限制或封禁操作必须给出具体原因与依据；免费和付费用户均可申诉并跟踪状态；不得以付费作为申诉前提。",
       "sourceReviewIds": [
-        "dabc7ca85c6be245ea65",
-        "397b9e8e139c307922dd",
-        "c5e4dd6a49553397b882",
-        "d52e5ce2502c1fb3db3d",
-        "2f62dc8aa63697e7ddf6",
-        "e65585cfcd381a145856",
-        "fe996470ac7cc136390f",
-        "ce55aaf7bdadf6e2ed70",
-        "c238acb8869b86898031",
-        "1d9c03fa7c1752ec039c",
-        "b8ace3ccf5b408696c11",
-        "667138f3e69c5bd452e7",
-        "5ae4adca2a0f08e04b73",
-        "35c199d588e66936a855",
-        "6ad5a5cb80562e87be20",
-        "b680022465b8bd4adbaa",
-        "46f6febe4e287d198214",
-        "903f5975a4fe9b77837f",
-        "975e8a5c7dda6b9c31b0",
-        "8705e89d353623b04cfd",
-        "24ac8cd6c953c4425527",
-        "2afc91dd147c2508799c",
-        "d883b185fdea6916711c",
-        "05d5408e5be132f875bd",
-        "6acd02e50e0dfd677461",
-        "d0e59478c8b751e1fb1a",
-        "187872d2e6ec043bec03"
+        "942e8fb78d4ce7c42fed",
+        "b72cb5b5369ef4acf380",
+        "72854236343f2023e590",
+        "3b4c600e86c460a49186",
+        "9ac8666109691fba5f70",
+        "ff0f3e1c7e16757c275a",
+        "b139645074909b1f5110",
+        "2ff17e156b51002dae7d",
+        "82973717a5a5bd512dcd",
+        "88ceceaf528c6c039adf",
+        "76ef34c426c2633409ac",
+        "eca55a9575da9b7a2349",
+        "1f5a3b69b07ee525be3f",
+        "746d3505931cb1b710d3",
+        "232158cf07f6adc110c2",
+        "5a398934f16ccebe94b5",
+        "f7a386821507debbd09d",
+        "90795ba894f2a774f54e",
+        "1c882652d8542e7608a4",
+        "4529e77929effbb1be08",
+        "554635876b726fcfc341",
+        "e19ce43b965ff170bdd1",
+        "161d9b39015b97ceed5b",
+        "3bf4601dbea80e52a3c5",
+        "a40c3f400f1dc51a59b1",
+        "aa3892c1816c5a6382eb",
+        "cdc731e3b26a01b3cfe7",
+        "d43918cce19fedd740af",
+        "fa97cc1d80cf24c71f4a",
+        "7f29df8debf1154f6328",
+        "ccc8dba9066958a86523",
+        "ea871352e9224a1724c9",
+        "91c24f546aa1f8cd4911",
+        "d60b1ef568edcc06fcfa",
+        "5ae581ab93e56039cfbd",
+        "0ff49f2767eef4a355a2",
+        "3149ea6f88ac1590379d",
+        "cb14681dfe63fb647f2f",
+        "054e4c2d3fe193d45c18",
+        "473cfcbcd75d69d5f2bb",
+        "9c6f8d59ca9d678ce743",
+        "262dea90fefc46097147",
+        "2084d13dd6067f06ebc7",
+        "f3b0221693e72972a8fe",
+        "15140568111aa68e47fe",
+        "1870c553be2429f7eba3",
+        "10e945293704caca02f3",
+        "2b0ef2fe65347a3e8f41",
+        "b598c740a53babfec796",
+        "7983cdc56ccb5f592895",
+        "6e71c35fa56f499e082c",
+        "43ffeb2d101141f64315",
+        "8e99f841ec133d3661d8",
+        "7b81b3a5ce81cd0254cf",
+        "45ed99b74d25be7c5d8c",
+        "4521af5319b8a9f43470",
+        "4938951db0f0641b8e45",
+        "a877aa1d79240560118e",
+        "37d328729ad9b568359c",
+        "c3aec2447f634c7ddc66",
+        "6419d487e20096da58cd"
       ],
-      "priority": "P0",
+      "priority": "P1",
       "acceptanceCriteria": [
-        "在稳定网络环境下，视频/GIF 可在 5 秒内开始播放，不再出现 'content not available' 错误",
-        "所有支持的视频格式均可在应用内播放，不会跳转至应用下载页",
-        "重复刷新、切换账号或切换网络后媒体加载保持正常，错误率低于 0.1%"
+        "上线后对所有新建的封禁/限流/标签操作，处罚详情页 100% 展示“具体原因+规则依据+申诉入口”；验收抽查 50 个处罚案例，Suggested: 100%。",
+        "免费与付费用户均可提交申诉；每条申诉在提交后 10 分钟内生成可查询的 case ID（Suggested: 10 分钟）。",
+        "对 Premium 账号或连续申诉 2 次及以上的用户，系统在 24 小时内升级至人工复核（Suggested: 24 小时）。",
+        "上线后 4 周应用商店评论监测中，“无故封禁/限流/申诉无效/影子封禁”类评论占比由 finding-1 的确定性支持比 12.2%（61/499）降至不高于 8%；该 8% 为基于 finding-1 数据提出的目标（Suggested: ≤8%）。"
       ],
       "versionId": "ver-1",
       "planningFactors": {
         "severity": "critical",
         "userImpact": "high",
-        "implementationScope": "medium",
+        "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "大量用户反映 12.16 更新后无法观看视频/GIF，严重影响核心媒体消费，需优先修复。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "rationale": "finding-1 支持样本最多（61 条，比例 12.2%），涉及账号可用性、付费权益和言论自由感知；复杂度高，但若不优先解决会持续放大差评与信任危机。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 27,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.11587982832618025
+          "supportingReviewCount": 61,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.12224448897795591
         }
       }
     },
     {
       "id": "req-2",
       "findingIds": [
-        "finding-1"
+        "finding-2"
       ],
-      "title": "修复信息流自动刷新导致阅读位置丢失",
-      "description": "解决打开或离开应用时信息流自动刷新、重复加载同一批帖子的问题，保留用户阅读位置和已加载内容，避免用户错过正在阅读的帖子。",
+      "title": "涉未成年人及极端有害内容快速处置与未成年保护",
+      "description": "针对用户反映的儿童色情/非法内容、自残暴力内容、成人内容可被未成年人看到以及举报后无处理等问题，建立安全优先举报通道、人工复核队列和未成年内容隔离，并保障善意举报者不被反向限制。",
       "sourceReviewIds": [
-        "dabc7ca85c6be245ea65",
-        "397b9e8e139c307922dd",
-        "c5e4dd6a49553397b882",
-        "d52e5ce2502c1fb3db3d",
-        "2f62dc8aa63697e7ddf6",
-        "e65585cfcd381a145856",
-        "fe996470ac7cc136390f",
-        "ce55aaf7bdadf6e2ed70",
-        "c238acb8869b86898031",
-        "1d9c03fa7c1752ec039c",
-        "b8ace3ccf5b408696c11",
-        "667138f3e69c5bd452e7",
-        "5ae4adca2a0f08e04b73",
-        "35c199d588e66936a855",
-        "6ad5a5cb80562e87be20",
-        "b680022465b8bd4adbaa",
-        "46f6febe4e287d198214",
-        "903f5975a4fe9b77837f",
-        "975e8a5c7dda6b9c31b0",
-        "8705e89d353623b04cfd",
-        "24ac8cd6c953c4425527",
-        "2afc91dd147c2508799c",
-        "d883b185fdea6916711c",
-        "05d5408e5be132f875bd",
-        "6acd02e50e0dfd677461",
-        "d0e59478c8b751e1fb1a",
-        "187872d2e6ec043bec03"
+        "9ac8666109691fba5f70",
+        "546311cffcf7b395f8bb",
+        "0a50412c5b9cbdf1b7c6",
+        "3b4c600e86c460a49186",
+        "deac1c70911c5cb0f22f",
+        "e24298a5f578d9fa3f61",
+        "32dc558b884c2448066a",
+        "bc3589f3dd7780b311c2",
+        "592e221cc4ec98801e62",
+        "91adbf478301de28a709",
+        "6c2b03f16b06ee09d803",
+        "bfac1bc5a2cfc0802d74",
+        "17c0b8d4f8b13fcc7e52",
+        "88d9dd0b4204721b2ff7",
+        "3f6d58b7e700fb16f48d",
+        "dbee4e9b3907ee3b5bb3",
+        "5d1071c36f9163b09ec6",
+        "e8c898d885282ce357e9",
+        "f1c1645fa7f5c96016ca",
+        "7f29df8debf1154f6328",
+        "83287b7ba08a98cdd064",
+        "bb4c2a15b6af318bfc15",
+        "f34ec40e0c8f2039b2c4",
+        "6ddf9be60b89194b3cb4",
+        "a405d9b0c641afed8331",
+        "aadedd7ecb352e450339",
+        "0dd37aa757a881c3625a",
+        "f47dd416af749737b5a2",
+        "fbe24ba998bc40507c5b",
+        "e5f57695ae9718cb97fb"
       ],
       "priority": "P1",
       "acceptanceCriteria": [
-        "切到后台再返回时，信息流保持原滚动位置且不自动刷新",
-        "点击通知后返回信息流时，阅读位置不丢失，已加载内容不被重复拉取",
-        "信息流滚动时不会出现同一批帖子在数屏内重复出现"
+        "举报入口新增“涉及未成年人的非法内容/儿童性剥削”分类；测试 20 条模拟举报，100% 进入人工队列且不可被自动驳回（Suggested: 100%）。",
+        "对 CSAM/儿童剥削类举报，中位首次人工响应时间不超过 1 小时，24 小时内给出处理结果（Suggested: 1 小时 / 24 小时）。",
+        "使用 5 个 18 岁以下测试账号浏览“为你推荐”，成人向内容出现次数为 0（Suggested: 0 次）。",
+        "10 个善意举报测试账号在举报后 7 天内 0 个被自动限制（Suggested: 0 个）。",
+        "上线后 4 周，“有害内容未下架/举报无效”类评论占比由 finding-2 的确定性支持比 6.0%（30/499）降至不高于 4%；该 4% 为基于 finding-2 数据提出的目标（Suggested: ≤4%）。"
       ],
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "high",
-        "userImpact": "medium",
-        "implementationScope": "small",
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "自动刷新导致内容丢失，与通知跳转共同造成阅读中断，修复成本较小且收益明显。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "rationale": "finding-2 涉及平台法律与未成年人安全底线；虽然支持比例 6.0%，但性质严重，举报无效与反向处罚会进一步损害信任，必须最先上线。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 27,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.11587982832618025
+          "supportingReviewCount": 30,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.06012024048096192
         }
       }
     },
     {
       "id": "req-3",
       "findingIds": [
-        "finding-1"
+        "finding-3"
       ],
-      "title": "修复回复/评论失败及登录/账号锁定问题",
-      "description": "解决 12.16 更新后部分用户无法回复评论、账号被登出或锁定的问题，恢复正常的评论发布和账号切换功能。",
+      "title": "机器人、冒充账号与欺诈链接专项治理",
+      "description": "针对机器人账号、AI 生成内容、冒充公众人物的诈骗账号以及外部恶意链接泛滥的问题，增加识别与处置能力，将外部链接内容纳入审核，并针对高风险冒充账号提供快速响应。",
       "sourceReviewIds": [
-        "dabc7ca85c6be245ea65",
-        "397b9e8e139c307922dd",
-        "c5e4dd6a49553397b882",
-        "d52e5ce2502c1fb3db3d",
-        "2f62dc8aa63697e7ddf6",
-        "e65585cfcd381a145856",
-        "fe996470ac7cc136390f",
-        "ce55aaf7bdadf6e2ed70",
-        "c238acb8869b86898031",
-        "1d9c03fa7c1752ec039c",
-        "b8ace3ccf5b408696c11",
-        "667138f3e69c5bd452e7",
-        "5ae4adca2a0f08e04b73",
-        "35c199d588e66936a855",
-        "6ad5a5cb80562e87be20",
-        "b680022465b8bd4adbaa",
-        "46f6febe4e287d198214",
-        "903f5975a4fe9b77837f",
-        "975e8a5c7dda6b9c31b0",
-        "8705e89d353623b04cfd",
-        "24ac8cd6c953c4425527",
-        "2afc91dd147c2508799c",
-        "d883b185fdea6916711c",
-        "05d5408e5be132f875bd",
-        "6acd02e50e0dfd677461",
-        "d0e59478c8b751e1fb1a",
-        "187872d2e6ec043bec03"
+        "9ac8666109691fba5f70",
+        "783d5c7e1c688ceaa112",
+        "de8e973736535896e045",
+        "fe86a46a4d2b6f2a09b9",
+        "b07730e2f69df620b746",
+        "c2503e3da903dd1a5a94",
+        "737ea4c1e49da874da67",
+        "4ce75633b519bfa509f0",
+        "c17fe3f9f05fb5ce14a2",
+        "2204b955a52689d2ed5e",
+        "cb6d73df662ff5b02fd5"
+      ],
+      "priority": "P1",
+      "acceptanceCriteria": [
+        "举报分类新增“冒充他人/诈骗/机器人刷量”，99% 的该类举报获得复核结论并回传用户（Suggested: 99%）。",
+        "针对仿冒 Elon Musk 等高风险公众人物的已验证账号举报，中位处理时间不超过 2 小时（Suggested: 2 小时）。",
+        "用 10 条含恶意外部链接的报告做测试，0 条返回“外部链接不违规”的自动答复（Suggested: 0 条）。",
+        "上线后 4 周，“机器人/冒充/诈骗”类评论占比由 finding-3 的确定性支持比 2.2%（11/499）降至不高于 1.5%；该 1.5% 为基于 finding-3 数据提出的目标（Suggested: ≤1.5%）。"
+      ],
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-3 证据一致、无冲突样本，机器人/冒充/恶意链接影响内容可信度与财产安全，处置链路相对独立，适合与 R2 并行推进。",
+        "evidenceStrength": "high",
+        "confidence": "high",
+        "frequency": {
+          "supportingReviewCount": 11,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.022044088176352707
+        }
+      }
+    },
+    {
+      "id": "req-4",
+      "findingIds": [
+        "finding-4"
+      ],
+      "title": "仇恨言论与误导信息治理及处置透明度",
+      "description": "针对信息流被仇恨言论、右翼政治宣传和误导信息污染的问题，增强举报复核、重复违规升级和处置透明度，同时通过申诉机制避免误伤合法言论。",
+      "sourceReviewIds": [
+        "c5472d4d2ab4612a6e23",
+        "310412ae643618509453",
+        "fec118d45f0c2f8e91e8",
+        "042264c12441f41ab1da",
+        "565a71d877d4fd6005a7",
+        "5769054c2109799dcdfc",
+        "da428307199cc9ef24b0",
+        "3276c72463c06e9254cf",
+        "e19a4b9a3ddf56e0a9b7",
+        "3a7c99670c5aba0e19b3"
+      ],
+      "priority": "P1",
+      "acceptanceCriteria": [
+        "仇恨言论/误导信息举报接入 R2 的优先处置队列，测试 20 条模拟举报，100% 在 48 小时内给出最终结论（Suggested: 48 小时）。",
+        "同一账号在 30 天内累计 3 次被确认的仇恨/误导违规时，自动升级限制措施（Suggested: 3 次）。",
+        "对内容降权/移除决定，用户可在处罚页查看原因并发起申诉；10 个违规处置页面中 100% 包含“申诉”按钮（Suggested: 100%）。",
+        "上线后 4 周，“仇恨/误导/宣传污染”类评论占比由 finding-4 的确定性支持比 2.0%（10/499）降至不高于 1.5%；该 1.5% 为基于 finding-4 数据提出的目标（Suggested: ≤1.5%）。"
+      ],
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "medium",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [
+          "req-2"
+        ],
+        "rationale": "finding-4 存在正反评价和主观政治立场，严重度低于 R2，但重复举报无法清除的反馈明确；依赖 R2 的举报与复核基础设施，故安排在 ver-2。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 10,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.02004008016032064
+        }
+      }
+    },
+    {
+      "id": "req-5",
+      "findingIds": [
+        "finding-5"
+      ],
+      "title": "所有权/品牌变更后的核心体验回归与透明度",
+      "description": "针对老用户将体验下滑归因于改名和所有权变更的情况，提供熟悉的信息流与功能设置、重大变更的应用内说明，并通过客服共情回应缓解“怀念旧 Twitter”的信任流失。",
+      "sourceReviewIds": [
+        "c5e32445431764a8f2e6",
+        "eda1bb73b4994cdbfb86",
+        "ef80bd33b28a8770ffa8",
+        "88d9dd0b4204721b2ff7",
+        "da91b792277ddf42bdd7",
+        "7114993019fac2ca3a53",
+        "b34373ffdbd6bc4e1292",
+        "4845dd35386e00fbe45f",
+        "dc11aec9e4a27d95a62f",
+        "ea871352e9224a1724c9",
+        "25addfc03df0c4796485",
+        "0b989cee732b72f49556",
+        "ae365fbf2ba58b22a0d6",
+        "bcd18c29637efc2d9e8d",
+        "73c9dd1f17e747405858",
+        "d1e889569340e420cfc8",
+        "8e0d37bbe07be0d41afb",
+        "7983cdc56ccb5f592895",
+        "cf34abbca878ce549e4b",
+        "e236540ba39b14a963fc",
+        "c38dc52862e6e066757f",
+        "f8c3df409f3240519ff9",
+        "43ffeb2d101141f64315"
+      ],
+      "priority": "P2",
+      "acceptanceCriteria": [
+        "设置中提供“信息流偏好”入口，允许将“关注中”时间线设置为默认 Tab；50 名老用户可用性测试中 80% 可在 2 步内完成设置（Suggested: 80%）。",
+        "应用内“更新说明/什么是新的”页面覆盖近 6 个月的 5 个重大 UI/功能变更，并说明变更理由；5 个页面 100% 可从设置或弹窗进入（Suggested: 100%）。",
+        "客服模板增加针对品牌变更不满的共情回应并记录具体功能回退需求；上线后 4 周，“怀念旧 Twitter/变更后更差”类评论占比由 finding-5 的确定性支持比 4.6%（23/499）降至不高于 3.5%；该 3.5% 为基于 finding-5 数据提出的目标（Suggested: ≤3.5%）。"
+      ],
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "medium",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-5 证据充分但高度政治化和主观，直接产品改动空间有限；通过信息流偏好、变更透明度和客服共情回应以低成本缓解，排在体验修复之后。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 23,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.04609218436873747
+        }
+      }
+    },
+    {
+      "id": "req-6",
+      "findingIds": [
+        "finding-7"
+      ],
+      "title": "信息流质量与阅读体验修复",
+      "description": "修复信息流回归：优先展示已关注账号内容；打开 App 不自动刷新导致阅读内容消失；滚动时去重；被屏蔽/静音账号的推广内容不得再次出现；用户可以关闭强制推送内容。",
+      "sourceReviewIds": [
+        "95ff0e5ce2decdad4efa",
+        "d8af87f68e11e39a8cda",
+        "ac8bb5f8c1077854d90e",
+        "6011df5ef4c0a2909598",
+        "d6b99959fd1615834c48",
+        "187dc5dab5a49dac3006",
+        "ccc8dba9066958a86523",
+        "d1e889569340e420cfc8",
+        "af579df018b0361415eb",
+        "39792e4ee95c4db65d91",
+        "97a49cde436933cbc6da",
+        "a118abbc125418b65069",
+        "ca0e44de094a35bc6c68",
+        "841dc9417dbfdfdbb38a",
+        "e236540ba39b14a963fc",
+        "b7de895371da99e77094"
+      ],
+      "priority": "P1",
+      "acceptanceCriteria": [
+        "冷启动打开 App 时，若信息流没有新内容则保持原位置不刷新；5 台设备各执行 20 次，共 100 次测试，100% 不丢失当前阅读位置（Suggested: 100%）。",
+        "连续滚动 100 条帖子时，同一帖子重复出现次数不超过 2 次（Suggested: ≤2 次）。",
+        "已 Block 账号的付费推广不再出现在“为你推荐”；20 个测试账号中 100% 不出现（Suggested: 100%）。",
+        "设置中提供“关闭可能感兴趣的人/推荐内容”开关，开启后信息流中不再出现未关注账号的强推内容；20 次测试中 100% 生效（Suggested: 100%）。",
+        "上线后 4 周，“信息流/算法/重复/自动刷新”类评论占比由 finding-7 的确定性支持比 3.2%（16/499）降至不高于 2.5%；该 2.5% 为基于 finding-7 数据提出的目标（Suggested: ≤2.5%）。"
+      ],
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "large",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-7 有 16 条样本且正反评价并存，但自动刷新丢位置、重复帖子、屏蔽无效直接影响核心浏览体验；算法改动较大，安排在 ver-2 逐步验证。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 16,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.03206412825651302
+        }
+      }
+    },
+    {
+      "id": "req-7",
+      "findingIds": [
+        "finding-8"
+      ],
+      "title": "视频/直播/图片媒体功能回归修复",
+      "description": "修复视频加载失败、静音状态重置、视频被放大裁切、时长不显示、直播被踢出或随机结束、图片无法滚动等媒体功能回归。",
+      "sourceReviewIds": [
+        "9d01028f92f6ff731769",
+        "6d8d18acb1fb21835964",
+        "f1123c98dd84fc43b9c2",
+        "c4aeecfc4b469388c984",
+        "ff0f3e1c7e16757c275a",
+        "c630bec5849d84b38015",
+        "ae1ef7d74375b5185bf8",
+        "c88fe14328c584de052c",
+        "4fdc7c480dfcce558d72",
+        "88d9dd0b4204721b2ff7",
+        "0d5d60a6d27024c64c68",
+        "cc8dd93fdecc0ab77a06",
+        "7c30c016cbb55c8eee7d",
+        "586ec3158c80ecadce9e",
+        "dfc19a088cc0b3ddec55",
+        "f3765d35dbe38ed427ac",
+        "79d4e260a78ea687e6b1",
+        "f4c97744699c8542449b",
+        "c407e4257507ef58f352",
+        "93654802b86175f5dd88"
+      ],
+      "priority": "P1",
+      "acceptanceCriteria": [
+        "在 5 种主流设备/系统版本上播放 100 个视频样本，“Content not available”错误率不超过 2%（Suggested: ≤2%）。",
+        "用户将视频静音后切换到下一条视频，静音状态保持；50 次连续播放测试中 100% 保持（Suggested: 100%）。",
+        "以 10 个不同宽高比视频测试，视频默认完整显示且无强制裁切/放大，100% 无需手动缩放（Suggested: 100%）。",
+        "直播稳定性测试 100 场，观众被随机踢出或直播随机结束次数为 0（Suggested: 0 次）。",
+        "多图帖可正常滑动；50 次滑动测试中 0 次卡死或无法滚动（Suggested: 0 次）。"
+      ],
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "medium",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-8 无冲突证据且样本 20 条，媒体播放问题可直接影响留存；问题相互独立、修复范围以客户端播放器为主，安排在 ver-2。",
+        "evidenceStrength": "high",
+        "confidence": "high",
+        "frequency": {
+          "supportingReviewCount": 20,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.04008016032064128
+        }
+      }
+    },
+    {
+      "id": "req-8",
+      "findingIds": [
+        "finding-9"
+      ],
+      "title": "发帖、回复、登录与账号切换核心交互修复",
+      "description": "修复用户无法回复/发帖、更新后登出/锁号、切换账号卡死、搜索找不到自己帖子等核心交互问题，并建立相关错误监控与快速回滚通道。",
+      "sourceReviewIds": [
+        "21939e7bf5014b13bbfd",
+        "750460473c64435ba9ae",
+        "247e9b0a937e729b9977",
+        "b530d2b11e958946a3b9",
+        "a24b43e2b8b9823bc392",
+        "5c1e7af4dca29c2bd4f8",
+        "737ea4c1e49da874da67",
+        "4b6bda04e3fb4dfd383b",
+        "d92e6c9e95887d5bad5f",
+        "9a1dbbd58ae5a27478bb",
+        "c17fe3f9f05fb5ce14a2",
+        "921983d712bf9f485f91",
+        "84b0df5bcbb1364b99f7",
+        "e10388d70666172946b7",
+        "c960b6784d3aa6b0e358",
+        "9d6fedc64164a94d4833",
+        "a8f76924121f54475f2a",
+        "e4d0bbe3b9ffc5b684a8"
       ],
       "priority": "P0",
       "acceptanceCriteria": [
-        "用户可正常发布回复和评论，不再反复出现 'error resend' 提示",
-        "更新后账号不会被自动登出或锁定，账号切换不再导致应用卡死",
-        "回复发布成功率达到 99% 以上（以发送按钮后成功回调计）"
+        "发帖/回复接口在 Wi-Fi 与 5G 下总体成功率不低于 99.5%；用 5 台新手机发布 50 条测试帖，0 条返回“重试”错误（Suggested: ≥99.5% / 0 条）。",
+        "切换账号操作 100 次，应用卡死/白屏发生次数为 0（Suggested: 0 次）。",
+        "20 个测试账号升级到新版本后，0 个被自动登出或锁号（Suggested: 0 个）。",
+        "搜索可检索用户自己发布的帖子；20 条历史帖搜索命中率为 100%（Suggested: 100%）。",
+        "上线后 4 周，“无法发帖/回复/登录/切换账号”类评论占比由 finding-9 的确定性支持比 3.6%（18/499）降至不高于 2%；该 2% 为基于 finding-9 数据提出的目标（Suggested: ≤2%）。"
       ],
       "versionId": "ver-1",
       "planningFactors": {
@@ -878,269 +2285,13 @@
         "userImpact": "high",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "登录和回复是核心交互，阻断后用户无法正常使用基本功能，必须紧急修复。",
+        "rationale": "finding-9 直接阻断用户发布和登录等核心行为，影响面大且问题描述具体；修复和上线路径短，应作为 P0 与安全治理并行推进。",
         "evidenceStrength": "high",
         "confidence": "high",
         "frequency": {
-          "supportingReviewCount": 27,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.11587982832618025
-        }
-      }
-    },
-    {
-      "id": "req-4",
-      "findingIds": [
-        "finding-2"
-      ],
-      "title": "修复举报流程，确保垃圾/机器人账号可以被有效举报",
-      "description": "修复举报按钮无响应、举报后无反馈、举报导致自身内容被过滤的问题；建立举报进度跟踪，并将举报结果反馈给用户。",
-      "sourceReviewIds": [
-        "9967c9c6b724e5b8f101",
-        "d1acd46c72b340d99cc8",
-        "087861f6c78d5f58aae4",
-        "13497782d29654cdc8bb",
-        "0a460bd4781c764cf5a7",
-        "4ecb043db74be454e15d",
-        "7f8726384e9d02b8afe1",
-        "11a5c3b5bca434420cbc",
-        "2d9454ce738c332a9df2",
-        "3ddfe92752c385eac585",
-        "0bc98e613ff518920ba4",
-        "2d0bfdaffe85ca8d0abe",
-        "bee7c70a9d15b0768e5e",
-        "94524f8831d5b195494f",
-        "105842b234ac9ce7b4ea",
-        "365c33ad8f340a5946d7",
-        "5e2dd3899347c079a2cc",
-        "3902d86035600c4c4156",
-        "3d4f4d0d519b3cb62272",
-        "58e4985f6594aa009f3f"
-      ],
-      "priority": "P1",
-      "acceptanceCriteria": [
-        "点击举报后可正常完成流程，不再出现无响应或报错",
-        "举报提交后用户可在 7 天内收到处理结果通知",
-        "举报垃圾账号后，用户的正常评论/回复不会被隐藏或限流",
-        "举报提交成功率（提交成功/尝试举报）达到 99% 以上"
-      ],
-      "versionId": "ver-2",
-      "planningFactors": {
-        "severity": "high",
-        "userImpact": "high",
-        "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "用户对垃圾信息投诉的核心入口当前失效，纵容了垃圾/机器人账号的泛滥，必须优先打通。",
-        "evidenceStrength": "high",
-        "confidence": "high",
-        "frequency": {
-          "supportingReviewCount": 20,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.08583690987124463
-        }
-      }
-    },
-    {
-      "id": "req-5",
-      "findingIds": [
-        "finding-2"
-      ],
-      "title": "治理垃圾机器人与诈骗账号，降低私信骚扰",
-      "description": "基于举报数据和自动检测，减少信息流、通知和私信中的垃圾机器人、诈骗账号；尤其是新注册用户不应在 1 小时内收到陌生人垃圾私信，并对已确认的批量机器人账号进行清理。",
-      "sourceReviewIds": [
-        "9967c9c6b724e5b8f101",
-        "d1acd46c72b340d99cc8",
-        "087861f6c78d5f58aae4",
-        "13497782d29654cdc8bb",
-        "0a460bd4781c764cf5a7",
-        "4ecb043db74be454e15d",
-        "7f8726384e9d02b8afe1",
-        "11a5c3b5bca434420cbc",
-        "2d9454ce738c332a9df2",
-        "3ddfe92752c385eac585",
-        "0bc98e613ff518920ba4",
-        "2d0bfdaffe85ca8d0abe",
-        "bee7c70a9d15b0768e5e",
-        "94524f8831d5b195494f",
-        "105842b234ac9ce7b4ea",
-        "365c33ad8f340a5946d7",
-        "5e2dd3899347c079a2cc",
-        "3902d86035600c4c4156",
-        "3d4f4d0d519b3cb62272",
-        "58e4985f6594aa009f3f"
-      ],
-      "priority": "P1",
-      "acceptanceCriteria": [
-        "新注册用户 1 小时内收到垃圾私信的比例降低 80%",
-        "信息流中展示的机器人/诈骗内容减少 50%（通过用户举报率衡量）",
-        "对已举报并核实的机器人账号在 24 小时内采取封禁或限制措施",
-        "正常用户被误标记为机器人的比例低于 0.5%"
-      ],
-      "versionId": "ver-2",
-      "planningFactors": {
-        "severity": "high",
-        "userImpact": "high",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [
-          "req-4"
-        ],
-        "rationale": "需要先修复举报入口以获取高质量反垃圾信号；治理涉及算法和风控系统，工作量较大。",
-        "evidenceStrength": "high",
-        "confidence": "high",
-        "frequency": {
-          "supportingReviewCount": 20,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.08583690987124463
-        }
-      }
-    },
-    {
-      "id": "req-6",
-      "findingIds": [
-        "finding-3"
-      ],
-      "title": "优化时间线算法，减少低质/无关内容并提高小账号曝光",
-      "description": "调整信息流排序策略，减少重复帖子、低质/政治宣传内容，不再自动关闭用户屏蔽操作；为小账号（非订阅用户）提供基础曝光，使内容更贴合用户兴趣。",
-      "sourceReviewIds": [
-        "70f909729a7e468d5626",
-        "08bd931a4e9eae138727",
-        "060188969730e2225952",
-        "4585dd25ef43e3be5d6d",
-        "1bcd2e5bac7de57f7233",
-        "58cb89038c5d95bddd35",
-        "5ac2822d1e3ff900b245",
-        "da53165b290c8253c59d",
-        "29a852c2054a68f546af",
-        "0aab79fc5aa69d2f67a9",
-        "43bd943e44b0442a6774",
-        "bee7c70a9d15b0768e5e",
-        "6d605a081ebe72d7fdcd",
-        "3d4f4d0d519b3cb62272",
-        "c430942dd607d0bd2b3f"
-      ],
-      "priority": "P1",
-      "acceptanceCriteria": [
-        "信息流中重复帖子的展示率降低至 5% 以下",
-        "用户点击『少看这类内容』后，同类内容在 48 小时内不再出现",
-        "未订阅的小账号帖子在信息流中的曝光量达到总曝光的 10% 以上",
-        "算法不再自动关闭三点菜单，用户可以正常屏蔽/拉黑账号"
-      ],
-      "versionId": "ver-3",
-      "planningFactors": {
-        "severity": "medium",
-        "userImpact": "medium",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [],
-        "rationale": "时间线质量是长期满意度问题，涉及算法深度调整，不紧急但重要。",
-        "evidenceStrength": "high",
-        "confidence": "high",
-        "frequency": {
-          "supportingReviewCount": 15,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.06437768240343347
-        }
-      }
-    },
-    {
-      "id": "req-7",
-      "findingIds": [
-        "finding-4"
-      ],
-      "title": "停止对 X Premium 付费用户的无端限流与误封",
-      "description": "改进自动化审核系统，降低对付费订阅用户的误判率；对触发『inauthentic behavior』等规则的用户提供明确原因，并允许申诉恢复。",
-      "sourceReviewIds": [
-        "4a2debe531e3a0800e6d",
-        "d1acd46c72b340d99cc8",
-        "4b179258c68325d39439",
-        "6968500a7d802fa8b0dd",
-        "5b4dbeab037cbbf05cd1",
-        "ff374fafd3a3a08b1d63",
-        "dac93fd351efa43aa9e5",
-        "9748af67b822016e0d4a",
-        "4585dd25ef43e3be5d6d",
-        "797933af247af55265a5",
-        "31989df8af018c9fc9f7",
-        "c57f2c368b6726c519e5",
-        "35eb895d170e72db7c3f",
-        "e8431ff7989cb9465ae9",
-        "8bc837306e6f1bcaca8d",
-        "285b5cdb7a0fa1328fe7",
-        "7812c4b3b453dc60f772",
-        "a6f427a600fa930f87aa",
-        "58e4985f6594aa009f3f"
-      ],
-      "priority": "P1",
-      "acceptanceCriteria": [
-        "Premium/Verified 用户因自动化误判而被限流或封禁的月比例降低 80%",
-        "被限制的账号在收到通知时给出具体原因，不再仅显示 'inauthentic behavior'",
-        "申诉入口对 Premium 用户可用，且在 48 小时内响应"
-      ],
-      "versionId": "ver-2",
-      "planningFactors": {
-        "severity": "high",
-        "userImpact": "medium",
-        "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "付费用户受到不公平对待，损害信任和收入；调整审核逻辑可在中等范围内有效。",
-        "evidenceStrength": "high",
-        "confidence": "high",
-        "frequency": {
-          "supportingReviewCount": 19,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.0815450643776824
-        }
-      }
-    },
-    {
-      "id": "req-8",
-      "findingIds": [
-        "finding-4"
-      ],
-      "title": "为 X Premium 订阅用户提供有效的人工客服支持",
-      "description": "建设 Premium 用户专属客服渠道，确保申诉和问题反馈由人工处理而非模板回复；在合理时限内解决账号受限和订阅相关问题。",
-      "sourceReviewIds": [
-        "4a2debe531e3a0800e6d",
-        "d1acd46c72b340d99cc8",
-        "4b179258c68325d39439",
-        "6968500a7d802fa8b0dd",
-        "5b4dbeab037cbbf05cd1",
-        "ff374fafd3a3a08b1d63",
-        "dac93fd351efa43aa9e5",
-        "9748af67b822016e0d4a",
-        "4585dd25ef43e3be5d6d",
-        "797933af247af55265a5",
-        "31989df8af018c9fc9f7",
-        "c57f2c368b6726c519e5",
-        "35eb895d170e72db7c3f",
-        "e8431ff7989cb9465ae9",
-        "8bc837306e6f1bcaca8d",
-        "285b5cdb7a0fa1328fe7",
-        "7812c4b3b453dc60f772",
-        "a6f427a600fa930f87aa",
-        "58e4985f6594aa009f3f"
-      ],
-      "priority": "P2",
-      "acceptanceCriteria": [
-        "Premium 用户可在应用内联系到人工客服，且平均首次响应时间小于 24 小时",
-        "客服回复不使用模板复制粘贴，能根据具体问题给出对应处理",
-        "账号申诉成功率比当前提高 50%",
-        "用户满意度调查（CSAT）达到 70% 以上"
-      ],
-      "versionId": "ver-3",
-      "planningFactors": {
-        "severity": "medium",
-        "userImpact": "medium",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [
-          "req-7"
-        ],
-        "rationale": "需要先减少误封，否则人工客服会被海量申诉淹没；客服体系搭建涉及人力与系统改造。",
-        "evidenceStrength": "high",
-        "confidence": "high",
-        "frequency": {
-          "supportingReviewCount": 19,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.0815450643776824
+          "supportingReviewCount": 18,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.036072144288577156
         }
       }
     }
@@ -1148,34 +2299,26 @@
   "versions": [
     {
       "id": "ver-1",
-      "name": "12.16 回归热修复",
-      "summary": "紧急修复 12.16 版本引入的核心功能回归，包括视频/GIF 无法加载、信息流自动刷新丢位置、回复/登录故障。",
-      "rationale": "这些 P0 问题直接影响所有用户的基本使用，证据充分且严重性高，需立即发布小版本修复。",
+      "name": "1.0.0",
+      "summary": "紧急修复版：解决账号误封/申诉、涉未成年有害内容、机器人/冒充诈骗、发帖登录核心交互。",
+      "rationale": "对应 finding-1/2/3/9，均为 P0 级别；这些问题的严重度、用户影响或法律/信任风险最高，需要最先止血。",
       "requirementIds": [
         "req-1",
         "req-2",
-        "req-3"
+        "req-3",
+        "req-8"
       ]
     },
     {
       "id": "ver-2",
-      "name": "信任与安全整治",
-      "summary": "修复举报流程，治理垃圾机器人与诈骗账号，停止对 Premium 用户的无端限流/误封。",
-      "rationale": "当前举报入口失效纵容垃圾信息泛滥，同时 Premium 付费用户被误判限流严重损害信任。基于高置信度证据，优先解决安全和账户公平问题。",
+      "name": "1.1.0",
+      "summary": "体验与内容环境修复版：治理仇恨/误导内容、修复信息流与媒体播放，并通过透明化缓解所有权变更带来的信任流失。",
+      "rationale": "对应 finding-4/5/7/8，依赖 ver-1 的举报处置与申诉基础设施；在第 1 版安全与交互基线稳定后，再处理算法、媒体和品牌信任问题。",
       "requirementIds": [
         "req-4",
-        "req-5",
-        "req-7"
-      ]
-    },
-    {
-      "id": "ver-3",
-      "name": "内容生态与订阅体验升级",
-      "summary": "优化时间线算法以降低低质/无关内容并提高小账号曝光，同时为 Premium 用户提供有效的人工客服。",
-      "rationale": "这两项为长期体验提升，实现范围大，且客服体系依赖 ver-2 中误封治理的完成。",
-      "requirementIds": [
         "req-6",
-        "req-8"
+        "req-7",
+        "req-5"
       ]
     }
   ],
@@ -1183,23 +2326,18 @@
   "assumptions": [
     {
       "id": "asm-1",
-      "text": "通知投递延迟/丢失问题可能存在，但当前样本不足以形成需求，需从官方渠道或更多用户反馈收集证据。",
-      "basis": "finding-5 证据充分性为 insufficient，仅有 1 条评论，无法确定问题普遍性。"
+      "text": "付费墙与订阅价值的投诉（finding-6）可能真实存在，但当前支持样本仅 4 条、比例 0.8%，未达到证据充分阈值；暂不列入正式需求，改为在 ver-1 后结合付费用户留存、订阅取消率与客服工单做专项验证。",
+      "basis": "finding-6 的 evidenceSufficiency.status=insufficient，且评论同时与账号封禁、变现规则变更叠加，不能单独确定修复范围。"
     },
     {
       "id": "asm-2",
-      "text": "时间线内容质量问题可能部分由用户关注网络和平台内容生态引起，不仅仅是算法排序问题；需要 A/B 测试验证算法调整效果。",
-      "basis": "finding-3 的 uncertainties 提到无法证实算法政治偏向，受用户关注网络影响。"
+      "text": "通知/消息功能回归（finding-10）只有 2 条支持样本并主要来自单一用户长期反馈，暂不排期；先用通知点击漏斗、未读消息打开率等埋点确认真实影响面。",
+      "basis": "finding-10 的 evidenceSufficiency.status=insufficient，触发 SUPPORT_BELOW_MINIMUM 与 SUPPORT_RATIO_BELOW_MINIMUM。"
     },
     {
       "id": "asm-3",
-      "text": "12.16 版本回归可能只影响部分设备/系统配置，需要通过设备型号分布数据进一步定位。",
-      "basis": "finding-1 的 limitations 提到评论未提供设备型号和系统版本。"
-    },
-    {
-      "id": "asm-4",
-      "text": "垃圾账号治理需要与平台风控团队协作，并可能引入新的机器学习模型；短期内无法做到完全消除。",
-      "basis": "finding-2 的 limitations 提到样本量小，且垃圾账号判断为主观描述，需要更多数据。"
+      "text": "对于用户指控的“平台政治倾向”和“所有权导致内容恶化”，不作为可验证的功能缺陷处理；通过内容治理透明度、信息流偏好设置和变更说明间接响应。",
+      "basis": "finding-4 与 finding-5 均存在强冲突证据和主观立场，无法从评论中客观证实平台偏向。"
     }
   ],
   "goalCoverage": {
@@ -1208,74 +2346,24 @@
     "items": [
       {
         "focusAreaId": "focus-1",
-        "label": "12.16版本回归问题",
-        "status": "covered",
-        "findingIds": [
-          "finding-1"
-        ],
-        "requirementIds": [
-          "req-1",
-          "req-2",
-          "req-3"
-        ]
-      },
-      {
-        "focusAreaId": "focus-2",
-        "label": "时间线算法投诉",
+        "label": "Regression analysis",
         "status": "covered",
         "findingIds": [
           "finding-1",
-          "finding-3"
+          "finding-2",
+          "finding-3",
+          "finding-4",
+          "finding-5",
+          "finding-7",
+          "finding-8",
+          "finding-9"
         ],
         "requirementIds": [
           "req-1",
           "req-2",
           "req-3",
-          "req-6"
-        ]
-      },
-      {
-        "focusAreaId": "focus-3",
-        "label": "垃圾机器人泛滥投诉",
-        "status": "covered",
-        "findingIds": [
-          "finding-2",
-          "finding-3"
-        ],
-        "requirementIds": [
           "req-4",
           "req-5",
-          "req-6"
-        ]
-      },
-      {
-        "focusAreaId": "focus-4",
-        "label": "通知投递问题",
-        "status": "unsupported",
-        "findingIds": [],
-        "requirementIds": []
-      },
-      {
-        "focusAreaId": "focus-5",
-        "label": "私信投递问题",
-        "status": "covered",
-        "findingIds": [
-          "finding-2"
-        ],
-        "requirementIds": [
-          "req-4",
-          "req-5"
-        ]
-      },
-      {
-        "focusAreaId": "focus-6",
-        "label": "1-2星评论中的X Premium付费订阅体验",
-        "status": "covered",
-        "findingIds": [
-          "finding-3",
-          "finding-4"
-        ],
-        "requirementIds": [
           "req-6",
           "req-7",
           "req-8"

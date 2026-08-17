@@ -2,56 +2,56 @@
   "runId": "run-x-twitter-us",
   "status": "completed",
   "executionMode": "live",
-  "goal": "识别最新版本引入的回归问题。\n\n分析时间线算法和垃圾机器人泛滥的投诉。\n\n调查通知和私信投递方面的问题。\n\n聚焦 1-2 星评论中关于付费订阅(X Premium)体验的问题。",
-  "appName": "X",
+  "goal": "analyze X regressions",
+  "appName": "X (Twitter)",
   "appUrl": "https://apps.apple.com/us/app/id333903271",
-  "createdAt": "2026-08-14T01:56:37.734Z",
-  "updatedAt": "2026-08-14T02:12:47.957Z",
+  "createdAt": "2026-08-17T04:42:16.520Z",
+  "updatedAt": "2026-08-17T05:06:26.472Z",
   "stages": {
     "source": {
       "status": "completed",
-      "startedAt": "2026-08-14T01:56:37.737Z",
-      "finishedAt": "2026-08-14T01:56:45.418Z"
+      "startedAt": "2026-08-17T04:42:16.523Z",
+      "finishedAt": "2026-08-17T04:42:16.536Z"
     },
     "prepare": {
       "status": "completed",
-      "startedAt": "2026-08-14T01:56:45.419Z",
-      "finishedAt": "2026-08-14T01:56:45.580Z"
+      "startedAt": "2026-08-17T04:42:16.536Z",
+      "finishedAt": "2026-08-17T04:42:16.657Z"
     },
     "scope": {
       "status": "completed",
-      "startedAt": "2026-08-14T01:56:45.581Z",
-      "finishedAt": "2026-08-14T01:57:09.246Z"
+      "startedAt": "2026-08-17T04:42:16.658Z",
+      "finishedAt": "2026-08-17T04:42:49.855Z"
     },
     "topics": {
       "status": "completed",
-      "startedAt": "2026-08-14T01:57:09.248Z",
-      "finishedAt": "2026-08-14T02:04:38.615Z"
+      "startedAt": "2026-08-17T04:42:49.855Z",
+      "finishedAt": "2026-08-17T04:50:12.393Z"
     },
     "findings": {
       "status": "completed",
-      "startedAt": "2026-08-14T02:04:38.616Z",
-      "finishedAt": "2026-08-14T02:10:59.369Z"
+      "startedAt": "2026-08-17T04:50:12.393Z",
+      "finishedAt": "2026-08-17T05:00:05.396Z"
     },
     "evidence-validation": {
       "status": "completed",
-      "startedAt": "2026-08-14T02:10:59.372Z",
-      "finishedAt": "2026-08-14T02:10:59.379Z"
+      "startedAt": "2026-08-17T05:00:05.397Z",
+      "finishedAt": "2026-08-17T05:00:05.401Z"
     },
     "planning": {
       "status": "completed",
-      "startedAt": "2026-08-14T02:10:59.383Z",
-      "finishedAt": "2026-08-14T02:12:11.830Z"
+      "startedAt": "2026-08-17T05:00:05.403Z",
+      "finishedAt": "2026-08-17T05:04:14.052Z"
     },
     "tests": {
       "status": "completed",
-      "startedAt": "2026-08-14T02:12:11.831Z",
-      "finishedAt": "2026-08-14T02:12:47.943Z"
+      "startedAt": "2026-08-17T05:04:14.053Z",
+      "finishedAt": "2026-08-17T05:06:26.456Z"
     },
     "traceability": {
       "status": "completed",
-      "startedAt": "2026-08-14T02:12:47.944Z",
-      "finishedAt": "2026-08-14T02:12:47.950Z"
+      "startedAt": "2026-08-17T05:06:26.457Z",
+      "finishedAt": "2026-08-17T05:06:26.464Z"
     }
   },
   "artifacts": {
@@ -119,34 +119,45 @@
   "limitations": [
     {
       "code": "SCOPE_LIMITATION",
-      "message": "仅提供聚合统计，无评论文本，无法直接确认时间线算法、垃圾机器人、通知/私信投递及X Premium相关的具体投诉内容。"
+      "message": "The exact meaning of 'X' (the type of regression) is unknown and cannot be resolved from the available data.",
+      "params": {
+        "detail": "The exact meaning of 'X' (the type of regression) is unknown and cannot be resolved from the available data."
+      }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "不支持按应用内主题（如时间线、垃圾机器人、通知、私信、X Premium）进行筛选，只能作为分析维度手动解读。"
+      "message": "Only aggregate statistics are available; no individual review text or additional categorical tags are provided, so the actual regression symptoms cannot be identified.",
+      "params": {
+        "detail": "Only aggregate statistics are available; no individual review text or additional categorical tags are provided, so the actual regression symptoms cannot be identified."
+      }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "回归判断需要依赖评论文本，当前统计数据只能显示版本间的数量或比例差异，无法确认功能是否真正回归。"
+      "message": "The data covers only reviews from 2026-08-07 to 2026-08-15, and no earlier baseline is provided for a robust regression difference analysis.",
+      "params": {
+        "detail": "The data covers only reviews from 2026-08-07 to 2026-08-15, and no earlier baseline is provided for a robust regression difference analysis."
+      }
     },
     {
       "code": "INSUFFICIENT_EVIDENCE",
-      "message": "1 of 5 findings have insufficient evidence for broad or critical claims"
-    },
-    {
-      "code": "GOAL_AREA_UNSUPPORTED",
-      "message": "Goal dimension \"通知投递问题\" has no findings with sufficient evidence"
+      "message": "2 of 10 findings have insufficient evidence for broad or critical claims",
+      "params": {
+        "count": 2,
+        "total": 10
+      }
     }
   ],
   "canReplay": true,
   "modelUsage": {
     "model": "deepseek-v4-flash",
-    "provider": "OpenAI-compatible endpoint",
+    "provider": "https://api.deepseek.com",
     "temperature": 0.1,
-    "calls": 19,
-    "attempts": 19,
-    "retries": 0,
-    "retryReasons": [],
+    "calls": 27,
+    "attempts": 28,
+    "retries": 1,
+    "retryReasons": [
+      "MODEL_NON_JSON_OUTPUT"
+    ],
     "promptVersions": [
       "scope@2",
       "topics.discovery@3",
@@ -156,39 +167,84 @@
       "topics.discovery@3",
       "topics.discovery@3",
       "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
+      "topics.discovery@3",
       "topics.consolidation@3",
-      "findings@3",
-      "findings@3",
-      "findings@3",
-      "findings@3",
-      "findings@3",
-      "findings@3",
-      "findings@3",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
+      "findings@4",
       "findings.consolidation@1",
       "planning@3",
       "tests@1"
     ],
-    "totalTokens": 316428,
+    "promptHashes": [
+      "90700717d2313843a10c3f14d0ccfa6d17513e2af515bb8b4b276da9b7153a8c",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "05a196bcf97d3835f83cb52e200600d7b49378b1bdcea8c845198aa4a64cd281",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "e08355716df8a998bf025ba64ff82a49231d3a0ab1fd0cd8381c907f3a5b7182",
+      "020adc3408bf8067cbdb2f003896a96f6c991ffe0c35f0c6f9a6cb7a16ab74ff",
+      "c1a87a5ea0ade36fd151d3bb4bdc0af6847865c0de961beefdc18adaaccc2be4"
+    ],
+    "totalTokens": 550200,
     "durationsMs": [
-      23641,
-      77437,
-      124473,
-      143490,
-      106578,
-      157068,
-      125784,
-      45593,
-      172702,
-      68952,
-      94427,
-      129943,
-      77110,
-      123131,
-      77075,
-      73470,
-      135731,
-      72427,
-      36104
+      33191,
+      80962,
+      86011,
+      131744,
+      86968,
+      92597,
+      100127,
+      76887,
+      110175,
+      82302,
+      77473,
+      124997,
+      67084,
+      97973,
+      101587,
+      142109,
+      113121,
+      97615,
+      158379,
+      113325,
+      124979,
+      24978,
+      187809,
+      121008,
+      143945,
+      143763,
+      132392
     ]
   },
   "promptVersions": [
@@ -200,14 +256,22 @@
     "topics.discovery@3",
     "topics.discovery@3",
     "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
+    "topics.discovery@3",
     "topics.consolidation@3",
-    "findings@3",
-    "findings@3",
-    "findings@3",
-    "findings@3",
-    "findings@3",
-    "findings@3",
-    "findings@3",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
+    "findings@4",
     "findings.consolidation@1",
     "planning@3",
     "tests@1"

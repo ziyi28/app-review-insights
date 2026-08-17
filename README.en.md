@@ -145,6 +145,22 @@ Analysis is decoupled from the browser connection and runs as a background task:
   retried or deleted; a genuinely running task cannot be deleted (`409`).
   No resume-after-restart is supported.
 
+### Single-instance constraint (important)
+
+This is a **single-process, single-instance local app**. A run's status is
+decided by the on-disk manifest plus an in-process active-run registry
+(`running`/`interrupted`); there is **no** cross-process task coordination,
+distributed lock, or database:
+
+- Do not horizontally scale against the same `data/runs/` (or `RUNS_DIR`) — a
+  second instance cannot see the first instance's running tasks (it would read
+  them as `interrupted`) and two instances writing the same run directory can
+  trample each other.
+- A process restart never resumes in place; `interrupted` runs recover only via
+  "retry" (a brand-new `runId`, full re-run), never from the last stage.
+- Deploying to multiple instances/replicas requires a Redis/DB task-state layer
+  first (out of scope; not implemented).
+
 ## Data Sources and Limitations
 
 - **Primary source (when configured):** [SerpApi](https://serpapi.com) Apple

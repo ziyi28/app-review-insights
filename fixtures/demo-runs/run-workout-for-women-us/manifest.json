@@ -5,53 +5,53 @@
   "goal": "Analyze the most impactful problems and opportunities from US App Store reviews. Identify the most polarizing features — loved by some users, disliked by others — especially around subscription value and workout usability. Capture conflicting feedback explicitly instead of discarding it.",
   "appName": "Workout for Women",
   "appUrl": "https://apps.apple.com/us/app/id839285684",
-  "createdAt": "2026-08-14T06:01:59.552Z",
-  "updatedAt": "2026-08-14T06:25:32.401Z",
+  "createdAt": "2026-08-17T04:42:19.972Z",
+  "updatedAt": "2026-08-17T05:10:11.437Z",
   "stages": {
     "source": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:01:59.555Z",
-      "finishedAt": "2026-08-14T06:01:59.567Z"
+      "startedAt": "2026-08-17T04:42:19.975Z",
+      "finishedAt": "2026-08-17T04:42:19.984Z"
     },
     "prepare": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:01:59.568Z",
-      "finishedAt": "2026-08-14T06:01:59.743Z"
+      "startedAt": "2026-08-17T04:42:19.984Z",
+      "finishedAt": "2026-08-17T04:42:20.134Z"
     },
     "scope": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:01:59.744Z",
-      "finishedAt": "2026-08-14T06:02:33.405Z"
+      "startedAt": "2026-08-17T04:42:20.135Z",
+      "finishedAt": "2026-08-17T04:42:44.583Z"
     },
     "topics": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:02:33.405Z",
-      "finishedAt": "2026-08-14T06:12:27.398Z"
+      "startedAt": "2026-08-17T04:42:44.583Z",
+      "finishedAt": "2026-08-17T04:53:14.026Z"
     },
     "findings": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:12:27.398Z",
-      "finishedAt": "2026-08-14T06:23:18.331Z"
+      "startedAt": "2026-08-17T04:53:14.027Z",
+      "finishedAt": "2026-08-17T05:05:40.678Z"
     },
     "evidence-validation": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:23:18.331Z",
-      "finishedAt": "2026-08-14T06:23:18.334Z"
+      "startedAt": "2026-08-17T05:05:40.679Z",
+      "finishedAt": "2026-08-17T05:05:40.684Z"
     },
     "planning": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:23:18.336Z",
-      "finishedAt": "2026-08-14T06:24:22.471Z"
+      "startedAt": "2026-08-17T05:05:40.685Z",
+      "finishedAt": "2026-08-17T05:09:07.336Z"
     },
     "tests": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:24:22.471Z",
-      "finishedAt": "2026-08-14T06:25:32.393Z"
+      "startedAt": "2026-08-17T05:09:07.337Z",
+      "finishedAt": "2026-08-17T05:10:11.423Z"
     },
     "traceability": {
       "status": "completed",
-      "startedAt": "2026-08-14T06:25:32.393Z",
-      "finishedAt": "2026-08-14T06:25:32.397Z"
+      "startedAt": "2026-08-17T05:10:11.423Z",
+      "finishedAt": "2026-08-17T05:10:11.431Z"
     }
   },
   "artifacts": {
@@ -119,35 +119,49 @@
   "limitations": [
     {
       "code": "SCOPE_LIMITATION",
-      "message": "Cannot filter by app-specific themes like subscription or workout usability because these are not structured fields; they must be inferred from review text."
+      "message": "Country/storefront is not provided in the statistics; 'US App Store' is inferred from the stated goal, not from the data.",
+      "params": {
+        "detail": "Country/storefront is not provided in the statistics; 'US App Store' is inferred from the stated goal, not from the data."
+      }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "Store territory (US) is not a generic filter; the dataset is assumed to contain US App Store reviews but cannot be explicitly verified."
+      "message": "Language distribution includes 'other' and 'und' categories, so non-English/undefined-language reviews cannot be individually identified or excluded from the analysis.",
+      "params": {
+        "detail": "Language distribution includes 'other' and 'und' categories, so non-English/undefined-language reviews cannot be individually identified or excluded from the analysis."
+      }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "No structured sentiment or intent labels are available; all detection of polarizing features depends on the reliability of raw review language."
+      "message": "No app-specific review categories are predefined; themes must be derived from the review texts and cannot be enforced through filters.",
+      "params": {
+        "detail": "No app-specific review categories are predefined; themes must be derived from the review texts and cannot be enforced through filters."
+      }
     },
     {
-      "code": "INSUFFICIENT_EVIDENCE",
-      "message": "1 of 7 findings have insufficient evidence for broad or critical claims"
+      "code": "SCOPE_LIMITATION",
+      "message": "Conflicting feedback is identified qualitatively from review text/tone; the available stats alone do not reveal within-feature sentiment polarity.",
+      "params": {
+        "detail": "Conflicting feedback is identified qualitatively from review text/tone; the available stats alone do not reveal within-feature sentiment polarity."
+      }
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "Version-level conclusions are limited to the versions present in the version distribution and are not statistically tested.",
+      "params": {
+        "detail": "Version-level conclusions are limited to the versions present in the version distribution and are not statistically tested."
+      }
     }
   ],
   "canReplay": true,
   "modelUsage": {
     "model": "deepseek-v4-flash",
-    "provider": "https://opencode.ai",
+    "provider": "https://api.deepseek.com",
     "temperature": 0.1,
     "calls": 33,
-    "attempts": 39,
-    "retries": 6,
+    "attempts": 34,
+    "retries": 1,
     "retryReasons": [
-      "MODEL_NON_JSON_OUTPUT",
-      "MODEL_NON_JSON_OUTPUT",
-      "MODEL_NON_JSON_OUTPUT",
-      "MODEL_NON_JSON_OUTPUT",
-      "MODEL_HTTP_ERROR",
       "MODEL_NON_JSON_OUTPUT"
     ],
     "promptVersions": [
@@ -185,41 +199,76 @@
       "planning@3",
       "tests@1"
     ],
-    "totalTokens": 687220,
+    "promptHashes": [
+      "90700717d2313843a10c3f14d0ccfa6d17513e2af515bb8b4b276da9b7153a8c",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
+      "05a196bcf97d3835f83cb52e200600d7b49378b1bdcea8c845198aa4a64cd281",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
+      "e08355716df8a998bf025ba64ff82a49231d3a0ab1fd0cd8381c907f3a5b7182",
+      "020adc3408bf8067cbdb2f003896a96f6c991ffe0c35f0c6f9a6cb7a16ab74ff",
+      "c1a87a5ea0ade36fd151d3bb4bdc0af6847865c0de961beefdc18adaaccc2be4"
+    ],
+    "totalTokens": 729622,
     "durationsMs": [
-      33655,
-      110027,
-      126769,
-      159562,
-      82445,
-      104970,
-      123132,
-      81850,
-      105870,
-      90630,
-      122518,
-      112759,
-      67497,
-      118564,
-      128582,
-      46031,
-      55650,
-      88760,
-      91114,
-      95920,
-      78568,
-      176385,
-      89992,
-      107416,
-      116424,
-      120249,
-      164998,
-      127063,
-      111934,
-      80068,
-      100335,
-      64123,
-      69914
+      24442,
+      105651,
+      106673,
+      118434,
+      97094,
+      134612,
+      130709,
+      126279,
+      82460,
+      99282,
+      118264,
+      128815,
+      160382,
+      89107,
+      105886,
+      75232,
+      104916,
+      116684,
+      129989,
+      129054,
+      120280,
+      145626,
+      104278,
+      163067,
+      153377,
+      178905,
+      128647,
+      159858,
+      83206,
+      119024,
+      110457,
+      144218,
+      64075
     ]
   },
   "promptVersions": [

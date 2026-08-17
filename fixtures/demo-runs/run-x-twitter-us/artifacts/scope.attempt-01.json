@@ -1,48 +1,21 @@
 {
-  "interpretation": "本分析聚焦1–2星负面评论，比较12.16、12.15、12.14三个版本的评分分布，以识别12.16是否引入回归问题；同时从这些负面评论中探查时间线算法、垃圾机器人、通知投递、私信投递以及X Premium付费订阅体验方面的投诉。由于只提供聚合统计而没有评论文本，实际投诉主题无法直接确认，只能基于评分、版本、语言和日期做整体对比。",
+  "interpretation": "The goal is to analyze 'X regressions' using the provided review statistics. However, the data does not specify what 'X' refers to; it only contains aggregate counts by rating, app version, language, and date. Therefore, the analysis can identify general regression patterns (e.g., shifts in rating distributions, version-specific differences, or language-specific variations) but cannot determine the specific nature of the regressions.",
   "filters": {
-    "rating": [
-      1,
-      2
-    ],
-    "versions": [
-      "12.16",
-      "12.15",
-      "12.14"
-    ],
+    "rating": [],
+    "versions": [],
     "languages": [],
     "minDate": null,
     "maxDate": null
   },
   "explicitLimitations": [
-    "仅提供聚合统计，无评论文本，无法直接确认时间线算法、垃圾机器人、通知/私信投递及X Premium相关的具体投诉内容。",
-    "不支持按应用内主题（如时间线、垃圾机器人、通知、私信、X Premium）进行筛选，只能作为分析维度手动解读。",
-    "回归判断需要依赖评论文本，当前统计数据只能显示版本间的数量或比例差异，无法确认功能是否真正回归。"
+    "The exact meaning of 'X' (the type of regression) is unknown and cannot be resolved from the available data.",
+    "Only aggregate statistics are available; no individual review text or additional categorical tags are provided, so the actual regression symptoms cannot be identified.",
+    "The data covers only reviews from 2026-08-07 to 2026-08-15, and no earlier baseline is provided for a robust regression difference analysis."
   ],
   "focusAreas": [
     {
       "id": "focus-1",
-      "label": "12.16版本回归问题"
-    },
-    {
-      "id": "focus-2",
-      "label": "时间线算法投诉"
-    },
-    {
-      "id": "focus-3",
-      "label": "垃圾机器人泛滥投诉"
-    },
-    {
-      "id": "focus-4",
-      "label": "通知投递问题"
-    },
-    {
-      "id": "focus-5",
-      "label": "私信投递问题"
-    },
-    {
-      "id": "focus-6",
-      "label": "1-2星评论中的X Premium付费订阅体验"
+      "label": "Regression analysis"
     }
   ]
 }

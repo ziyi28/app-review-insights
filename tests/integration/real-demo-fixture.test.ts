@@ -2,6 +2,9 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { loadReplayRun } from "@/server/runs/replay";
+import { validateTraceability } from "@/domain/traceability/validate";
+import type { NormalizedReview } from "@/domain/contracts/review";
+import type { Prd } from "@/domain/contracts/analysis";
 
 const FIXTURE_ROOT = path.join(process.cwd(), "fixtures", "demo-runs");
 
@@ -10,7 +13,9 @@ const FIXTURE_ROOT = path.join(process.cwd(), "fixtures", "demo-runs");
 // categories are intentionally shipped to demonstrate the pipeline is not
 // hard-coded to any single app.
 const FIXTURES = [
-  { runId: "run-x-twitter-us", appId: "333903271", reviewData: "apple-rss-real" },
+  // Captured on 2026-08-16 via build-real-demo.ts against the current code;
+  // both now use the SerpApi path (the persisted config carries a SerpApi key).
+  { runId: "run-x-twitter-us", appId: "333903271", reviewData: "serpapi-apple-reviews-real" },
   { runId: "run-workout-for-women-us", appId: "839285684", reviewData: "serpapi-apple-reviews-real" },
 ];
 
@@ -54,6 +59,40 @@ describe("real demo fixtures", () => {
         expect(bundle.manifest.status).toBe("completed");
         expect(bundle.events.length).toBeGreaterThan(0);
         expect(bundle.artifacts["final-report"]).toBeDefined();
+      });
+
+      it("is valid against the CURRENT traceability validator (re-derives from the corpus)", () => {
+        // The stored report.valid is a historical snapshot: replay never
+        // re-runs the validator, so a drift between the fixture and the current
+        // rules would stay hidden. Re-validate the fixture corpus + PRD with the
+        // live validator to surface any drift (violation codes are listed in the
+        // failure message so the fix is actionable).
+        //
+        // The authoritative PRD lives in final-report (the orchestrator publishes
+        // `prd.attempt-01.json` before the tests stage fills it in, so that
+        // intermediate artifact carries no tests; the final report carries the
+        // completed review→test chain). Validate THAT artifact.
+        const cleaned = JSON.parse(
+          readFileSync(path.join(dir, "artifacts", "cleaned-reviews.attempt-01.json"), "utf8"),
+        ) as { reviews: NormalizedReview[] };
+        const finalReport = JSON.parse(
+          readFileSync(path.join(dir, "artifacts", "final-report.attempt-01.json"), "utf8"),
+        ) as { prd: Prd; report: { valid: boolean } };
+        expect(finalReport.report.valid).toBe(true);
+
+        // Legacy fixtures carry no contentGroupId (schema default ""); keep the
+        // validator's reviewId fallback intact by not fabricating one.
+        const reviewMap = new Map<string, NormalizedReview>();
+        for (const r of cleaned.reviews) {
+          reviewMap.set(r.reviewId, { ...r, contentGroupId: r.contentGroupId ?? "" });
+          reviewMap.set(r.sourceReviewId, { ...r, contentGroupId: r.contentGroupId ?? "" });
+        }
+        const corpusReviewIds = cleaned.reviews.filter((r) => r.includedInAnalysis).map((r) => r.reviewId);
+        const report = validateTraceability(finalReport.prd, corpusReviewIds, reviewMap);
+        const codes = [...new Set(report.violations.map((v) => v.code))];
+        expect({ valid: report.valid, violations: codes, total: report.violations.length }).toEqual(
+          { valid: true, violations: [], total: 0 },
+        );
       });
 
       it("review artifacts are privacy-minimized", () => {

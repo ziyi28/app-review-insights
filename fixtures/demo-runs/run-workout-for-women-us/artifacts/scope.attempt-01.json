@@ -1,5 +1,5 @@
 {
-  "interpretation": "This analysis examines 500 included US App Store reviews to surface the most impactful problems and opportunities highlighted by users. It specifically looks for polarizing features—aspects that receive both strong praise and strong criticism—with concentrated focus on subscription value and workout usability. Conflicting opinions will be preserved and reported explicitly rather than averaged away, so the reader can see where user sentiment diverges. Since no structured topic labels exist, these themes are derived from review text and rating patterns.",
+  "interpretation": "This analysis will use all 500 included US App Store reviews (Aug 19, 2025 – Aug 15, 2026) to identify the most impactful problems and opportunities, with special attention to subscription value and workout usability. It will also detect features that receive sharply mixed sentiment — praised by some users and criticized by others — and will deliberately preserve these conflicting viewpoints rather than collapsing them into a single sentiment. The conclusions will be based only on the provided review statistics and the review texts implied by those counts; no external data or app-specific category labels are assumed.",
   "filters": {
     "rating": [
       1,
@@ -10,38 +10,36 @@
     ],
     "versions": [],
     "languages": [],
-    "minDate": null,
-    "maxDate": null
+    "minDate": "2025-08-19T00:00:00.000Z",
+    "maxDate": "2026-08-15T00:00:00.000Z"
   },
   "explicitLimitations": [
-    "Cannot filter by app-specific themes like subscription or workout usability because these are not structured fields; they must be inferred from review text.",
-    "Store territory (US) is not a generic filter; the dataset is assumed to contain US App Store reviews but cannot be explicitly verified.",
-    "No structured sentiment or intent labels are available; all detection of polarizing features depends on the reliability of raw review language."
+    "Country/storefront is not provided in the statistics; 'US App Store' is inferred from the stated goal, not from the data.",
+    "Language distribution includes 'other' and 'und' categories, so non-English/undefined-language reviews cannot be individually identified or excluded from the analysis.",
+    "No app-specific review categories are predefined; themes must be derived from the review texts and cannot be enforced through filters.",
+    "Conflicting feedback is identified qualitatively from review text/tone; the available stats alone do not reveal within-feature sentiment polarity.",
+    "Version-level conclusions are limited to the versions present in the version distribution and are not statistically tested."
   ],
   "focusAreas": [
     {
       "id": "focus-1",
-      "label": "Impactful problems"
+      "label": "Subscription value: praise, complaints, and perceived worth"
     },
     {
       "id": "focus-2",
-      "label": "Opportunities"
+      "label": "Workout usability: ease, friction, and feature-specific reactions"
     },
     {
       "id": "focus-3",
-      "label": "Polarizing features (loved vs disliked)"
+      "label": "Most impactful problems: frequent or strongly negative themes"
     },
     {
       "id": "focus-4",
-      "label": "Subscription value"
+      "label": "Opportunities: unmet needs, requests, and positive potential"
     },
     {
       "id": "focus-5",
-      "label": "Workout usability"
-    },
-    {
-      "id": "focus-6",
-      "label": "Conflicting feedback"
+      "label": "Polarizing features: same feature loved by some, disliked by others"
     }
   ]
 }

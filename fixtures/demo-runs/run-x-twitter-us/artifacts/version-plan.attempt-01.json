@@ -2,54 +2,46 @@
   "versions": [
     {
       "id": "ver-1",
-      "name": "12.16 回归热修复",
-      "summary": "紧急修复 12.16 版本引入的核心功能回归，包括视频/GIF 无法加载、信息流自动刷新丢位置、回复/登录故障。",
-      "rationale": "这些 P0 问题直接影响所有用户的基本使用，证据充分且严重性高，需立即发布小版本修复。",
+      "name": "1.0.0",
+      "summary": "紧急修复版：解决账号误封/申诉、涉未成年有害内容、机器人/冒充诈骗、发帖登录核心交互。",
+      "rationale": "对应 finding-1/2/3/9，均为 P0 级别；这些问题的严重度、用户影响或法律/信任风险最高，需要最先止血。",
       "requirementIds": [
         "req-1",
         "req-2",
-        "req-3"
+        "req-3",
+        "req-8"
       ]
     },
     {
       "id": "ver-2",
-      "name": "信任与安全整治",
-      "summary": "修复举报流程，治理垃圾机器人与诈骗账号，停止对 Premium 用户的无端限流/误封。",
-      "rationale": "当前举报入口失效纵容垃圾信息泛滥，同时 Premium 付费用户被误判限流严重损害信任。基于高置信度证据，优先解决安全和账户公平问题。",
+      "name": "1.1.0",
+      "summary": "体验与内容环境修复版：治理仇恨/误导内容、修复信息流与媒体播放，并通过透明化缓解所有权变更带来的信任流失。",
+      "rationale": "对应 finding-4/5/7/8，依赖 ver-1 的举报处置与申诉基础设施；在第 1 版安全与交互基线稳定后，再处理算法、媒体和品牌信任问题。",
       "requirementIds": [
         "req-4",
-        "req-5",
-        "req-7"
-      ]
-    },
-    {
-      "id": "ver-3",
-      "name": "内容生态与订阅体验升级",
-      "summary": "优化时间线算法以降低低质/无关内容并提高小账号曝光，同时为 Premium 用户提供有效的人工客服。",
-      "rationale": "这两项为长期体验提升，实现范围大，且客服体系依赖 ver-2 中误封治理的完成。",
-      "requirementIds": [
         "req-6",
-        "req-8"
+        "req-7",
+        "req-5"
       ]
     }
   ],
   "decisions": [
     {
       "requirementId": "req-1",
-      "priority": "P0",
+      "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
         "severity": "critical",
         "userImpact": "high",
-        "implementationScope": "medium",
+        "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "大量用户反映 12.16 更新后无法观看视频/GIF，严重影响核心媒体消费，需优先修复。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "rationale": "finding-1 支持样本最多（61 条，比例 12.2%），涉及账号可用性、付费权益和言论自由感知；复杂度高，但若不优先解决会持续放大差评与信任危机。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 27,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.11587982832618025
+          "supportingReviewCount": 61,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.12224448897795591
         }
       }
     },
@@ -58,36 +50,36 @@
       "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "high",
-        "userImpact": "medium",
-        "implementationScope": "small",
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "自动刷新导致内容丢失，与通知跳转共同造成阅读中断，修复成本较小且收益明显。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "rationale": "finding-2 涉及平台法律与未成年人安全底线；虽然支持比例 6.0%，但性质严重，举报无效与反向处罚会进一步损害信任，必须最先上线。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 27,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.11587982832618025
+          "supportingReviewCount": 30,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.06012024048096192
         }
       }
     },
     {
       "requirementId": "req-3",
-      "priority": "P0",
+      "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "critical",
+        "severity": "high",
         "userImpact": "high",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "登录和回复是核心交互，阻断后用户无法正常使用基本功能，必须紧急修复。",
+        "rationale": "finding-3 证据一致、无冲突样本，机器人/冒充/恶意链接影响内容可信度与财产安全，处置链路相对独立，适合与 R2 并行推进。",
         "evidenceStrength": "high",
         "confidence": "high",
         "frequency": {
-          "supportingReviewCount": 27,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.11587982832618025
+          "supportingReviewCount": 11,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.022044088176352707
         }
       }
     },
@@ -97,56 +89,56 @@
       "versionId": "ver-2",
       "planningFactors": {
         "severity": "high",
-        "userImpact": "high",
+        "userImpact": "medium",
         "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "用户对垃圾信息投诉的核心入口当前失效，纵容了垃圾/机器人账号的泛滥，必须优先打通。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "dependencyRequirementIds": [
+          "req-2"
+        ],
+        "rationale": "finding-4 存在正反评价和主观政治立场，严重度低于 R2，但重复举报无法清除的反馈明确；依赖 R2 的举报与复核基础设施，故安排在 ver-2。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 20,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.08583690987124463
+          "supportingReviewCount": 10,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.02004008016032064
         }
       }
     },
     {
       "requirementId": "req-5",
-      "priority": "P1",
+      "priority": "P2",
       "versionId": "ver-2",
       "planningFactors": {
-        "severity": "high",
-        "userImpact": "high",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [
-          "req-4"
-        ],
-        "rationale": "需要先修复举报入口以获取高质量反垃圾信号；治理涉及算法和风控系统，工作量较大。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "severity": "medium",
+        "userImpact": "medium",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-5 证据充分但高度政治化和主观，直接产品改动空间有限；通过信息流偏好、变更透明度和客服共情回应以低成本缓解，排在体验修复之后。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 20,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.08583690987124463
+          "supportingReviewCount": 23,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.04609218436873747
         }
       }
     },
     {
       "requirementId": "req-6",
       "priority": "P1",
-      "versionId": "ver-3",
+      "versionId": "ver-2",
       "planningFactors": {
-        "severity": "medium",
-        "userImpact": "medium",
+        "severity": "high",
+        "userImpact": "high",
         "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "时间线质量是长期满意度问题，涉及算法深度调整，不紧急但重要。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "rationale": "finding-7 有 16 条样本且正反评价并存，但自动刷新丢位置、重复帖子、屏蔽无效直接影响核心浏览体验；算法改动较大，安排在 ver-2 逐步验证。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 15,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.06437768240343347
+          "supportingReviewCount": 16,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.03206412825651302
         }
       }
     },
@@ -159,34 +151,32 @@
         "userImpact": "medium",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "付费用户受到不公平对待，损害信任和收入；调整审核逻辑可在中等范围内有效。",
+        "rationale": "finding-8 无冲突证据且样本 20 条，媒体播放问题可直接影响留存；问题相互独立、修复范围以客户端播放器为主，安排在 ver-2。",
         "evidenceStrength": "high",
         "confidence": "high",
         "frequency": {
-          "supportingReviewCount": 19,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.0815450643776824
+          "supportingReviewCount": 20,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.04008016032064128
         }
       }
     },
     {
       "requirementId": "req-8",
-      "priority": "P2",
-      "versionId": "ver-3",
+      "priority": "P0",
+      "versionId": "ver-1",
       "planningFactors": {
-        "severity": "medium",
-        "userImpact": "medium",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [
-          "req-7"
-        ],
-        "rationale": "需要先减少误封，否则人工客服会被海量申诉淹没；客服体系搭建涉及人力与系统改造。",
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-9 直接阻断用户发布和登录等核心行为，影响面大且问题描述具体；修复和上线路径短，应作为 P0 与安全治理并行推进。",
         "evidenceStrength": "high",
         "confidence": "high",
         "frequency": {
-          "supportingReviewCount": 19,
-          "corpusReviewCount": 233,
-          "supportRatio": 0.0815450643776824
+          "supportingReviewCount": 18,
+          "corpusReviewCount": 499,
+          "supportRatio": 0.036072144288577156
         }
       }
     }

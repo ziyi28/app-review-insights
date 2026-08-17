@@ -65,6 +65,12 @@ documents the env shape.
   source completeness, and conflict ratio (conflicts < support). An
   `insufficient` finding survives as a limited fact but can never drive a
   P0/P1 requirement or a target version.
+- Support is counted in **distinct content groups** (the normalized body's
+  stable hash), not raw review ids — a re-synced or adversarial copy of the same
+  review collapses to one group instead of inflating the sample. Confidence is
+  a deterministic v2 policy that additionally downgrades `high` for a negligible
+  corpus share, uniformly short supporting bodies, or a homogeneous rating, and
+  records every downgrade in `reasons`.
 - Test cases' direct `findingIds` and `priority` are derived by code from the
   requirement graph and validated the same way; the tests prompt output
   contract does not carry them.

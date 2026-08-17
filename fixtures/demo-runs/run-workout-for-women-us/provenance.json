@@ -4,7 +4,7 @@
     "reviewData": "serpapi-apple-reviews-real",
     "storefront": "us",
     "appId": "839285684",
-    "capturedAt": "2026-08-14T06:01:28.542Z",
+    "capturedAt": "2026-08-17T04:41:51.459Z",
     "captureMethod": "SerpApi Apple Reviews engine (country=us, sort=mostrecent, no_cache=true)",
     "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained"
   },
