@@ -43,15 +43,43 @@ describe("SettingsPanel", () => {
       modelName: "deepseek-v4-flash",
       modelBaseUrl: "https://api.deepseek.com/v1",
       jsonMode: "prompt",
+      reasoningEffort: "high",
     });
     render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
     await waitFor(() => {
       expect(screen.getByLabelText(tEn.modelBaseUrl)).toHaveValue("https://api.deepseek.com/v1");
     });
     expect(screen.getByLabelText(tEn.modelName)).toHaveValue("deepseek-v4-flash");
+    expect(screen.getByLabelText(tEn.modelReasoningEffort)).toHaveValue("high");
     // The API key is never exposed back to the client.
     expect(screen.getByLabelText(tEn.modelApiKey)).toHaveValue("");
     expect(screen.getByText(tEn.apiKeyConfigured)).toBeInTheDocument();
+  });
+
+  it("saves the selected reasoning effort via POST /api/config", async () => {
+    const fetchMock = vi.fn();
+    mockFetch({ reasoningEffort: "medium" });
+    fetchMock
+      .mockResolvedValueOnce({ ok: true, json: async () => ({ reasoningEffort: "medium" }) }) // GET
+      .mockResolvedValueOnce({ ok: true, json: async () => ({}) }); // POST
+    vi.stubGlobal("fetch", fetchMock);
+
+    const user = userEvent.setup();
+    render(<SettingsPanel t={tEn} open onClose={vi.fn()} />);
+    await waitFor(() => {
+      expect(screen.getByLabelText(tEn.modelReasoningEffort)).toBeInTheDocument();
+    });
+
+    await user.selectOptions(screen.getByLabelText(tEn.modelReasoningEffort), "max");
+    await user.click(screen.getByRole("button", { name: tEn.save }));
+
+    await waitFor(() => {
+      expect(fetchMock.mock.calls.length).toBeGreaterThanOrEqual(2);
+      const postCall = fetchMock.mock.calls[1];
+      expect(postCall[0]).toBe("/api/config");
+      const body = JSON.parse(postCall[1].body);
+      expect(body.modelReasoningEffort).toBe("max");
+    });
   });
 
   it("saves the api key and base url via POST /api/config", async () => {
@@ -112,6 +140,8 @@ describe("SettingsPanel", () => {
     });
     expect(screen.getByLabelText(tZh.modelName)).toBeInTheDocument();
     expect(screen.getByLabelText(tZh.modelApiKey)).toBeInTheDocument();
+    expect(screen.getByLabelText(tZh.modelReasoningEffort)).toBeInTheDocument();
+    expect(screen.getByText(tZh.modelReasoningEffortHint)).toBeInTheDocument();
   });
 
   it("shows configured SerpApi status without prefilling the secret", async () => {

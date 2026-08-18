@@ -92,6 +92,8 @@ export type Dictionary = {
   modelApiKey: string;
   modelName: string;
   modelJsonMode: string;
+  modelReasoningEffort: string;
+  modelReasoningEffortHint: string;
   save: string;
   saved: string;
   close: string;
@@ -247,6 +249,7 @@ export type Dictionary = {
     viewTestCases: string;
     viewPrdRequirement: string;
     traceValidationSummary: string;
+    traceRevisedPassed: string;
     traceCoverageLabel: string;
     traceCoverageFindings: string;
     traceCoverageRequirements: string;
@@ -362,6 +365,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     modelApiKey: "API Key",
     modelName: "Model Name",
     modelJsonMode: "JSON Mode",
+    modelReasoningEffort: "Reasoning Effort",
+    modelReasoningEffortHint: "Higher effort takes longer per call and may improve output quality.",
     save: "Save",
     saved: "Saved",
     close: "Close",
@@ -517,6 +522,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     viewTestCases: "View test cases",
     viewPrdRequirement: "View in PRD",
     traceValidationSummary: "end-to-end evidence and requirement validation",
+    traceRevisedPassed: "Initial validation failed ({count}) → auto-revised & passed",
     traceCoverageLabel: "Coverage",
     traceCoverageFindings: "findings",
     traceCoverageRequirements: "requirements",
@@ -630,6 +636,8 @@ export const dictionaries: Record<Locale, Dictionary> = {
     modelApiKey: "API Key",
     modelName: "模型名称",
     modelJsonMode: "JSON 模式",
+    modelReasoningEffort: "推理强度",
+    modelReasoningEffortHint: "档位越高，单次调用耗时越长，输出质量可能越高。",
     save: "保存",
     saved: "已保存",
     close: "关闭",
@@ -785,6 +793,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     viewTestCases: "查看测试用例",
     viewPrdRequirement: "查看对应 PRD 需求",
     traceValidationSummary: "全链路证据与需求双向验证",
+    traceRevisedPassed: "初版校验未通过（{count}）→ 已自动修订通过",
     traceCoverageLabel: "覆盖",
     traceCoverageFindings: "核心痛点",
     traceCoverageRequirements: "需求",

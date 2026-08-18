@@ -228,12 +228,13 @@ distributed lock, or database:
 | `MODEL_API_KEY` | bearer token; may be empty for local runtimes |
 | `MODEL_NAME` | model identifier |
 | `MODEL_JSON_MODE` | `prompt` (default) or `json_object` |
+| `MODEL_REASONING_EFFORT` | `low`, `medium` (default), `high`, or `max` |
 
 Copy `.env.example` to `.env` (git-ignored) and fill in your values. Keys are
 never logged, persisted, or committed. Temperature is fixed at 0.1.
 
 **You can also configure the model from the UI:** open **Settings** in the
-header to set the API Base URL, API Key, Model Name, and JSON mode. Saving
+header to set the API Base URL, API Key, Model Name, JSON mode, and reasoning effort. Saving
 applies the values immediately (no restart) and persists them to the local,
 git-ignored `data/config.local.json` so they survive a restart; `.env.local` /
 `.env` still apply as startup configuration, so existing setups need no

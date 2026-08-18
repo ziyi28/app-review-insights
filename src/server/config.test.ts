@@ -16,6 +16,7 @@ beforeEach(() => {
   delete process.env.MODEL_API_KEY;
   delete process.env.MODEL_NAME;
   delete process.env.MODEL_JSON_MODE;
+  delete process.env.MODEL_REASONING_EFFORT;
   delete process.env.MODEL_TIMEOUT_MS;
   delete process.env.RUNS_DIR;
   delete process.env.APPLE_RSS_BASE_URL;
@@ -45,6 +46,7 @@ describe("loadConfig", () => {
     expect(cfg.modelBaseUrl).toBeNull();
     expect(cfg.modelName).toBeNull();
     expect(cfg.modelJsonMode).toBe("prompt");
+    expect(cfg.modelReasoningEffort).toBe("medium");
     expect(cfg.modelTimeoutMs).toBe(300_000);
     expect(cfg.appleRssMaxPages).toBe(10);
     expect(cfg.appleRssPageDelayMs).toBe(500);
@@ -65,6 +67,16 @@ describe("loadConfig", () => {
   it("supports json_object mode", () => {
     process.env.MODEL_JSON_MODE = "json_object";
     expect(loadConfig().modelJsonMode).toBe("json_object");
+  });
+
+  it("supports valid reasoning effort levels and falls back to medium on invalid input", () => {
+    for (const level of ["low", "medium", "high", "max"] as const) {
+      process.env.MODEL_REASONING_EFFORT = level;
+      expect(loadConfig().modelReasoningEffort).toBe(level);
+    }
+
+    process.env.MODEL_REASONING_EFFORT = "super-high";
+    expect(loadConfig().modelReasoningEffort).toBe("medium");
   });
 
   it("parses numeric limits and enforces rate-limit discipline", () => {
@@ -304,6 +316,15 @@ describe("data/config.local.json persistence and precedence", () => {
     rmSync(path.dirname(file), { recursive: true, force: true });
   });
 
+  it("an invalid reasoning effort in the file falls back to env instead of failing", () => {
+    const file = tempDataConfig();
+    process.env.DATA_CONFIG_FILE = file;
+    writeFileSync(file, JSON.stringify({ MODEL_REASONING_EFFORT: "super-high" }), "utf8");
+    process.env.MODEL_REASONING_EFFORT = "low";
+    expect(loadConfig().modelReasoningEffort).toBe("low");
+    rmSync(path.dirname(file), { recursive: true, force: true });
+  });
+
   it("a corrupt json file is tolerated and reads as empty", () => {
     const file = tempDataConfig();
     process.env.DATA_CONFIG_FILE = file;
@@ -352,12 +373,13 @@ describe("data/config.local.json persistence and precedence", () => {
   it("a json value applies after a simulated restart (fresh process, empty runtime)", () => {
     const file = tempDataConfig();
     process.env.DATA_CONFIG_FILE = file;
-    persistRuntimeConfig({ model: { modelBaseUrl: "https://saved.example.com/v1", modelJsonMode: "json_object" }, serpApi: { apiKey: "serp-saved" } });
+    persistRuntimeConfig({ model: { modelBaseUrl: "https://saved.example.com/v1", modelJsonMode: "json_object", modelReasoningEffort: "high" }, serpApi: { apiKey: "serp-saved" } });
     resetRuntimeModelConfig();
     resetRuntimeSerpApiConfig();
     const cfg = loadConfig();
     expect(cfg.modelBaseUrl).toBe("https://saved.example.com/v1");
     expect(cfg.modelJsonMode).toBe("json_object");
+    expect(cfg.modelReasoningEffort).toBe("high");
     expect(cfg.serpApiKey).toBe("serp-saved");
     rmSync(path.dirname(file), { recursive: true, force: true });
   });

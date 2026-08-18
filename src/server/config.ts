@@ -17,6 +17,7 @@ export type RuntimeModelConfig = {
   modelApiKey?: string | null;
   modelName?: string | null;
   modelJsonMode?: "prompt" | "json_object";
+  modelReasoningEffort?: "low" | "medium" | "high" | "max";
 };
 
 const runtimeModelConfig: RuntimeModelConfig = {};
@@ -26,6 +27,7 @@ export function setRuntimeModelConfig(cfg: RuntimeModelConfig): void {
   if (cfg.modelApiKey !== undefined) runtimeModelConfig.modelApiKey = cfg.modelApiKey;
   if (cfg.modelName !== undefined) runtimeModelConfig.modelName = cfg.modelName;
   if (cfg.modelJsonMode !== undefined) runtimeModelConfig.modelJsonMode = cfg.modelJsonMode;
+  if (cfg.modelReasoningEffort !== undefined) runtimeModelConfig.modelReasoningEffort = cfg.modelReasoningEffort;
 }
 
 /** Clears every runtime override so loadConfig falls back entirely to env. */
@@ -34,6 +36,7 @@ export function resetRuntimeModelConfig(): void {
   runtimeModelConfig.modelApiKey = undefined;
   runtimeModelConfig.modelName = undefined;
   runtimeModelConfig.modelJsonMode = undefined;
+  runtimeModelConfig.modelReasoningEffort = undefined;
 }
 
 /**
@@ -66,6 +69,7 @@ export type ServerConfig = {
   modelApiKey: string | null;
   modelName: string | null;
   modelJsonMode: "prompt" | "json_object";
+  modelReasoningEffort: "low" | "medium" | "high" | "max";
   /** Hard deadline for a single model call (ms); the run aborts when exceeded. */
   modelTimeoutMs: number;
   /** Server-only SerpApi API key; never exposed to the client. */
@@ -104,12 +108,19 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
   const modelName = pickPersisted(runtimeModelConfig.modelName, persisted.MODEL_NAME, env.MODEL_NAME?.trim() || null);
   const persistedJsonMode = persisted.MODEL_JSON_MODE === "json_object" || persisted.MODEL_JSON_MODE === "prompt" ? persisted.MODEL_JSON_MODE : undefined;
   const effectiveJsonMode = runtimeModelConfig.modelJsonMode ?? persistedJsonMode ?? jsonMode;
+  const validEfforts = ["low", "medium", "high", "max"] as const;
+  const isReasoningEffort = (v: unknown): v is "low" | "medium" | "high" | "max" =>
+    typeof v === "string" && (validEfforts as readonly string[]).includes(v);
+  const reasoningEffort = isReasoningEffort(env.MODEL_REASONING_EFFORT) ? env.MODEL_REASONING_EFFORT : "medium";
+  const persistedReasoningEffort = isReasoningEffort(persisted.MODEL_REASONING_EFFORT) ? persisted.MODEL_REASONING_EFFORT : undefined;
+  const effectiveReasoningEffort = runtimeModelConfig.modelReasoningEffort ?? persistedReasoningEffort ?? reasoningEffort;
   const serpApiKey = pickPersisted(runtimeSerpApiConfig.apiKey, persisted.SERPAPI_API_KEY, env.SERPAPI_API_KEY?.trim() || null);
   return {
     modelBaseUrl,
     modelApiKey,
     modelName,
     modelJsonMode: effectiveJsonMode,
+    modelReasoningEffort: effectiveReasoningEffort,
     // A single topic-discovery call often takes minutes on a large prompt;
     // 300s default, floored at 10s so a 0/negative env cannot abort instantly.
     modelTimeoutMs: Math.max(10_000, intFromEnv("MODEL_TIMEOUT_MS", 300_000)),
@@ -223,7 +234,7 @@ function quoteEnvValue(value: string): string {
 }
 
 /** Keys persisted in data/config.local.json (env-style names, JSON values). */
-const PERSISTED_CONFIG_KEYS = ["MODEL_API_KEY", "MODEL_BASE_URL", "MODEL_JSON_MODE", "MODEL_NAME", "SERPAPI_API_KEY"] as const;
+const PERSISTED_CONFIG_KEYS = ["MODEL_API_KEY", "MODEL_BASE_URL", "MODEL_JSON_MODE", "MODEL_NAME", "MODEL_REASONING_EFFORT", "SERPAPI_API_KEY"] as const;
 
 export type PersistedConfigKey = (typeof PERSISTED_CONFIG_KEYS)[number];
 
@@ -294,6 +305,7 @@ export function persistRuntimeConfig(update: RuntimeConfigUpdate, env: NodeJS.Pr
     assign("MODEL_API_KEY", update.model.modelApiKey);
     assign("MODEL_NAME", update.model.modelName);
     assign("MODEL_JSON_MODE", update.model.modelJsonMode);
+    assign("MODEL_REASONING_EFFORT", update.model.modelReasoningEffort);
   }
   if (update.serpApi) assign("SERPAPI_API_KEY", update.serpApi.apiKey);
 

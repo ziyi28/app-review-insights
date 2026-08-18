@@ -32,6 +32,7 @@ point of this project.
 | `MODEL_API_KEY` | bearer token; empty is allowed for local runtimes |
 | `MODEL_NAME` | model identifier |
 | `MODEL_JSON_MODE` | `prompt` (default, JSON via prompt) or `json_object` (declared response format) |
+| `MODEL_REASONING_EFFORT` | `low`, `medium` (default), `high`, or `max` reasoning effort |
 
 Secrets come from the environment (`.env` / `.env.local`) or the settings
 panel, which persists to the git-ignored `data/config.local.json`. Either way

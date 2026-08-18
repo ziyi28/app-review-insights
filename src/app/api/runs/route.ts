@@ -197,6 +197,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
           apiKey: cfg.modelApiKey ?? "",
           model: cfg.modelName,
           jsonMode: cfg.modelJsonMode,
+          reasoningEffort: cfg.modelReasoningEffort,
           timeoutMs: cfg.modelTimeoutMs,
         })
       : ({ generate: async () => { throw new Error("model not configured"); } } as never);

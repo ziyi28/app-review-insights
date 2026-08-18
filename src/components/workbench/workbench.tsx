@@ -670,6 +670,7 @@ export function Workbench() {
                   <ArtifactPhaseSelector revised={traceFinal !== null} phase={tracePhase} onSelect={setTracePhase} t={t} />
                   <TraceabilityPanel
                     report={activeTrace}
+                    revisedAndValid={traceFinal?.valid === true}
                     findings={cache.findings?.findings}
                     prd={activePrd}
                     tests={activeTests}

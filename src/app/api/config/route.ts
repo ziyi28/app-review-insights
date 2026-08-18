@@ -13,6 +13,7 @@ function configStatus(cfg: ReturnType<typeof loadConfig>) {
     modelName: cfg.modelName,
     modelBaseUrl: cfg.modelBaseUrl,
     jsonMode: cfg.modelJsonMode,
+    reasoningEffort: cfg.modelReasoningEffort,
     runsDir: cfg.runsDir,
     limits: {
       appleRssMaxPages: cfg.appleRssMaxPages,
@@ -54,6 +55,7 @@ export async function POST(req: Request) {
   if (update.modelApiKey !== undefined) runtime.modelApiKey = update.modelApiKey;
   if (update.modelName !== undefined) runtime.modelName = update.modelName;
   if (update.modelJsonMode !== undefined) runtime.modelJsonMode = update.modelJsonMode;
+  if (update.modelReasoningEffort !== undefined) runtime.modelReasoningEffort = update.modelReasoningEffort;
 
   persistRuntimeConfig({
     model: runtime,

@@ -211,6 +211,36 @@ describe("TraceabilityPanel", () => {
     expect(within(rows()[0]).queryByText(t.traceStatusClosed)).not.toBeInTheDocument();
   });
 
+  it("contextualizes an invalid draft as auto-revised when the final validation passed", () => {
+    render(
+      <TraceabilityPanel
+        report={{ valid: false, violations: [{ code: "X", message: "boom", entity: "finding-1" }] }}
+        findings={[finding1]}
+        prd={{ requirements: [req1] }}
+        tests={[]}
+        t={t}
+        revisedAndValid
+      />,
+    );
+    expect(screen.getByText(/auto-revised & passed/)).toBeInTheDocument();
+    expect(screen.queryByText(t.failed)).not.toBeInTheDocument();
+    // The violations themselves remain visible (they are the draft's record).
+    expect(screen.getByText(/boom/)).toBeInTheDocument();
+  });
+
+  it("keeps the plain failed label when an invalid draft was never revised", () => {
+    render(
+      <TraceabilityPanel
+        report={{ valid: false, violations: [{ code: "X", message: "boom", entity: "finding-1" }] }}
+        findings={[finding1]}
+        prd={{ requirements: [req1] }}
+        tests={[]}
+        t={t}
+      />,
+    );
+    expect(screen.getByText(t.failed)).toBeInTheDocument();
+  });
+
   it("shows a missing-test status for a finding with requirements but no covering test", () => {
     render(
       <TraceabilityPanel

@@ -64,6 +64,32 @@ describe("OpenAiCompatibleClient", () => {
     expect(body.temperature).toBe(0.1);
   });
 
+  it("defaults reasoning_effort to medium in payload", async () => {
+    const { client, fetchMock } = makeClient();
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+    await client.generate(requestBase());
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const body = JSON.parse(String(init.body));
+    expect(body.reasoning_effort).toBe("medium");
+  });
+
+  it("uses specified reasoning_effort in payload", async () => {
+    const fetchMock = vi.fn();
+    const client = new OpenAiCompatibleClient({
+      baseUrl: "https://example.com/v1",
+      apiKey: "secret-key",
+      model: "model-x",
+      jsonMode: "prompt",
+      reasoningEffort: "high",
+      fetchFn: fetchMock as unknown as typeof fetch,
+    });
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] })));
+    await client.generate(requestBase());
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    const body = JSON.parse(String(init.body));
+    expect(body.reasoning_effort).toBe("high");
+  });
+
   it("surfaces a client abort as a non-transient abort error", async () => {
     const { client, fetchMock } = makeClient();
     fetchMock.mockRejectedValue(new DOMException("aborted", "AbortError"));

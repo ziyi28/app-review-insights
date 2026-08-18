@@ -2,6 +2,8 @@ import type { z } from "zod";
 
 export type ModelJsonMode = "prompt" | "json_object";
 
+export type ModelReasoningEffort = "low" | "medium" | "high" | "max";
+
 export type ModelProgress =
   | { kind: "heartbeat"; elapsedMs: number }
   | {

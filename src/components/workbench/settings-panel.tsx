@@ -16,6 +16,7 @@ type ConfigState = {
   modelBaseUrl: string;
   modelName: string;
   jsonMode: "prompt" | "json_object";
+  reasoningEffort: "low" | "medium" | "high" | "max";
   apiKeyConfigured: boolean;
   serpApiKeyConfigured: boolean;
 };
@@ -30,7 +31,7 @@ type ConfigState = {
  * always blank (no prefilled secret, no reveal).
  */
 export function SettingsPanel({ t, open, onClose, onConfigChange }: SettingsPanelProps) {
-  const [config, setConfig] = useState<ConfigState>({ modelBaseUrl: "", modelName: "", jsonMode: "prompt", apiKeyConfigured: false, serpApiKeyConfigured: false });
+  const [config, setConfig] = useState<ConfigState>({ modelBaseUrl: "", modelName: "", jsonMode: "prompt", reasoningEffort: "medium", apiKeyConfigured: false, serpApiKeyConfigured: false });
   const [apiKey, setApiKey] = useState("");
   const [serpApiKey, setSerpApiKey] = useState("");
   const [saving, setSaving] = useState(false);
@@ -53,10 +54,15 @@ export function SettingsPanel({ t, open, onClose, onConfigChange }: SettingsPane
         const res = await fetch("/api/config", { cache: "no-store" });
         const json = await res.json();
         if (cancelled) return;
+        const validEfforts = ["low", "medium", "high", "max"];
+        const reasoningEffort = validEfforts.includes(json.reasoningEffort as string)
+          ? (json.reasoningEffort as "low" | "medium" | "high" | "max")
+          : "medium";
         setConfig({
           modelBaseUrl: (json.modelBaseUrl as string) ?? "",
           modelName: (json.modelName as string) ?? "",
           jsonMode: json.jsonMode === "json_object" ? "json_object" : "prompt",
+          reasoningEffort,
           apiKeyConfigured: Boolean(json.modelApiKeyConfigured),
           serpApiKeyConfigured: Boolean(json.serpApiKeyConfigured),
         });
@@ -80,6 +86,7 @@ export function SettingsPanel({ t, open, onClose, onConfigChange }: SettingsPane
     body.modelBaseUrl = config.modelBaseUrl.trim() || null;
     body.modelName = config.modelName.trim() || null;
     body.modelJsonMode = config.jsonMode;
+    body.modelReasoningEffort = config.reasoningEffort;
     if (apiKey.trim()) {
       body.modelApiKey = apiKey.trim();
     }
@@ -221,6 +228,22 @@ export function SettingsPanel({ t, open, onClose, onConfigChange }: SettingsPane
             <option value="prompt">prompt</option>
             <option value="json_object">json_object</option>
           </select>
+
+          <label className="field-label" htmlFor="settings-reasoning-effort">
+            {t.modelReasoningEffort}
+          </label>
+          <select
+            id="settings-reasoning-effort"
+            className="field"
+            value={config.reasoningEffort}
+            onChange={(e) => setConfig((c) => ({ ...c, reasoningEffort: e.target.value as "low" | "medium" | "high" | "max" }))}
+          >
+            <option value="low">low</option>
+            <option value="medium">medium</option>
+            <option value="high">high</option>
+            <option value="max">max</option>
+          </select>
+          <p style={{ margin: 0, fontSize: "12px", color: "var(--text-muted)" }}>{t.modelReasoningEffortHint}</p>
 
           <h4 style={{ margin: "12px 0 0" }}>{t.dataSourceSettings}</h4>
           <label className="field-label" htmlFor="settings-serpapi-api-key">

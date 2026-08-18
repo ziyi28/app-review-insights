@@ -11,6 +11,7 @@ export const ConfigUpdateSchema = z
     modelApiKey: z.string().trim().max(4096).nullable().optional(),
     modelName: z.string().trim().max(256).nullable().optional(),
     modelJsonMode: z.enum(["prompt", "json_object"]).optional(),
+    modelReasoningEffort: z.enum(["low", "medium", "high", "max"]).optional(),
     serpApiKey: z.string().trim().min(1).max(4096).nullable().optional(),
   })
   .strict();

@@ -16,6 +16,7 @@ beforeEach(() => {
   delete process.env.MODEL_API_KEY;
   delete process.env.MODEL_NAME;
   delete process.env.MODEL_JSON_MODE;
+  delete process.env.MODEL_REASONING_EFFORT;
   delete process.env.SERPAPI_API_KEY;
   delete process.env.SERPAPI_BASE_URL;
   delete process.env.SERPAPI_TIMEOUT_MS;
@@ -61,6 +62,7 @@ describe("GET /api/config", () => {
     const json = await jsonResponse(res);
     expect(json.modelConfigured).toBe(true);
     expect(json.modelApiKeyConfigured).toBe(true);
+    expect(json.reasoningEffort).toBe("medium");
     expect(JSON.stringify(json)).not.toContain("sk-secret");
   });
 
@@ -79,6 +81,7 @@ describe("POST /api/config", () => {
       modelApiKey: "sk-new-key",
       modelName: "new-model",
       modelJsonMode: "json_object",
+      modelReasoningEffort: "high",
     }));
     expect(res.status).toBe(200);
 
@@ -88,7 +91,10 @@ describe("POST /api/config", () => {
     expect(cfg.modelApiKey).toBe("sk-new-key");
     expect(cfg.modelName).toBe("new-model");
     expect(cfg.modelJsonMode).toBe("json_object");
-    expect(cfg.modelBaseUrl).toBe((await jsonResponse(res)).modelBaseUrl as string);
+    expect(cfg.modelReasoningEffort).toBe("high");
+    const json = await jsonResponse(res);
+    expect(cfg.modelBaseUrl).toBe(json.modelBaseUrl as string);
+    expect(json.reasoningEffort).toBe("high");
 
     // Persisted to the git-ignored JSON file.
     expect(readDataFile()).toEqual({
@@ -96,6 +102,7 @@ describe("POST /api/config", () => {
       MODEL_API_KEY: "sk-new-key",
       MODEL_NAME: "new-model",
       MODEL_JSON_MODE: "json_object",
+      MODEL_REASONING_EFFORT: "high",
     });
 
     // .env.local is never created or touched (touching it would make Next.js
@@ -147,6 +154,11 @@ describe("POST /api/config", () => {
 
   it("rejects an invalid url", async () => {
     const res = await POST(configRequest({ modelBaseUrl: "not-a-url" }));
+    expect(res.status).toBe(422);
+  });
+
+  it("rejects an invalid reasoning effort enum with 422", async () => {
+    const res = await POST(configRequest({ modelReasoningEffort: "extreme" }));
     expect(res.status).toBe(422);
   });
 

@@ -173,12 +173,13 @@ Apple RSS 也返回 HTTP 200 空体（标记为 `suspect-empty`，绝不解读�
 | `MODEL_API_KEY` | bearer token；本地运行时可以为空 |
 | `MODEL_NAME` | 模型标识 |
 | `MODEL_JSON_MODE` | `prompt`（默认）或 `json_object` |
+| `MODEL_REASONING_EFFORT` | `low`、`medium`（默认）、`high` 或 `max` |
 
 把 `.env.example` 复制为 `.env`（git-ignore）并填写你的值。密钥永远不会被记录日志、
 持久化或提交。Temperature 固定为 0.1。
 
-**你也可以在界面中配置模型：** 打开顶栏的 **设置**，填写 API Base URL、API Key、模型名称
-和 JSON 模式。保存后立即生效（无需重启），并持久化到本地 git-ignore 的
+**你也可以在界面中配置模型：** 打开顶栏的 **设置**，填写 API Base URL、API Key、模型名称、
+JSON 模式和推理强度。保存后立即生效（无需重启），并持久化到本地 git-ignore 的
 `data/config.local.json`，重启后仍保留；`.env.local` / `.env` 仍作为启动配置生效，老用户无需
 迁移。API Key 永远不会返回给客户端 —— 面板只显示是否已配置，并提供清除选项。
 

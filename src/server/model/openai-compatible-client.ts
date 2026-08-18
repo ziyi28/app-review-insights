@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import type { ModelJsonMode, ModelMeta, ModelRequest, ModelResult, ModelUsageLog } from "./types";
+import type { ModelJsonMode, ModelMeta, ModelReasoningEffort, ModelRequest, ModelResult, ModelUsageLog } from "./types";
 import { extractJsonObject } from "./parse-json";
 
 export type ModelClientDeps = {
@@ -7,6 +7,7 @@ export type ModelClientDeps = {
   apiKey: string;
   model: string;
   jsonMode: ModelJsonMode;
+  reasoningEffort?: ModelReasoningEffort;
   temperature?: number;
   fetchFn?: typeof fetch;
   signal?: AbortSignal;
@@ -17,6 +18,7 @@ export type ModelClientDeps = {
 };
 
 const TEMPERATURE = 0.1;
+const DEFAULT_REASONING_EFFORT: ModelReasoningEffort = "medium";
 // Heartbeats are a low-noise "still working" signal, not a progress meter; a
 // 10s interval keeps long model calls responsive to the UI without emitting a
 // stream event every 2 seconds for a call that may run for minutes.
@@ -41,6 +43,7 @@ export class OpenAiCompatibleClient {
   private readonly apiKey: string;
   private readonly model: string;
   private readonly jsonMode: ModelJsonMode;
+  private readonly reasoningEffort: ModelReasoningEffort;
   private readonly temperature: number;
   private readonly fetchFn: typeof fetch;
   private readonly signal?: AbortSignal;
@@ -53,6 +56,7 @@ export class OpenAiCompatibleClient {
     this.apiKey = deps.apiKey;
     this.model = deps.model;
     this.jsonMode = deps.jsonMode;
+    this.reasoningEffort = deps.reasoningEffort ?? DEFAULT_REASONING_EFFORT;
     this.temperature = deps.temperature ?? TEMPERATURE;
     this.fetchFn = deps.fetchFn ?? fetch;
     this.signal = deps.signal;
@@ -110,6 +114,7 @@ export class OpenAiCompatibleClient {
     const payload: Record<string, unknown> = {
       model: this.model,
       temperature: this.temperature,
+      reasoning_effort: this.reasoningEffort,
       messages: [
         { role: "system", content: request.system },
         { role: "user", content: userContent },

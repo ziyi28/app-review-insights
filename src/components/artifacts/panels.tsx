@@ -297,6 +297,7 @@ export function TraceabilityPanel({
   findings = [],
   prd,
   tests = [],
+  revisedAndValid = false,
   t,
   onJumpToReview,
   onJumpToPrd,
@@ -306,6 +307,7 @@ export function TraceabilityPanel({
   findings?: Finding[];
   prd?: Prd | { requirements?: Requirement[] } | null;
   tests?: TestCase[];
+  revisedAndValid?: boolean;
   t: Dictionary;
   onJumpToReview?: (id: string) => void;
   onJumpToPrd?: (reqId?: string) => void;
@@ -315,6 +317,22 @@ export function TraceabilityPanel({
 
   const requirements: Requirement[] = prd ? ("requirements" in prd ? (prd.requirements ?? []) : []) : [];
 
+  // En revision is not the end of the story: when a later (final) validation
+  // passed after an automatic revision, the draft failure is contextualized
+  // instead of read as the run having failed.
+  const revisedAndFixed = !!report && !report.valid && revisedAndValid;
+  const statusColor = report?.valid ? "var(--ok)" : revisedAndFixed ? "var(--warn)" : "var(--danger)";
+  const statusBackground = report?.valid
+    ? "rgba(74,222,128,0.08)"
+    : revisedAndFixed
+      ? "var(--warn-soft)"
+      : "rgba(248,113,113,0.08)";
+  const statusLabel = report?.valid
+    ? t.completed
+    : revisedAndFixed
+      ? t.traceRevisedPassed.replace("{count}", String(report.violations.length))
+      : t.failed;
+
   return (
     <div style={{ display: "grid", gap: "16px" }}>
       {/* Verification Status */}
@@ -323,8 +341,8 @@ export function TraceabilityPanel({
           style={{
             padding: "12px 16px",
             borderRadius: "8px",
-            background: report.valid ? "rgba(74,222,128,0.08)" : "rgba(248,113,113,0.08)",
-            border: `1px solid ${report.valid ? "var(--ok)" : "var(--danger)"}`,
+            background: statusBackground,
+            border: `1px solid ${statusColor}`,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
@@ -339,12 +357,10 @@ export function TraceabilityPanel({
                 width: "8px",
                 height: "8px",
                 borderRadius: "50%",
-                background: report.valid ? "var(--ok)" : "var(--danger)",
+                background: statusColor,
               }}
             />
-            <strong style={{ color: report.valid ? "var(--ok)" : "var(--danger)" }}>
-              {report.valid ? t.completed : t.failed}
-            </strong>
+            <strong style={{ color: statusColor }}>{statusLabel}</strong>
             <span style={{ color: "var(--text-muted)", fontSize: "13px" }}>
               — {report.violations.length} {t.errors} ({t.traceValidationSummary})
             </span>
