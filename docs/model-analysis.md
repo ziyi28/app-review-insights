@@ -39,6 +39,11 @@ panel, which persists to the git-ignored `data/config.local.json`. Either way
 they never enter run snapshots, API responses, or logs. `.env.example`
 documents the env shape.
 
+### Model Performance & Benchmark Notes
+
+- **`gpt5.6luna` (Fast & High Quality)**: In benchmark runs, `gpt5.6luna` completes the full multi-stage analysis pipeline in approximately **2 minutes** while producing high-quality semantic insights and adhering strictly to structured JSON requirements.
+- **`deepseek-v4-flash` (Baseline)**: The benchmark and test suite baseline is verified against `deepseek-v4-flash`, taking around **20 minutes** for the complete pipeline.
+
 ## Prompt discipline
 
 - Prompts live in `src/server/model/prompts/*.ts` (one file per version) with

@@ -259,9 +259,10 @@ For the bundled demo fixtures the analysis used a DeepSeek-compatible endpoint
 `provenance.json` and is **not** required to replay them.
 
 > [!IMPORTANT]
-> **Model Selection and Compatibility Note:**
-> - **Recommended Model**: The entire development and end-to-end benchmark baseline is built and verified against **`deepseek-v4-flash`**. It delivers the highest fidelity and compliance for structured JSON outputs, strict schema contracts, and exact evidence substrings.
-> - **Switching to Other Models (e.g., Qwen series)**: The analysis pipeline enforces strict deterministic Zod schema validation across all stages (such as requiring non-empty supporting citations and canonical ID prefixes). When switching to other models (such as Alibaba Cloud Qwen, Llama, or other open-weight/commercial models), minor discrepancies—such as empty supporting arrays (`supportingReviewIds: []`), omitted fields, or slight formatting drifts during chunked analysis—can trigger `MODEL_SCHEMA_VIOLATION` errors and cause runs to fail. If you experience instability, switch back to the recommended `deepseek-v4-flash` model.
+> **Model Selection, Performance Comparison, and Compatibility Note:**
+> - **Speed & Quality Comparison**: In actual testing, **`gpt5.6luna`** (or equivalent compatible models) runs significantly faster, completing a full end-to-end pipeline run in approximately **2 minutes** while maintaining good analysis quality; in comparison, **`deepseek-v4-flash`** takes around **20 minutes** for a full run. Users can choose based on their execution time preferences.
+> - **Baseline Model**: The development and benchmark baseline is verified against **`deepseek-v4-flash`**. It delivers high fidelity and compliance for structured JSON outputs, strict schema contracts, and exact evidence substrings.
+> - **Switching to Other Models (e.g., Qwen series)**: The analysis pipeline enforces strict deterministic Zod schema validation across all stages (such as requiring non-empty supporting citations and canonical ID prefixes). When switching to other models (such as Alibaba Cloud Qwen, Llama, or other open-weight/commercial models), minor discrepancies—such as empty supporting arrays (`supportingReviewIds: []`), omitted fields, or slight formatting drifts during chunked analysis—can trigger `MODEL_SCHEMA_VIOLATION` errors and cause runs to fail. If you experience instability, consider using `gpt5.6luna` or `deepseek-v4-flash`.
 
 See `docs/model-analysis.md` for per-stage rules-vs-model rationale, prompt
 versions, and failure handling.
