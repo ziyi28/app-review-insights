@@ -534,6 +534,22 @@ describe("consolidateFindings", () => {
     expect(result.warnings.some((w) => w.code === "FINDING_GROUP_UNKNOWN_CANDIDATE")).toBe(true);
   });
 
+  it("drops non-string focusAreaId values instead of crashing (regression: MODEL_SCHEMA_VIOLATION)", () => {
+    // A pathological model output — a numeric focus area id — used to surface
+    // as a fatal MODEL_SCHEMA_VIOLATION during consolidateFindings and fail the
+    // whole run. It must now degrade to a warning and keep the valid members.
+    const candidates = [candidateFinding("c1", ["r1"], ["focus-1"])];
+    const result = consolidateFindings(
+      candidates,
+      // TS type allows numbers in focusAreaIds as model output can.
+      [{ id: "finding-1", title: "a", summary: "a", candidateIds: ["c1"], focusAreaIds: ["focus-1", 42 as unknown as never] }] as never,
+      "complete",
+    );
+    expect(result.findings).toHaveLength(1);
+    expect(result.findings[0].focusAreaIds).toEqual(["focus-1"]);
+    expect(result.warnings.some((w) => w.code === "FINDING_GROUP_FOCUS_AREA_INVALID")).toBe(true);
+  });
+
   it("drops unused candidates and keeps every valid group", () => {
     const candidates = Array.from({ length: 30 }, (_, i) => candidateFinding(`c${i}`, [`r${i}`]));
     const groups = Array.from({ length: 5 }, (_, i) => ({ id: `finding-${i + 1}`, title: "a", summary: "a", candidateIds: [`c${i}`] }));

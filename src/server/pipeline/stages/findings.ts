@@ -266,7 +266,7 @@ function candidateById(candidates: Finding[]): Map<string, Finding> {
  */
 export function consolidateFindings(
   candidates: Finding[],
-  groups: { id: string; title: string; summary: string; candidateIds: string[]; focusAreaIds?: string[] }[],
+  groups: { id: string; title: string; summary: string; candidateIds: string[]; focusAreaIds?: (string | number | boolean | null)[] }[],
   sourceStatus: SourceStatus,
   reviews: NormalizedReview[] = [],
 ): { findings: Finding[]; warnings: { code: string; message: string }[]; usedCandidateIds: Set<string>; droppedCandidateIds: string[] } {
@@ -309,7 +309,17 @@ export function consolidateFindings(
     const members = fresh.map((id) => index.get(id)!);
     const mergedSupport = [...new Set(members.flatMap((m) => m.supportingReviewIds))];
     const topicIds = [...new Set(members.flatMap((m) => m.topicIds))];
-    const focusAreaIds = [...new Set([...members.flatMap((m) => m.focusAreaIds), ...(g.focusAreaIds ?? [])])];
+    // Focus-area ids are untrusted model fields: only strings are kept, so a
+    // pathological value (e.g. a numeric focus-id) degrades to a warning here
+    // rather than crashing consolidation.
+    const gFocusAreaIds = (g.focusAreaIds ?? []).filter((id): id is string => typeof id === "string");
+    if (gFocusAreaIds.length !== (g.focusAreaIds ?? []).length) {
+      warnings.push({
+        code: "FINDING_GROUP_FOCUS_AREA_INVALID",
+        message: `${g.id} returned ${(g.focusAreaIds ?? []).length - gFocusAreaIds.length} non-string focusAreaId value(s); dropped deterministically`,
+      });
+    }
+    const focusAreaIds = [...new Set([...members.flatMap((m) => m.focusAreaIds), ...gFocusAreaIds])];
     const conflictingReviewIds = [...new Set(members.flatMap((m) => m.conflictingReviewIds))];
     const { supporting: supportingReviewIds, removed } = resolveSupportConflictOverlap(
       mergedSupport,

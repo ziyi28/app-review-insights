@@ -3,7 +3,12 @@ import type { PromptDefinition } from "./registry";
 
 /** A consolidated finding group: may only reference existing candidate ids and
  *  re-normalize their titles/summaries. Every returned group is re-normalized
- *  deterministically by the stage (evidence merged, counts recomputed). */
+ *  deterministically by the stage (evidence merged, counts recomputed).
+ *  `focusAreaIds` is typed loosely (strings expected; anything else is dropped
+ *  deterministically in `consolidateFindings`) so a PATHOLOGICAL model value —
+ *  e.g. a numeric focus-id — degrades to a warning instead of failing a whole
+ *  run with MODEL_SCHEMA_VIOLATION, matching how other stages tolerate and
+ *  re-normalize untrusted model fields. */
 export const FindingConsolidationOutputSchema = z.object({
   groups: z.array(
     z.object({
@@ -11,7 +16,7 @@ export const FindingConsolidationOutputSchema = z.object({
       title: z.string().min(1).max(500),
       summary: z.string().min(1).max(5_000),
       candidateIds: z.array(z.string()).min(1),
-      focusAreaIds: z.array(z.string()).default([]),
+      focusAreaIds: z.array(z.union([z.string(), z.number(), z.boolean(), z.null()])).default([]),
     }),
   ),
 });
