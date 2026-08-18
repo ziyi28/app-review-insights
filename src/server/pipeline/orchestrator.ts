@@ -10,6 +10,7 @@ import { runScopeStage } from "./stages/scope";
 import { runTopicsStage } from "./stages/topics";
 import { runFindingsStage, normalizeFindings } from "./stages/findings";
 import { runPlanningWithCoverage, normalizePlanningOutput } from "./stages/planning";
+import { runRequirementEvidenceStage } from "./stages/requirement-evidence";
 import { runTestsStage, normalizeTestsOutput } from "./stages/tests";
 import { runRevisionStage } from "./stages/revision";
 import type { FindingOutput, PlanningOutput, TestsOutput } from "@/server/model/prompts/prompts";
@@ -516,6 +517,26 @@ export async function executeRun(
     await startStage("planning");
     const planning = await runPlanningWithCoverage({ model: deps.model, findings: findingsResult.findings, outputLocale, goal, focusAreas, onProgress: onStageProgress("planning") });
     for (const w of planning.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "planning", data: w });
+    await endStage("planning");
+
+    // Requirement evidence: independently judge every (requirement, candidate
+    // review) pair so a requirement no longer inherits a finding's whole review
+    // set as its formal evidence. sourceReviewIds narrows to direct support;
+    // the audit is persisted so the direct/partial/none split is inspectable.
+    await startStage("requirement-evidence");
+    const requirementEvidence = await runRequirementEvidenceStage({
+      model: deps.model,
+      requirements: planning.prd.requirements,
+      findings: planning.prd.findings,
+      reviews: analysisReviews,
+      outputLocale,
+      onProgress: onStageProgress("requirement-evidence"),
+    });
+    for (const w of requirementEvidence.report.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "requirement-evidence", data: w });
+    planning.prd = { ...planning.prd, requirements: requirementEvidence.requirements };
+    await publishArtifact("requirement-evidence", 1, requirementEvidence.report);
+    await endStage("requirement-evidence");
+
     await publishArtifact("version-plan", 1, planning.versionPlan);
     await publishArtifact("prd", 1, planning.prd);
     goalCoverageArtifact = planning.goalCoverage;
@@ -545,7 +566,6 @@ export async function executeRun(
         await publisher.publish({ type: "limitation.reported", runId, stage: "planning", data: limitation });
       }
     }
-    await endStage("planning");
 
     // Tests
     await startStage("tests");
@@ -611,6 +631,13 @@ export async function executeRun(
         },
         revisedFindingsResult.findings,
         outputLocale,
+        // Preserve the evidence selection already applied by the
+        // requirement-evidence stage: the revision may only remove evidence, so
+        // re-normalization intersects the findings union with the frozen,
+        // already-filtered requirement evidence rather than re-inflating it.
+        new Map(
+          Object.entries(frozenLedger.requirements).map(([id, rids]) => [id, new Set(rids)]),
+        ),
       );
       for (const w of revisedPlanning.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "revision", data: w });
       const revisedTestsResult = normalizeTestsOutput(

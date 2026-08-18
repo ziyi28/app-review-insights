@@ -116,6 +116,8 @@ async function buildScript(): Promise<string[]> {
       ],
       assumptions: [],
     }),
+    // requirement-evidence: the single candidate review directly supports req-1.
+    JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "praises workout variety" }] }),
     // tests
     JSON.stringify({
       tests: [
@@ -373,9 +375,9 @@ describe("executeRun (live pipeline)", () => {
     const manifest = await store.readManifest(runId);
     expect(manifest.status).toBe("completed");
     expect(manifest.canReplay).toBe(true);
-    // buildScript yields 6 model calls: scope, topic discovery, consolidation,
-    // findings, planning, tests.
-    expect(model.callIndex).toBe(6);
+    // buildScript yields 7 model calls: scope, topic discovery, consolidation,
+    // findings, planning, requirement-evidence, tests.
+    expect(model.callIndex).toBe(7);
     // The selected dataset is persisted as a run-local raw-reviews artifact.
     const rawArtifact = (await store.readArtifact(runId, "raw-reviews", 1)) as { reviews: unknown[] };
     expect(rawArtifact.reviews).toHaveLength(1);
@@ -495,8 +497,8 @@ describe("executeRun (live pipeline)", () => {
     expect(manifest.status).toBe("completed");
     expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
     // planning/tests still run (a finding exists, it is just insufficient),
-    // so the full 6-stage script executes.
-    expect(model.callIndex).toBe(6);
+    // so the full 7-stage script executes.
+    expect(model.callIndex).toBe(7);
     const prd = (await store.readArtifact(runId, "prd", 1)) as {
       requirements: { priority: string; versionId: string | null }[];
       versions: { requirementIds: string[] }[];
@@ -652,6 +654,13 @@ describe("executeRun (live pipeline)", () => {
         ],
         assumptions: [],
       }),
+      // requirement-evidence: all three candidate reviews support the pricing
+      // requirement directly.
+      JSON.stringify({ requirementId: "req-1", verdicts: [
+        { reviewId: "rev-1", relation: "direct", confidence: 1, reason: "price complaint" },
+        { reviewId: "rev-2", relation: "direct", confidence: 1, reason: "price complaint" },
+        { reviewId: "rev-3", relation: "direct", confidence: 1, reason: "price complaint" },
+      ] }),
       // tests
       JSON.stringify({
         tests: [

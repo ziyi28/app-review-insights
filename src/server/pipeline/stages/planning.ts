@@ -40,6 +40,15 @@ export function normalizePlanningOutput(
   output: PlanningOutput,
   findings: Finding[],
   outputLocale: "en" | "zh-CN",
+  /**
+   * Optional requirement -> allowed-review-id filter. When present, a
+   * requirement's sourceReviewIds is the findings union intersected with this
+   * set (used by the revision path to preserve the evidence selection already
+   * applied by the requirement-evidence stage — evidence may only be removed,
+   * never added). When absent, the full findings union is used (the candidate
+   * set, before semantic filtering).
+   */
+  evidenceFilter?: Map<string, Set<string>>,
 ): PlanningStageResult {
   const warnings: { code: string; message: string }[] = [];
   const findingIndex = new Map(findings.map((f) => [f.id, f]));
@@ -99,12 +108,17 @@ export function normalizePlanningOutput(
     if (versionId !== req.versionId && req.versionId) {
       warnings.push({ code: "PLANNING_VERSION_DROPPED", message: `${req.id} removed from target version ${req.versionId}` });
     }
+    const unionedEvidence = reviewIdsForFindings(validFindingIds, findings);
+    const filteredEvidence = evidenceFilter?.get(req.id);
+    const sourceReviewIds = filteredEvidence
+      ? unionedEvidence.filter((id) => filteredEvidence.has(id))
+      : unionedEvidence;
     requirements.push({
       id: req.id,
       findingIds: validFindingIds,
       title: req.title,
       description: req.description,
-      sourceReviewIds: reviewIdsForFindings(validFindingIds, findings),
+      sourceReviewIds,
       priority,
       acceptanceCriteria: req.acceptanceCriteria,
       versionId,

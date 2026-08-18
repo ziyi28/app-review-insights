@@ -148,10 +148,15 @@ export function validateTraceability(
         violations.push({ code: "REQUIREMENT_UNKNOWN_FINDING", message: `${req.id} links unknown finding ${fid}`, entity: req.id });
       }
     }
-    const expected = new Set(reviewIdsForFindings(req.findingIds, prd.findings));
-    const actual = new Set(req.sourceReviewIds);
-    if (expected.size !== actual.size || [...expected].some((id) => !actual.has(id))) {
-      violations.push({ code: "REQUIREMENT_EVIDENCE_MISMATCH", message: `${req.id} sourceReviewIds must equal findings evidence`, entity: req.id });
+    // A requirement's evidence must be a subset of its findings' supporting
+    // reviews: the requirement-evidence stage may narrow the set (direct/partial
+    // filtering) but may never widen it. The semantic filter is the model's job;
+    // this check only enforces the structural containment invariant.
+    const allowed = new Set(reviewIdsForFindings(req.findingIds, prd.findings));
+    for (const id of req.sourceReviewIds) {
+      if (!allowed.has(id)) {
+        violations.push({ code: "REQUIREMENT_EVIDENCE_MISMATCH", message: `${req.id} cites review ${id} outside its findings' evidence`, entity: req.id });
+      }
     }
     for (const id of req.sourceReviewIds) {
       if (!corpus.has(id)) violations.push({ code: "REVIEW_NOT_FOUND", message: `${req.id} cites unknown review ${id}`, entity: req.id });

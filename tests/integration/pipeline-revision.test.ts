@@ -67,6 +67,8 @@ describe("executeRun (revision path)", () => {
         requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
+      // requirement-evidence: the single candidate review supports req-1.
+      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
       // tests (cites a ghost review -> TEST_REVIEW_OUTSIDE_EVIDENCE -> traceability fails)
       JSON.stringify({
         tests: [
@@ -136,6 +138,8 @@ describe("executeRun (revision path)", () => {
         title: "Plan", overview: "x", versions: [], requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
+      // requirement-evidence: the single candidate review supports req-1.
+      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
       // tests cite a ghost review -> traceability fails -> revision runs
       JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
       // revision: same insufficient finding, still requests P1.
@@ -192,6 +196,8 @@ describe("executeRun (revision path)", () => {
         title: "Plan", overview: "x", versions: [], requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
+      // requirement-evidence: the single candidate review supports req-1.
+      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
       // tests cite a ghost review -> traceability fails -> revision runs
       JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
       // revision still leaves the requirement uncovered (empty tests)
@@ -289,6 +295,12 @@ describe("executeRun (revision path)", () => {
         ],
         assumptions: [],
       }),
+      // requirement-evidence: all three candidate reviews support req-1.
+      JSON.stringify({ requirementId: "req-1", verdicts: [
+        { reviewId: rid1, relation: "direct", confidence: 1, reason: "price complaint" },
+        { reviewId: rid2, relation: "direct", confidence: 1, reason: "price complaint" },
+        { reviewId: rid3, relation: "direct", confidence: 1, reason: "price complaint" },
+      ] }),
       // tests cite a ghost review -> traceability fails -> revision runs
       JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
       // revision: fixes the test citation but keeps requesting P1/ver-1. The

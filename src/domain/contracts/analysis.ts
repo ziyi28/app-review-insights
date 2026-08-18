@@ -151,6 +151,20 @@ export const FindingSchema = z
   });
 export type Finding = z.infer<typeof FindingSchema>;
 
+/**
+ * A per-(requirement, review) semantic verdict from the requirement-evidence
+ * selection step. Only reviews judged "direct" (or, as a fallback, "partial")
+ * enter `sourceReviewIds`; "none" is recorded for audit but never cited as
+ * formal support.
+ */
+export const EvidenceVerdictSchema = z.object({
+  reviewId: z.string().min(1),
+  relation: z.enum(["direct", "partial", "none"]),
+  confidence: z.number().min(0).max(1),
+  reason: z.string().min(1).max(1_000),
+});
+export type EvidenceVerdict = z.infer<typeof EvidenceVerdictSchema>;
+
 /** A product requirement traceable to one or more findings. */
 export const RequirementSchema = z.object({
   id: z.string().regex(/^req-/).min(1),
@@ -163,6 +177,9 @@ export const RequirementSchema = z.object({
   versionId: z.string().nullable().default(null),
   // Optional only for old cached runs; the planning normalizer always writes it.
   planningFactors: PlanningFactorsSchema.optional(),
+  // Optional for old cached runs and the planning stage's pre-selection output;
+  // the requirement-evidence stage writes it with the full audit verdicts.
+  evidenceVerdicts: z.array(EvidenceVerdictSchema).optional(),
 });
 export type Requirement = z.infer<typeof RequirementSchema>;
 

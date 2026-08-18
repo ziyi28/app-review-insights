@@ -56,6 +56,7 @@ describe("executeRun (import with mixed languages, duplicates, conflicts)", () =
         requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
+      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
       JSON.stringify({
         tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }],
       }),
@@ -104,6 +105,7 @@ describe("executeRun (import with mixed languages, duplicates, conflicts)", () =
         requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
+      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
       JSON.stringify({
         tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }],
       }),
@@ -198,6 +200,7 @@ describe("executeRun (import with mixed languages, duplicates, conflicts)", () =
         title: "Plan", overview: "x", versions: [], requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
+      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
       JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
     ]);
 
@@ -261,6 +264,7 @@ describe("executeRun (import with mixed languages, duplicates, conflicts)", () =
         title: "Plan", overview: "x", versions: [], requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
+      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
       JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
     ]);
 

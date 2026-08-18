@@ -86,6 +86,19 @@ function stubModel(dispatch: { scope?: unknown; discovery?: unknown; consolidati
       else if (request.promptVersion.includes("coverage-repair")) out = dispatch.coverageRepair;
       else if (request.promptVersion.includes("planning")) out = dispatch.planning;
       else if (request.promptVersion.includes("tests")) out = dispatch.tests;
+      else if (request.promptVersion.includes("requirement-evidence")) {
+        // Self-consistent stub: mark every candidate review the stage asks about
+        // as direct support, so the downstream tests/traceability ledger stays
+        // valid for any number of requirements or chunked calls.
+        const input = JSON.parse(String(request.user)) as {
+          requirement: { id: string };
+          candidateReviews: { reviewId: string }[];
+        };
+        out = {
+          requirementId: input.requirement.id,
+          verdicts: input.candidateReviews.map((c) => ({ reviewId: c.reviewId, relation: "direct", confidence: 1, reason: "scripted direct support" })),
+        };
+      }
       else out = { topics: [] };
       return request.schema.parse(out);
     },
