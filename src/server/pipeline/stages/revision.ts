@@ -56,17 +56,17 @@ function normalizeEntitiesReviewIds(entities: unknown[], allowed: string[]) {
   if (!Array.isArray(entities)) return;
   for (const e of entities) {
     if (!e || typeof e !== "object") continue;
-    const obj = e as Record<string, any>;
+    const obj = e as Record<string, unknown>;
     if (Array.isArray(obj.supportingReviewIds)) {
-      obj.supportingReviewIds = obj.supportingReviewIds.map((id: string) => (typeof id === "string" ? normalizeReviewId(id, allowed) : id));
+      obj.supportingReviewIds = obj.supportingReviewIds.map((id: unknown) => (typeof id === "string" ? normalizeReviewId(id, allowed) : id));
     }
     if (Array.isArray(obj.sourceReviewIds)) {
-      obj.sourceReviewIds = obj.sourceReviewIds.map((id: string) => (typeof id === "string" ? normalizeReviewId(id, allowed) : id));
+      obj.sourceReviewIds = obj.sourceReviewIds.map((id: unknown) => (typeof id === "string" ? normalizeReviewId(id, allowed) : id));
     }
     if (Array.isArray(obj.evidenceExcerpts)) {
       for (const exc of obj.evidenceExcerpts) {
-        if (exc && typeof exc === "object" && typeof exc.reviewId === "string") {
-          exc.reviewId = normalizeReviewId(exc.reviewId, allowed);
+        if (exc && typeof exc === "object" && "reviewId" in exc && typeof (exc as Record<string, unknown>).reviewId === "string") {
+          (exc as Record<string, unknown>).reviewId = normalizeReviewId((exc as Record<string, unknown>).reviewId as string, allowed);
         }
       }
     }

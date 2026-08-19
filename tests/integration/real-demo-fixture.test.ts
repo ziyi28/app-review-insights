@@ -13,10 +13,10 @@ const FIXTURE_ROOT = path.join(process.cwd(), "fixtures", "demo-runs");
 // categories are intentionally shipped to demonstrate the pipeline is not
 // hard-coded to any single app.
 const FIXTURES = [
-  // Captured on 2026-08-16 via build-real-demo.ts against the current code;
-  // both now use the SerpApi path (the persisted config carries a SerpApi key).
-  { runId: "run-x-twitter-us", appId: "333903271", reviewData: "serpapi-apple-reviews-real" },
-  { runId: "run-workout-for-women-us", appId: "839285684", reviewData: "serpapi-apple-reviews-real" },
+  // Captured via build-real-demo.ts against real US App Store reviews;
+  // both ship with verified US storefront provenance.
+  { runId: "run-x-twitter-us", appId: "333903271", reviewData: "apple-rss-real" },
+  { runId: "run-workout-for-women-us", appId: "839285684", reviewData: "apple-rss-real" },
 ];
 
 describe("real demo fixtures", () => {
