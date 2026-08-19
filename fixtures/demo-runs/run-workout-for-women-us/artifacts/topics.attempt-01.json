@@ -2,396 +2,375 @@
   "topics": [
     {
       "id": "topic-1",
-      "label": "Formerly free workouts are now locked behind premium paywall",
-      "description": "Long-time and free users report that previously free or saved workouts now require a paid subscription, and the free tier funnels into premium prompts. This creates a bait-and-switch feeling and is a major source of frustration.",
+      "label": "付费墙与免费内容大幅收窄引发冲突",
+      "description": "大量用户反映原本免费或带广告可用的训练如今几乎全部需要订阅，长期用户因此感到失望；同时也有付费用户认为订阅相对健身房费用公平、物有所值，形成对订阅付费价值的冲突反馈。",
       "candidateIds": [
         "topic-candidate-1@c0",
         "topic-candidate-1@c1",
-        "topic-candidate-2@c2"
+        "topic-candidate-2@c2",
+        "topic-candidate-1@c3",
+        "topic-candidate-3@c4",
+        "topic-candidate-2@c5"
       ],
       "reviewIds": [
+        "8f297219318483654e5c",
+        "9abdbf40c7644f9a6d8e",
         "a314d1d2904116031392",
         "bf8084e7f6501c7d9a6d",
         "41dda90bb7c5bf6a5f50",
         "f1d769915693bff365b5",
-        "9abdbf40c7644f9a6d8e",
-        "7d579ddab7ad9866916e",
         "1e26434428fd7d297ebd",
+        "7d579ddab7ad9866916e",
         "aa10fd1c007b0ebde89f",
         "9d842425c38a5a7bb4d4",
         "5a83a72849e12b022595",
-        "22362f152de51b719e6f",
         "ab3a2f593db6baa75d7a",
+        "cbb69a199b87635d6910",
+        "5388376e53d4eca15c60",
         "15adc40ae33fa59c6460",
         "3c469722f1d0864a64bb",
         "50dd40e82486e9e93aae",
-        "5388376e53d4eca15c60",
-        "0567acea07a5f230c350",
         "cd3e775a272561da7d61",
+        "8e1dadc88db3cb1e2d52",
+        "0567acea07a5f230c350",
+        "4b4d13468d71f994d0a9",
+        "02bfe99c3421d23ff17d",
         "be03fa8fd8bdfb45b97d",
         "49f29c1a38b41e2bc8dd",
-        "02bfe99c3421d23ff17d",
-        "4b4d13468d71f994d0a9",
-        "8e1dadc88db3cb1e2d52",
+        "1f584730f8580f6b15bd",
+        "6d22e4014053df4dd6eb",
+        "0b88af6733f38b6a7474",
         "a8cafd51b7cbb04b0ad9",
         "b336d30bd0c5bb4c158b",
-        "cc63855d1f2503b23e1a",
-        "bf6882ede9d60abe6519",
         "19dd801156be88554d22",
-        "5a40025573b2c55b1963",
         "ce914d45a09ffcb8351b",
-        "fec6299a11560eaa8f62",
         "1e69a0302e47a4ef87e7",
         "1f437acb3f7e7e8c10b3",
-        "1ae1015baaba922f02d0"
+        "c9338a41a33df24b016d",
+        "028401fef9603d6d798d",
+        "cb0cc8ac89a9761a3b16",
+        "446debb488c9e30a47dd",
+        "453d414ea6a6bf40613e",
+        "b87d5108f1c3d560a191",
+        "d12437b2f22497298e1b",
+        "bc8c57bc004f780e2a19",
+        "665cd14c6001dacd0a84",
+        "b5db1fbb2e56d1b56e16",
+        "ea2a981452bdd7fb7f68",
+        "0e621260607a04cf082e",
+        "b13ecc45b66030acc2d7",
+        "dc4faf66d83960f53218",
+        "abde41fc0222660ff656",
+        "9209576b87ce4944ca28",
+        "893a5614aeb5510fceb5",
+        "d92cce6e9e7960f75948",
+        "842e5e0f16697cf1a01a",
+        "a0b0f9da4e31b7a6f52d",
+        "4395008b5af14e4a1615",
+        "2c27621158b0b10ba11f",
+        "0515592adfe6c089a8ea",
+        "4a97f4d4338874d4a871",
+        "19245404c6e294fa0231",
+        "f65d70e0417408b7a7e4"
       ],
       "focusAreaIds": [
         "focus-1",
         "focus-3",
-        "focus-5",
-        "focus-2"
+        "focus-4",
+        "focus-6"
       ]
     },
     {
       "id": "topic-2",
-      "label": "Subscription value is polarizing",
-      "description": "The same membership is seen as a cheap, effective gym replacement by loyal subscribers, while many others call it an unreasonable paywall for what was once free. Users are strongly split on whether the subscription is worth it or a bait-and-switch.",
+      "label": "免费试用误导与未授权扣费/取消困难",
+      "description": "用户报告免费试用被立即扣费、周期展示误导、试用结束前未获充分提醒、取消订阅后仍被重复扣款，且联系客服或退款困难，反映订阅付费信任问题。",
       "candidateIds": [
-        "topic-candidate-5@c1",
-        "topic-candidate-5@c2",
-        "topic-candidate-1@c3",
-        "topic-candidate-2@c5",
-        "topic-candidate-1@c6"
-      ],
-      "reviewIds": [
-        "6d22e4014053df4dd6eb",
-        "0b88af6733f38b6a7474",
-        "021386bdfee491a3baeb",
-        "02bfe99c3421d23ff17d",
-        "be03fa8fd8bdfb45b97d",
-        "49f29c1a38b41e2bc8dd",
-        "4b4d13468d71f994d0a9",
-        "b3eff3cdf551f2c7096b",
-        "fec6299a11560eaa8f62",
-        "53974bcc26a0d788626b",
-        "98de3937a388855366bc",
-        "edb0da5e3f55117ad807",
-        "ce914d45a09ffcb8351b",
-        "1ae1015baaba922f02d0",
-        "1f437acb3f7e7e8c10b3",
-        "5a40025573b2c55b1963",
-        "4f2cf6597c046f4c579d",
-        "028401fef9603d6d798d",
-        "c9338a41a33df24b016d",
-        "cb0cc8ac89a9761a3b16",
-        "0e621260607a04cf082e",
-        "0975a5a2992339e60625",
-        "446debb488c9e30a47dd",
-        "453d414ea6a6bf40613e",
-        "bc8c57bc004f780e2a19",
-        "b87d5108f1c3d560a191",
-        "d12437b2f22497298e1b",
-        "665cd14c6001dacd0a84",
-        "b5db1fbb2e56d1b56e16",
-        "52ecbbc862689ee97897",
-        "842e5e0f16697cf1a01a",
-        "a0b0f9da4e31b7a6f52d",
-        "4395008b5af14e4a1615",
-        "c837abacb62f11bf392f",
-        "19245404c6e294fa0231",
-        "0515592adfe6c089a8ea",
-        "893a5614aeb5510fceb5",
-        "89626a77cb324252fb52",
-        "d92cce6e9e7960f75948",
-        "2c27621158b0b10ba11f",
-        "4a97f4d4338874d4a871",
-        "3041a3e4c84f6e84e057",
-        "55bfd9115408f9880868",
-        "ea303adaff4ec227d28c",
-        "370a4d8f25cfb867adfb",
-        "1e38cfa729df94fff88e",
-        "5184627d2d5497da6d62",
-        "85ac9926c35e9ced7bc0",
-        "684e6330b8fac437b13e",
-        "42aa8fc8624e8b26fb11",
-        "42a3722f697ca6fa429c",
-        "9090014af5591854637e",
-        "11ac6c75bc4ac9c5920e",
-        "3ca68eec045e1b37f414"
-      ],
-      "focusAreaIds": [
-        "focus-1",
-        "focus-5",
-        "focus-3"
-      ]
-    },
-    {
-      "id": "topic-3",
-      "label": "Misleading free trials, surprise charges, and subscription management problems",
-      "description": "Users report being charged immediately for advertised free trials, charged after canceling, unable to cancel renewals, and finding it hard to get refunds. These billing practices strongly damage trust.",
-      "candidateIds": [
-        "topic-candidate-2@c0",
+        "topic-candidate-3@c0",
         "topic-candidate-2@c1",
         "topic-candidate-1@c2",
         "topic-candidate-2@c3",
-        "topic-candidate-2@c4"
+        "topic-candidate-2@c4",
+        "topic-candidate-1@c6"
       ],
       "reviewIds": [
         "1cf18baaa2b920a6718d",
         "a714751ef74be8bea80e",
-        "c0f1c62d059d3ec7cd06",
-        "a4c127668e22552df85d",
+        "9d842425c38a5a7bb4d4",
+        "aa10fd1c007b0ebde89f",
         "c352d86551671d7b8d70",
         "dd0b01e8efe7359b1089",
         "1f584730f8580f6b15bd",
-        "4fbc4f72bcfecda65727",
+        "a4c127668e22552df85d",
         "eeb35f52212cad12f495",
+        "4fbc4f72bcfecda65727",
         "62be00dda9ffd5c8bc7a",
         "a23ee85600cd3c3ae86f",
-        "3db3756c43b8043720be",
         "f8eb72f77f1bd83b00c8",
-        "7a160bd56131157f4752",
+        "3db3756c43b8043720be",
         "c5cec2597485411001ba",
         "474aa2e44c378c760f59",
         "cc85fc2414bb9b897dfd",
         "14811281319525325893",
-        "7aaf37a74c0b10a4cc33"
+        "7aaf37a74c0b10a4cc33",
+        "370a4d8f25cfb867adfb",
+        "1e38cfa729df94fff88e",
+        "684e6330b8fac437b13e",
+        "5184627d2d5497da6d62",
+        "ea303adaff4ec227d28c",
+        "e5b8843ff3eecb453ed7",
+        "f7056bce85c297605c99",
+        "55bfd9115408f9880868"
       ],
       "focusAreaIds": [
         "focus-1",
-        "focus-3"
+        "focus-2",
+        "focus-4"
       ]
     },
     {
-      "id": "topic-4",
-      "label": "Intrusive ads interrupt and punish free users",
-      "description": "Free workouts are interrupted by 90-second ads, hidden close buttons, and in one case redirects to an external shopping site. The ad experience is so aggressive that users feel forced to pay or uninstall.",
+      "id": "topic-3",
+      "label": "广告体验干扰与强制跳转",
+      "description": "免费用户频繁遇到90秒或更长的强制广告、退出按钮难找、训练中弹出第三方网站或无法关闭的付费弹窗，严重打断训练并导致流失。",
       "candidateIds": [
-        "topic-candidate-6@c1",
-        "topic-candidate-3@c3",
-        "topic-candidate-3@c4",
+        "topic-candidate-5@c0",
+        "topic-candidate-3@c1",
+        "topic-candidate-5@c2",
+        "topic-candidate-1@c4",
         "topic-candidate-1@c5"
       ],
       "reviewIds": [
-        "3ca751f46d64b8b6d725",
+        "c0f1c62d059d3ec7cd06",
+        "ab3a2f593db6baa75d7a",
         "3c469722f1d0864a64bb",
-        "cd3e775a272561da7d61",
+        "3ca751f46d64b8b6d725",
+        "bf6882ede9d60abe6519",
         "a294f3b4369a18c41112",
-        "b87d5108f1c3d560a191",
-        "c9338a41a33df24b016d",
+        "cc63855d1f2503b23e1a",
         "d209ae2dfd97ff0bdb80",
+        "a9a965a3ee3756a838f8",
         "a3219e1290028aaf4834",
         "b4467727f123a07beea9",
-        "a9a965a3ee3756a838f8",
         "f65d70e0417408b7a7e4",
         "db79928046519e7ffdcd",
         "bf3841e67602dc01e0b2",
         "1e0fb9be01863f607fa3",
-        "72cf0fc6b2f25ec4e1ac",
         "76e57a90688ac2de17a6",
+        "72cf0fc6b2f25ec4e1ac",
         "8cab578e3ab71d8124a9",
         "7e2302afb4e5dac12a13",
         "af48b9baedefbffda432"
       ],
       "focusAreaIds": [
-        "focus-2",
-        "focus-3",
         "focus-1",
+        "focus-2",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-4",
+      "label": "AI生成内容侵蚀内容真实性与质量",
+      "description": "多位用户认为应用重塑后充斥AI生成内容、重复训练和虚假形象，语音指导与演示不一致，训练强度不足，原有的真实教练感和内容质量明显下降。",
+      "candidateIds": [
+        "topic-candidate-2@c0",
+        "topic-candidate-3@c3",
+        "topic-candidate-4@c5"
+      ],
+      "reviewIds": [
+        "9abdbf40c7644f9a6d8e",
+        "7d579ddab7ad9866916e",
+        "cbb69a199b87635d6910",
+        "1e26434428fd7d297ebd",
+        "b13ecc45b66030acc2d7",
+        "d12437b2f22497298e1b",
+        "61cabebf911229cac631"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-2",
         "focus-5"
       ]
     },
     {
       "id": "topic-5",
-      "label": "Workout quality is polarizing: effective and varied vs AI slop and repetitive",
-      "description": "Many users love the variety, sequencing, and results, but a significant cluster criticizes newer workouts as AI-generated, stale, or low-intensity. The quality of workout content is a core love/hate tension.",
+      "label": "训练内容与易用性正面认可",
+      "description": "不少用户称赞应用提供丰富训练选择、适合初学者、时间灵活、短时稳定，便于建立日常锻炼习惯并看到效果。",
       "candidateIds": [
-        "topic-candidate-3@c0",
-        "topic-candidate-4@c3",
+        "topic-candidate-6@c1",
+        "topic-candidate-3@c2",
         "topic-candidate-3@c5"
       ],
       "reviewIds": [
-        "9abdbf40c7644f9a6d8e",
-        "1e26434428fd7d297ebd",
-        "7d579ddab7ad9866916e",
-        "cbb69a199b87635d6910",
-        "1cf18baaa2b920a6718d",
-        "2e0026d69a6bca97b90a",
-        "52ecbbc862689ee97897",
-        "d2556889c59bcc869614",
-        "84b6c316e86a35b3fb75",
-        "b13ecc45b66030acc2d7",
-        "d12437b2f22497298e1b",
-        "63e3062c81dc6548b47e",
+        "6d22e4014053df4dd6eb",
+        "021386bdfee491a3baeb",
+        "b6d75605977aad508231",
+        "35faa42d589b56ba38f2",
+        "668f40f529d9d0dd21ae",
+        "f7290fe64a406f83b54f",
+        "dcb564f577dabd2fe953",
+        "c64a82c6820fc3aeeeb1",
+        "0fe319101430b82ef5a6",
+        "030127cbe4098673f827",
+        "17cdc8c508a860319c27",
+        "3c49af9bb0aef09a3fdc",
+        "e0d1838121012adeedaa",
+        "c7ed3b29dfdc1ebd1d1e",
+        "53974bcc26a0d788626b",
         "66fa455a3bc44f182c65",
-        "1a8557f142bc630824ef",
-        "f2bb995e4a1d10521898",
-        "d5b25078d199b55fd062",
-        "af48b9baedefbffda432",
-        "818576cbf19f52251034",
+        "578366a04f7da6efbe18",
+        "893a5614aeb5510fceb5",
         "f663a47722d240c912da",
-        "0b8fc13d97546607d5e6",
-        "beffe6788ff06768a18c",
-        "61cabebf911229cac631",
-        "b4e7ccd6da5e64cc4de3"
+        "f2bb995e4a1d10521898",
+        "1a8557f142bc630824ef",
+        "d5b25078d199b55fd062",
+        "818576cbf19f52251034",
+        "5e06d81949328264c51a",
+        "beffe6788ff06768a18c"
       ],
       "focusAreaIds": [
-        "focus-2",
-        "focus-3",
-        "focus-5",
-        "focus-4"
+        "focus-5"
       ]
     },
     {
       "id": "topic-6",
-      "label": "Positive workout experience: variety, short sessions, guidance, and results",
-      "description": "Devoted users credit the app with easy-to-follow, varied workouts, short 20-minute sessions, helpful on-screen demos, music options, and real physical results. This positive value is why many stay.",
-      "candidateIds": [
-        "topic-candidate-6@c0",
-        "topic-candidate-4@c1",
-        "topic-candidate-3@c2",
-        "topic-candidate-4@c2",
-        "topic-candidate-6@c4"
-      ],
-      "reviewIds": [
-        "22ff0663d45e581d4501",
-        "31283c9ec942265487b0",
-        "8c7322700a091de0efc6",
-        "89d39ff177caa228b26f",
-        "63ac45e9ef64dcf4fe0f",
-        "6ad576008e6465adc345",
-        "b34f61d4a24155813305",
-        "4a644a56a8619cd8783c",
-        "6acda9e389faa1143883",
-        "d331227b060177a24ad3",
-        "6d22e4014053df4dd6eb",
-        "12277142053771f844f1",
-        "021386bdfee491a3baeb",
-        "b6d75605977aad508231",
-        "56230fefae8368124913",
-        "f7290fe64a406f83b54f",
-        "35faa42d589b56ba38f2",
-        "0b88af6733f38b6a7474",
-        "668f40f529d9d0dd21ae",
-        "c64a82c6820fc3aeeeb1",
-        "0fe319101430b82ef5a6",
-        "edb0da5e3f55117ad807",
-        "17cdc8c508a860319c27",
-        "3c49af9bb0aef09a3fdc",
-        "53974bcc26a0d788626b",
-        "98de3937a388855366bc",
-        "e0d1838121012adeedaa",
-        "c7ed3b29dfdc1ebd1d1e",
-        "ca0c6894695eb2275fd1",
-        "dcb564f577dabd2fe953",
-        "030127cbe4098673f827",
-        "98fa3a30eb191e9b4f92",
-        "e48f507238167347f923",
-        "55d763820c6068e5fa96",
-        "abec4e956a261a973827",
-        "1a50245eec24db09a48c"
-      ],
-      "focusAreaIds": [
-        "focus-2",
-        "focus-4"
-      ]
-    },
-    {
-      "id": "topic-7",
-      "label": "Personalization and exercise avoidance are not honored",
-      "description": "Users who specify avoided areas such as knees or abs still receive moves targeting those areas, and the app forces a weight-loss goal onto every exercise note. The onboarding quiz appears disconnected from the actual plan, causing frustration and distrust.",
+      "label": "训练计划一致性与难度个性化冲突",
+      "description": "用户对训练计划是否个性化存在明显分歧：一些用户称赞动作多样、指导清晰，另一些用户批评每日训练部位失衡、设置重置、限制未被遵守，或即使调高难度仍不够难。",
       "candidateIds": [
         "topic-candidate-4@c0",
-        "topic-candidate-4@c4",
-        "topic-candidate-2@c6"
+        "topic-candidate-5@c4"
       ],
       "reviewIds": [
-        "d331227b060177a24ad3",
-        "2143f3ec8ed35afd12de",
+        "22362f152de51b719e6f",
+        "bd7a17c7711d6f478c76",
+        "43f4266f074eaa80d2fc",
+        "22ff0663d45e581d4501",
+        "1972c340f1762cd2f9f8",
         "4a644a56a8619cd8783c",
         "6acda9e389faa1143883",
+        "d331227b060177a24ad3",
         "b34f61d4a24155813305",
-        "bd7a17c7711d6f478c76",
-        "22362f152de51b719e6f",
-        "43f4266f074eaa80d2fc",
-        "51d4b3f25ab831d4417f",
+        "89d39ff177caa228b26f",
         "5e9ea710a133198a495c",
-        "98fa3a30eb191e9b4f92",
-        "23279288b9997ed880fa",
-        "0177e49b6144656eb965",
-        "c8d0383c0e9865fc14dd",
-        "684e6330b8fac437b13e"
+        "cb1ac0588b2aee125248",
+        "1a50245eec24db09a48c",
+        "63e3062c81dc6548b47e"
       ],
       "focusAreaIds": [
         "focus-2",
         "focus-3",
         "focus-5",
-        "focus-4"
+        "focus-6"
+      ]
+    },
+    {
+      "id": "topic-7",
+      "label": "身体形象与减重目标叙事问题",
+      "description": "用户指出新用户引导中的女性形象不真实、营销问题只问是否想变得有吸引力，且应用强制设置减重目标，被认为强化有毒健身文化并忽视健康、力量等其他动机。",
+      "candidateIds": [
+        "topic-candidate-5@c1",
+        "topic-candidate-4@c4"
+      ],
+      "reviewIds": [
+        "75d7b5fc1746c4d80026",
+        "51d4b3f25ab831d4417f",
+        "63e3062c81dc6548b47e"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-1",
+        "focus-3",
+        "focus-5",
+        "focus-6"
       ]
     },
     {
       "id": "topic-8",
-      "label": "Account access, data sync, and support failures",
-      "description": "Paying subscribers report being locked out of their accounts, losing tracked progress on a new phone, Apple Watch not registering workouts, and support messages going unanswered or blocked as spam. Reliability and support gaps undermine paid trust.",
+      "label": "账号登录、跨设备同步与客服支持故障",
+      "description": "部分付费用户无法登录账号，更换设备后进度丢失，邮件客服长期无响应或联系请求被误标为垃圾邮件，导致已付费订阅无法正常使用。",
       "candidateIds": [
-        "topic-candidate-3@c1",
-        "topic-candidate-4@c5"
+        "topic-candidate-4@c1",
+        "topic-candidate-5@c5"
       ],
       "reviewIds": [
         "3108668c8b4ee2438bf7",
         "22935659be45db2172e8",
-        "50dd40e82486e9e93aae",
         "dd0b01e8efe7359b1089",
-        "cd9d8211bc907e7935bc",
+        "50dd40e82486e9e93aae",
         "d92cce6e9e7960f75948",
         "342561b8e8592cc0b63a",
         "85861b1ae4ea322bed91"
       ],
       "focusAreaIds": [
-        "focus-3",
-        "focus-4",
-        "focus-2"
+        "focus-1",
+        "focus-2",
+        "focus-4"
       ]
     },
     {
       "id": "topic-9",
-      "label": "User requests and unmet product needs",
-      "description": "Reviewers ask for more free or ad-based access, longer interval timers, true personalization that respects limitations, more programs, pregnancy-safe workouts, better Apple Watch and rep-counting controls, clearer demos, more music variety, and harder challenge levels.",
+      "label": "训练内容与选项扩充需求",
+      "description": "忠实用户希望持续更新训练计划、增加更多锻炼选项、腹部训练和更高强度，也有提及增加音乐服务选项，以保持长期使用新鲜感和付费吸引力。",
       "candidateIds": [
-        "topic-candidate-5@c0",
-        "topic-candidate-6@c2",
-        "topic-candidate-5@c3",
-        "topic-candidate-6@c3",
-        "topic-candidate-5@c4",
-        "topic-candidate-5@c5"
+        "topic-candidate-4@c2",
+        "topic-candidate-6@c5"
       ],
       "reviewIds": [
-        "ab3a2f593db6baa75d7a",
-        "2143f3ec8ed35afd12de",
-        "bd7a17c7711d6f478c76",
-        "aa10fd1c007b0ebde89f",
-        "22362f152de51b719e6f",
-        "a714751ef74be8bea80e",
         "edb0da5e3f55117ad807",
         "e0d1838121012adeedaa",
-        "b46e6db96ab3b39e12b8",
-        "4a9e233a7d40327ddd01",
-        "feaae9dce2297b34ac2e",
-        "2e0026d69a6bca97b90a",
-        "89f15c4184fe51fd54d2",
-        "a5900337c9421dc68dbc",
-        "39f537e8298befa28a06",
-        "fbfc29ddbb6142d2e40f",
-        "d8b0365890e12753b065",
-        "9dcf6dee35426a0c9035",
-        "d723d3091dfcb5ebcacb",
-        "32e7a4d8aaa1b9789f74",
-        "cb1ac0588b2aee125248",
         "f2bb995e4a1d10521898",
         "beffe6788ff06768a18c",
-        "98a39e78a98fde68f2ad"
+        "b4e7ccd6da5e64cc4de3"
       ],
       "focusAreaIds": [
-        "focus-4",
+        "focus-2",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-10",
+      "label": "音乐与语音提示选项",
+      "description": "用户欢迎第三方音乐应用连接和自带音乐功能，但希望内置歌曲更多样，并希望使用自己的音乐或播客时能选择更简洁、更细微的听觉提示。",
+      "candidateIds": [
+        "topic-candidate-5@c3",
+        "topic-candidate-6@c4"
+      ],
+      "reviewIds": [
+        "2e0026d69a6bca97b90a",
+        "e48f507238167347f923",
+        "abec4e956a261a973827",
+        "55d763820c6068e5fa96"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-11",
+      "label": "孕期安全训练内容缺失",
+      "description": "用户认为作为女性健身应用，缺乏孕期安全的力量训练、活动度和柔韧性课程，仅有少量产后内容，希望按孕期阶段补充资源。",
+      "candidateIds": [
+        "topic-candidate-4@c3"
+      ],
+      "reviewIds": [
+        "a5900337c9421dc68dbc"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-12",
+      "label": "手表连接与自动卡路里记录",
+      "description": "用户希望应用能连接手表自动记录消耗卡路里，而不是手动输入，以提升训练跟踪的便利性。",
+      "candidateIds": [
+        "topic-candidate-6@c3"
+      ],
+      "reviewIds": [
+        "4a9e233a7d40327ddd01"
+      ],
+      "focusAreaIds": [
         "focus-2",
         "focus-5"
       ]
@@ -400,11 +379,15 @@
   "warnings": [
     {
       "code": "INVALID_TOPIC_EVIDENCE",
-      "message": "dropped topic-candidate-1 (bad citation or quote)"
+      "message": "dropped topic-candidate-3 (bad citation or quote)"
+    },
+    {
+      "code": "INVALID_TOPIC_EVIDENCE",
+      "message": "dropped topic-candidate-4 (bad citation or quote)"
     },
     {
       "code": "TOPIC_CANDIDATES_TRUNCATED",
-      "message": "kept 36 of 81 discovered candidates (goal-aware selection); 45 excess dropped deterministically"
+      "message": "kept 36 of 73 discovered candidates (goal-aware selection); 37 excess dropped deterministically"
     }
   ]
 }

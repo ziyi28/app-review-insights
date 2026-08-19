@@ -1,4 +1,25 @@
 {
-  "valid": true,
-  "violations": []
+  "valid": false,
+  "violations": [
+    {
+      "code": "REQUIREMENT_UNKNOWN_VERSION",
+      "message": "req-1 links unknown version ver-1",
+      "entity": "req-1"
+    },
+    {
+      "code": "REQUIREMENT_UNKNOWN_VERSION",
+      "message": "req-2 links unknown version ver-1",
+      "entity": "req-2"
+    },
+    {
+      "code": "REQUIREMENT_UNKNOWN_VERSION",
+      "message": "req-3 links unknown version ver-1",
+      "entity": "req-3"
+    },
+    {
+      "code": "REQUIREMENT_UNKNOWN_VERSION",
+      "message": "req-4 links unknown version ver-1",
+      "entity": "req-4"
+    }
+  ]
 }

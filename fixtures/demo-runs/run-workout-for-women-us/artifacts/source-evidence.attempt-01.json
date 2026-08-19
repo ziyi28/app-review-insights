@@ -1,6 +1,6 @@
 {
   "kind": "app-store-reviews",
-  "provider": "serpapi",
+  "provider": "apple-rss",
   "appId": "839285684",
   "storefront": "US",
   "status": "complete",
@@ -8,10 +8,10 @@
   "liveCount": 500,
   "stableCount": 0,
   "reviewCount": 500,
-  "collectedAt": "2026-08-17T04:41:51.459Z",
-  "forcedRefresh": true,
+  "collectedAt": "2026-08-19T09:32:21.955Z",
+  "forcedRefresh": false,
   "providerCached": false,
-  "requestCount": 20,
-  "searchCount": 20,
-  "searchId": "6a82912ad868dd10e3389969"
+  "requestCount": 10,
+  "searchCount": 0,
+  "searchId": null
 }

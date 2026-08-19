@@ -1,17 +1,17 @@
 {
   "kind": "app-store-reviews",
-  "provider": "serpapi",
+  "provider": "apple-rss",
   "appId": "333903271",
   "storefront": "US",
   "status": "complete",
   "selection": "live",
-  "liveCount": 500,
+  "liveCount": 300,
   "stableCount": 0,
-  "reviewCount": 500,
-  "collectedAt": "2026-08-17T04:41:42.646Z",
-  "forcedRefresh": true,
+  "reviewCount": 300,
+  "collectedAt": "2026-08-19T08:31:06.412Z",
+  "forcedRefresh": false,
   "providerCached": false,
-  "requestCount": 20,
-  "searchCount": 20,
-  "searchId": "6a829125054e5f6863f06659"
+  "requestCount": 6,
+  "searchCount": 0,
+  "searchId": null
 }

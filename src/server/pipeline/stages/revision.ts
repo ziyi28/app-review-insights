@@ -43,6 +43,36 @@ export type RevisionStageResult = {
   note: string;
 };
 
+function normalizeReviewId(id: string, allowed: string[]): string {
+  if (allowed.includes(id)) return id;
+  if (id.length >= 8) {
+    const match = allowed.filter((a) => a.startsWith(id) || id.startsWith(a));
+    if (match.length === 1) return match[0];
+  }
+  return id;
+}
+
+function normalizeEntitiesReviewIds(entities: unknown[], allowed: string[]) {
+  if (!Array.isArray(entities)) return;
+  for (const e of entities) {
+    if (!e || typeof e !== "object") continue;
+    const obj = e as Record<string, any>;
+    if (Array.isArray(obj.supportingReviewIds)) {
+      obj.supportingReviewIds = obj.supportingReviewIds.map((id: string) => (typeof id === "string" ? normalizeReviewId(id, allowed) : id));
+    }
+    if (Array.isArray(obj.sourceReviewIds)) {
+      obj.sourceReviewIds = obj.sourceReviewIds.map((id: string) => (typeof id === "string" ? normalizeReviewId(id, allowed) : id));
+    }
+    if (Array.isArray(obj.evidenceExcerpts)) {
+      for (const exc of obj.evidenceExcerpts) {
+        if (exc && typeof exc === "object" && typeof exc.reviewId === "string") {
+          exc.reviewId = normalizeReviewId(exc.reviewId, allowed);
+        }
+      }
+    }
+  }
+}
+
 function extractReviewIds(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.flatMap((v) => {
@@ -128,6 +158,10 @@ export async function runRevisionStage(ctx: RevisionStageContext): Promise<Revis
     schema: RevisionOutputSchema,
     onProgress: modelProgressRelay(ctx.onProgress),
   });
+
+  normalizeEntitiesReviewIds(output.findings, ctx.allowedReviewIds);
+  normalizeEntitiesReviewIds(output.requirements, ctx.allowedReviewIds);
+  normalizeEntitiesReviewIds(output.tests, ctx.allowedReviewIds);
 
   const after = new Set<string>();
   const frozen = frozenPairs(ctx);

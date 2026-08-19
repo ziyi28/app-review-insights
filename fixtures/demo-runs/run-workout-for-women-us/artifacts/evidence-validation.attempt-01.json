@@ -1,88 +1,107 @@
 {
-  "validFindingCount": 8,
+  "validFindingCount": 9,
   "rejectedFindingCount": 0,
-  "sufficientCount": 8,
-  "insufficientCount": 0,
+  "sufficientCount": 5,
+  "insufficientCount": 4,
   "findings": [
     {
       "findingId": "finding-1",
-      "supportCount": 81,
-      "corpusCount": 500,
-      "supportRatio": 0.162,
-      "conflictCount": 30,
+      "supportCount": 58,
+      "corpusCount": 439,
+      "supportRatio": 0.13211845102505695,
+      "conflictCount": 23,
       "confidence": "medium",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
       "findingId": "finding-2",
-      "supportCount": 32,
-      "corpusCount": 500,
-      "supportRatio": 0.064,
-      "conflictCount": 2,
-      "confidence": "high",
-      "sufficiency": "sufficient",
-      "reasons": []
-    },
-    {
-      "findingId": "finding-3",
-      "supportCount": 37,
-      "corpusCount": 500,
-      "supportRatio": 0.074,
+      "supportCount": 40,
+      "corpusCount": 439,
+      "supportRatio": 0.09111617312072894,
       "conflictCount": 7,
       "confidence": "high",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
-      "findingId": "finding-4",
-      "supportCount": 40,
-      "corpusCount": 500,
-      "supportRatio": 0.08,
-      "conflictCount": 31,
-      "confidence": "medium",
-      "sufficiency": "sufficient",
-      "reasons": []
-    },
-    {
-      "findingId": "finding-5",
-      "supportCount": 29,
-      "corpusCount": 500,
-      "supportRatio": 0.058,
-      "conflictCount": 0,
+      "findingId": "finding-3",
+      "supportCount": 33,
+      "corpusCount": 439,
+      "supportRatio": 0.07517084282460136,
+      "conflictCount": 8,
       "confidence": "high",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
+      "findingId": "finding-4",
+      "supportCount": 7,
+      "corpusCount": 439,
+      "supportRatio": 0.015945330296127564,
+      "conflictCount": 11,
+      "confidence": "medium",
+      "sufficiency": "insufficient",
+      "reasons": [
+        "CONFLICT_NOT_MINOR"
+      ]
+    },
+    {
+      "findingId": "finding-5",
+      "supportCount": 9,
+      "corpusCount": 439,
+      "supportRatio": 0.02050113895216401,
+      "conflictCount": 9,
+      "confidence": "medium",
+      "sufficiency": "insufficient",
+      "reasons": [
+        "CONFLICT_NOT_MINOR"
+      ]
+    },
+    {
       "findingId": "finding-6",
-      "supportCount": 16,
-      "corpusCount": 500,
-      "supportRatio": 0.032,
-      "conflictCount": 13,
+      "supportCount": 20,
+      "corpusCount": 439,
+      "supportRatio": 0.04555808656036447,
+      "conflictCount": 14,
       "confidence": "medium",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
       "findingId": "finding-7",
-      "supportCount": 7,
-      "corpusCount": 500,
-      "supportRatio": 0.014,
-      "conflictCount": 0,
+      "supportCount": 6,
+      "corpusCount": 439,
+      "supportRatio": 0.01366742596810934,
+      "conflictCount": 2,
       "confidence": "medium",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
       "findingId": "finding-8",
-      "supportCount": 13,
-      "corpusCount": 500,
-      "supportRatio": 0.026,
-      "conflictCount": 9,
+      "supportCount": 3,
+      "corpusCount": 439,
+      "supportRatio": 0.00683371298405467,
+      "conflictCount": 3,
       "confidence": "medium",
-      "sufficiency": "sufficient",
-      "reasons": []
+      "sufficiency": "insufficient",
+      "reasons": [
+        "SUPPORT_RATIO_BELOW_MINIMUM",
+        "CONFLICT_NOT_MINOR"
+      ]
+    },
+    {
+      "findingId": "finding-9",
+      "supportCount": 3,
+      "corpusCount": 439,
+      "supportRatio": 0.00683371298405467,
+      "conflictCount": 0,
+      "confidence": "medium",
+      "sufficiency": "insufficient",
+      "reasons": [
+        "SUPPORT_RATIO_BELOW_MINIMUM"
+      ]
     }
   ],
   "rejected": []

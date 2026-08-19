@@ -1,19 +1,19 @@
 {
   "provenance": {
     "schemaVersion": "1",
-    "reviewData": "serpapi-apple-reviews-real",
+    "reviewData": "apple-rss-real",
     "storefront": "us",
     "appId": "333903271",
-    "capturedAt": "2026-08-17T04:41:42.646Z",
-    "captureMethod": "SerpApi Apple Reviews engine (country=us, sort=mostrecent, no_cache=true)",
+    "capturedAt": "2026-08-19T08:31:06.412Z",
+    "captureMethod": "Apple Customer Reviews RSS (sequential, max 10 pages, >=500ms delay)",
     "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained"
   },
   "analysis": {
     "executionMode": "live",
     "outputLocale": "zh-CN",
-    "goal": "analyze X regressions",
+    "goal": "分析 X (Twitter) 用户评论中的高频退化问题、崩溃卡顿与交互痛点，特别是信息流刷新、多媒体加载和核心功能体验，制定具体的版本改进规划与测试验证用例。",
     "modelProvider": "OpenAI-compatible endpoint",
-    "modelName": "deepseek-v4-flash",
+    "modelName": "qwen3.7-flash-2026-07-15",
     "temperature": 0.1,
     "promptVersions": [
       "scope@2",
@@ -22,7 +22,9 @@
       "findings@4",
       "findings.consolidation@1",
       "planning@3",
-      "tests@1"
+      "requirement-evidence@1",
+      "tests@1",
+      "revision@1"
     ]
   }
 }

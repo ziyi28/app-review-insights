@@ -4,126 +4,118 @@
   "items": [
     {
       "focusAreaId": "focus-1",
-      "label": "Subscription value: praise, complaints, and perceived worth",
+      "label": "High-impact problems",
       "status": "covered",
       "findingIds": [
         "finding-1",
         "finding-2",
         "finding-3",
-        "finding-8"
-      ],
-      "requirementIds": [
-        "req-1",
-        "req-3",
-        "req-4",
-        "req-10",
-        "req-2",
-        "req-11"
-      ]
-    },
-    {
-      "focusAreaId": "focus-2",
-      "label": "Workout usability: ease, friction, and feature-specific reactions",
-      "status": "covered",
-      "findingIds": [
-        "finding-1",
-        "finding-2",
-        "finding-3",
-        "finding-4",
-        "finding-5",
-        "finding-6",
-        "finding-7",
-        "finding-8"
-      ],
-      "requirementIds": [
-        "req-1",
-        "req-3",
-        "req-4",
-        "req-10",
-        "req-2",
-        "req-11",
-        "req-5",
-        "req-6",
-        "req-7",
-        "req-8",
-        "req-9"
-      ]
-    },
-    {
-      "focusAreaId": "focus-3",
-      "label": "Most impactful problems: frequent or strongly negative themes",
-      "status": "covered",
-      "findingIds": [
-        "finding-1",
-        "finding-2",
-        "finding-3",
-        "finding-4",
-        "finding-6",
-        "finding-8"
-      ],
-      "requirementIds": [
-        "req-1",
-        "req-3",
-        "req-4",
-        "req-10",
-        "req-2",
-        "req-11",
-        "req-5",
-        "req-6",
-        "req-7",
-        "req-8",
-        "req-9"
-      ]
-    },
-    {
-      "focusAreaId": "focus-4",
-      "label": "Opportunities: unmet needs, requests, and positive potential",
-      "status": "covered",
-      "findingIds": [
-        "finding-2",
-        "finding-4",
-        "finding-5",
         "finding-6",
         "finding-7"
       ],
       "requirementIds": [
         "req-1",
-        "req-2",
-        "req-10",
-        "req-11",
-        "req-5",
-        "req-6",
-        "req-7",
+        "req-3",
         "req-8",
-        "req-4",
-        "req-9"
+        "req-7",
+        "req-2",
+        "req-5",
+        "req-6"
       ]
     },
     {
-      "focusAreaId": "focus-5",
-      "label": "Polarizing features: same feature loved by some, disliked by others",
+      "focusAreaId": "focus-2",
+      "label": "Improvement opportunities",
       "status": "covered",
       "findingIds": [
         "finding-1",
         "finding-2",
         "finding-3",
-        "finding-4",
         "finding-6",
-        "finding-7",
-        "finding-8"
+        "finding-7"
       ],
       "requirementIds": [
         "req-1",
         "req-3",
-        "req-4",
-        "req-10",
-        "req-2",
-        "req-11",
-        "req-5",
-        "req-6",
-        "req-7",
         "req-8",
-        "req-9"
+        "req-7",
+        "req-2",
+        "req-5",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-3",
+      "label": "Controversial features with mixed sentiment",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-3",
+        "finding-6",
+        "finding-7"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-3",
+        "req-8",
+        "req-2",
+        "req-5",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-4",
+      "label": "Subscription payment value",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-2",
+        "finding-3"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-3",
+        "req-8",
+        "req-7",
+        "req-2"
+      ]
+    },
+    {
+      "focusAreaId": "focus-5",
+      "label": "Workout training usability",
+      "status": "covered",
+      "findingIds": [
+        "finding-3",
+        "finding-6",
+        "finding-7"
+      ],
+      "requirementIds": [
+        "req-2",
+        "req-3",
+        "req-8",
+        "req-5",
+        "req-6"
+      ]
+    },
+    {
+      "focusAreaId": "focus-6",
+      "label": "Conflicting feedback documentation",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-2",
+        "finding-3",
+        "finding-6",
+        "finding-7"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-3",
+        "req-8",
+        "req-7",
+        "req-2",
+        "req-5",
+        "req-6"
       ]
     }
   ]

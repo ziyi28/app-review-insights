@@ -2,29 +2,25 @@
   "versions": [
     {
       "id": "ver-1",
-      "name": "1.0 Trust & Monetization Fixes",
-      "summary": "Fix the highest-severity problems: make paywall boundaries explicit, guarantee free-trial and billing integrity, repair the free-tier ad experience, preserve a meaningful free workout path, and make support responsive.",
-      "rationale": "Findings 1, 2, 3, 5, and 8 show that surprise charges, unlabeled paywalls, forced 90-second ads, and unreachable support are the most severe and trust-damaging themes. These issues also drive the polarizing subscription-value split, so they must be addressed before content or personalization work can land effectively.",
+      "name": "1.0.0",
+      "summary": "信任修复与免费训练核心体验紧急版：修复试用扣费/取消客服流程、减少广告干扰、明确免费与付费边界，并建立冲突反馈证据基线。",
+      "rationale": "finding-1、finding-2、finding-3 均为证据充分的高置信发现，分别覆盖付费墙扩大、错误扣费/取消困难、广告中断训练等高频高影响问题。优先处理这些可快速交付且直接影响用户信任和流失风险的修复项，同时把冲突反馈记录纳入版本流程，确保后续迭代不忽略正反证据。",
       "requirementIds": [
         "req-1",
         "req-2",
         "req-3",
-        "req-4",
-        "req-11"
+        "req-8"
       ]
     },
     {
       "id": "ver-2",
-      "name": "2.0 Content, Personalization & Opportunities",
-      "summary": "Resolve the polarizing workout-content split, honor user goals and restrictions, and ship concrete requests: Apple Watch sync, adaptive programs, and workout control options. Rebuild subscription value messaging around outcomes and flexibility.",
-      "rationale": "Findings 4, 6, and 7 show that after trust issues are fixed, the next lever is making the app feel tailored, safe, and genuinely useful. These changes directly address the 'AI slop' vs 'love the variety' split and the unmet needs expressed by older, pregnant, or injury-avoiding users.",
+      "name": "1.1.0",
+      "summary": "内容质量与训练易用性改进版：清理AI生成/重复内容，修复孕期安全动作、个性化计划一致性、包容性引导和跨设备同步。",
+      "rationale": "finding-4、finding-5、finding-6、finding-7、finding-8、finding-9 虽然部分证据样本量有限，但指向内容安全、个性化一致性和付费用户核心使用断点等中长期改进机会。这些项需要内容审计、训练生成逻辑和账号/同步方案调整，更适合在信任修复后的第二个版本集中交付。",
       "requirementIds": [
         "req-5",
         "req-6",
-        "req-7",
-        "req-8",
-        "req-9",
-        "req-10"
+        "req-7"
       ]
     }
   ],
@@ -34,17 +30,17 @@
       "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "high",
+        "severity": "critical",
         "userImpact": "high",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "Finding 1 shows this is a frequent reason for churn and trust loss; finding 8 highlights the same feature is praised by subscribers, so transparency is the bridge between the two sides. Scope is medium because it touches UI labels, content metadata, and onboarding flow.",
+        "rationale": "finding-2 为高置信、40 个支持内容组、支持率 9.1%，直接反映错误扣费和取消/客服问题，财务信任风险高；implementation 涉及支付确认页、账户管理入口和客服路由，规模中等。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 126,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.252
+          "supportingReviewCount": 97,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.22095671981776766
         }
       }
     },
@@ -53,17 +49,17 @@
       "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "critical",
+        "severity": "high",
         "userImpact": "high",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "Finding 2 and several supporting reviews in finding 8 describe real money being taken without clear consent, which is the highest-severity trust issue. Scope is medium because it involves StoreKit purchase flows, subscription management UI, and notification scheduling.",
-        "evidenceStrength": "medium",
-        "confidence": "medium",
+        "rationale": "finding-3 为高置信、33 个支持内容组、支持率 7.5%，影响大量免费用户训练启动体验和留存；修复涉及广告SDK配置、跳转策略和用户流程，规模中等。",
+        "evidenceStrength": "high",
+        "confidence": "high",
         "frequency": {
-          "supportingReviewCount": 45,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.09
+          "supportingReviewCount": 33,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.07517084282460136
         }
       }
     },
@@ -72,39 +68,59 @@
       "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "critical",
+        "severity": "high",
         "userImpact": "high",
         "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "Finding 3 shows broken ad UX can hijack the app entirely, and finding 1 shows it pushes formerly loyal users away. Scope is medium because it requires ad SDK configuration, close-control handling, and a no-redirect safeguard.",
+        "dependencyRequirementIds": [
+          "req-1"
+        ],
+        "rationale": "finding-1 为充分证据但存在正反冲突，58 个支持内容组显示免费入口收窄造成严重不满；需要与订阅披露流程协同，依赖 req-1 的支付透明度基线。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 109,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.218
+          "supportingReviewCount": 86,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.1958997722095672
+        }
+      }
+    },
+    {
+      "requirementId": "req-8",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "medium",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-1、finding-3、finding-4、finding-5、finding-6、finding-7、finding-8 均包含明显冲突证据；满足 focus-6 明确记录而非忽略冲突反馈的要求，实施为流程和轻量工具改进。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 129,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.2938496583143508
         }
       }
     },
     {
       "requirementId": "req-4",
-      "priority": "P1",
-      "versionId": "ver-1",
+      "priority": "P2",
+      "versionId": null,
       "planningFactors": {
         "severity": "high",
-        "userImpact": "high",
-        "implementationScope": "medium",
+        "userImpact": "medium",
+        "implementationScope": "large",
         "dependencyRequirementIds": [
-          "req-1",
-          "req-3"
+          "req-8"
         ],
-        "rationale": "Finding 1 shows the removal of formerly free workouts is the core churn driver; finding 5 shows daily short workouts are the most-loved habit; finding 8 shows some users still find the subscription worth it. This requirement restores the free path without eliminating the paid value proposition.",
-        "evidenceStrength": "medium",
+        "rationale": "finding-8 涉及孕期安全风险，finding-4 涉及内容质量冲突；实施需要内容审计、AI素材替换和规则配置，依赖 req-8 建立冲突证据基线来避免遗漏。",
+        "evidenceStrength": "insufficient",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 123,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.246
+          "supportingReviewCount": 10,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.022779043280182234
         }
       }
     },
@@ -114,132 +130,58 @@
       "versionId": "ver-2",
       "planningFactors": {
         "severity": "high",
-        "userImpact": "high",
-        "implementationScope": "large",
+        "userImpact": "medium",
+        "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "Finding 6 documents ignored preferences and exclusionary content, which damages trust and can pose safety risks. Finding 4 shows content quality is polarizing, so plan generation must at least respect the user's stated constraints. Scope is large because it requires tagging, plan generation logic, and onboarding changes.",
+        "rationale": "finding-5 和 finding-6 提供可识别的个性化与易用性冲突信号；修复依赖内容审计后的训练生成规则调整。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 55,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.11
+          "supportingReviewCount": 35,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.07972665148063782
         }
       }
     },
     {
       "requirementId": "req-6",
-      "priority": "P1",
+      "priority": "P2",
       "versionId": "ver-2",
       "planningFactors": {
         "severity": "medium",
-        "userImpact": "high",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [],
-        "rationale": "Finding 4 shows the same workout library is beloved by some and criticized by others; finding 7 and finding 5 provide concrete directions for demos and short sessions. Scope is large because it involves content production, demo assets, and plan-generation rotation rules.",
+        "userImpact": "medium",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [
+          "req-8"
+        ],
+        "rationale": "finding-7 虽有单条强负面证据，但涉及身体形象和社会风险，需纳入内容与流程整改并保持冲突记录。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 70,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.14
+          "supportingReviewCount": 6,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.01366742596810934
         }
       }
     },
     {
       "requirementId": "req-7",
-      "priority": "P2",
-      "versionId": "ver-2",
-      "planningFactors": {
-        "severity": "low",
-        "userImpact": "medium",
-        "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "Finding 7 contains the direct Apple Watch request, and finding 4 shows a reviewer wishing the app connected to a watch. Scope is medium because HealthKit integration and watch app work are moderate.",
-        "evidenceStrength": "medium",
-        "confidence": "medium",
-        "frequency": {
-          "supportingReviewCount": 46,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.092
-        }
-      }
-    },
-    {
-      "requirementId": "req-8",
-      "priority": "P2",
-      "versionId": "ver-2",
-      "planningFactors": {
-        "severity": "medium",
-        "userImpact": "medium",
-        "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "Finding 6 documents the pregnancy-safety complaint and forced-goal problem; finding 7 contains the older-adult program request; finding 4 shows no-floor workouts are already appreciated. Scope is medium because it adds new content and filtering logic.",
-        "evidenceStrength": "medium",
-        "confidence": "medium",
-        "frequency": {
-          "supportingReviewCount": 61,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.122
-        }
-      }
-    },
-    {
-      "requirementId": "req-9",
-      "priority": "P2",
-      "versionId": "ver-2",
-      "planningFactors": {
-        "severity": "low",
-        "userImpact": "medium",
-        "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "Finding 7 includes the voice-prompt and shorter-ad requests; finding 6 includes the no-jump and longer-interval requests; finding 5 shows the daily short workout is a loved habit that these controls protect. Scope is medium because it touches settings, workout player, and plan substitution.",
-        "evidenceStrength": "medium",
-        "confidence": "medium",
-        "frequency": {
-          "supportingReviewCount": 50,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.1
-        }
-      }
-    },
-    {
-      "requirementId": "req-10",
       "priority": "P1",
       "versionId": "ver-2",
       "planningFactors": {
-        "severity": "medium",
-        "userImpact": "medium",
-        "implementationScope": "small",
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
         "dependencyRequirementIds": [
           "req-1"
         ],
-        "rationale": "Finding 8 explicitly shows the same subscription is seen as transformative by some and as a paywall by others; finding 1 shows former free access is the main complaint; finding 2 shows billing surprises amplify the negative view. This requirement directly addresses the polarizing value perception and depends on transparent labeling first.",
-        "evidenceStrength": "medium",
+        "rationale": "finding-9 样本量小但直接影响付费用户核心权益；finding-2 高置信支持客服问题，跨设备恢复应与订阅账户管理修复联动。",
+        "evidenceStrength": "high",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 126,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.252
-        }
-      }
-    },
-    {
-      "requirementId": "req-11",
-      "priority": "P0",
-      "versionId": "ver-1",
-      "planningFactors": {
-        "severity": "critical",
-        "userImpact": "high",
-        "implementationScope": "small",
-        "dependencyRequirementIds": [],
-        "rationale": "Finding 2 shows support failures compound billing and login issues, turning a bad moment into a permanent trust loss. Implementable independently as a support workflow and form fix, so it belongs in the trust-focused first version.",
-        "evidenceStrength": "high",
-        "confidence": "high",
-        "frequency": {
-          "supportingReviewCount": 32,
-          "corpusReviewCount": 500,
-          "supportRatio": 0.064
+          "supportingReviewCount": 43,
+          "corpusReviewCount": 439,
+          "supportRatio": 0.0979498861047836
         }
       }
     }

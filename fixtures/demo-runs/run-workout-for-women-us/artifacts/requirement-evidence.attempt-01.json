@@ -1,0 +1,69 @@
+{
+  "items": [
+    {
+      "requirementId": "req-1",
+      "candidateCount": 97,
+      "directCount": 32,
+      "partialCount": 22,
+      "noneCount": 43,
+      "keptCount": 32
+    },
+    {
+      "requirementId": "req-2",
+      "candidateCount": 33,
+      "directCount": 33,
+      "partialCount": 0,
+      "noneCount": 0,
+      "keptCount": 33
+    },
+    {
+      "requirementId": "req-3",
+      "candidateCount": 86,
+      "directCount": 75,
+      "partialCount": 9,
+      "noneCount": 2,
+      "keptCount": 75
+    },
+    {
+      "requirementId": "req-8",
+      "candidateCount": 129,
+      "directCount": 93,
+      "partialCount": 16,
+      "noneCount": 20,
+      "keptCount": 93
+    },
+    {
+      "requirementId": "req-4",
+      "candidateCount": 10,
+      "directCount": 9,
+      "partialCount": 1,
+      "noneCount": 0,
+      "keptCount": 9
+    },
+    {
+      "requirementId": "req-5",
+      "candidateCount": 35,
+      "directCount": 6,
+      "partialCount": 3,
+      "noneCount": 26,
+      "keptCount": 6
+    },
+    {
+      "requirementId": "req-6",
+      "candidateCount": 6,
+      "directCount": 1,
+      "partialCount": 0,
+      "noneCount": 5,
+      "keptCount": 1
+    },
+    {
+      "requirementId": "req-7",
+      "candidateCount": 43,
+      "directCount": 13,
+      "partialCount": 0,
+      "noneCount": 30,
+      "keptCount": 13
+    }
+  ],
+  "warnings": []
+}

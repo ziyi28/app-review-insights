@@ -1,4 +1,7 @@
 {
+  "outputLocale": "zh-CN",
+  "title": "X (Twitter) 核心体验退化问题修复与稳定性提升发布计划",
+  "overview": "基于用户反馈分析，本次发布聚焦信息流刷新逻辑、多媒体加载兼容性、账户访问透明度及通知交互缺陷。通过重构时间线缓存机制、修复Wi-Fi媒体加载故障、优化账户申诉流程与通知点击逻辑，旨在恢复核心功能可用性，降低流失风险，并为后续版本迭代奠定稳定性基础。所有需求均严格映射至已验证的发现项，确保产品改进有据可依。",
   "findings": [
     {
       "id": "finding-1",
@@ -10,11 +13,7 @@
         "focus-1",
         "focus-4"
       ],
-      "sourceFindingIds": [
-        "finding-1@c0",
-        "finding-2@c1",
-        "finding-1@c2"
-      ],
+      "sourceFindingIds": [],
       "title": "信息流加载失败与自动刷新导致内容丢失",
       "summary": "用户频繁报告时间线锁定、帖子无法加载以及应用打开或滚动时发生非预期的自动刷新。该行为不仅导致基础内容获取受阻，还会使正在阅读的内容意外消失且无法找回，严重破坏浏览连贯性并引发性能卡顿。",
       "supportingReviewIds": [
@@ -100,10 +99,7 @@
       "focusAreaIds": [
         "focus-4"
       ],
-      "sourceFindingIds": [
-        "finding-2@c0",
-        "finding-4@c2"
-      ],
+      "sourceFindingIds": [],
       "title": "核心交互与账户切换引发界面冻结",
       "summary": "在执行点赞、评论、分享等基础互动，或在多账户间切换时，应用界面会频繁出现数秒至数十秒的无响应冻结状态。此类性能瓶颈直接阻碍了日常社交操作，反映出底层上下文管理与渲染优化的稳定性问题。",
       "supportingReviewIds": [
@@ -160,10 +156,7 @@
       "focusAreaIds": [
         "focus-3"
       ],
-      "sourceFindingIds": [
-        "finding-3@c0",
-        "finding-3@c2"
-      ],
+      "sourceFindingIds": [],
       "title": "通知系统交互逻辑缺陷持续存在",
       "summary": "点击单条通知会错误地清除其余所有通知，或强制重新加载主页并跳转至无关推文。该交互Bug已跨越多个版本未获修复，导致用户难以准确追踪遗漏信息，严重影响通知系统的核心可用性。",
       "supportingReviewIds": [
@@ -222,13 +215,7 @@
       "focusAreaIds": [
         "focus-3"
       ],
-      "sourceFindingIds": [
-        "finding-4@c0",
-        "finding-1@c1",
-        "finding-4@c1",
-        "finding-1@c3",
-        "finding-2@c3"
-      ],
+      "sourceFindingIds": [],
       "title": "账号访问障碍、任意封禁与申诉机制失效",
       "summary": "用户遭遇多种账户访问危机：包括登录循环错误、无故被暂停或影子屏蔽（Shadow Ban）、以及新号注册初期即遭永久锁定。配套的AI自动审核与申诉流程缺乏透明度且频繁误判，形成逻辑死循环，导致用户完全丧失账户控制权与纠错能力。",
       "supportingReviewIds": [
@@ -368,10 +355,7 @@
         "focus-2",
         "focus-3"
       ],
-      "sourceFindingIds": [
-        "finding-3@c1",
-        "finding-2@c2"
-      ],
+      "sourceFindingIds": [],
       "title": "多媒体内容加载失败与显示比例异常",
       "summary": "媒体资源在特定网络环境（如Wi-Fi）下频繁加载失败或显示“内容不可用”；同时视频默认播放比例错误需手动缩放，图片轮播功能失效。此外，输入框无法写入评论进一步阻断了多媒体内容的互动体验。",
       "supportingReviewIds": [
@@ -442,10 +426,7 @@
       "focusAreaIds": [
         "focus-3"
       ],
-      "sourceFindingIds": [
-        "finding-3@c3",
-        "finding-4@c3"
-      ],
+      "sourceFindingIds": [],
       "title": "近期版本迭代导致整体体验恶化与高流失风险",
       "summary": "用户普遍反映每次应用更新后体验均呈下降趋势，最新版本的性能与UI表现引发强烈不满。结合品牌变更带来的认知割裂，大量用户表达出放弃使用、拒绝互动及劝退他人的倾向，显示出极高的用户留存危机。",
       "supportingReviewIds": [
@@ -505,61 +486,396 @@
       ]
     }
   ],
-  "warnings": [],
-  "insufficientEvidence": false,
-  "consolidationAudit": {
-    "candidateCount": 16,
-    "consolidatedCount": 6,
-    "finalCount": 6,
-    "groups": [
+  "requirements": [
+    {
+      "id": "req-1",
+      "findingIds": [
+        "finding-1"
+      ],
+      "title": "修复信息流自动刷新导致的内容丢失与加载卡顿",
+      "description": "优化时间线加载逻辑，禁用或限制应用打开/滚动时的非预期自动刷新行为；增加内容缓存与断点续读机制，防止阅读中的帖子意外消失；优化网络请求重试策略以解决“posts aren’t loading”错误；强化后台渲染线程管理以降低滚动卡顿。",
+      "sourceReviewIds": [
+        "cffe3869f6440eefa52c",
+        "b530d2b11e958946a3b9",
+        "84b0df5bcbb1364b99f7",
+        "d6b99959fd1615834c48"
+      ],
+      "priority": "P1",
+      "acceptanceCriteria": [
+        "打开应用或滚动至底部时，触发一次标准刷新，不出现二次刷新。",
+        "用户阅读推文期间若发生后台刷新，已读推文位置保持锁定或提供“恢复上次浏览位置”选项，内容不丢失。",
+        "弱网环境下，加载失败提示出现后，点击重试成功率需达到95%以上（Suggested: 基于行业基准，因证据未提供具体阈值）。",
+        "界面滚动帧率保持在55fps以上，无肉眼可见卡顿（Suggested: 性能基线）。"
+      ],
+      "versionId": null,
+      "planningFactors": {
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "Severity定为critical，因信息流是核心功能，内容丢失与加载失败直接阻断用户浏览路径。User Impact为high，影响7个独立样本组（supportRatio 6.25%），属高频痛点。Implementation Scope为medium，涉及前端缓存策略、网络层重试逻辑及渲染优化，但无需底层架构重构。Evidence Strength、Confidence与Frequency由系统确定性计算得出，本规划重点权衡业务影响与技术可行性。无外部依赖，可独立交付。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 7,
+          "corpusReviewCount": 112,
+          "supportRatio": 0.0625
+        }
+      }
+    },
+    {
+      "id": "req-2",
+      "findingIds": [
+        "finding-5"
+      ],
+      "title": "修复Wi-Fi环境下多媒体加载失败及视频显示比例异常",
+      "description": "排查并修复特定Wi-Fi网络下媒体资源加载失败的问题；修正视频默认播放缩放比例，确保全屏自适应；恢复图片轮播功能；优化输入框焦点管理以支持评论写入。",
+      "sourceReviewIds": [
+        "ae1ef7d74375b5185bf8",
+        "c630bec5849d84b38015",
+        "618790743691086fccb1",
+        "21939e7bf5014b13bbfd"
+      ],
+      "priority": "P1",
+      "acceptanceCriteria": [
+        "在主流Wi-Fi网络环境下，图文/视频媒体加载成功率≥98%（Suggested: 目标值）。",
+        "点击视频后默认以正确比例完整显示，无需手动双指缩放即可观看全貌。",
+        "图片帖子支持左右滑动轮播，且切换流畅无白屏。",
+        "点击评论区输入框可正常唤起键盘并输入文本，无焦点丢失或冻结现象。"
+      ],
+      "versionId": null,
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "Severity定为high，多媒体消费与互动是平台核心留存指标。User Impact为high，覆盖5个样本组（supportRatio 4.46%），明确指向网络兼容性与UI适配缺陷。Implementation Scope为medium，需调整CDN/代理路由策略、视频播放器容器适配及输入法焦点事件监听。无依赖关系，可与req-1并行开发。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 5,
+          "corpusReviewCount": 112,
+          "supportRatio": 0.044642857142857144
+        }
+      }
+    },
+    {
+      "id": "req-3",
+      "findingIds": [
+        "finding-4",
+        "finding-3"
+      ],
+      "title": "优化账户申诉透明度与通知交互逻辑",
+      "description": "重构通知点击逻辑，避免单条点击清除全部通知；为账户暂停/影子屏蔽用户提供明确的违规原因说明与人工复核入口，打破AI误判死循环；优化登录会话管理以减少循环报错；完善受限状态下的用户引导路径。",
+      "sourceReviewIds": [
+        "497a88d5fbe0c5acac1b",
+        "ec780cea31243926a0ad",
+        "56b934314151a3330b0b",
+        "64f980a7e100c2776829",
+        "98f7634113466eef87d6",
+        "669b1b69fcd52b3a0a96",
+        "b72cb5b5369ef4acf380",
+        "942e8fb78d4ce7c42fed",
+        "88ceceaf528c6c039adf",
+        "b139645074909b1f5110",
+        "161d9b39015b97ceed5b",
+        "554635876b726fcfc341",
+        "232158cf07f6adc110c2",
+        "4fdc7c480dfcce558d72",
+        "a40c3f400f1dc51a59b1",
+        "054e4c2d3fe193d45c18"
+      ],
+      "priority": "P1",
+      "acceptanceCriteria": [
+        "点击单条通知仅跳转至对应内容，不触发“全部清除”操作。",
+        "账户受限页面明确展示具体违规类型、判定时间及申诉渠道，禁止出现“无法申诉”或无限循环提示。",
+        "登录失败时提供明确的错误代码或引导步骤，而非重复要求下载官方App的无效提示。",
+        "申诉提交后，系统需在48小时内返回初步审核状态（Suggested: 服务SLA目标）。"
+      ],
+      "versionId": null,
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "large",
+        "dependencyRequirementIds": [],
+        "rationale": "Severity定为high，账户控制权丧失与通知逻辑缺陷直接引发信任危机与高流失风险。User Impact为high，finding-4覆盖15个样本组（supportRatio 13.4%），finding-3虽证据不足但属长期未修复的交互Bug。Implementation Scope为large，需跨端协调后端风控提示策略、前端导航状态管理及客服工单系统集成。无技术依赖，但需法务与合规团队确认申诉文案规范。",
+        "evidenceStrength": "medium",
+        "confidence": "low",
+        "frequency": {
+          "supportingReviewCount": 17,
+          "corpusReviewCount": 112,
+          "supportRatio": 0.15178571428571427
+        }
+      }
+    },
+    {
+      "id": "req-4",
+      "findingIds": [
+        "finding-6"
+      ],
+      "title": "建立版本更新质量门禁与回滚机制",
+      "description": "针对用户普遍反映的“每次更新体验下降”问题，建立上线前性能与崩溃率基线监控；新版本发布后若核心指标劣化，自动触发热修复或版本回退通道；增加用户端快速反馈入口以便收集退化数据。",
+      "sourceReviewIds": [
+        "a8f76924121f54475f2a"
+      ],
+      "priority": "P2",
+      "acceptanceCriteria": [
+        "建立版本更新前性能与崩溃率基线监控，新版本上线后若核心指标（如ANR率、启动耗时）劣化超过10%，自动触发回滚或热修复通道（Suggested: 质量门禁阈值）。",
+        "用户反馈入口增加“版本回退”或“问题上报”快捷按钮，便于快速收集退化数据。",
+        "每次大版本更新后，针对历史高频崩溃场景执行自动化回归测试，通过率需达100%。"
+      ],
+      "versionId": null,
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "medium",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "Severity定为medium，finding-6主要反映情绪化评价与宏观体验下滑，缺乏具体技术根因，但预示系统性质量滑坡风险。User Impact为medium，直接影响品牌口碑与留存。Implementation Scope为medium，侧重CI/CD流水线改造、监控埋点接入与客户端热更模块集成。作为防御性需求，不阻塞核心功能修复，但需前置配置监控看板。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 4,
+          "corpusReviewCount": 112,
+          "supportRatio": 0.03571428571428571
+        }
+      }
+    }
+  ],
+  "versions": [],
+  "tests": [
+    {
+      "id": "test-1",
+      "requirementIds": [
+        "req-1"
+      ],
+      "findingIds": [
+        "finding-1"
+      ],
+      "sourceReviewIds": [
+        "b530d2b11e958946a3b9"
+      ],
+      "testType": "manual",
+      "precondition": "应用已安装最新版本，网络环境稳定，用户已登录。",
+      "steps": [
+        "打开应用，等待信息流加载完成。",
+        "快速连续滚动至信息流底部触发一次刷新。",
+        "观察是否出现二次刷新或内容列表重置。",
+        "在信息流中点击任意一条推文开始阅读。",
+        "模拟后台网络请求触发自动刷新（或使用测试工具模拟）。",
+        "检查已读推文是否仍在视野内或提供恢复位置选项。"
+      ],
+      "expectedResult": "信息流仅触发一次标准刷新，无二次刷新现象；阅读中的推文位置保持锁定或可一键恢复，内容未丢失。",
+      "priority": "P1"
+    },
+    {
+      "id": "test-2",
+      "requirementIds": [
+        "req-1"
+      ],
+      "findingIds": [
+        "finding-1"
+      ],
+      "sourceReviewIds": [
+        "cffe3869f6440eefa52c"
+      ],
+      "testType": "automated",
+      "precondition": "测试环境配置弱网模拟插件（如Network Link Conditioner），帧率监控工具已接入。",
+      "steps": [
+        "启动自动化脚本，模拟弱网（3G/高延迟）环境下信息流加载。",
+        "执行10次加载失败重试操作，记录成功次数。",
+        "使用性能分析工具持续录制界面滚动过程，采集FPS数据。",
+        "分析日志与性能报告。"
+      ],
+      "expectedResult": "弱网环境下重试成功率达到95%以上；界面滚动帧率稳定保持在55fps以上，无肉眼可见卡顿或掉帧。",
+      "priority": "P1"
+    },
+    {
+      "id": "test-3",
+      "requirementIds": [
+        "req-2"
+      ],
+      "findingIds": [
+        "finding-5"
+      ],
+      "sourceReviewIds": [
+        "21939e7bf5014b13bbfd"
+      ],
+      "testType": "manual",
+      "precondition": "设备连接至主流Wi-Fi网络，多媒体资源缓存已清空。",
+      "steps": [
+        "进入包含图文与视频的信息流页面。",
+        "依次点击加载失败的媒体占位符进行重试。",
+        "点击任意视频帖子，观察默认播放比例与画面完整性。",
+        "尝试双指缩放查看是否需要手动调整。"
+      ],
+      "expectedResult": "Wi-Fi环境下媒体加载成功率≥98%；视频默认以正确比例完整显示，无需手动双指缩放即可观看全貌。",
+      "priority": "P1"
+    },
+    {
+      "id": "test-4",
+      "requirementIds": [
+        "req-2"
+      ],
+      "findingIds": [
+        "finding-5"
+      ],
+      "sourceReviewIds": [
+        "ae1ef7d74375b5185bf8"
+      ],
+      "testType": "manual",
+      "precondition": "存在包含多张图片的帖子及评论区。",
+      "steps": [
+        "打开含多图轮播的帖子，左右滑动切换图片。",
+        "点击评论区输入框，观察键盘唤起状态。",
+        "尝试输入文本并发送评论。",
+        "检查输入过程中焦点是否丢失或界面冻结。"
+      ],
+      "expectedResult": "图片帖子支持左右滑动轮播且切换流畅无白屏；点击输入框正常唤起键盘，可顺利输入文本，无焦点丢失或冻结现象。",
+      "priority": "P1"
+    },
+    {
+      "id": "test-5",
+      "requirementIds": [
+        "req-3"
+      ],
+      "findingIds": [
+        "finding-4",
+        "finding-3"
+      ],
+      "sourceReviewIds": [
+        "497a88d5fbe0c5acac1b"
+      ],
+      "testType": "manual",
+      "precondition": "用户账户拥有多条未读通知。",
+      "steps": [
+        "进入通知中心页面。",
+        "点击单条非关键通知（如点赞、转发）。",
+        "观察跳转行为及通知列表变化。",
+        "检查其余未读通知是否被意外清除。"
+      ],
+      "expectedResult": "点击单条通知仅跳转至对应内容详情页，不触发“全部清除”操作，其余通知保留原状。",
+      "priority": "P1"
+    },
+    {
+      "id": "test-6",
+      "requirementIds": [
+        "req-3"
+      ],
+      "findingIds": [
+        "finding-4",
+        "finding-3"
+      ],
+      "sourceReviewIds": [
+        "669b1b69fcd52b3a0a96"
+      ],
+      "testType": "manual",
+      "precondition": "测试账号处于账户暂停或影子屏蔽受限状态。",
+      "steps": [
+        "登录受限账号，进入账户状态页面。",
+        "查看违规原因说明、判定时间及申诉渠道入口。",
+        "点击申诉按钮提交复核请求。",
+        "记录系统反馈提示，确认是否存在无限循环或“无法申诉”提示。"
+      ],
+      "expectedResult": "受限页面明确展示具体违规类型、判定时间及人工复核入口；申诉提交后无死循环提示，系统按流程处理并在48小时内返回初步审核状态。",
+      "priority": "P1"
+    },
+    {
+      "id": "test-7",
+      "requirementIds": [
+        "req-4"
+      ],
+      "findingIds": [
+        "finding-6"
+      ],
+      "sourceReviewIds": [
+        "a8f76924121f54475f2a"
+      ],
+      "testType": "automated",
+      "precondition": "CI/CD流水线已集成质量门禁插件，客户端已部署版本反馈模块。",
+      "steps": [
+        "模拟新版本发布，注入ANR率上升15%的测试数据至监控看板。",
+        "验证系统是否自动触发回滚或热修复通道。",
+        "在客户端首页右上角找到“版本反馈”入口。",
+        "点击快捷按钮上报退化问题，检查数据是否准确上传至反馈队列。"
+      ],
+      "expectedResult": "核心指标劣化超过10%时自动触发回滚或热修复通道；用户端反馈入口功能正常，快捷按钮可快速收集并提交退化数据。",
+      "priority": "P2"
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "asm-1",
+      "text": "网络环境差异导致的媒体加载失败可能涉及运营商DNS解析或CDN节点配置，需运维与网络团队配合进行抓包与路由策略调优。",
+      "basis": "finding-5 uncertainties指出Wi-Fi与5G表现差异显著，且用户强调非本地网络问题。"
+    },
+    {
+      "id": "asm-2",
+      "text": "账户封禁与申诉逻辑涉及后端风控算法调整，当前前端仅能优化提示与入口，底层判定规则变更需跨部门协调，短期内无法彻底解决误判。",
+      "basis": "finding-4 limitations明确指出AI审核不透明、样本为主观陈述，且部分用户可能确实存在违规行为。"
+    },
+    {
+      "id": "asm-3",
+      "text": "界面冻结问题（如点赞/评论/切换账号卡顿）样本量不足且设备分布不明，暂按低优先级纳入性能监控队列，待后续APM数据验证后再决定是否加入下一版本。",
+      "basis": "finding-2 evidence sufficiency为insufficient，supportRatio仅1.79%，且uncertainties指出频率与设备相关性未明。"
+    },
+    {
+      "id": "asm-4",
+      "text": "信息流自动刷新的具体触发条件（如后台活动、网络状态切换）需通过客户端日志进一步定位，当前规划基于用户感知行为进行防御性设计。",
+      "basis": "finding-1 uncertainties明确说明double-refresh的具体触发条件尚未完全定义。"
+    }
+  ],
+  "goalCoverage": {
+    "valid": true,
+    "retried": false,
+    "items": [
       {
-        "findingId": "finding-1",
-        "sourceFindingIds": [
-          "finding-1@c0",
-          "finding-2@c1",
-          "finding-1@c2"
+        "focusAreaId": "focus-1",
+        "label": "Feed Refresh Issues",
+        "status": "covered",
+        "findingIds": [
+          "finding-1"
+        ],
+        "requirementIds": [
+          "req-1"
         ]
       },
       {
-        "findingId": "finding-2",
-        "sourceFindingIds": [
-          "finding-2@c0",
-          "finding-4@c2"
+        "focusAreaId": "focus-2",
+        "label": "Multimedia Loading Problems",
+        "status": "covered",
+        "findingIds": [
+          "finding-5"
+        ],
+        "requirementIds": [
+          "req-2"
         ]
       },
       {
-        "findingId": "finding-3",
-        "sourceFindingIds": [
-          "finding-3@c0",
-          "finding-3@c2"
+        "focusAreaId": "focus-3",
+        "label": "Core Functionality Experience",
+        "status": "covered",
+        "findingIds": [
+          "finding-4",
+          "finding-5",
+          "finding-6"
+        ],
+        "requirementIds": [
+          "req-3",
+          "req-2",
+          "req-4"
         ]
       },
       {
-        "findingId": "finding-4",
-        "sourceFindingIds": [
-          "finding-4@c0",
-          "finding-1@c1",
-          "finding-4@c1",
-          "finding-1@c3",
-          "finding-2@c3"
-        ]
-      },
-      {
-        "findingId": "finding-5",
-        "sourceFindingIds": [
-          "finding-3@c1",
-          "finding-2@c2"
-        ]
-      },
-      {
-        "findingId": "finding-6",
-        "sourceFindingIds": [
-          "finding-3@c3",
-          "finding-4@c3"
+        "focusAreaId": "focus-4",
+        "label": "App Stability (Crashes/Lags)",
+        "status": "covered",
+        "findingIds": [
+          "finding-1"
+        ],
+        "requirementIds": [
+          "req-1"
         ]
       }
-    ],
-    "droppedCandidateIds": [],
-    "addedForCoverage": []
+    ]
   }
 }

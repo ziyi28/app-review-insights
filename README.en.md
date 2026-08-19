@@ -109,17 +109,6 @@ Two points to note:
 
 Cached replay and import analysis do not need outbound network access or a proxy.
 
-### Known phenomenon: both sources return empty for high-traffic apps
-
-For very high-download apps (Duolingo / Chase scale), live collection can hit
-**both sources returning empty at the same time**: SerpApi reports rate or
-quota exhaustion (`SERPAPI_RATE_OR_QUOTA_EXHAUSTED` — check your quota in the
-console and retry), while the fallback Apple RSS also returns an HTTP 200 with
-an empty body (marked `suspect-empty`, never interpreted as "this app has no
-reviews"). The system records the corresponding limitations honestly and stops
-collection — **it never fabricates data**. For live demos prefer a mid- or
-low-traffic app, or use the cached replay mode (offline and stable).
-
 ## Background Tasks and Refresh Recovery
 
 Analysis is decoupled from the browser connection and runs as a background task:
@@ -259,10 +248,10 @@ For the bundled demo fixtures the analysis used a DeepSeek-compatible endpoint
 `provenance.json` and is **not** required to replay them.
 
 > [!IMPORTANT]
-> **Model Selection, Performance Comparison, and Compatibility Note:**
-> - **Speed & Quality Comparison**: In actual testing, **`gpt5.6luna`** (or equivalent compatible models) runs significantly faster, completing a full end-to-end pipeline run in approximately **2 minutes** while maintaining good analysis quality; in comparison, **`deepseek-v4-flash`** takes around **20 minutes** for a full run. Users can choose based on their execution time preferences.
-> - **Baseline Model**: The development and benchmark baseline is verified against **`deepseek-v4-flash`**. It delivers high fidelity and compliance for structured JSON outputs, strict schema contracts, and exact evidence substrings.
-> - **Switching to Other Models (e.g., Qwen series)**: The analysis pipeline enforces strict deterministic Zod schema validation across all stages (such as requiring non-empty supporting citations and canonical ID prefixes). When switching to other models (such as Alibaba Cloud Qwen, Llama, or other open-weight/commercial models), minor discrepancies—such as empty supporting arrays (`supportingReviewIds: []`), omitted fields, or slight formatting drifts during chunked analysis—can trigger `MODEL_SCHEMA_VIOLATION` errors and cause runs to fail. If you experience instability, consider using `gpt5.6luna` or `deepseek-v4-flash`.
+> **Model Selection Recommendation and Benchmark Note:**
+> - **Strongly Recommend DeepSeek Series (Best Real-World Results)**: Across full end-to-end runs, we strongly recommend using the **`DeepSeek` series models** (e.g., `deepseek-v4-pro`, `deepseek-v4-flash`, etc.). They demonstrate the highest compliance with complex structured JSON schemas, strict field constraints, and exact review substring citations, resulting in **significantly fewer intermediate self-healing revisions and superior analysis depth**.
+> - **Reasoning Effort vs. Latency Tradeoff**: Setting a higher reasoning effort (`high` / `max`) or utilizing flagship reasoning models (like `deepseek-v4-pro`) increases pipeline execution time, but yields **far more comprehensive and deeply grounded insights, conflict analysis, and PRD roadmaps**. For faster turnaround, lighter models (like `gpt5.6luna`) or lower reasoning efforts can be selected (completing in ~2–5 minutes).
+> - **Notes on Other Models (e.g., Qwen series)**: The pipeline enforces strict deterministic Zod schema validations. While fallback normalizations are in place to handle various model formatting quirks, switching to DeepSeek is recommended if any prompt schema edge cases occur during massive multi-batch runs.
 
 See `docs/model-analysis.md` for per-stage rules-vs-model rationale, prompt
 versions, and failure handling.

@@ -30,18 +30,16 @@ import { OpenAiCompatibleClient } from "../src/server/model/openai-compatible-cl
 import { loadConfig, readEnvLocal } from "../src/server/config";
 import { collectSerpApiReviews } from "../src/server/sources/serpapi-collector";
 import { collectAppleReviews } from "../src/server/sources/apple-rss-collector";
+import { AppleReviewCacheStore } from "../src/server/sources/apple-review-cache";
 import type { Limitation } from "../src/server/sources/source-types";
 import type { RawReview } from "../src/domain/contracts/review";
 
 const DEFAULT_APP_ID = "839285684";
 const DEFAULT_APP_NAME = "Workout for Women";
 const DEFAULT_FIXTURE_NAME = "run-workout-for-women-us";
-const DEFAULT_OUTPUT_LOCALE = "en";
+const DEFAULT_OUTPUT_LOCALE = "zh-CN";
 const DEFAULT_GOAL =
-  "Analyze the most impactful problems and opportunities from US App Store reviews. " +
-  "Identify the most polarizing features — loved by some users, disliked by others — " +
-  "especially around subscription value and workout usability. Capture conflicting " +
-  "feedback explicitly instead of discarding it.";
+  "分析美国应用商店用户评论中影响最大的问题与改进机会。识别最具争议的功能点（部分用户喜欢但另一部分用户反感），尤其是关于订阅付费价值与健身训练易用性方面。明确记录冲突的反馈而非忽略。";
 
 const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
@@ -143,6 +141,24 @@ export async function buildRealDemo(): Promise<string> {
   }
 
   if (reviews.length === 0) {
+    const cacheStore = new AppleReviewCacheStore(cfg.sourceCacheDir);
+    const cached = await cacheStore.readCache("us", appId);
+    if (cached && cached.reviews && cached.reviews.length > 0) {
+      const reviewLimit = Number(process.env.REVIEW_LIMIT) || 500;
+      provider = "apple-rss";
+      reviews = cached.reviews.slice(0, reviewLimit);
+      rawRefs = (cached.rawRefs ?? []).slice(0, reviews.length);
+      limitations = cached.limitations ?? [];
+      status = "complete";
+      requestCount = Math.ceil(reviews.length / 50);
+      searchCount = 0;
+      searchId = null;
+      forcedRefresh = false;
+      console.log(`Using cached raw reviews for app ${appId}: ${reviews.length} reviews (limit: ${reviewLimit})`);
+    }
+  }
+
+  if (reviews.length === 0) {
     throw new Error(`No reviews collected for app ${appId} (status: ${status}); cannot build a demo fixture`);
   }
 
@@ -196,7 +212,18 @@ export async function buildRealDemo(): Promise<string> {
     maxPages: cfg.appleRssMaxPages,
     timeoutMs: cfg.appleRssTimeoutMs,
   };
-  const metadata = { appName, appUrl: canonicalUrl };
+  const metadata: RunMetadata = {
+    appName,
+    appUrl: canonicalUrl,
+    startRequest: {
+      protocolVersion: "1",
+      mode: "analyze",
+      uiLocale: "zh-CN",
+      outputLocale,
+      goal,
+      source: { kind: "live", appStoreUrl: canonicalUrl, reviewLimit: reviews.length >= 500 ? 500 : reviews.length >= 300 ? 300 : 100 },
+    },
+  };
 
   console.log(`Collecting + analyzing app ${appId} (${appName}, ${provider}, ${reviews.length} reviews) -> ${runId}`);
   await executeRun(runId, goal, outputLocale, deps, publisher, store, "live", true, metadata);

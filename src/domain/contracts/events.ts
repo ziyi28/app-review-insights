@@ -8,6 +8,7 @@ export const StageNameSchema = z.enum([
   "findings",
   "evidence-validation",
   "planning",
+  "requirement-evidence",
   "tests",
   "traceability",
   "revision",

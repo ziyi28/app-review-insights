@@ -2,559 +2,247 @@
   "candidates": [
     {
       "id": "topic-candidate-1@c0",
-      "label": "账号被无故限制/封禁且申诉无回应",
-      "description": "多位用户反映账号被无故限制或封禁，申诉和支持渠道无响应，导致老用户流失。",
+      "label": "Feed Loading Failures and Error Handling",
+      "description": "Users report frequent failures in loading posts, encountering persistent error messages like 'posts aren’t loading right now', and being forced to repeatedly refresh or reopen the app. The lack of clear communication during these outages exacerbates frustration.",
       "supportingReviewIds": [
-        "942e8fb78d4ce7c42fed",
-        "b72cb5b5369ef4acf380",
-        "3b4c600e86c460a49186"
+        "cffe3869f6440eefa52c"
       ],
-      "quote": "now my account has been limited with zero explanation, can’t get anyone from support to respond",
+      "quote": "i opened the app expecting to be able to browse posts normally, only to be greeted with a message stating, “posts aren’t loading right now. try again.”",
       "focusAreaIds": [
-        "focus-1"
+        "focus-1",
+        "focus-2"
       ]
     },
     {
       "id": "topic-candidate-2@c0",
-      "label": "涉及未成年人的违规与有害内容未被处理",
-      "description": "用户声称平台存在涉未成年人的不当内容、色情和虐待内容，举报后仍不下架，内容安全机制失灵。",
+      "label": "App Performance Degradation (Freezing/Lags)",
+      "description": "Significant performance issues are reported where basic interactions such as sharing, commenting, and liking cause the screen to freeze for multiple seconds, leading to a poor user experience.",
       "supportingReviewIds": [
-        "9ac8666109691fba5f70",
-        "546311cffcf7b395f8bb",
-        "0a50412c5b9cbdf1b7c6",
-        "3b4c600e86c460a49186"
+        "803ede81b8072bde4361"
       ],
-      "quote": "it’s mainly inappropriate content featuring underage kids which is illegal and they refuse to take anything down",
+      "quote": "they freeze the screen for multiple seconds. it is very frustrating",
       "focusAreaIds": [
-        "focus-1"
+        "focus-4"
       ]
     },
     {
       "id": "topic-candidate-3@c0",
-      "label": "机器人与AI虚假账号扰乱内容生态",
-      "description": "用户抱怨AI配音、机器人、冒充账号和刷量内容泛滥，影响视频功能和整体可信度。",
+      "label": "Notification System Bugs",
+      "description": "A long-standing bug causes tapping on a single notification to dismiss all others or force reload the home page incorrectly, preventing users from viewing missed notifications properly despite numerous updates.",
       "supportingReviewIds": [
-        "de8e973736535896e045",
-        "783d5c7e1c688ceaa112",
-        "9ac8666109691fba5f70"
+        "497a88d5fbe0c5acac1b"
       ],
-      "quote": "foreign accounts constantly farming views with ai voiceovers and other garbage the apps the video feature is practically useless",
+      "quote": "tapping to view one will dismiss the rest, forcing you to scroll through your notification tab to see what you missed.",
       "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-4@c0",
-      "label": "直播与界面功能故障/体验回退",
-      "description": "用户反映直播功能老旧、掉线、无法看评论，滚动手势误触，且多次更新后问题仍未解决。",
+      "label": "Authentication and Login Issues",
+      "description": "Users experience difficulties logging into their accounts, including being told to download the official app while already using it, and general refusal to accept valid credentials.",
       "supportingReviewIds": [
-        "9d01028f92f6ff731769",
-        "6d8d18acb1fb21835964",
-        "c4aeecfc4b469388c984",
-        "ff0f3e1c7e16757c275a",
-        "f1123c98dd84fc43b9c2"
+        "56b934314151a3330b0b",
+        "64f980a7e100c2776829"
       ],
-      "quote": "the live in this app is archaic",
+      "quote": "the app keeps on refusing me to login my account. i have updated the app buh still the same thing.",
       "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-5@c0",
-      "label": "付费订阅性价比下降与客服缺失",
-      "description": "用户认为价格上涨不值、Premium承诺未兑现，且付费用户同样得不到有效支持。",
+      "label": "False Positive Account Suspensions and Shadow Banning",
+      "description": "Users report being suspended or shadow-banned without clear reasons, often attributed to automated systems misidentifying them as bots. Appeals are frequently denied instantly by AI, leaving users unable to use their accounts.",
       "supportingReviewIds": [
-        "d286f19ac722a00509c1",
-        "9ac8666109691fba5f70",
-        "ff0f3e1c7e16757c275a"
+        "b71789ac2d00b7701502",
+        "70795a32fd9acf789380",
+        "13d7dc95842da11b304f",
+        "98f7634113466eef87d6",
+        "669b1b69fcd52b3a0a96",
+        "f4e11bd31390e16a07af"
       ],
-      "quote": "not worth a 10% price increase. spotify here i come!",
+      "quote": "my 10 year account was suspended for “inauthentic behavior” and thus far, all appeals have been instantly denied the moment i press send.",
       "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-6@c0",
-      "label": "平台政治化与仇恨/虚假信息增多",
-      "description": "用户反馈信息流充满政治帖、仇恨言论与虚假信息，平台被认为成为宣传机器或情绪负面来源。",
-      "supportingReviewIds": [
-        "36b0c01299e82c66499d",
-        "96a3ca1269f573fce629",
-        "e529c223c6cd1d413bf5",
-        "a943160525eeaef6b7c2",
-        "414d3a947f52292dfc92"
-      ],
-      "quote": "nothing but idiotic political posts",
-      "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-1@c1",
-      "label": "通知栏回归：点击一条通知会清除/跳过其余通知",
-      "description": "多个版本后仍存在：点击通知不再进入通知标签页，而是跳到个性化首页；查看一条通知会清除其余通知，用户被迫重新翻找。",
+      "label": "Feed Stability and Performance Issues",
+      "description": "Users report significant technical instability including timeline locking, threads becoming unavailable, and general glitches that prevent normal usage of the feed.",
       "supportingReviewIds": [
-        "497a88d5fbe0c5acac1b"
+        "592e221cc4ec98801e62",
+        "5c1e7af4dca29c2bd4f8"
       ],
-      "quote": "tapping to view one will dismiss the rest",
+      "quote": "timeline locks up, threads are unavailable a lot",
       "focusAreaIds": [
-        "focus-1"
+        "focus-1",
+        "focus-4"
       ]
     },
     {
       "id": "topic-candidate-2@c1",
-      "label": "影子封禁与回复可见性下降",
-      "description": "用户反映自己的回复被从讨论串中移除、仅粉丝可见，帖子被隐藏，且没有被告知原因，也无法联系人工支持。",
+      "label": "Multimedia Display and Loading Defects",
+      "description": "Specific complaints regarding video playback issues (zoomed-in view requiring manual adjustment) and inability to scroll through pictures smoothly.",
       "supportingReviewIds": [
-        "b139645074909b1f5110",
-        "eca55a9575da9b7a2349",
-        "d8af87f68e11e39a8cda",
-        "76ef34c426c2633409ac"
+        "ae1ef7d74375b5185bf8",
+        "c630bec5849d84b38015"
       ],
-      "quote": "my replies have been detached from threads and only my followers have seen my posts for a month now",
+      "quote": "any video you click on the app is slightly zoomed in",
       "focusAreaIds": [
-        "focus-1"
+        "focus-2"
       ]
     },
     {
       "id": "topic-candidate-3@c1",
-      "label": "账号被无故封禁/AI 误判",
-      "description": "用户被 AI 标记为“不真实行为”后遭封禁，或因言论/立场被封号，且不清楚触发原因，申诉困难。",
+      "label": "Arbitrary Account Suspension and Shadow Banning",
+      "description": "High volume of reports regarding unexplained account suspensions, limited functionality without explanation, and shadow banning where posts/replies are hidden or detached from threads.",
       "supportingReviewIds": [
-        "2ff17e156b51002dae7d",
-        "82973717a5a5bd512dcd",
-        "88ceceaf528c6c039adf"
+        "b72cb5b5369ef4acf380",
+        "942e8fb78d4ce7c42fed",
+        "b139645074909b1f5110",
+        "161d9b39015b97ceed5b",
+        "554635876b726fcfc341"
       ],
-      "quote": "suspend you for “inauthentic behavior” even though you don’t know why or what you did to trigger this",
+      "quote": "my replies have been detached from threads and only my followers have seen my posts for a month now",
       "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-4@c1",
-      "label": "核心功能不可用：评论、私信与时间线",
-      "description": "用户报告无法发表评论、无法读取未读私信（除非不断更新 App），时间线/讨论串频繁卡死或不可用。",
+      "label": "Live Streaming Functionality Failures",
+      "description": "Issues with the Live feature including random disconnections for both viewers and hosts, inability to see comments, and missing battery indicators.",
       "supportingReviewIds": [
-        "618790743691086fccb1",
-        "f8abedeec2426686243d",
-        "592e221cc4ec98801e62"
+        "9d01028f92f6ff731769"
       ],
-      "quote": "i can’t write a comment on anything",
+      "quote": "it randomly kicks me out and ends it too, and now i can’t see the comments my followers leave me",
       "focusAreaIds": [
-        "focus-1"
+        "focus-3",
+        "focus-4"
       ]
     },
     {
       "id": "topic-candidate-5@c1",
-      "label": "信息流推荐回归：关注对象减少、无关内容增多",
-      "description": "信息流很少出现用户关注的账号，反而被大量不想要的媒体/政治内容占据，算法体验明显变差。",
+      "label": "Navigation and Interaction Pain Points",
+      "description": "Usability issues such as accidental navigation triggers when scrolling, difficulty accessing unread messages due to update prompts, and inability to write comments.",
       "supportingReviewIds": [
-        "32dc558b884c2448066a",
-        "95ff0e5ce2decdad4efa"
+        "6d8d18acb1fb21835964",
+        "f8abedeec2426686243d",
+        "618790743691086fccb1"
       ],
-      "quote": "those i follow rarely come up, excessive posts from forbes and bloomberg are annoying me too",
+      "quote": "when you scroll down, i always accidentally touch the left to open the home page",
       "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-6@c1",
-      "label": "GIF 库回归：旧 GIF 丢失/被替换",
-      "description": "用户注意到旧 GIF 库被替换，新表情很少适配语境，一些常用 GIF 彻底消失，希望恢复旧库。",
-      "supportingReviewIds": [
-        "c088e6bfedfe9a2add7b"
-      ],
-      "quote": "please bring back the old gifs!",
-      "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-1@c2",
-      "label": "媒体浏览回归：视频缩放与图片滚动异常",
-      "description": "用户在浏览媒体时遇到回归：视频默认被放大需手动缩放，图片也无法滚动查看。",
+      "label": "信息流异常自动刷新与内容丢失",
+      "description": "应用打开或阅读过程中信息流会触发非预期的自动刷新机制，甚至出现双击刷新、点击通知强制重载主页等现象，导致用户正在浏览的推文突然消失且无法回溯查找。",
       "supportingReviewIds": [
-        "c630bec5849d84b38015",
-        "ae1ef7d74375b5185bf8"
+        "b530d2b11e958946a3b9",
+        "84b0df5bcbb1364b99f7",
+        "d6b99959fd1615834c48",
+        "ec780cea31243926a0ad"
       ],
-      "quote": "any video you click on the app is slightly zoomed in",
+      "quote": "when you enter, when you start reading the tweet, the feed itself is updated and the tweet you read can no longer be found.",
       "focusAreaIds": [
         "focus-1"
       ]
     },
     {
       "id": "topic-candidate-2@c2",
-      "label": "账号登录与访问故障",
-      "description": "部分用户无法正常登录账号，或账号被无故锁定/封禁，导致正常使用受阻。",
+      "label": "应用卡顿与多账号切换死锁",
+      "description": "执行核心状态切换操作（如切换账号）时高频触发应用无响应或界面冻结，整体渲染与响应延迟显著增加，严重影响基础交互流畅度。",
       "supportingReviewIds": [
-        "4fdc7c480dfcce558d72",
-        "232158cf07f6adc110c2",
-        "4529e77929effbb1be08",
-        "5a398934f16ccebe94b5"
+        "b530d2b11e958946a3b9"
       ],
-      "quote": "it won’t let me login to my account it’s keeps telling me to login to the official app",
+      "quote": "switching between accounts causes the app to lock up maybe 50% of the time. no obvious reason why.",
       "focusAreaIds": [
-        "focus-1"
+        "focus-4"
       ]
     },
     {
       "id": "topic-candidate-3@c2",
-      "label": "内容安全与审核失守：成人/违法内容及机器人泛滥",
-      "description": "平台被指充斥儿童色情、成人内容和机器人账号，审核机制未能有效遏制，AI 工具也被指可能助长 CSAM。",
+      "label": "多媒体加载失败与网络适配缺陷",
+      "description": "视频及图片等多媒体资源在特定网络环境下（如WiFi）无法加载，表现为持续转圈后抛出‘内容不可用’错误，附件下载功能亦存在间歇性失效问题。",
       "supportingReviewIds": [
-        "91adbf478301de28a709",
-        "bfac1bc5a2cfc0802d74",
-        "6c2b03f16b06ee09d803",
-        "1344a638a34644fc6d1a",
-        "17c0b8d4f8b13fcc7e52",
-        "88d9dd0b4204721b2ff7"
+        "21939e7bf5014b13bbfd",
+        "921983d712bf9f485f91",
+        "bb4c2a15b6af318bfc15"
       ],
-      "quote": "x is infested with child pornography.",
+      "quote": "videos spin then turn to content is not available error. been happening for days",
       "focusAreaIds": [
-        "focus-1"
+        "focus-2"
       ]
     },
     {
       "id": "topic-candidate-4@c2",
-      "label": "言论自由承诺与现实审查封号之间的矛盾",
-      "description": "用户认为平台宣称的言论自由与实际封号/降权/影子封禁相矛盾，尤其特定政治观点账号被限制。",
+      "label": "核心交互控件失效与UI状态错位",
+      "description": "举报等关键功能模块按钮点击无响应，取消关注等交互动画与目标账户数据绑定错乱，部分新设备端发布动态功能被完全阻断。",
       "supportingReviewIds": [
-        "f7a386821507debbd09d",
-        "90795ba894f2a774f54e",
-        "1c882652d8542e7608a4",
-        "746d3505931cb1b710d3",
-        "092897092c8be44b684d",
-        "5a398934f16ccebe94b5"
+        "458208e861496c5c0d0b",
+        "187dc5dab5a49dac3006",
+        "d6b99959fd1615834c48",
+        "247e9b0a937e729b9977"
       ],
-      "quote": "they promised complete freedom of speech on this app but they ban/demote certain accounts that don’t fit the agenda",
+      "quote": "if you unsubscribe from people, the buttons work as crookedly as possible. you unsubscribed from one person, but at the same time the unsubscribe animation occurs with a completely different profile.",
       "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-5@c2",
-      "label": "品牌更名后整体质量与算法体验下滑",
-      "description": "老用户反映更名 X 后更新反而让产品体验下降，包括信息流算法触达锐减、广告政治化、界面刷新频繁等。",
-      "supportingReviewIds": [
-        "c5e32445431764a8f2e6",
-        "eda1bb73b4994cdbfb86",
-        "7114993019fac2ca3a53",
-        "ef80bd33b28a8770ffa8",
-        "88d9dd0b4204721b2ff7",
-        "da91b792277ddf42bdd7"
-      ],
-      "quote": "it all went downhill once the name change happened",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-6@c2",
-      "label": "广告、诈骗与隐私滥用问题",
-      "description": "用户报告广告/推广内容具有欺骗性，平台存在诈骗邮件以及个人信息/资产被出售的担忧。",
-      "supportingReviewIds": [
-        "758a900438a9836e7718",
-        "d0436a752c1cce31c99a",
-        "9df679412fd30d5d779b",
-        "88d9dd0b4204721b2ff7"
-      ],
-      "quote": "abusive advertising practices and content",
-      "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-1@c3",
-      "label": "Musk 收购与品牌更换后的整体质量回退",
-      "description": "多条低星评价将 X 的明显变差归因于 Elon Musk 接手以及从 Twitter 改名/改版：用户表示怀念旧版，认为产品持续走下坡，应用充斥机器人和不稳定问题。",
+      "label": "账号封禁与恢复流程失效",
+      "description": "用户反馈账号在注册初期被永久锁定，且缺乏申诉或纠正违规的渠道，账户停用/重新激活流程存在逻辑死循环，严重影响核心账号功能体验。",
       "supportingReviewIds": [
-        "c2503e3da903dd1a5a94",
-        "5c1e7af4dca29c2bd4f8",
-        "737ea4c1e49da874da67",
-        "5612c10311960b9a976a",
-        "9a1dbbd58ae5a27478bb",
-        "072bc7d6fbb3b0a44999"
+        "a40c3f400f1dc51a59b1"
       ],
-      "quote": "terrible since elon took over",
+      "quote": "my account was locked permanently on my 2nd day for violating a rule but without any recourse to correct the violation.",
       "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-2@c3",
-      "label": "账号被限流/隐藏及滥用封禁",
-      "description": "用户反馈评论和帖子被无解释地隐藏或影子封禁，申诉机制无效，甚至 7 天内反复被封/解封，显示审核与账号系统出现明显回退。",
+      "label": "版本迭代导致的体验劣化",
+      "description": "多条评论指出每次应用更新后整体质量下降，新版本表现糟糕，且伴随对品牌更名（X）的不满，反映出持续的性能退化与交互体验滑坡。",
       "supportingReviewIds": [
-        "554635876b726fcfc341",
-        "e19ce43b965ff170bdd1",
-        "161d9b39015b97ceed5b",
-        "3bf4601dbea80e52a3c5",
-        "313326c676fb4ef48f88"
+        "a8f76924121f54475f2a",
+        "55ccfe3be5491e82a831"
       ],
-      "quote": "been months now of x hiding every single one of my comments with no explanation",
+      "quote": "every update the app gets worse and this newest update is absolutely dog water",
       "focusAreaIds": [
-        "focus-1"
+        "focus-4"
       ]
     },
     {
       "id": "topic-candidate-3@c3",
-      "label": "内容审核失效：儿童安全与违规内容监管不足",
-      "description": "有评价直接指出平台存在儿童影像且未处理，同时成人/色情内容随处可见，举报按钮损坏，审核不一致（会因微不足道的原因封号却放任违规内容）。",
+      "label": "内容审核机制争议与信任危机",
+      "description": "用户抱怨平台标签化与封禁机制缺乏透明度，仅因理性反驳即遭静音或处罚，配合“烟雾弹”式的产品表现，引发严重的社区信任流失。",
       "supportingReviewIds": [
-        "3f6d58b7e700fb16f48d",
-        "dbee4e9b3907ee3b5bb3",
-        "20cbc1e14d8c6976809b",
-        "d76ab90874e0133e77e1",
-        "5d1071c36f9163b09ec6",
-        "458208e861496c5c0d0b"
+        "054e4c2d3fe193d45c18",
+        "ba149e316970e9b742fa"
       ],
-      "quote": "there is multiple videos and images of children on this app and twitter is not doing nothing to resolve this issue",
+      "quote": "the app is a joke… labeling and banning just because you prove people wrong.",
       "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     },
     {
       "id": "topic-candidate-4@c3",
-      "label": "客户端稳定性与基础功能回归",
-      "description": "用户遇到发布失败、切换账号卡死、Wi‑Fi 下媒体无法加载、新手机无法发帖、应用缓慢且没有技术支持入口等问题，说明 App 稳定性明显退步。",
+      "label": "核心功能萎缩与应用活力衰退",
+      "description": "部分基础功能（如自拍上传）出现异常或限制，结合用户普遍反映的应用状态低迷，表明核心功能生态正在快速萎缩，影响日常使用意愿。",
       "supportingReviewIds": [
-        "5c1e7af4dca29c2bd4f8",
-        "737ea4c1e49da874da67",
-        "750460473c64435ba9ae",
-        "21939e7bf5014b13bbfd",
-        "b530d2b11e958946a3b9",
-        "247e9b0a937e729b9977",
-        "a24b43e2b8b9823bc392",
-        "cc8c66296ca9ec5377c1"
+        "ec4f6875f52688d628c0"
       ],
-      "quote": "have bug sometimes post doesn’t work says to retry",
+      "quote": "i’m not uploading a selfie. this app is dead.",
       "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-5@c3",
-      "label": "机器人、诈骗与虚假账号泛滥",
-      "description": "多条评价认为平台上充斥着机器人/骗子账号和验证过的互动刷量账号，新用户还会遇到冒名账号和诈骗话术，社交信任度严重下降。",
-      "supportingReviewIds": [
-        "b07730e2f69df620b746",
-        "c2503e3da903dd1a5a94",
-        "737ea4c1e49da874da67",
-        "4ce75633b519bfa509f0"
-      ],
-      "quote": "everyone seems like a scammer or bot",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-6@c3",
-      "label": "信息流/搜索/资料页等核心体验回退",
-      "description": "用户要求恢复旧版资料页（帖子和转推合并展示），希望可搜索自己的帖子；同时抱怨时间线自动刷新导致内容丢失、搜索很差、信息流缺少多样性且算法操纵曝光。",
-      "supportingReviewIds": [
-        "4b6bda04e3fb4dfd383b",
-        "b530d2b11e958946a3b9",
-        "d92e6c9e95887d5bad5f",
-        "b21f76de057a4da51f03"
-      ],
-      "quote": "please dear god just go back to the normal profile view (tweets and retweets under one) and allow us to search our own posts",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-1@c4",
-      "label": "影子封禁与流量压制（帖子可见性下降）",
-      "description": "用户反映发帖被 shadowban、原创内容不再被关注者看到、互动被限制或隐藏，即使付费订阅也不例外，且没有解释或申诉途径。",
-      "supportingReviewIds": [
-        "ccc8dba9066958a86523",
-        "cdc731e3b26a01b3cfe7",
-        "d3a1f09928406a92f475",
-        "ea871352e9224a1724c9"
-      ],
-      "quote": "any original posts, 100% unseen",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-2@c4",
-      "label": "账号被封禁/锁定且申诉无门",
-      "description": "用户反映账号被永久锁定、功能被禁用或被封禁，联系支持无效，申诉流程形同虚设，无法接触人工客服。",
-      "supportingReviewIds": [
-        "a40c3f400f1dc51a59b1",
-        "aa3892c1816c5a6382eb",
-        "d43918cce19fedd740af",
-        "fa97cc1d80cf24c71f4a",
-        "a515e0496148b9ea719e"
-      ],
-      "quote": "my account was locked permanently on my 2nd day for violating a rule but without any recourse to correct the violation",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-3@c4",
-      "label": "审核失效：有害内容与诈骗/违规账号泛滥",
-      "description": "用户投诉平台上存在自残、色情、暴力、儿童剥削等有害内容，以及诈骗和仇恨言论账号，却得不到应有的封禁处理。",
-      "supportingReviewIds": [
-        "e8c898d885282ce357e9",
-        "bb4c2a15b6af318bfc15",
-        "83287b7ba08a98cdd064",
-        "f1c1645fa7f5c96016ca",
-        "7f29df8debf1154f6328",
-        "ea871352e9224a1724c9"
-      ],
-      "quote": "self harm and porn and violence put as vfx",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-4@c4",
-      "label": "新所有权下的审查与言论自由倒退",
-      "description": "用户认为平台在马斯克接手后审查/封口问题加剧，所谓“自由言论平台”承诺落空，并带有政治化倾向。",
-      "supportingReviewIds": [
-        "dc11aec9e4a27d95a62f",
-        "4845dd35386e00fbe45f",
-        "25addfc03df0c4796485",
-        "7f29df8debf1154f6328",
-        "d3a1f09928406a92f475"
-      ],
-      "quote": "the censorship today is far worse than previous ownership",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-5@c4",
-      "label": "客户端技术缺陷：推文/信息流异常、卡顿",
-      "description": "用户反馈阅读中的推文因信息流自动刷新而消失、报告功能失效、取消关注交互错乱、画面卡顿等应用回归问题。",
-      "supportingReviewIds": [
-        "187dc5dab5a49dac3006",
-        "d6b99959fd1615834c48",
-        "0bc32d77e91c65f6d91d"
-      ],
-      "quote": "reporting still does not work right correctly properly and tweets are disappearing for no reason",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-6@c4",
-      "label": "老用户对旧版 Twitter 的怀念与质量下滑",
-      "description": "老用户表达对原来 Twitter 时代的认同感消失，认为新平台充斥着仇恨内容、垃圾账号和分裂言论，整体体验倒退。",
-      "supportingReviewIds": [
-        "b34373ffdbd6bc4e1292",
-        "4845dd35386e00fbe45f",
-        "ea871352e9224a1724c9"
-      ],
-      "quote": "i miss twitter.",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-1@c5",
-      "label": "账号被自动误判、封禁或影子封禁",
-      "description": "多位用户反映账号被自动化系统批量标记为敏感内容、疑似机器人并遭到封禁、限制或影子封禁，申诉后仍无法恢复，账号信任与使用体验严重受损。",
-      "supportingReviewIds": [
-        "91c24f546aa1f8cd4911",
-        "d60b1ef568edcc06fcfa",
-        "5ae581ab93e56039cfbd",
-        "0ff49f2767eef4a355a2",
-        "3149ea6f88ac1590379d",
-        "cb14681dfe63fb647f2f"
-      ],
-      "quote": "the system recently mass flagged thousands of accounts and mislabeled many for posting sensitive media",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-2@c5",
-      "label": "客服依赖AI模板，支持形同虚设",
-      "description": "用户联系X支持时反复收到同一条AI/模板回复，无法解决问题、无法转人工，甚至有用户被威胁不再提供帮助，支持体验明显退化。",
-      "supportingReviewIds": [
-        "91c24f546aa1f8cd4911",
-        "d60b1ef568edcc06fcfa",
-        "5ae581ab93e56039cfbd",
-        "cb14681dfe63fb647f2f",
-        "cb6d73df662ff5b02fd5"
-      ],
-      "quote": "i get the same ai agent response",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-3@c5",
-      "label": "应用功能与技术性Bug回归",
-      "description": "用户多次遇到视频加载后报错不可用、动态重复刷新导致内容丢失、无法回复帖子、暂停按钮难点击等技术问题，部分问题持续数天。",
-      "supportingReviewIds": [
-        "84b0df5bcbb1364b99f7",
-        "921983d712bf9f485f91",
-        "e10388d70666172946b7",
-        "c17fe3f9f05fb5ce14a2",
-        "c960b6784d3aa6b0e358"
-      ],
-      "quote": "videos spin then turn to content is not available error",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-4@c5",
-      "label": "Bot/AI内容泛滥，时间线质量下降",
-      "description": "用户抱怨机器人账号与AI生成内容大量涌入，垃圾回复和不良链接增多，推荐流充斥无关内容，即使举报也难以清除。",
-      "supportingReviewIds": [
-        "2204b955a52689d2ed5e",
-        "c17fe3f9f05fb5ce14a2",
-        "5769054c2109799dcdfc",
-        "cb6d73df662ff5b02fd5",
-        "d0436e6c0c315f085a7c"
-      ],
-      "quote": "the bots are also no longer simply annoying, random, spam replies, but also posting links to criminal, horrific material",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-5@c5",
-      "label": "仇恨与政治化内容担忧",
-      "description": "部分用户认为平台充满种族主义、右翼/法西斯式言论和仇恨内容，广告与信息流也带有政治倾向，导致对平台氛围与所有者立场强烈不满。",
-      "supportingReviewIds": [
-        "c5472d4d2ab4612a6e23",
-        "310412ae643618509453",
-        "042264c12441f41ab1da",
-        "fec118d45f0c2f8e91e8",
-        "dc60d0f263f701d6f7f5",
-        "565a71d877d4fd6005a7",
-        "5769054c2109799dcdfc"
-      ],
-      "quote": "too many racism on this app and the owner seems to be loving it",
-      "focusAreaIds": [
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-candidate-6@c5",
-      "label": "广告增加与付费墙侵蚀免费功能",
-      "description": "用户反馈广告数量增加，甚至需要在普通帖子中看广告才能继续浏览；原本免费的功能被移入付费墙，例如每日可查看的帖子数量受限。",
-      "supportingReviewIds": [
-        "c17fe3f9f05fb5ce14a2",
-        "5769054c2109799dcdfc"
-      ],
-      "quote": "a paywall hiding features that were free on the original app",
-      "focusAreaIds": [
-        "focus-1"
+        "focus-3"
       ]
     }
   ],
-  "warnings": [
-    {
-      "code": "TOPIC_CANDIDATES_TRUNCATED",
-      "message": "kept 36 of 61 discovered candidates (goal-aware selection); 25 excess dropped deterministically"
-    }
-  ]
+  "warnings": []
 }

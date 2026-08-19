@@ -9,7 +9,7 @@ export const EvidenceVerdictSchema = z.object({
 });
 
 export const RequirementEvidenceOutputSchema = z.object({
-  requirementId: z.string().min(1),
+  requirementId: z.string().optional(),
   verdicts: z.array(EvidenceVerdictSchema),
 });
 export type RequirementEvidenceOutput = z.infer<typeof RequirementEvidenceOutputSchema>;

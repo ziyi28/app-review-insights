@@ -1,30 +1,30 @@
 {
-  "rawCount": 500,
-  "includedCount": 499,
+  "rawCount": 300,
+  "includedCount": 299,
   "excludedCount": 1,
   "duplicateCount": 1,
   "identityConflictCount": 0,
-  "normalizedChangedCount": 464,
+  "normalizedChangedCount": 275,
   "ratingDistribution": {
-    "1": 205,
-    "2": 19,
-    "3": 31,
-    "4": 13,
-    "5": 231
+    "1": 109,
+    "2": 9,
+    "3": 17,
+    "4": 11,
+    "5": 153
   },
   "versionDistribution": {
-    "12.17": 99,
-    "12.16": 197,
-    "12.15": 203
+    "12.17": 136,
+    "12.16": 148,
+    "12.15": 15
   },
   "languageDistribution": {
-    "en": 369,
-    "other": 110,
-    "zh": 6,
-    "und": 14
+    "other": 68,
+    "en": 215,
+    "und": 10,
+    "zh": 6
   },
   "dateRange": {
-    "earliest": "2026-08-07T00:00:00.000Z",
-    "latest": "2026-08-15T00:00:00.000Z"
+    "earliest": "2026-08-10T00:00:00.000Z",
+    "latest": "2026-08-17T00:00:00.000Z"
   }
 }

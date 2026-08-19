@@ -1,0 +1,37 @@
+{
+  "items": [
+    {
+      "requirementId": "req-1",
+      "candidateCount": 7,
+      "directCount": 4,
+      "partialCount": 1,
+      "noneCount": 2,
+      "keptCount": 4
+    },
+    {
+      "requirementId": "req-2",
+      "candidateCount": 5,
+      "directCount": 4,
+      "partialCount": 1,
+      "noneCount": 0,
+      "keptCount": 4
+    },
+    {
+      "requirementId": "req-3",
+      "candidateCount": 17,
+      "directCount": 16,
+      "partialCount": 0,
+      "noneCount": 1,
+      "keptCount": 16
+    },
+    {
+      "requirementId": "req-4",
+      "candidateCount": 4,
+      "directCount": 1,
+      "partialCount": 0,
+      "noneCount": 3,
+      "keptCount": 1
+    }
+  ],
+  "warnings": []
+}

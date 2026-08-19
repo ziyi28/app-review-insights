@@ -4,7 +4,7 @@
     {
       "requirementId": "req-1",
       "priority": "P1",
-      "versionId": "ver-1",
+      "versionId": null,
       "planningFactors": {
         "severity": "critical",
         "userImpact": "high",
@@ -23,7 +23,7 @@
     {
       "requirementId": "req-2",
       "priority": "P1",
-      "versionId": "ver-1",
+      "versionId": null,
       "planningFactors": {
         "severity": "high",
         "userImpact": "high",
@@ -42,7 +42,7 @@
     {
       "requirementId": "req-3",
       "priority": "P1",
-      "versionId": "ver-1",
+      "versionId": null,
       "planningFactors": {
         "severity": "high",
         "userImpact": "high",
@@ -61,7 +61,7 @@
     {
       "requirementId": "req-4",
       "priority": "P2",
-      "versionId": "ver-1",
+      "versionId": null,
       "planningFactors": {
         "severity": "medium",
         "userImpact": "medium",

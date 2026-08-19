@@ -174,11 +174,7 @@
           "focus-1",
           "focus-4"
         ],
-        "sourceFindingIds": [
-          "finding-1@c0",
-          "finding-2@c1",
-          "finding-1@c2"
-        ],
+        "sourceFindingIds": [],
         "title": "信息流加载失败与自动刷新导致内容丢失",
         "summary": "用户频繁报告时间线锁定、帖子无法加载以及应用打开或滚动时发生非预期的自动刷新。该行为不仅导致基础内容获取受阻，还会使正在阅读的内容意外消失且无法找回，严重破坏浏览连贯性并引发性能卡顿。",
         "supportingReviewIds": [
@@ -264,10 +260,7 @@
         "focusAreaIds": [
           "focus-4"
         ],
-        "sourceFindingIds": [
-          "finding-2@c0",
-          "finding-4@c2"
-        ],
+        "sourceFindingIds": [],
         "title": "核心交互与账户切换引发界面冻结",
         "summary": "在执行点赞、评论、分享等基础互动，或在多账户间切换时，应用界面会频繁出现数秒至数十秒的无响应冻结状态。此类性能瓶颈直接阻碍了日常社交操作，反映出底层上下文管理与渲染优化的稳定性问题。",
         "supportingReviewIds": [
@@ -324,10 +317,7 @@
         "focusAreaIds": [
           "focus-3"
         ],
-        "sourceFindingIds": [
-          "finding-3@c0",
-          "finding-3@c2"
-        ],
+        "sourceFindingIds": [],
         "title": "通知系统交互逻辑缺陷持续存在",
         "summary": "点击单条通知会错误地清除其余所有通知，或强制重新加载主页并跳转至无关推文。该交互Bug已跨越多个版本未获修复，导致用户难以准确追踪遗漏信息，严重影响通知系统的核心可用性。",
         "supportingReviewIds": [
@@ -386,13 +376,7 @@
         "focusAreaIds": [
           "focus-3"
         ],
-        "sourceFindingIds": [
-          "finding-4@c0",
-          "finding-1@c1",
-          "finding-4@c1",
-          "finding-1@c3",
-          "finding-2@c3"
-        ],
+        "sourceFindingIds": [],
         "title": "账号访问障碍、任意封禁与申诉机制失效",
         "summary": "用户遭遇多种账户访问危机：包括登录循环错误、无故被暂停或影子屏蔽（Shadow Ban）、以及新号注册初期即遭永久锁定。配套的AI自动审核与申诉流程缺乏透明度且频繁误判，形成逻辑死循环，导致用户完全丧失账户控制权与纠错能力。",
         "supportingReviewIds": [
@@ -532,10 +516,7 @@
           "focus-2",
           "focus-3"
         ],
-        "sourceFindingIds": [
-          "finding-3@c1",
-          "finding-2@c2"
-        ],
+        "sourceFindingIds": [],
         "title": "多媒体内容加载失败与显示比例异常",
         "summary": "媒体资源在特定网络环境（如Wi-Fi）下频繁加载失败或显示“内容不可用”；同时视频默认播放比例错误需手动缩放，图片轮播功能失效。此外，输入框无法写入评论进一步阻断了多媒体内容的互动体验。",
         "supportingReviewIds": [
@@ -606,10 +587,7 @@
         "focusAreaIds": [
           "focus-3"
         ],
-        "sourceFindingIds": [
-          "finding-3@c3",
-          "finding-4@c3"
-        ],
+        "sourceFindingIds": [],
         "title": "近期版本迭代导致整体体验恶化与高流失风险",
         "summary": "用户普遍反映每次应用更新后体验均呈下降趋势，最新版本的性能与UI表现引发强烈不满。结合品牌变更带来的认知割裂，大量用户表达出放弃使用、拒绝互动及劝退他人的倾向，显示出极高的用户留存危机。",
         "supportingReviewIds": [
@@ -690,7 +668,7 @@
           "弱网环境下，加载失败提示出现后，点击重试成功率需达到95%以上（Suggested: 基于行业基准，因证据未提供具体阈值）。",
           "界面滚动帧率保持在55fps以上，无肉眼可见卡顿（Suggested: 性能基线）。"
         ],
-        "versionId": "ver-1",
+        "versionId": null,
         "planningFactors": {
           "severity": "critical",
           "userImpact": "high",
@@ -704,51 +682,7 @@
             "corpusReviewCount": 112,
             "supportRatio": 0.0625
           }
-        },
-        "evidenceVerdicts": [
-          {
-            "reviewId": "cffe3869f6440eefa52c",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "Review explicitly reports 'posts aren’t loading', which directly matches the requirement's goal to fix loading errors and optimize network retry strategies."
-          },
-          {
-            "reviewId": "592e221cc4ec98801e62",
-            "relation": "partial",
-            "confidence": 0.6,
-            "reason": "Mentions timeline locking up (stuttering/freezing), which relates to the requirement's goal of reducing scroll lag, but also includes unrelated complaints about bots and trolls."
-          },
-          {
-            "reviewId": "5c1e7af4dca29c2bd4f8",
-            "relation": "none",
-            "confidence": 0.8,
-            "reason": "Complains about general glitches and updates breaking the app, but does not specifically mention feed auto-refresh issues, content loss, or specific loading failures targeted by this requirement."
-          },
-          {
-            "reviewId": "737ea4c1e49da874da67",
-            "relation": "none",
-            "confidence": 0.8,
-            "reason": "General complaint about poor performance and algorithm, lacking specific details about auto-refresh causing content loss or loading errors."
-          },
-          {
-            "reviewId": "b530d2b11e958946a3b9",
-            "relation": "direct",
-            "confidence": 0.95,
-            "reason": "Explicitly states that the timeline automatically refreshes upon opening, causing users to lose track of interesting posts they haven't finished reading, which perfectly matches the requirement's core issue."
-          },
-          {
-            "reviewId": "84b0df5bcbb1364b99f7",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "Reports that opening the app causes double updates/refreshes, leading to missing content, which supports the requirement to disable non-expected auto-refresh behaviors."
-          },
-          {
-            "reviewId": "d6b99959fd1615834c48",
-            "relation": "direct",
-            "confidence": 0.95,
-            "reason": "Describes exactly the scenario where starting to read a tweet causes the feed to update, making the tweet disappear, which is the primary problem the requirement aims to solve via caching/breakpoint mechanisms."
-          }
-        ]
+        }
       },
       {
         "id": "req-2",
@@ -770,7 +704,7 @@
           "图片帖子支持左右滑动轮播，且切换流畅无白屏。",
           "点击评论区输入框可正常唤起键盘并输入文本，无焦点丢失或冻结现象。"
         ],
-        "versionId": "ver-1",
+        "versionId": null,
         "planningFactors": {
           "severity": "high",
           "userImpact": "high",
@@ -784,39 +718,7 @@
             "corpusReviewCount": 112,
             "supportRatio": 0.044642857142857144
           }
-        },
-        "evidenceVerdicts": [
-          {
-            "reviewId": "ae1ef7d74375b5185bf8",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "The review explicitly reports the inability to scroll pictures, which directly corresponds to the requirement to restore image carousel functionality."
-          },
-          {
-            "reviewId": "c630bec5849d84b38015",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "The review describes videos being zoomed in and cut off, which directly supports the requirement to fix video display aspect ratio and ensure full-screen adaptation."
-          },
-          {
-            "reviewId": "618790743691086fccb1",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "The review states an inability to write comments, which directly aligns with the requirement to optimize input focus management for comment writing."
-          },
-          {
-            "reviewId": "21939e7bf5014b13bbfd",
-            "relation": "direct",
-            "confidence": 0.95,
-            "reason": "The review reports media content failure specifically on Wi-Fi while working on mobile data, directly supporting the requirement to fix media loading failures under specific Wi-Fi conditions."
-          },
-          {
-            "reviewId": "921983d712bf9f485f91",
-            "relation": "partial",
-            "confidence": 0.7,
-            "reason": "The review mentions media loading errors ('content is not available'), which relates to the general topic of media loading issues, but does not specify the Wi-Fi condition required by this specific requirement."
-          }
-        ]
+        }
       },
       {
         "id": "req-3",
@@ -851,7 +753,7 @@
           "登录失败时提供明确的错误代码或引导步骤，而非重复要求下载官方App的无效提示。",
           "申诉提交后，系统需在48小时内返回初步审核状态（Suggested: 服务SLA目标）。"
         ],
-        "versionId": "ver-1",
+        "versionId": null,
         "planningFactors": {
           "severity": "high",
           "userImpact": "high",
@@ -865,111 +767,7 @@
             "corpusReviewCount": 112,
             "supportRatio": 0.15178571428571427
           }
-        },
-        "evidenceVerdicts": [
-          {
-            "reviewId": "497a88d5fbe0c5acac1b",
-            "relation": "direct",
-            "confidence": 1,
-            "reason": "明确描述了点击单条通知会清除其余所有通知的问题，直接对应需求中重构通知点击逻辑的要求。"
-          },
-          {
-            "reviewId": "ec780cea31243926a0ad",
-            "relation": "direct",
-            "confidence": 1,
-            "reason": "明确描述了点击单条通知会清除其余所有通知的问题，直接对应需求中重构通知点击逻辑的要求。"
-          },
-          {
-            "reviewId": "56b934314151a3330b0b",
-            "relation": "direct",
-            "confidence": 0.8,
-            "reason": "报告了持续无法登录的循环报错问题，直接对应需求中优化登录会话管理以减少循环报错的要求。"
-          },
-          {
-            "reviewId": "64f980a7e100c2776829",
-            "relation": "direct",
-            "confidence": 0.8,
-            "reason": "报告了登录时收到错误提示且无法登录的问题，属于登录会话与循环报错相关的直接反馈。"
-          },
-          {
-            "reviewId": "98f7634113466eef87d6",
-            "relation": "direct",
-            "confidence": 0.8,
-            "reason": "明确提及账号被影子屏蔽且内容不可见，直接对应需求中针对影子屏蔽用户优化透明度与引导路径的要求。"
-          },
-          {
-            "reviewId": "669b1b69fcd52b3a0a96",
-            "relation": "direct",
-            "confidence": 1,
-            "reason": "详细描述了因AI误判被封禁且申诉被秒拒的死循环问题，直接对应需求中提供人工复核入口以打破AI误判的要求。"
-          },
-          {
-            "reviewId": "b72cb5b5369ef4acf380",
-            "relation": "direct",
-            "confidence": 1,
-            "reason": "明确指出账号被封禁却不知原因且申诉无回应，直接对应需求中优化违规原因说明与申诉流程的要求。"
-          },
-          {
-            "reviewId": "942e8fb78d4ce7c42fed",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "报告账号受限且零解释、客服无回复，直接对应需求中完善受限状态引导与申诉透明度的要求。"
-          },
-          {
-            "reviewId": "88ceceaf528c6c039adf",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "讽刺AI误标封号且不知具体原因，直接对应需求中解决AI误判死循环及提供明确违规说明的要求。"
-          },
-          {
-            "reviewId": "b139645074909b1f5110",
-            "relation": "direct",
-            "confidence": 1,
-            "reason": "详细描述影子屏蔽现象、不知原因且无法联系人工客服，直接对应需求中优化影子屏蔽透明度与人工复核入口的要求。"
-          },
-          {
-            "reviewId": "161d9b39015b97ceed5b",
-            "relation": "direct",
-            "confidence": 0.8,
-            "reason": "反映账号因AI频繁封禁解封的循环问题，直接对应需求中打破AI误判死循环的目标。"
-          },
-          {
-            "reviewId": "554635876b726fcfc341",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "指出评论被隐藏且申诉系统反馈与实际不符，直接对应需求中完善受限状态引导与申诉逻辑的要求。"
-          },
-          {
-            "reviewId": "232158cf07f6adc110c2",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "抱怨无故被封禁且未提供原因，直接对应需求中为受限用户提供明确违规说明的要求。"
-          },
-          {
-            "reviewId": "4fdc7c480dfcce558d72",
-            "relation": "direct",
-            "confidence": 0.8,
-            "reason": "报告登录时不断提示跳转官方应用的循环报错，直接对应需求中优化登录会话管理的要求。"
-          },
-          {
-            "reviewId": "f8abedeec2426686243d",
-            "relation": "none",
-            "confidence": 0.9,
-            "reason": "评论主要抱怨iOS版本兼容性导致无法查看消息，与需求中的通知交互、账户申诉或登录会话管理均无关。"
-          },
-          {
-            "reviewId": "a40c3f400f1dc51a59b1",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "描述账号锁定后缺乏纠错途径且引导指令矛盾死循环，直接对应需求中完善受限状态引导路径与申诉逻辑的要求。"
-          },
-          {
-            "reviewId": "054e4c2d3fe193d45c18",
-            "relation": "direct",
-            "confidence": 0.7,
-            "reason": "抱怨账号因言论被随意标记封禁和限流，直接对应需求中优化账户限制透明度与申诉机制的要求。"
-          }
-        ]
+        }
       },
       {
         "id": "req-4",
@@ -987,7 +785,7 @@
           "用户反馈入口增加“版本回退”或“问题上报”快捷按钮，便于快速收集退化数据。",
           "每次大版本更新后，针对历史高频崩溃场景执行自动化回归测试，通过率需达100%。"
         ],
-        "versionId": "ver-1",
+        "versionId": null,
         "planningFactors": {
           "severity": "medium",
           "userImpact": "medium",
@@ -1001,33 +799,7 @@
             "corpusReviewCount": 112,
             "supportRatio": 0.03571428571428571
           }
-        },
-        "evidenceVerdicts": [
-          {
-            "reviewId": "a8f76924121f54475f2a",
-            "relation": "direct",
-            "confidence": 0.9,
-            "reason": "明确提到每次更新后应用体验都变差，直接对应需求中针对更新导致体验下降的核心背景。"
-          },
-          {
-            "reviewId": "ec4f6875f52688d628c0",
-            "relation": "none",
-            "confidence": 0.8,
-            "reason": "仅抱怨特定功能异常及应用状态，未提及版本更新或更新引发的质量退化问题。"
-          },
-          {
-            "reviewId": "097014ccfd571825914d",
-            "relation": "none",
-            "confidence": 0.9,
-            "reason": "内容主要为成瘾性警告与安全担忧，与版本更新质量监控及回滚机制完全无关。"
-          },
-          {
-            "reviewId": "ba149e316970e9b742fa",
-            "relation": "none",
-            "confidence": 0.7,
-            "reason": "表述模糊且未涉及更新流程、崩溃率或性能指标等需求所针对的具体问题。"
-          }
-        ]
+        }
       }
     ],
     "versions": [],
