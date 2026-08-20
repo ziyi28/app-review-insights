@@ -14,9 +14,9 @@ test("cached replay survives a mid-run page refresh", async ({ page }) => {
   // Start a cached replay of the bundled demo fixture.
   await page.getByRole("button", { name: /历史/ }).click();
   await expect(page.getByRole("dialog", { name: /历史/ })).toBeVisible();
-  const xRow = page.locator(".card", { hasText: /识别最新版本引入的回归问题/ }).first();
+  const fixtureCard = page.getByTestId("history-card-run-workout-for-women-us");
   const replayPromise = page.waitForResponse((r) => r.url().includes("/api/runs") && r.request().method() === "POST");
-  await xRow.getByRole("button", { name: /回放/ }).click();
+  await fixtureCard.getByTestId("history-replay").click();
   expect((await replayPromise).status()).toBe(202);
 
   // Refresh immediately: the background task must keep running and the client
@@ -53,9 +53,9 @@ test("a second task started while one is running completes both", async ({ page 
   // (second, independent task). This must NOT cancel the live task.
   await page.getByRole("button", { name: /历史/ }).click();
   await expect(page.getByRole("dialog", { name: /历史/ })).toBeVisible();
-  const workoutRow = page.locator(".card", { hasText: /Analyze the most impactful problems/ }).first();
+  const workoutCard = page.getByTestId("history-card-run-workout-for-women-us");
   const replayPromise = page.waitForResponse((r) => r.url().includes("/api/runs") && r.request().method() === "POST");
-  await workoutRow.getByRole("button", { name: /回放/ }).click();
+  await workoutCard.getByTestId("history-replay").click();
   expect((await replayPromise).status()).toBe(202);
 
   // The replay (now the monitored run) completes.

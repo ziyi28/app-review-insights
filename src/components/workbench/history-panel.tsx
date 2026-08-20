@@ -124,7 +124,7 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
         <div style={{ overflowY: "auto", display: "grid", gap: "8px" }}>
           {runs.length === 0 && !error ? <p style={{ color: "var(--text-muted)" }}>{t.historyEmpty}</p> : null}
           {runs.map((run) => (
-            <div key={run.runId} className="card" style={{ display: "grid", gap: "6px" }}>
+            <div key={run.runId} className="card" data-testid={`history-card-${run.runId}`} style={{ display: "grid", gap: "6px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
                 <span className={run.status === "completed" ? "chip chip-ok" : run.status === "failed" ? "chip chip-danger" : "chip chip-accent"}>{run.status}</span>
                 {run.executionMode ? <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{run.executionMode}</span> : null}
@@ -158,16 +158,16 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
 
               <p style={{ margin: 0, fontSize: "13px", color: "var(--text)" }}>{run.goal || <span style={{ color: "var(--text-muted)" }}>—</span>}</p>
               <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", alignItems: "center" }}>
-                <button type="button" className="btn btn-secondary" onClick={() => onView(run.runId)}>
+                <button type="button" className="btn btn-secondary" data-testid="history-view" onClick={() => onView(run.runId)}>
                   {t.view}
                 </button>
                 {run.canReplay ? (
-                  <button type="button" className="btn btn-primary" onClick={() => onReplay(run.runId)}>
+                  <button type="button" className="btn btn-primary" data-testid="history-replay" onClick={() => onReplay(run.runId)}>
                     {t.replay}
                   </button>
                 ) : null}
                 {run.canRetry && onRetry ? (
-                  <button type="button" className="btn btn-primary" onClick={() => onRetry(run.runId)}>
+                  <button type="button" className="btn btn-primary" data-testid="history-retry" onClick={() => onRetry(run.runId)}>
                     {t.retry}
                   </button>
                 ) : null}
@@ -175,6 +175,7 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
                   <button
                     type="button"
                     className="btn btn-danger"
+                    data-testid="history-delete"
                     onClick={() => setConfirmingRunId(run.runId)}
                     disabled={deletingRunId === run.runId}
                   >
