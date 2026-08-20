@@ -358,15 +358,19 @@ describe("data/config.local.json persistence and precedence", () => {
     persistRuntimeConfig({ model: { modelName: "model-x" } });
     expect(loadConfig().modelName).toBe("model-x");
 
-    // Make the file unwritable: persisting the same value must skip writing
-    // (no throw); persisting a new value attempts the write and throws.
+    // Make both the file and its parent directory unwritable. On POSIX,
+    // replacing a read-only file with rename() is allowed when the directory
+    // remains writable, so locking only the file is not a portable failure.
+    const directory = path.dirname(file);
     chmodSync(file, 0o444);
+    chmodSync(directory, 0o555);
     try {
       expect(() => persistRuntimeConfig({ model: { modelName: "model-x" } })).not.toThrow();
       expect(() => persistRuntimeConfig({ model: { modelName: "model-y" } })).toThrow();
     } finally {
       chmodSync(file, 0o666);
-      rmSync(path.dirname(file), { recursive: true, force: true });
+      chmodSync(directory, 0o755);
+      rmSync(directory, { recursive: true, force: true });
     }
   });
 
