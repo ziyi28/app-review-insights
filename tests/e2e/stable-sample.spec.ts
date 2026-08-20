@@ -12,11 +12,16 @@ test("stable sample analysis uses the live-merged cache and reports local histor
   resetCounters();
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+  const newRunBtn = page.getByRole("button", { name: /新建运行|新建分析|New Run/ });
+  if (await newRunBtn.isVisible()) {
+    await newRunBtn.click();
+  }
 
   // Walk the wizard: live mode, example URL, goal, confirm. The sample is
   // checked automatically; the live result is merged into the cache, making the
   // stable card available in the same response.
   await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
   await page.getByRole("button", { name: /使用示例 App/ }).click();
   await page.getByLabel(/分析目标/).fill("了解用户为什么喜欢这个应用以及他们遇到的问题");
   const previewPromise = page.waitForResponse("**/api/source-previews");
@@ -58,7 +63,12 @@ test("falls back to Apple RSS when SerpApi is rate-limited", async ({ page }) =>
   resetCounters();
   setSerpApiMode("fallback");
   await page.goto("/");
+  const newRunBtn = page.getByRole("button", { name: /新建运行|新建分析|New Run/ });
+  if (await newRunBtn.isVisible()) {
+    await newRunBtn.click();
+  }
   await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
   await page.getByRole("button", { name: /使用示例 App/ }).click();
   await page.getByLabel(/分析目标/).fill("了解用户为什么喜欢这个应用以及他们遇到的问题");
   const previewPromise = page.waitForResponse("**/api/source-previews");

@@ -35,10 +35,15 @@ test("a second task started while one is running completes both", async ({ page 
   resetCounters();
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+  const newRunBtn = page.getByRole("button", { name: /新建运行|新建分析|New Run/ });
+  if (await newRunBtn.isVisible()) {
+    await newRunBtn.click();
+  }
 
   // Start a live analysis (first task): it walks the model pipeline, so it
   // stays in flight long enough to start a second task while it runs.
   await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
   await page.getByRole("button", { name: /使用示例 App/ }).click();
   await page.getByLabel(/分析目标/).fill("了解用户为什么喜欢这个应用以及他们遇到的问题");
   const previewPromise = page.waitForResponse("**/api/source-previews");

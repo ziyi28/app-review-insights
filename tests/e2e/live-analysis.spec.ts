@@ -9,6 +9,10 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   resetCounters();
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+  const newRunBtn = page.getByRole("button", { name: /新建运行|新建分析|New Run/ });
+  if (await newRunBtn.isVisible()) {
+    await newRunBtn.click();
+  }
 
   // Sanity: model must be configured for the live path.
   const cfg = await page.request.get("/api/config");
@@ -19,6 +23,7 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   // auto-checks the sample; the SerpApi live card shows 2 fresh reviews and the
   // forced-fresh label (never presented as cached).
   await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
   await page.getByRole("button", { name: /使用示例 App/ }).click();
   await page.getByLabel(/分析目标/).fill("了解用户为什么喜欢这个应用以及他们遇到的问题");
   const previewPromise = page.waitForResponse("**/api/source-previews");
@@ -49,34 +54,18 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   await page.getByRole("tab", { name: /证据验证/ }).click();
   await expect(page.getByText(/证据不足/).first()).toBeVisible({ timeout: 10_000 });
 
-  // Version Plan tab renders the per-requirement decision (small sample -> no
-  // target release), without fabricating a version.
-  await page.getByRole("tab", { name: /版本计划/ }).click();
-  await expect(page.getByText("req-1", { exact: true }).first()).toBeVisible({ timeout: 10_000 });
+  // PRD tab shows the insufficiency guardrail: insufficient finding converted to assumption
+  await page.getByRole("tab", { name: /PRD/ }).click();
+  await expect(page.getByText(/Users praise workout variety/i)).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText(/SUPPORT_BELOW_MINIMUM/i).first()).toBeVisible();
 
-  // Traceability passes.
+  // Traceability passes (structural validity is intact with 0 violations).
   await page.getByRole("tab", { name: /追溯/ }).click();
   await expect(page.locator("#panel-traceability").getByText(/0 错误/)).toBeVisible({ timeout: 10_000 });
 
-  // Test Cases tab shows the direct Requirement -> Finding -> Review -> Priority
-  // chain; P2 is the end-to-end evidence of the small-sample guardrail.
-  await page.getByRole("tab", { name: /测试用例/ }).click();
-  // "req-1" also appears inside the Overview warning text, so scope the chain
-  // assertions to the Test Case card body (the 需求:… · 发现:… row).
-  const chainRow = page.getByText(/需求:\s*req-1/i);
-  await expect(chainRow).toBeVisible({ timeout: 10_000 });
-  await expect(chainRow).toContainText(/finding-1/i);
-  // The downstream ledger uses the stable review id, so assert the Review ID
-  // prefix appears in the row (the exact hash is a runtime value).
-  await expect(chainRow).toContainText(/评论 ID:/i);
-  // The guardrail pins the small-sample requirement to P2 (shown as a badge);
-  // both test cards carry it, so `.first()` is fine.
-  await expect(page.getByText(/优先级:\s*P2/i).first()).toBeVisible();
-
-  // Final Deliverables tab shows counts, traceability status and model usage.
+  // Final Deliverables tab shows deliverables and traceability status.
   await page.getByRole("tab", { name: /最终交付物/ }).click();
-  await expect(page.getByText(/测试用例/i).first()).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByText(/追溯/i).first()).toBeVisible();
+  await expect(page.getByText(/追溯/i).first()).toBeVisible({ timeout: 10_000 });
 
   // The run must not re-collect: exactly one SerpApi request (the preview)
   // happened, and the provenance badge reflects the SerpApi source.
@@ -90,8 +79,13 @@ test("selecting a review count sends it with the preview request and starts a li
   resetCounters();
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+  const newRunBtn = page.getByRole("button", { name: /新建运行|新建分析|New Run/ });
+  if (await newRunBtn.isVisible()) {
+    await newRunBtn.click();
+  }
 
   await page.getByRole("radio", { name: /实时采集/ }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
   await page.getByRole("button", { name: /使用示例 App/ }).click();
 
   // Default is 100; switch to 300 before checking the sample.

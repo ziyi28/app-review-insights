@@ -185,6 +185,18 @@ export function startUpstreamServer() {
 
 export const UPSTREAM_PORT = 39876;
 
+function extractReviews(last: string): { reviewId: string; bodyNormalized?: string; body?: string }[] {
+  try {
+    const parsed = JSON.parse(last);
+    if (Array.isArray(parsed.reviews)) return parsed.reviews;
+    if (Array.isArray(parsed.candidateReviews)) return parsed.candidateReviews;
+    if (Array.isArray(parsed.batch)) return parsed.batch;
+  } catch {
+    // ignore parse error
+  }
+  return [];
+}
+
 /**
  * Deterministic model script for the E2E live path, dispatched on unquoted
  * markers (instruction strings get JSON-escaped inside the payload).
@@ -193,13 +205,29 @@ export const UPSTREAM_PORT = 39876;
  */
 function scriptedModelResponse(body: { messages?: { role: string; content: string }[] }): string {
   const last = body.messages?.at(-1)?.content ?? "";
+  const reviews = extractReviews(last);
+  const rids = reviews.map((r) => r.reviewId).filter(Boolean);
+  const defaultRids = rids.length > 0 ? rids : ["r1", "r2"];
+  const r1 = defaultRids[0] ?? "r1";
+  const r2 = defaultRids[1] ?? defaultRids[0] ?? "r2";
+
+  if (last.includes("verdicts")) {
+    return JSON.stringify({
+      verdicts: defaultRids.map((id) => ({
+        reviewId: id,
+        relation: "direct",
+        confidence: 1,
+        reason: "Direct user evidence",
+      })),
+    });
+  }
 
   if (last.includes("expectedResult")) {
     // tests (may also carry acceptanceCriteria from the requirements input)
     return JSON.stringify({
       tests: [
-        { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["r1"], testType: "manual", precondition: "", steps: ["open app", "browse workouts"], expectedResult: "new workouts listed" },
-        { id: "test-2", requirementIds: ["req-2"], sourceReviewIds: ["r2"], testType: "manual", precondition: "", steps: ["open pricing", "select annual"], expectedResult: "annual plan selectable" },
+        { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [r1], testType: "manual", precondition: "", steps: ["open app", "browse workouts"], expectedResult: "new workouts listed" },
+        { id: "test-2", requirementIds: ["req-2"], sourceReviewIds: [r2], testType: "manual", precondition: "", steps: ["open pricing", "select annual"], expectedResult: "annual plan selectable" },
       ],
     });
   }
@@ -228,10 +256,12 @@ function scriptedModelResponse(body: { messages?: { role: string; content: strin
     });
   }
   if (last.includes("evidenceExcerpts")) {
+    const e1 = reviews.find((r) => r.reviewId === r1)?.bodyNormalized ?? reviews.find((r) => r.reviewId === r1)?.body ?? "workout variety";
+    const e2 = reviews.find((r) => r.reviewId === r2)?.bodyNormalized ?? reviews.find((r) => r.reviewId === r2)?.body ?? "too expensive";
     return JSON.stringify({
       findings: [
-        { id: "finding-1", topicIds: ["topic-1"], title: "Loves variety", summary: "Users praise workout variety", supportingReviewIds: ["r1"], evidenceExcerpts: [{ reviewId: "r1", excerpt: "workout variety" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
-        { id: "finding-2", topicIds: ["topic-1"], title: "Too expensive", summary: "Users find it costly", supportingReviewIds: ["r2"], evidenceExcerpts: [{ reviewId: "r2", excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        { id: "finding-1", topicIds: ["topic-1"], title: "Loves variety", summary: "Users praise workout variety", supportingReviewIds: [r1], evidenceExcerpts: [{ reviewId: r1, excerpt: e1.slice(0, 30) }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        { id: "finding-2", topicIds: ["topic-1"], title: "Too expensive", summary: "Users find it costly", supportingReviewIds: [r2], evidenceExcerpts: [{ reviewId: r2, excerpt: e2.slice(0, 30) }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
       ],
     });
   }
@@ -241,10 +271,12 @@ function scriptedModelResponse(body: { messages?: { role: string; content: strin
     return JSON.stringify({ topics: [{ id: "topic-1", label: "Workout quality", description: "d", candidateIds: ["topic-candidate-1@c0", "topic-candidate-2@c0"] }] });
   }
   if (last.includes("supportingReviewIds")) {
+    const q1 = reviews.find((r) => r.reviewId === r1)?.bodyNormalized ?? reviews.find((r) => r.reviewId === r1)?.body ?? "workout variety";
+    const q2 = reviews.find((r) => r.reviewId === r2)?.bodyNormalized ?? reviews.find((r) => r.reviewId === r2)?.body ?? "too expensive";
     return JSON.stringify({
       topics: [
-        { id: "topic-candidate-1", label: "Workout quality", description: "d", supportingReviewIds: ["r1"], quote: "workout variety" },
-        { id: "topic-candidate-2", label: "Pricing", description: "d", supportingReviewIds: ["r2"], quote: "too expensive" },
+        { id: "topic-candidate-1", label: "Workout quality", description: "d", supportingReviewIds: [r1], quote: q1.slice(0, 30) },
+        { id: "topic-candidate-2", label: "Pricing", description: "d", supportingReviewIds: [r2], quote: q2.slice(0, 30) },
       ],
     });
   }

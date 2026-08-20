@@ -11,9 +11,14 @@ const CSV = [
 test("imports a mixed-language CSV with duplicates and identity conflicts", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /App 评论分析台/ })).toBeVisible();
+  const newRunBtn = page.getByRole("button", { name: /新建运行|新建分析|New Run/ });
+  if (await newRunBtn.isVisible()) {
+    await newRunBtn.click();
+  }
 
   // Switch to import mode (the UI already defaults to Chinese).
   await page.getByRole("radio", { name: /导入/ }).click();
+  await page.getByRole("button", { name: /下一步/ }).click();
 
   // Upload the CSV via a file chooser.
   const chooserPromise = page.waitForEvent("filechooser");

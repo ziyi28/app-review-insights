@@ -8,11 +8,16 @@ import type { Page } from "@playwright/test";
 
 /** Start a live run: choose source → fill URL+goal → confirm → pick a sample. */
 export async function startLiveRun(page: Page, goal: string, selection: "fresh" | "history" = "fresh") {
+  const newRunBtn = page.getByRole("button", { name: /新建运行|新建分析|New Run/ });
+  if (await newRunBtn.isVisible()) {
+    await newRunBtn.click();
+  }
   await page.getByRole("radio", { name: /实时采集/ }).click();
-  await page.getByRole("button", { name: /使用示例 App/ }).click();
-  await page.getByLabel(/分析目标/).fill(goal);
-  await page.getByRole("button", { name: /下一步/ }).click();
-  const button = selection === "fresh" ? /分析最新样本/ : /分析本地历史样本/;
+  await page.getByRole("button", { name: /下一步|Next/ }).click();
+  await page.getByRole("button", { name: /使用示例 App|Use sample App/ }).click();
+  await page.getByLabel(/分析目标|Analysis goal/).fill(goal);
+  await page.getByRole("button", { name: /下一步|Next/ }).click();
+  const button = selection === "fresh" ? /分析最新样本|Analyze fresh sample/ : /分析本地历史样本|Analyze local-history sample/;
   await page.getByRole("button", { name: button }).click();
 }
 
