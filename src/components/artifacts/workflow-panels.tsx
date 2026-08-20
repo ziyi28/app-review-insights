@@ -3,7 +3,7 @@
 import { type Dictionary, type Locale, translateCode } from "@/i18n";
 import { translateLimitationMessage } from "@/i18n/limitation-messages";
 import type { Prd, VersionPlanArtifact, PlanningFactors } from "@/domain/contracts/analysis";
-import type { TraceabilityReport } from "@/domain/traceability/validate";
+import { deriveClosureStatus, type TraceabilityReport } from "@/domain/traceability/validate";
 import type { RunManifest } from "@/server/runs/run-store";
 import type { EvidenceValidationReport } from "@/domain/analysis/evidence-validation";
 import type { RunEvent } from "@/domain/contracts/events";
@@ -124,8 +124,8 @@ export function VersionPlanPanel({ versionPlan, t }: { versionPlan: VersionPlanA
   if (!versionPlan) return <p style={{ color: "var(--text-muted)" }}>{t.legacyArtifactUnavailable}</p>;
   return (
     <div style={{ display: "grid", gap: "10px" }}>
-      {versionPlan.versions.length === 0 && versionPlan.decisions.length === 0 ? (
-        <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>
+      {versionPlan.versions.length === 0 ? (
+        <p style={{ color: "var(--text-muted)" }}>{t.noSchedulableRequirements}</p>
       ) : null}
       {versionPlan.versions.map((v) => (
         <div key={v.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
@@ -350,11 +350,43 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
           </div>
         ))}
       </div>
-      {report ? (
-        <div style={{ padding: "10px", borderRadius: "8px", background: report.valid ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.12)", border: `1px solid ${report.valid ? "var(--ok)" : "var(--danger)"}` }}>
-          <strong>{report.valid ? t.completed : t.failed}</strong> — {t.traceability}
-        </div>
-      ) : null}
+      {report ? (() => {
+        const closureStatus = report.closureStatus ?? deriveClosureStatus(finalPrd, report.violations);
+        const isClosed = closureStatus === "closed";
+        const isPartial = closureStatus === "partial";
+        const isAssumptionOnly = closureStatus === "assumption-only";
+        const closureLabel =
+          closureStatus === "closed"
+            ? t.traceClosureClosed
+            : closureStatus === "partial"
+              ? t.traceClosurePartial.replace(
+                  "{count}",
+                  String(
+                    finalPrd?.findings.filter((f) => f.evidenceSufficiency?.status === "insufficient").length ||
+                    finalPrd?.assumptions.filter((a) => a.origin === "insufficient-finding" || a.origin === "rejected-requirement").length || 0,
+                  ),
+                )
+              : closureStatus === "assumption-only"
+                ? t.traceClosureAssumptionOnly
+                : t.traceClosureInvalid;
+
+        return (
+          <div style={{ display: "grid", gap: "8px" }}>
+            <div style={{ padding: "10px", borderRadius: "8px", background: report.valid ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.12)", border: `1px solid ${report.valid ? "var(--ok)" : "var(--danger)"}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <strong>{t.structuralValidation}: {report.valid ? t.completed : t.failed}</strong> — {t.traceability}
+              </div>
+              <ProvenanceBadge kind={report.valid ? "computed" : "conflict"} label={report.valid ? "VALID" : "INVALID"} />
+            </div>
+            <div style={{ padding: "10px", borderRadius: "8px", background: isClosed ? "rgba(74,222,128,0.12)" : isPartial || isAssumptionOnly ? "rgba(251,191,36,0.12)" : "rgba(248,113,113,0.12)", border: `1px solid ${isClosed ? "var(--ok)" : isPartial || isAssumptionOnly ? "var(--warn)" : "var(--danger)"}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div>
+                <strong>{t.productClosure}: {closureLabel}</strong>
+              </div>
+              <ProvenanceBadge kind={isClosed ? "computed" : isPartial || isAssumptionOnly ? "limitation" : "conflict"} label={closureStatus.toUpperCase()} />
+            </div>
+          </div>
+        );
+      })() : null}
       {manifest?.limitations.length ? (
         <div className="card">
           <h4 style={{ margin: "0 0 8px" }}>{t.limitations}</h4>

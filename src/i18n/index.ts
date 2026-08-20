@@ -267,10 +267,17 @@ export type Dictionary = {
     tableOfContents: string;
     clearSearch: string;
     copyFullId: string;
-    fullId: string;
-    importFormatHint: string;
-    orWord: string;
     runNotFound: string;
+    traceClosureClosed: string;
+    traceClosurePartial: string;
+    traceClosureAssumptionOnly: string;
+    traceClosureInvalid: string;
+    traceStatusAssumption: string;
+    noSchedulableRequirements: string;
+    structuralValidation: string;
+    productClosure: string;
+    sourceFindings: string;
+    sourceReviews: string;
 };
 
 export const dictionaries: Record<Locale, Dictionary> = {
@@ -545,6 +552,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
     importFormatHint: "Supports a JSON array or CSV format. Required fields:",
     orWord: "or",
     runNotFound: "Run not found or deleted.",
+    traceClosureClosed: "Closed",
+    traceClosurePartial: "Formal chain valid; {count} assumption(s) to verify",
+    traceClosureAssumptionOnly: "Insufficient evidence; no product plan produced",
+    traceClosureInvalid: "Traceability validation failed",
+    traceStatusAssumption: "Assumption to verify",
+    noSchedulableRequirements: "No requirements met the evidence threshold for scheduling.",
+    structuralValidation: "Structural validation",
+    productClosure: "Product closure",
+    sourceFindings: "Source findings",
+    sourceReviews: "Source reviews",
   },
   "zh-CN": {
     appTitle: "App 评论分析台",
@@ -817,6 +834,16 @@ export const dictionaries: Record<Locale, Dictionary> = {
     importFormatHint: "支持 JSON 数组或 CSV 格式。必需字段：",
     orWord: "或",
     runNotFound: "运行不存在或已被删除。",
+    traceClosureClosed: "已闭环",
+    traceClosurePartial: "正式链路有效，仍有 {count} 条假设待验证",
+    traceClosureAssumptionOnly: "证据不足，尚未形成产品计划",
+    traceClosureInvalid: "追溯校验未通过",
+    traceStatusAssumption: "待验证假设",
+    noSchedulableRequirements: "无符合证据门槛的可排期需求",
+    structuralValidation: "结构验证",
+    productClosure: "产品闭环",
+    sourceFindings: "来源发现",
+    sourceReviews: "来源评论",
   },
 };
 
@@ -834,6 +861,11 @@ export function translateCode(code: string, locale: Locale = "zh-CN"): string {
     MODEL_NETWORK_ERROR: "网络抖动重试",
     MODEL_TRUNCATED_RESPONSE: "输出截断重试",
     REQUIREMENT_UNKNOWN_DEPENDENCY: "未知依赖需求",
+    REQUIREMENT_INSUFFICIENT_EVIDENCE: "需求引用不足证据",
+    INSUFFICIENT_FINDING_UNTRACKED: "不足发现未追踪假设",
+    SUFFICIENT_FINDING_UNCOVERED: "充分发现未覆盖需求",
+    REQUIREMENT_REJECTED_INSUFFICIENT_EVIDENCE: "需求因证据不足转假设",
+    PLANNING_INSUFFICIENT_FINDING_DROPPED: "移除不足证据发现关联",
     "evidence-validation": "证据验证",
     findings: "痛点发现",
     planning: "产品规划",

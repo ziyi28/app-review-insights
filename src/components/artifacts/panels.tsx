@@ -4,6 +4,7 @@ import type { Dictionary } from "@/i18n";
 import type { Finding, Requirement, TestCase, Prd } from "@/domain/contracts/analysis";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 import { findingIdsForRequirements, priorityForRequirements } from "@/domain/traceability/evidence-sources";
+import { deriveClosureStatus, type ClosureStatus } from "@/domain/traceability/validate";
 
 function ReviewIdList({
   reviewIds,
@@ -217,9 +218,22 @@ export function RequirementsPanel({
         <div>
           <h4>{t.assumptions}</h4>
           {assumptions.map((a) => (
-            <div key={a.id} style={{ padding: "8px", border: "1px dashed var(--border)", borderRadius: "6px", marginBottom: "6px" }}>
-              <ProvenanceBadge kind="assumption" label={t.assumptions} /> <strong>{a.text}</strong>
+            <div key={a.id} style={{ padding: "8px", border: "1px dashed var(--border)", borderRadius: "6px", marginBottom: "6px", background: "var(--bg-panel)" }}>
+              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginBottom: "4px" }}>
+                <ProvenanceBadge kind="assumption" label={t.assumptions} />
+                <strong>{a.text}</strong>
+              </div>
               <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>{a.basis}</div>
+              {a.sourceFindingIds && a.sourceFindingIds.length > 0 ? (
+                <div style={{ color: "var(--text-faint)", fontSize: "12px", marginTop: "4px" }}>
+                  <strong>{t.sourceFindings}:</strong> {a.sourceFindingIds.join(", ")}
+                </div>
+              ) : null}
+              {a.sourceReviewIds && a.sourceReviewIds.length > 0 ? (
+                <div style={{ color: "var(--text-faint)", fontSize: "12px", marginTop: "2px" }}>
+                  <strong>{t.sourceReviews}:</strong> <ReviewIdList reviewIds={a.sourceReviewIds} onJumpToReview={onJumpToReview} t={t} limit={5} />
+                </div>
+              ) : null}
             </div>
           ))}
         </div>
@@ -303,9 +317,9 @@ export function TraceabilityPanel({
   onJumpToPrd,
   onJumpToTests,
 }: {
-  report: { valid: boolean; violations: { code: string; message: string; entity?: string }[] } | null;
+  report: { valid: boolean; closureStatus?: ClosureStatus; violations: { code: string; message: string; entity?: string }[] } | null;
   findings?: Finding[];
-  prd?: Prd | { requirements?: Requirement[] } | null;
+  prd?: Prd | { requirements?: Requirement[]; assumptions?: Assumption[] } | null;
   tests?: TestCase[];
   revisedAndValid?: boolean;
   t: Dictionary;
@@ -316,22 +330,48 @@ export function TraceabilityPanel({
   if (!report && findings.length === 0 && !prd) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
 
   const requirements: Requirement[] = prd ? ("requirements" in prd ? (prd.requirements ?? []) : []) : [];
+  const closureStatus: ClosureStatus =
+    report?.closureStatus ??
+    deriveClosureStatus(prd as Prd, report?.violations ?? []);
+
+  const insufficientCount =
+    findings.filter((f) => f.evidenceSufficiency?.status === "insufficient").length ||
+    (prd && "assumptions" in prd
+      ? (prd.assumptions ?? []).filter((a) => a.origin === "insufficient-finding" || a.origin === "rejected-requirement").length
+      : 0);
 
   // En revision is not the end of the story: when a later (final) validation
   // passed after an automatic revision, the draft failure is contextualized
   // instead of read as the run having failed.
   const revisedAndFixed = !!report && !report.valid && revisedAndValid;
-  const statusColor = report?.valid ? "var(--ok)" : revisedAndFixed ? "var(--warn)" : "var(--danger)";
-  const statusBackground = report?.valid
-    ? "rgba(74,222,128,0.08)"
-    : revisedAndFixed
-      ? "var(--warn-soft)"
-      : "rgba(248,113,113,0.08)";
-  const statusLabel = report?.valid
-    ? t.completed
-    : revisedAndFixed
-      ? t.traceRevisedPassed.replace("{count}", String(report.violations.length))
-      : t.failed;
+  const statusColor =
+    closureStatus === "closed"
+      ? "var(--ok)"
+      : closureStatus === "partial" || closureStatus === "assumption-only"
+        ? "var(--warn)"
+        : revisedAndFixed
+          ? "var(--warn)"
+          : "var(--danger)";
+
+  const statusBackground =
+    closureStatus === "closed"
+      ? "rgba(74,222,128,0.08)"
+      : closureStatus === "partial" || closureStatus === "assumption-only"
+        ? "var(--warn-soft)"
+        : revisedAndFixed
+          ? "var(--warn-soft)"
+          : "rgba(248,113,113,0.08)";
+
+  const statusLabel =
+    closureStatus === "closed"
+      ? t.traceClosureClosed
+      : closureStatus === "partial"
+        ? t.traceClosurePartial.replace("{count}", String(insufficientCount))
+        : closureStatus === "assumption-only"
+          ? t.traceClosureAssumptionOnly
+          : revisedAndFixed
+            ? t.traceRevisedPassed.replace("{count}", String(report?.violations.length ?? 0))
+            : t.failed;
 
   return (
     <div style={{ display: "grid", gap: "16px" }}>
@@ -416,14 +456,17 @@ export function TraceabilityPanel({
                   const matchedTests = tests.filter((tc) =>
                     (tc.findingIds ?? findingIdsForRequirements(tc.requirementIds, requirements)).includes(f.id),
                   );
+                  const isInsufficient = f.evidenceSufficiency?.status === "insufficient";
                   const hasViolation = report?.violations.some((v) => v.entity === f.id) ?? false;
                   const traceStatus = hasViolation
                     ? "violation"
-                    : relatedReqs.length === 0
-                      ? "uncovered"
-                      : matchedTests.length === 0
-                        ? "missing-test"
-                        : "closed";
+                    : isInsufficient
+                      ? "insufficient"
+                      : relatedReqs.length === 0
+                        ? "uncovered"
+                        : matchedTests.length === 0
+                          ? "missing-test"
+                          : "closed";
 
                   return (
                     <tr
@@ -521,20 +564,24 @@ export function TraceabilityPanel({
                             fontWeight: 600,
                             ...(traceStatus === "violation"
                               ? { background: "rgba(248,113,113,0.12)", color: "var(--danger)", border: "1px solid rgba(248,113,113,0.3)" }
-                              : traceStatus === "missing-test"
+                              : traceStatus === "insufficient"
                                 ? { background: "rgba(251,191,36,0.12)", color: "var(--warn)", border: "1px solid rgba(251,191,36,0.3)" }
-                                : traceStatus === "uncovered"
-                                  ? { background: "var(--bg-elevated)", color: "var(--text-muted)", border: "1px solid var(--border)" }
-                                  : { background: "rgba(74,222,128,0.12)", color: "var(--ok)", border: "1px solid rgba(74,222,128,0.3)" }),
+                                : traceStatus === "missing-test"
+                                  ? { background: "rgba(251,191,36,0.12)", color: "var(--warn)", border: "1px solid rgba(251,191,36,0.3)" }
+                                  : traceStatus === "uncovered"
+                                    ? { background: "var(--bg-elevated)", color: "var(--text-muted)", border: "1px solid var(--border)" }
+                                    : { background: "rgba(74,222,128,0.12)", color: "var(--ok)", border: "1px solid rgba(74,222,128,0.3)" }),
                           }}
                         >
                           {traceStatus === "violation"
                             ? t.traceStatusViolation
-                            : traceStatus === "missing-test"
-                              ? t.traceStatusMissingTest
-                              : traceStatus === "uncovered"
-                                ? t.traceStatusUncovered
-                                : t.traceStatusClosed}
+                            : traceStatus === "insufficient"
+                              ? t.traceStatusAssumption
+                              : traceStatus === "missing-test"
+                                ? t.traceStatusMissingTest
+                                : traceStatus === "uncovered"
+                                  ? t.traceStatusUncovered
+                                  : t.traceStatusClosed}
                         </span>
                       </td>
                     </tr>

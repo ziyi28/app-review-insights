@@ -112,6 +112,23 @@ function buildMarkdownReport(props: ExecutiveReportProps): string {
     });
   }
 
+  // Assumptions
+  if (prd?.assumptions && Array.isArray(prd.assumptions) && prd.assumptions.length > 0) {
+    lines.push(`## 5. ${t.assumptions}`);
+    lines.push("");
+    prd.assumptions.forEach((a) => {
+      lines.push(`### ${a.id}: ${a.text}`);
+      lines.push(`- **Basis**: ${a.basis}`);
+      if (a.sourceFindingIds && a.sourceFindingIds.length > 0) {
+        lines.push(`- **${t.sourceFindings}**: ${a.sourceFindingIds.join(", ")}`);
+      }
+      if (a.sourceReviewIds && a.sourceReviewIds.length > 0) {
+        lines.push(`- **${t.sourceReviews}**: ${a.sourceReviewIds.join(", ")}`);
+      }
+      lines.push("");
+    });
+  }
+
   return lines.join("\n");
 }
 
@@ -231,6 +248,11 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
         {prd?.tests && prd.tests.length > 0 ? (
           <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-tests")}>
             {t.verificationPlan} ({prd.tests.length})
+          </button>
+        ) : null}
+        {prd?.assumptions && prd.assumptions.length > 0 ? (
+          <button type="button" className={styles.tocItem} onClick={() => scrollToSection("report-assumptions")}>
+            {t.assumptions} ({prd.assumptions.length})
           </button>
         ) : null}
       </nav>
@@ -420,6 +442,56 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                 <div style={{ fontSize: "13px", color: "var(--ok)" }}>
                   <strong>{t.expected}:</strong> {test.expectedResult}
                 </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {/* 5. Assumptions to Verify */}
+      {prd?.assumptions && prd.assumptions.length > 0 ? (
+        <section id="report-assumptions" className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h3 className={styles.sectionTitle}>
+              <Icon name="overview" size={16} />
+              <span>{t.assumptions} ({prd.assumptions.length})</span>
+            </h3>
+          </div>
+          <div className={styles.gridCards}>
+            {prd.assumptions.map((a) => (
+              <div key={a.id} className={styles.findingCard}>
+                <div className={styles.findingHead}>
+                  <h4 className={styles.findingTitle}>{a.text}</h4>
+                  <ProvenanceBadge kind="assumption" label={t.assumptions} />
+                  <code style={{ fontSize: "12px", color: "var(--text-muted)" }}>{a.id}</code>
+                </div>
+                <p className={styles.findingSummary}>{a.basis}</p>
+                {a.sourceFindingIds && a.sourceFindingIds.length > 0 ? (
+                  <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "4px" }}>
+                    <strong>{t.sourceFindings}:</strong> {a.sourceFindingIds.join(", ")}
+                  </div>
+                ) : null}
+                {a.sourceReviewIds && a.sourceReviewIds.length > 0 ? (
+                  <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "2px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
+                    <span>{t.sourceReviews}:</span>
+                    {a.sourceReviewIds.slice(0, 6).map((id, i) => (
+                      <span key={`${id}-${i}`}>
+                        {i > 0 ? ", " : ""}
+                        <code
+                          onClick={() => onJumpToReview?.(id)}
+                          title={onJumpToReview ? `${t.jumpToReview} ${id}` : undefined}
+                          style={{
+                            color: onJumpToReview ? "var(--accent)" : "inherit",
+                            cursor: onJumpToReview ? "pointer" : "default",
+                            textDecoration: onJumpToReview ? "underline" : "none",
+                          }}
+                        >
+                          {id.length > 8 ? id.slice(0, 8) : id}
+                        </code>
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>

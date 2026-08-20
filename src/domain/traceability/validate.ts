@@ -9,10 +9,46 @@ export type Violation = {
   entity?: string;
 };
 
+export type ClosureStatus = "closed" | "partial" | "assumption-only" | "invalid";
+
 export type TraceabilityReport = {
   valid: boolean;
+  closureStatus: ClosureStatus;
   violations: Violation[];
 };
+
+/**
+ * Deterministically derives the product closure status from the PRD and violations.
+ * - invalid: structural violations exist (or prd is missing)
+ * - assumption-only: valid structure, no formal requirements, but assumptions or findings exist
+ * - partial: formal requirement chain is valid, but assumptions to verify still exist
+ * - closed: all formal findings are sufficient, fully covered by requirements & tests, and no insufficient findings exist
+ */
+export function deriveClosureStatus(
+  prd: Prd | { findings?: unknown[]; assumptions?: unknown[]; requirements?: unknown[] } | null | undefined,
+  violations: Violation[] = [],
+): ClosureStatus {
+  if (!prd || violations.length > 0) {
+    return "invalid";
+  }
+  const findings = Array.isArray(prd.findings) ? (prd.findings as Prd["findings"]) : [];
+  const assumptions = Array.isArray(prd.assumptions) ? (prd.assumptions as Prd["assumptions"]) : [];
+  const requirements = Array.isArray(prd.requirements) ? (prd.requirements as Prd["requirements"]) : [];
+
+  const hasInsufficient =
+    findings.some((f) => f.evidenceSufficiency?.status === "insufficient") ||
+    assumptions.some((a) => a.origin === "insufficient-finding" || a.origin === "rejected-requirement");
+
+  if (requirements.length === 0) {
+    return "assumption-only";
+  }
+
+  if (hasInsufficient) {
+    return "partial";
+  }
+
+  return "closed";
+}
 
 /**
  * Detects requirement ids that participate in a dependency cycle via iterative
@@ -59,6 +95,7 @@ export function validateTraceability(
 ): TraceabilityReport {
   const violations: Violation[] = [];
   const corpus = new Set(corpusReviewIds);
+  const findingMap = new Map(prd.findings.map((f) => [f.id, f]));
   const findingIds = new Set(prd.findings.map((f) => f.id));
   const reqIds = new Set(prd.requirements.map((r) => r.id));
   const versionIds = new Set(prd.versions.map((v) => v.id));
@@ -136,6 +173,34 @@ export function validateTraceability(
         violations.push({ code: "EXCERPT_NOT_EXACT", message: `${f.id} excerpt not exact`, entity: f.id });
       }
     }
+
+    // Insufficient finding must have a corresponding tracking assumption in PRD
+    if (f.evidenceSufficiency?.status === "insufficient") {
+      const isTracked = prd.assumptions.some(
+        (a) => (a.sourceFindingIds ?? []).includes(f.id) || a.id === `asm-insufficient-${f.id}`,
+      );
+      if (!isTracked) {
+        violations.push({
+          code: "INSUFFICIENT_FINDING_UNTRACKED",
+          message: `${f.id} has insufficient evidence but has no tracking assumption`,
+          entity: f.id,
+        });
+      }
+    }
+  }
+
+  // Sufficient findings must be covered by at least one requirement
+  const coveredFindingIds = new Set(prd.requirements.flatMap((r) => r.findingIds));
+  for (const f of prd.findings) {
+    if (f.evidenceSufficiency?.status === "sufficient") {
+      if (!coveredFindingIds.has(f.id)) {
+        violations.push({
+          code: "SUFFICIENT_FINDING_UNCOVERED",
+          message: `${f.id} has sufficient evidence but is not covered by any requirement`,
+          entity: f.id,
+        });
+      }
+    }
   }
 
   // Requirements: link to findings, reviews derive from findings evidence.
@@ -146,6 +211,15 @@ export function validateTraceability(
     for (const fid of req.findingIds) {
       if (!findingIds.has(fid)) {
         violations.push({ code: "REQUIREMENT_UNKNOWN_FINDING", message: `${req.id} links unknown finding ${fid}`, entity: req.id });
+      } else {
+        const f = findingMap.get(fid);
+        if (f && f.evidenceSufficiency?.status === "insufficient") {
+          violations.push({
+            code: "REQUIREMENT_INSUFFICIENT_EVIDENCE",
+            message: `${req.id} references finding ${fid} which has insufficient evidence`,
+            entity: req.id,
+          });
+        }
       }
     }
     // A requirement's evidence must be a subset of its findings' supporting
@@ -268,5 +342,7 @@ export function validateTraceability(
     }
   }
 
-  return { valid: violations.length === 0, violations };
+  const valid = violations.length === 0;
+  const closureStatus = deriveClosureStatus(prd, violations);
+  return { valid, closureStatus, violations };
 }

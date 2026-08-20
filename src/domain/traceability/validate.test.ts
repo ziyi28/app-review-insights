@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import type { Prd, Requirement } from "@/domain/contracts/analysis";
 import type { NormalizedReview } from "@/domain/contracts/review";
-import { validateTraceability } from "./validate";
+import { validateTraceability, deriveClosureStatus } from "./validate";
 import { findingIdsForRequirements, priorityForRequirements } from "./evidence-sources";
 
 function reviewMap(ids: string[]): Map<string, NormalizedReview> {
@@ -407,6 +407,225 @@ describe("validateTraceability", () => {
       code: "FINDING_CONFLICT_OVERLAP",
       message: "finding-1 cites r1 as both supporting and conflicting",
       entity: "finding-1",
+    });
+  });
+
+  it("reports closed status for fully covered sufficient findings without insufficient findings", () => {
+    const report = validateTraceability(makePrd(), ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(true);
+    expect(report.closureStatus).toBe("closed");
+  });
+
+  it("reports partial status for mixed evidence when insufficient finding has tracking assumption", () => {
+    const prd = makePrd();
+    prd.findings.push({
+      id: "finding-2",
+      topicIds: ["topic-1"],
+      focusAreaIds: [],
+      sourceFindingIds: [],
+      title: "Sync issue",
+      summary: "Sync fails rarely",
+      supportingReviewIds: ["r1"],
+      supportingContentGroupIds: ["group-r1"],
+      supportingSampleCount: 1,
+      evidenceExcerpts: [{ reviewId: "r1", excerpt: "price is too expensive" }],
+      conflictingReviewIds: [],
+      confidence: { level: "low", method: "deterministic-v2", reasons: [] },
+      evidenceSufficiency: {
+        status: "insufficient",
+        corpusReviewCount: 100,
+        supportRatio: 0.01,
+        reasons: ["SUPPORT_BELOW_MINIMUM"],
+      },
+      uncertainties: [],
+      limitations: [],
+    });
+    prd.assumptions.push({
+      id: "asm-insufficient-finding-2",
+      text: "Sync fails rarely",
+      basis: "Evidence insufficient",
+      origin: "insufficient-finding",
+      sourceFindingIds: ["finding-2"],
+      sourceReviewIds: ["r1"],
+    });
+
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(true);
+    expect(report.closureStatus).toBe("partial");
+  });
+
+  it("reports assumption-only status when all findings are insufficient and requirements are empty", () => {
+    const prd: Prd = {
+      outputLocale: "en",
+      title: "Plan",
+      overview: "x",
+      findings: [
+        {
+          id: "finding-1",
+          topicIds: ["topic-1"],
+          focusAreaIds: [],
+          sourceFindingIds: [],
+          title: "Pricing",
+          summary: "cost complaints",
+          supportingReviewIds: ["r1", "r2"],
+          supportingContentGroupIds: ["group-r1", "group-r2"],
+          supportingSampleCount: 2,
+          evidenceExcerpts: [
+            { reviewId: "r1", excerpt: "price is too expensive" },
+            { reviewId: "r2", excerpt: "price is too expensive" },
+          ],
+          conflictingReviewIds: [],
+          confidence: { level: "low", method: "deterministic-v2", reasons: [] },
+          evidenceSufficiency: {
+            status: "insufficient",
+            corpusReviewCount: 100,
+            supportRatio: 0.02,
+            reasons: ["SUPPORT_BELOW_MINIMUM"],
+          },
+          uncertainties: [],
+          limitations: [],
+        },
+      ],
+      requirements: [],
+      versions: [],
+      tests: [],
+      assumptions: [
+        {
+          id: "asm-insufficient-finding-1",
+          text: "Pricing",
+          basis: "Insufficient",
+          origin: "insufficient-finding",
+          sourceFindingIds: ["finding-1"],
+          sourceReviewIds: ["r1", "r2"],
+        },
+      ],
+    };
+
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(true);
+    expect(report.closureStatus).toBe("assumption-only");
+  });
+
+  it("flags REQUIREMENT_INSUFFICIENT_EVIDENCE when requirement cites an insufficient finding", () => {
+    const prd = makePrd();
+    prd.findings[0].evidenceSufficiency.status = "insufficient";
+    prd.assumptions.push({
+      id: "asm-insufficient-finding-1",
+      text: "Pricing",
+      basis: "Insufficient",
+      origin: "insufficient-finding",
+      sourceFindingIds: ["finding-1"],
+      sourceReviewIds: ["r1", "r2"],
+    });
+
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(false);
+    expect(report.closureStatus).toBe("invalid");
+    expect(report.violations).toContainEqual({
+      code: "REQUIREMENT_INSUFFICIENT_EVIDENCE",
+      message: "req-1 references finding finding-1 which has insufficient evidence",
+      entity: "req-1",
+    });
+  });
+
+  it("flags INSUFFICIENT_FINDING_UNTRACKED when an insufficient finding has no tracking assumption", () => {
+    const prd = makePrd();
+    prd.findings.push({
+      id: "finding-2",
+      topicIds: ["topic-1"],
+      focusAreaIds: [],
+      sourceFindingIds: [],
+      title: "Sync issue",
+      summary: "Sync fails rarely",
+      supportingReviewIds: ["r1"],
+      supportingContentGroupIds: ["group-r1"],
+      supportingSampleCount: 1,
+      evidenceExcerpts: [{ reviewId: "r1", excerpt: "price is too expensive" }],
+      conflictingReviewIds: [],
+      confidence: { level: "low", method: "deterministic-v2", reasons: [] },
+      evidenceSufficiency: {
+        status: "insufficient",
+        corpusReviewCount: 100,
+        supportRatio: 0.01,
+        reasons: ["SUPPORT_BELOW_MINIMUM"],
+      },
+      uncertainties: [],
+      limitations: [],
+    });
+
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(false);
+    expect(report.violations).toContainEqual({
+      code: "INSUFFICIENT_FINDING_UNTRACKED",
+      message: "finding-2 has insufficient evidence but has no tracking assumption",
+      entity: "finding-2",
+    });
+  });
+
+  it("flags SUFFICIENT_FINDING_UNCOVERED when a sufficient finding is not cited by any requirement", () => {
+    const prd = makePrd();
+    prd.findings.push({
+      id: "finding-2",
+      topicIds: ["topic-1"],
+      focusAreaIds: [],
+      sourceFindingIds: [],
+      title: "Timer reset",
+      summary: "Timer resets on lock",
+      supportingReviewIds: ["r1", "r2"],
+      supportingContentGroupIds: ["group-r1", "group-r2"],
+      supportingSampleCount: 2,
+      evidenceExcerpts: [
+        { reviewId: "r1", excerpt: "price is too expensive" },
+        { reviewId: "r2", excerpt: "price is too expensive" },
+      ],
+      conflictingReviewIds: [],
+      confidence: { level: "high", method: "deterministic-v2", reasons: [] },
+      evidenceSufficiency: {
+        status: "sufficient",
+        corpusReviewCount: 100,
+        supportRatio: 0.05,
+        reasons: [],
+      },
+      uncertainties: [],
+      limitations: [],
+    });
+
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+    expect(report.valid).toBe(false);
+    expect(report.violations).toContainEqual({
+      code: "SUFFICIENT_FINDING_UNCOVERED",
+      message: "finding-2 has sufficient evidence but is not covered by any requirement",
+      entity: "finding-2",
+    });
+  });
+
+  describe("deriveClosureStatus", () => {
+    it("returns invalid if prd is null or violations exist", () => {
+      expect(deriveClosureStatus(null, [])).toBe("invalid");
+      expect(deriveClosureStatus(makePrd(), [{ code: "SOME_ERROR", message: "err" }])).toBe("invalid");
+    });
+
+    it("returns closed for clean PRD with all sufficient findings", () => {
+      expect(deriveClosureStatus(makePrd(), [])).toBe("closed");
+    });
+
+    it("returns assumption-only if requirements are empty", () => {
+      const prd = makePrd();
+      prd.requirements = [];
+      expect(deriveClosureStatus(prd, [])).toBe("assumption-only");
+    });
+
+    it("returns partial if PRD has insufficient findings or assumptions with origin", () => {
+      const prd = makePrd();
+      prd.assumptions.push({
+        id: "asm-rejected-req-2",
+        text: "Rejected req",
+        basis: "Insufficient finding",
+        origin: "rejected-requirement",
+        sourceFindingIds: ["finding-9"],
+        sourceReviewIds: [],
+      });
+      expect(deriveClosureStatus(prd, [])).toBe("partial");
     });
   });
 });

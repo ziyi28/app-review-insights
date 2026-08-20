@@ -113,6 +113,11 @@ describe("VersionPlanPanel", () => {
     render(<VersionPlanPanel versionPlan={null} t={t} />);
     expect(screen.getByText(t.legacyArtifactUnavailable)).toBeInTheDocument();
   });
+
+  it("shows noSchedulableRequirements when version plan has no versions", () => {
+    render(<VersionPlanPanel versionPlan={{ versions: [], decisions: [] }} t={t} />);
+    expect(screen.getByText(t.noSchedulableRequirements)).toBeInTheDocument();
+  });
 });
 
 describe("RunDiagnosticsPanel", () => {
@@ -162,7 +167,7 @@ describe("FinalDeliverablesPanel", () => {
     tests: [{ id: "test-1", requirementIds: ["req-1"], findingIds: ["finding-1"], sourceReviewIds: ["r1"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok", priority: "P1" }],
     assumptions: [],
   };
-  const report: TraceabilityReport = { valid: true, violations: [] };
+  const report: TraceabilityReport = { valid: true, closureStatus: "closed", violations: [] };
   const manifest: RunManifest = {
     runId: "run-1",
     status: "completed",
@@ -180,7 +185,8 @@ describe("FinalDeliverablesPanel", () => {
     render(<FinalDeliverablesPanel finalPrd={prd} report={report} manifest={manifest} t={t} />);
     // versions/requirements/tests counts each render a "1"
     expect(screen.getAllByText("1")).toHaveLength(3);
-    expect(screen.getByText(t.completed)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(t.completed))).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(t.traceClosureClosed))).toBeInTheDocument();
     expect(screen.getByText(/UNKNOWN_LIMITATION/)).toBeInTheDocument();
     expect(screen.getByText(/partial feed/)).toBeInTheDocument();
     expect(screen.getByText(/planning@2/)).toBeInTheDocument();
