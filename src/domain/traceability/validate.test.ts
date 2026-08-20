@@ -411,7 +411,9 @@ describe("validateTraceability", () => {
   });
 
   it("reports closed status for fully covered sufficient findings without insufficient findings", () => {
-    const report = validateTraceability(makePrd(), ["r1", "r2"], reviewMap(["r1", "r2"]));
+    const prd = makePrd();
+    prd.assumptions = [];
+    const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
     expect(report.valid).toBe(true);
     expect(report.closureStatus).toBe("closed");
   });
@@ -600,32 +602,229 @@ describe("validateTraceability", () => {
   });
 
   describe("deriveClosureStatus", () => {
-    it("returns invalid if prd is null or violations exist", () => {
-      expect(deriveClosureStatus(null, [])).toBe("invalid");
-      expect(deriveClosureStatus(makePrd(), [{ code: "SOME_ERROR", message: "err" }])).toBe("invalid");
+    it("returns invalid if prd has no findings", () => {
+      const prd = { ...makePrd(), findings: [], requirements: [], versions: [], tests: [], assumptions: [] };
+      expect(deriveClosureStatus(prd, [])).toBe("invalid");
     });
 
-    it("returns closed for clean PRD with all sufficient findings", () => {
-      expect(deriveClosureStatus(makePrd(), [])).toBe("closed");
+    it("returns invalid if prd has no findings and no requirements even with model assumption", () => {
+      const prd = {
+        ...makePrd(),
+        findings: [],
+        requirements: [],
+        versions: [],
+        tests: [],
+        assumptions: [{ id: "asm-1", text: "x", basis: "y", origin: "model" as const, sourceFindingIds: [], sourceReviewIds: [] }],
+      };
+      expect(deriveClosureStatus(prd, [])).toBe("invalid");
     });
 
-    it("returns assumption-only if requirements are empty", () => {
+    it("returns partial if requirements exist and assumptions are non-empty", () => {
       const prd = makePrd();
-      prd.requirements = [];
-      expect(deriveClosureStatus(prd, [])).toBe("assumption-only");
-    });
-
-    it("returns partial if PRD has insufficient findings or assumptions with origin", () => {
-      const prd = makePrd();
-      prd.assumptions.push({
-        id: "asm-rejected-req-2",
-        text: "Rejected req",
-        basis: "Insufficient finding",
-        origin: "rejected-requirement",
-        sourceFindingIds: ["finding-9"],
-        sourceReviewIds: [],
-      });
       expect(deriveClosureStatus(prd, [])).toBe("partial");
+    });
+
+    it("returns closed if requirements exist and assumptions are empty", () => {
+      const prd = makePrd();
+      prd.assumptions = [];
+      expect(deriveClosureStatus(prd, [])).toBe("closed");
+    });
+  });
+
+  describe("Task 1: Revision & Assumption validation rules", () => {
+    it("rejects an empty PRD instead of calling it assumption-only", () => {
+      const prd = { ...makePrd(), findings: [], requirements: [], versions: [], tests: [], assumptions: [] };
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+      expect(report.valid).toBe(false);
+      expect(report.closureStatus).toBe("invalid");
+      expect(report.violations.map((v) => v.code)).toContain("PRD_NO_FINDINGS");
+    });
+
+    it("rejects removal of a pre-revision sufficient finding", () => {
+      const prd = { ...makePrd(), findings: [], requirements: [], versions: [], tests: [], assumptions: [] };
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]), {
+        requiredSufficientFindingIds: ["finding-1"],
+      });
+      expect(report.violations.map((v) => v.code)).toContain(
+        "REVISION_SUFFICIENT_FINDING_NOT_PRESERVED",
+      );
+    });
+
+    it("rejects degradation of a pre-revision sufficient finding to insufficient", () => {
+      const prd = makePrd();
+      prd.findings[0].evidenceSufficiency.status = "insufficient";
+      prd.assumptions.push({
+        id: "asm-insufficient-finding-1",
+        text: "cost",
+        basis: "insufficient",
+        origin: "insufficient-finding",
+        sourceFindingIds: ["finding-1"],
+        sourceReviewIds: ["r1", "r2"],
+      });
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]), {
+        requiredSufficientFindingIds: ["finding-1"],
+      });
+      expect(report.violations.map((v) => v.code)).toContain(
+        "REVISION_SUFFICIENT_FINDING_NOT_PRESERVED",
+      );
+    });
+
+    it("flags ASSUMPTION_ORIGIN_SOURCE_MISMATCH when origin is model but specifies sources", () => {
+      const prd = makePrd();
+      prd.assumptions = [
+        {
+          id: "asm-1",
+          text: "x",
+          basis: "y",
+          origin: "model",
+          sourceFindingIds: ["finding-1"],
+          sourceReviewIds: [],
+        },
+      ];
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+      expect(report.valid).toBe(false);
+      expect(report.violations.map((v) => v.code)).toContain("ASSUMPTION_ORIGIN_SOURCE_MISMATCH");
+    });
+
+    it("flags ASSUMPTION_SOURCE_FINDING_INVALID when insufficient-finding assumption points to unknown or sufficient finding", () => {
+      const prd = makePrd();
+      prd.assumptions = [
+        {
+          id: "asm-insufficient-finding-1",
+          text: "x",
+          basis: "y",
+          origin: "insufficient-finding",
+          sourceFindingIds: ["finding-1"], // finding-1 is sufficient
+          sourceReviewIds: ["r1", "r2"],
+        },
+      ];
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+      expect(report.valid).toBe(false);
+      expect(report.violations.map((v) => v.code)).toContain("ASSUMPTION_SOURCE_FINDING_INVALID");
+    });
+
+    it("flags ASSUMPTION_SOURCE_FINDING_INVALID when insufficient-finding assumption points to multiple findings", () => {
+      const prd = makePrd();
+      prd.findings[0].evidenceSufficiency.status = "insufficient";
+      prd.assumptions = [
+        {
+          id: "asm-insufficient-multi",
+          text: "x",
+          basis: "y",
+          origin: "insufficient-finding",
+          sourceFindingIds: ["finding-1", "finding-2"],
+          sourceReviewIds: ["r1", "r2"],
+        },
+      ];
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+      expect(report.valid).toBe(false);
+      expect(report.violations.map((v) => v.code)).toContain("ASSUMPTION_SOURCE_FINDING_INVALID");
+    });
+
+    it("flags ASSUMPTION_SOURCE_REVIEW_MISMATCH when evidence-derived assumption cites mismatched reviews", () => {
+      const prd = makePrd();
+      prd.findings[0].evidenceSufficiency.status = "insufficient";
+      prd.assumptions = [
+        {
+          id: "asm-insufficient-finding-1",
+          text: "x",
+          basis: "y",
+          origin: "insufficient-finding",
+          sourceFindingIds: ["finding-1"],
+          sourceReviewIds: ["r1"], // missing r2
+        },
+      ];
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+      expect(report.valid).toBe(false);
+      expect(report.violations.map((v) => v.code)).toContain("ASSUMPTION_SOURCE_REVIEW_MISMATCH");
+    });
+
+    it.each([
+      { name: "empty", actual: [] },
+      { name: "missing", actual: ["r1", "r2"] },
+      { name: "extra", actual: ["r1", "r2", "r3", "r4", "r-extra"] },
+    ])("rejects $name rejected-requirement evidence", ({ actual }) => {
+      const prd = makePrd();
+      const firstFinding = prd.findings[0];
+      firstFinding.evidenceSufficiency.status = "insufficient";
+      firstFinding.conflictingReviewIds = ["r3"];
+      const secondFinding = {
+        ...firstFinding,
+        id: "finding-2",
+        supportingReviewIds: ["r3"],
+        supportingContentGroupIds: ["group-r3"],
+        supportingSampleCount: 1,
+        evidenceExcerpts: [{ reviewId: "r3", excerpt: "price is too expensive for me" }],
+        conflictingReviewIds: ["r4"],
+      };
+      prd.findings = [firstFinding, secondFinding];
+      prd.requirements = [];
+      prd.versions = [];
+      prd.tests = [];
+      prd.assumptions = [{
+        id: "asm-rejected-req-1",
+        text: "defer requirement",
+        basis: "insufficient evidence",
+        origin: "rejected-requirement",
+        sourceFindingIds: ["finding-1", "finding-2"],
+        sourceReviewIds: actual,
+      }];
+
+      const report = validateTraceability(prd, ["r1", "r2", "r3", "r4"], reviewMap(["r1", "r2", "r3", "r4"]));
+      expect(report.violations.map((v) => v.code)).toContain(
+        "ASSUMPTION_SOURCE_REVIEW_MISMATCH",
+      );
+    });
+
+    it("accepts rejected-requirement evidence as an order-independent set", () => {
+      const prd = makePrd();
+      const firstFinding = prd.findings[0];
+      firstFinding.evidenceSufficiency.status = "insufficient";
+      firstFinding.conflictingReviewIds = ["r3"];
+      const secondFinding = {
+        ...firstFinding,
+        id: "finding-2",
+        supportingReviewIds: ["r3"],
+        supportingContentGroupIds: ["group-r3"],
+        supportingSampleCount: 1,
+        evidenceExcerpts: [{ reviewId: "r3", excerpt: "price is too expensive for me" }],
+        conflictingReviewIds: ["r4"],
+      };
+      prd.findings = [firstFinding, secondFinding];
+      prd.requirements = [];
+      prd.versions = [];
+      prd.tests = [];
+      prd.assumptions = [{
+        id: "asm-rejected-req-1",
+        text: "defer requirement",
+        basis: "insufficient evidence",
+        origin: "rejected-requirement",
+        sourceFindingIds: ["finding-1", "finding-2"],
+        sourceReviewIds: ["r4", "r2", "r1", "r3", "r3"],
+      }];
+
+      const report = validateTraceability(prd, ["r1", "r2", "r3", "r4"], reviewMap(["r1", "r2", "r3", "r4"]));
+      expect(report.violations.map((v) => v.code)).not.toContain(
+        "ASSUMPTION_SOURCE_REVIEW_MISMATCH",
+      );
+    });
+
+    it("flags INSUFFICIENT_FINDING_UNTRACKED when assumption has matching name but invalid origin or sourceFindingIds", () => {
+      const prd = makePrd();
+      prd.findings[0].evidenceSufficiency.status = "insufficient";
+      prd.assumptions = [
+        {
+          id: "asm-insufficient-finding-1",
+          text: "x",
+          basis: "y",
+          origin: "model",
+          sourceFindingIds: [],
+          sourceReviewIds: [],
+        },
+      ];
+      const report = validateTraceability(prd, ["r1", "r2"], reviewMap(["r1", "r2"]));
+      expect(report.valid).toBe(false);
+      expect(report.violations.map((v) => v.code)).toContain("INSUFFICIENT_FINDING_UNTRACKED");
     });
   });
 });

@@ -380,4 +380,133 @@ describe("executeRun (revision path)", () => {
     expect(prd.requirements).toHaveLength(0);
     expect(prd.assumptions.some((a) => a.id === "asm-insufficient-finding-1")).toBe(true);
   });
+
+  it("fails explicitly when revision attempts to erase sufficient findings to bypass traceability gates", async () => {
+    const parse = parseImportedReviews({
+      fileName: "r.json",
+      mediaType: "application/json",
+      content: JSON.stringify({
+        schemaVersion: "1",
+        reviews: [
+          { id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b2", body: "Cannot afford the premium price, it is too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b3", body: "Far too expensive for a basic app", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+        ],
+      }),
+    });
+    const prepared = prepareReviews({ kind: "import", parse });
+    const rids = prepared.reviews.filter((r) => r.includedInAnalysis).map((r) => r.reviewId);
+
+    const model = new ScriptedModelClient([
+      JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
+      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: rids, quote: "too expensive" }] }),
+      JSON.stringify({ topics: [{ id: "topic-1", label: "Price", description: "d", candidateIds: ["topic-candidate-1@c0"] }] }),
+      JSON.stringify({
+        findings: [
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: rids, evidenceExcerpts: rids.map((id) => ({ reviewId: id, excerpt: "too expensive" })), conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        ],
+      }),
+      JSON.stringify({
+        title: "Plan", overview: "x", versions: [{ id: "ver-1", name: "1.0.0", summary: "x", rationale: "x", requirementIds: ["req-1"] }],
+        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
+        assumptions: [],
+      }),
+      JSON.stringify({ requirementId: "req-1", verdicts: rids.map((id) => ({ reviewId: id, relation: "direct", confidence: 1, reason: "price complaint" })) }),
+      JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
+      JSON.stringify({
+        findings: [],
+        requirements: [],
+        versions: [],
+        tests: [],
+        assumptions: [],
+        note: "removed everything",
+      }),
+    ]);
+
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+    const importParse = parse as ImportParseShape;
+    await executeRun(runId, "Understand pricing", "en", { model, source: { kind: "import", parse: importParse } }, publisher, store);
+
+    const events = await collectEvents(runId);
+    const lastEvent = events.at(-1) as { type: string };
+    expect(lastEvent.type).toBe("run.failed");
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("failed");
+    const traceAttempt2 = (await store.readArtifact(runId, "traceability", 2)) as {
+      closureStatus: string;
+      violations: { code: string }[];
+    };
+    expect(traceAttempt2.closureStatus).toBe("invalid");
+    expect(traceAttempt2.violations.map((v) => v.code)).toContain(
+      "REVISION_SUFFICIENT_FINDING_NOT_PRESERVED",
+    );
+    expect(manifest.limitations.map((l) => l.code)).toContain(
+      "TRACEABILITY_INVALID_AFTER_REVISION",
+    );
+  });
+
+  it("fails explicitly when revision downgrades a sufficient finding to insufficient", async () => {
+    const parse = parseImportedReviews({
+      fileName: "r.json",
+      mediaType: "application/json",
+      content: JSON.stringify({
+        schemaVersion: "1",
+        reviews: [
+          { id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b2", body: "Cannot afford the premium price, it is too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b3", body: "Far too expensive for a basic app", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+        ],
+      }),
+    });
+    const prepared = prepareReviews({ kind: "import", parse });
+    const rids = prepared.reviews.filter((r) => r.includedInAnalysis).map((r) => r.reviewId);
+
+    const model = new ScriptedModelClient([
+      JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
+      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: rids, quote: "too expensive" }] }),
+      JSON.stringify({ topics: [{ id: "topic-1", label: "Price", description: "d", candidateIds: ["topic-candidate-1@c0"] }] }),
+      JSON.stringify({
+        findings: [
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: rids, evidenceExcerpts: rids.map((id) => ({ reviewId: id, excerpt: "too expensive" })), conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        ],
+      }),
+      JSON.stringify({
+        title: "Plan", overview: "x", versions: [{ id: "ver-1", name: "1.0.0", summary: "x", rationale: "x", requirementIds: ["req-1"] }],
+        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
+        assumptions: [],
+      }),
+      JSON.stringify({ requirementId: "req-1", verdicts: rids.map((id) => ({ reviewId: id, relation: "direct", confidence: 1, reason: "price complaint" })) }),
+      JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
+      JSON.stringify({
+        findings: [
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rids[0]], evidenceExcerpts: [{ reviewId: rids[0], excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        ],
+        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
+        tests: [],
+        assumptions: [],
+        note: "reduced sufficient evidence",
+      }),
+    ]);
+
+    const runId = store.createRunId();
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
+    const importParse = parse as ImportParseShape;
+    await executeRun(runId, "Understand pricing", "en", { model, source: { kind: "import", parse: importParse } }, publisher, store);
+
+    const events = await collectEvents(runId);
+    const lastEvent = events.at(-1) as { type: string };
+    expect(lastEvent.type).toBe("run.failed");
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("failed");
+    const traceAttempt2 = (await store.readArtifact(runId, "traceability", 2)) as {
+      violations: { code: string }[];
+    };
+    expect(traceAttempt2.violations.map((v) => v.code)).toContain(
+      "REVISION_SUFFICIENT_FINDING_NOT_PRESERVED",
+    );
+    expect(manifest.limitations.map((l) => l.code)).toContain(
+      "TRACEABILITY_INVALID_AFTER_REVISION",
+    );
+  });
 });

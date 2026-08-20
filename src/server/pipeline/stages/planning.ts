@@ -81,7 +81,14 @@ export function normalizePlanningOutput(
       if (existingFindingIds.length > 0) {
         // The requirement cited findings that all have insufficient evidence.
         // Convert to a rejected-requirement assumption.
-        const sourceReviewIds = reviewIdsForFindings(existingFindingIds, findings);
+        const sourceReviewIds = [...new Set(
+          findings
+            .filter((finding) => existingFindingIds.includes(finding.id))
+            .flatMap((finding) => [
+              ...finding.supportingReviewIds,
+              ...finding.conflictingReviewIds,
+            ]),
+        )];
         rejectedAssumptions.push({
           id: `asm-rejected-${req.id}`,
           text: req.description ? `${req.title}: ${req.description}`.slice(0, 2000) : req.title.slice(0, 2000),

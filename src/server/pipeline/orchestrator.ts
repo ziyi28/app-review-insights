@@ -40,6 +40,8 @@ export type ImportParseShape = {
   sourceFiles: SourceFile[];
 };
 
+import type { CacheFixtureArchiveEvidence } from "@/server/sources/cache-fixture-archive";
+
 /**
  * Provider-aware source summary persisted as the `source-evidence` artifact.
  * `provider: "socialcrawl"` is legacy read-only compatibility for old cached
@@ -49,7 +51,7 @@ export type ImportParseShape = {
  */
 export type AppStoreReviewSourceSummary = {
   kind: "app-store-reviews";
-  provider: "serpapi" | "apple-rss" | "socialcrawl";
+  provider: "serpapi" | "apple-rss" | "socialcrawl" | "cache";
   appId: string;
   storefront: "US";
   status: "complete" | "suspect-empty" | "partial" | "failed";
@@ -67,6 +69,7 @@ export type AppStoreReviewSourceSummary = {
   searchId: string | null;
   creditsUsed?: number | null;
   requestId?: string | null;
+  cache?: CacheFixtureArchiveEvidence;
   /** Per-request archive evidence for an apple-rss provider (optional: absent
    *  for SerpApi providers and old artifacts). */
   pages?: {
@@ -659,6 +662,9 @@ export async function executeRun(
     if (revisionNeeded) {
       await startStage("revision");
       await publisher.publish({ type: "revision.started", runId, stage: "revision", data: { violations: report.violations } });
+      const requiredSufficientFindingIds = prd.findings
+        .filter((finding) => finding.evidenceSufficiency.status === "sufficient")
+        .map((finding) => finding.id);
       const frozenLedger = {
         findings: Object.fromEntries(prd.findings.map((f) => [f.id, f.supportingReviewIds])),
         requirements: Object.fromEntries(prd.requirements.map((r) => [r.id, r.sourceReviewIds])),
@@ -717,7 +723,9 @@ export async function executeRun(
       );
       for (const w of revisedTestsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "revision", data: w });
       const revisedPrd: Prd = revisedTestsResult.prd;
-      report = validateTraceability(revisedPrd, analysisReviews.map((r) => r.reviewId), reviewMap);
+      report = validateTraceability(revisedPrd, analysisReviews.map((r) => r.reviewId), reviewMap, {
+        requiredSufficientFindingIds,
+      });
       prd = revisedPrd;
       // Goal coverage is recomputed against the revised plan. The revision's
       // findings are raw model output that carries no focusAreaIds, so the

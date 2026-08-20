@@ -11,6 +11,10 @@ export type Violation = {
 
 export type ClosureStatus = "closed" | "partial" | "assumption-only" | "invalid";
 
+export type TraceabilityValidationContext = {
+  requiredSufficientFindingIds?: readonly string[];
+};
+
 export type TraceabilityReport = {
   valid: boolean;
   closureStatus: ClosureStatus;
@@ -19,10 +23,10 @@ export type TraceabilityReport = {
 
 /**
  * Deterministically derives the product closure status from the PRD and violations.
- * - invalid: structural violations exist (or prd is missing)
- * - assumption-only: valid structure, no formal requirements, but assumptions or findings exist
+ * - invalid: structural violations exist (or prd is missing/empty findings)
+ * - assumption-only: valid structure, no formal requirements, all findings insufficient with tracking assumptions
  * - partial: formal requirement chain is valid, but assumptions to verify still exist
- * - closed: all formal findings are sufficient, fully covered by requirements & tests, and no insufficient findings exist
+ * - closed: all formal findings are sufficient, fully covered by requirements & tests, and no assumptions exist
  */
 export function deriveClosureStatus(
   prd: Prd | { findings?: unknown[]; assumptions?: unknown[]; requirements?: unknown[] } | null | undefined,
@@ -35,15 +39,23 @@ export function deriveClosureStatus(
   const assumptions = Array.isArray(prd.assumptions) ? (prd.assumptions as Prd["assumptions"]) : [];
   const requirements = Array.isArray(prd.requirements) ? (prd.requirements as Prd["requirements"]) : [];
 
+  if (findings.length === 0) {
+    return "invalid";
+  }
+
   const hasInsufficient =
     findings.some((f) => f.evidenceSufficiency?.status === "insufficient") ||
     assumptions.some((a) => a.origin === "insufficient-finding" || a.origin === "rejected-requirement");
 
   if (requirements.length === 0) {
-    return "assumption-only";
+    const allFindingsInsufficient = findings.length > 0 && findings.every((f) => f.evidenceSufficiency?.status === "insufficient");
+    if (allFindingsInsufficient) {
+      return "assumption-only";
+    }
+    return "invalid";
   }
 
-  if (hasInsufficient) {
+  if (hasInsufficient || assumptions.length > 0) {
     return "partial";
   }
 
@@ -92,6 +104,7 @@ export function validateTraceability(
   prd: Prd,
   corpusReviewIds: string[],
   reviewMap: Map<string, NormalizedReview>,
+  context: TraceabilityValidationContext = {},
 ): TraceabilityReport {
   const violations: Violation[] = [];
   const corpus = new Set(corpusReviewIds);
@@ -99,6 +112,23 @@ export function validateTraceability(
   const findingIds = new Set(prd.findings.map((f) => f.id));
   const reqIds = new Set(prd.requirements.map((r) => r.id));
   const versionIds = new Set(prd.versions.map((v) => v.id));
+
+  if (prd.findings.length === 0) {
+    violations.push({ code: "PRD_NO_FINDINGS", message: "PRD has no findings", entity: "findings" });
+  }
+
+  if (context.requiredSufficientFindingIds) {
+    for (const id of context.requiredSufficientFindingIds) {
+      const f = findingMap.get(id);
+      if (!f || f.evidenceSufficiency?.status !== "sufficient") {
+        violations.push({
+          code: "REVISION_SUFFICIENT_FINDING_NOT_PRESERVED",
+          message: `pre-revision sufficient finding ${id} was removed or degraded`,
+          entity: id,
+        });
+      }
+    }
+  }
 
   // Dependency ordering: a requirement may only depend on requirements that
   // are scheduled in the same or an earlier version, never in a later one.
@@ -177,13 +207,105 @@ export function validateTraceability(
     // Insufficient finding must have a corresponding tracking assumption in PRD
     if (f.evidenceSufficiency?.status === "insufficient") {
       const isTracked = prd.assumptions.some(
-        (a) => (a.sourceFindingIds ?? []).includes(f.id) || a.id === `asm-insufficient-${f.id}`,
+        (a) =>
+          (a.origin === "insufficient-finding" || a.origin === "rejected-requirement") &&
+          (a.sourceFindingIds ?? []).includes(f.id),
       );
       if (!isTracked) {
         violations.push({
           code: "INSUFFICIENT_FINDING_UNTRACKED",
           message: `${f.id} has insufficient evidence but has no tracking assumption`,
           entity: f.id,
+        });
+      }
+    }
+  }
+
+  // Assumptions: origin and source references validation
+  for (const a of prd.assumptions) {
+    const origin = a.origin ?? "model";
+    if (origin === "model") {
+      if ((a.sourceFindingIds && a.sourceFindingIds.length > 0) || (a.sourceReviewIds && a.sourceReviewIds.length > 0)) {
+        violations.push({
+          code: "ASSUMPTION_ORIGIN_SOURCE_MISMATCH",
+          message: `${a.id} origin is model but specifies source findings or reviews`,
+          entity: a.id,
+        });
+      }
+    } else if (origin === "insufficient-finding") {
+      if (!a.sourceFindingIds || a.sourceFindingIds.length !== 1) {
+        violations.push({
+          code: "ASSUMPTION_SOURCE_FINDING_INVALID",
+          message: `${a.id} origin is insufficient-finding but does not reference exactly one finding`,
+          entity: a.id,
+        });
+      } else {
+        const targetFinding = findingMap.get(a.sourceFindingIds[0]);
+        if (!targetFinding || targetFinding.evidenceSufficiency?.status !== "insufficient") {
+          violations.push({
+            code: "ASSUMPTION_SOURCE_FINDING_INVALID",
+            message: `${a.id} references invalid or non-insufficient finding ${a.sourceFindingIds[0]}`,
+            entity: a.id,
+          });
+        } else {
+          const expectedReviews = new Set([...targetFinding.supportingReviewIds, ...targetFinding.conflictingReviewIds]);
+          const actualReviews = new Set(a.sourceReviewIds ?? []);
+          if (expectedReviews.size !== actualReviews.size || [...expectedReviews].some((id) => !actualReviews.has(id))) {
+            violations.push({
+              code: "ASSUMPTION_SOURCE_REVIEW_MISMATCH",
+              message: `${a.id} sourceReviewIds must match finding ${targetFinding.id} evidence reviews`,
+              entity: a.id,
+            });
+          }
+        }
+      }
+    } else if (origin === "rejected-requirement") {
+      if (!a.sourceFindingIds || a.sourceFindingIds.length === 0) {
+        violations.push({
+          code: "ASSUMPTION_SOURCE_FINDING_INVALID",
+          message: `${a.id} origin is rejected-requirement but references no findings`,
+          entity: a.id,
+        });
+      } else {
+        let anyInvalid = false;
+        const allowedReviews = new Set<string>();
+        for (const fid of a.sourceFindingIds) {
+          const f = findingMap.get(fid);
+          if (!f || f.evidenceSufficiency?.status !== "insufficient") {
+            anyInvalid = true;
+          } else {
+            for (const r of f.supportingReviewIds) allowedReviews.add(r);
+            for (const r of f.conflictingReviewIds) allowedReviews.add(r);
+          }
+        }
+        if (anyInvalid) {
+          violations.push({
+            code: "ASSUMPTION_SOURCE_FINDING_INVALID",
+            message: `${a.id} references invalid or non-insufficient findings`,
+            entity: a.id,
+          });
+        } else {
+          const actualReviews = new Set(a.sourceReviewIds ?? []);
+          if (
+            allowedReviews.size !== actualReviews.size ||
+            [...allowedReviews].some((id) => !actualReviews.has(id))
+          ) {
+            violations.push({
+              code: "ASSUMPTION_SOURCE_REVIEW_MISMATCH",
+              message: `${a.id} sourceReviewIds must match source findings evidence reviews`,
+              entity: a.id,
+            });
+          }
+        }
+      }
+    }
+
+    for (const rid of a.sourceReviewIds ?? []) {
+      if (!corpus.has(rid)) {
+        violations.push({
+          code: "REVIEW_NOT_FOUND",
+          message: `${a.id} cites unknown review ${rid}`,
+          entity: a.id,
         });
       }
     }

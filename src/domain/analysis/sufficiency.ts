@@ -55,4 +55,3 @@ export function createAssumptionFromInsufficientFinding(finding: Finding): Assum
     sourceReviewIds,
   };
 }
-

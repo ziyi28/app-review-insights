@@ -201,7 +201,12 @@ describe("runPlanningStage", () => {
 
   it("rejects a requirement backed only by insufficient findings and turns it into an assumption", async () => {
     // finding-1 is insufficient; model returns P1/ver-1 for it.
-    const result = await runPlanningStage(context({}, PLANNING_RESPONSE, [findings[0]]));
+    const insufficientFinding = {
+      ...findings[0],
+      supportingReviewIds: ["r1", "r2"],
+      conflictingReviewIds: ["r2", "r3"],
+    };
+    const result = await runPlanningStage(context({}, PLANNING_RESPONSE, [insufficientFinding]));
     // The requirement is rejected and does not enter PRD requirements
     expect(result.prd.requirements).toHaveLength(0);
     expect(result.prd.versions).toHaveLength(0);
@@ -212,6 +217,7 @@ describe("runPlanningStage", () => {
     expect(rejectedAsm).toBeDefined();
     expect(rejectedAsm?.origin).toBe("rejected-requirement");
     expect(rejectedAsm?.sourceFindingIds).toEqual(["finding-1"]);
+    expect([...new Set(rejectedAsm?.sourceReviewIds ?? [])].sort()).toEqual(["r1", "r2", "r3"]);
 
     // The insufficient finding also generated an insufficient-finding assumption
     const insufficientAsm = result.prd.assumptions.find((a) => a.id === "asm-insufficient-finding-1");
