@@ -1,49 +1,131 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { loadReplayRun } from "@/server/runs/replay";
 import { validateTraceability } from "@/domain/traceability/validate";
-import type { NormalizedReview } from "@/domain/contracts/review";
+import type { NormalizedReview, RawReview } from "@/domain/contracts/review";
 import type { Prd } from "@/domain/contracts/analysis";
+import type { AppStoreReviewSourceSummary } from "@/server/pipeline/orchestrator";
 
 const FIXTURE_ROOT = path.join(process.cwd(), "fixtures", "demo-runs");
 
-// Each shipped demo fixture: a real US-storefront capture of a different app,
-// analyzed by a real model and bundled for offline replay. Two different app
-// categories are intentionally shipped to demonstrate the pipeline is not
-// hard-coded to any single app.
 const FIXTURES = [
-  // Captured via build-real-demo.ts against real US App Store reviews;
-  // ships with verified US storefront provenance.
-  { runId: "run-workout-for-women-us", appId: "839285684", reviewData: "apple-rss-real" },
+  { runId: "run-workout-for-women-us", appId: "839285684" },
 ];
 
 describe("real demo fixtures", () => {
-  for (const { runId, appId, reviewData } of FIXTURES) {
+  for (const { runId, appId } of FIXTURES) {
     const dir = path.join(FIXTURE_ROOT, runId);
 
     describe(runId, () => {
-      it("ships a real US storefront replay with complete provenance", () => {
-        const provenance = JSON.parse(readFileSync(path.join(dir, "provenance.json"), "utf8")) as {
-          provenance: { reviewData: string; storefront: string; appId: string; privacyMinimization: string };
+      it("contains exactly 300 reviews with verified source distribution and truthful provenance", () => {
+        const rawArtifact = JSON.parse(
+          readFileSync(path.join(dir, "artifacts", "raw-reviews.attempt-01.json"), "utf8"),
+        ) as { reviews: RawReview[]; rawRefs: string[] };
+        const cleanedArtifact = JSON.parse(
+          readFileSync(path.join(dir, "artifacts", "cleaned-reviews.attempt-01.json"), "utf8"),
+        ) as { reviews: NormalizedReview[] };
+        const sourceEvidence = JSON.parse(
+          readFileSync(path.join(dir, "artifacts", "source-evidence.attempt-01.json"), "utf8"),
+        ) as AppStoreReviewSourceSummary;
+        const provenance = JSON.parse(
+          readFileSync(path.join(dir, "provenance.json"), "utf8"),
+        ) as {
+          provenance: {
+            reviewData: string;
+            storefront: string;
+            appId: string;
+            privacyMinimization: string;
+            cache?: {
+              rawFile: string;
+              byteLength: number;
+              sha256: string;
+              cacheUpdatedAt: string;
+              bootstrapRunId: string | null;
+              sourceCounts: Record<string, number>;
+            };
+          };
           analysis: { modelName: string; temperature: number; promptVersions: string[] };
         };
-        expect(provenance.provenance.reviewData).toBe(reviewData);
+
+        expect(rawArtifact.reviews).toHaveLength(300);
+        expect(cleanedArtifact.reviews).toHaveLength(300);
+        expect(sourceEvidence.reviewCount).toBe(300);
         expect(provenance.provenance.storefront).toBe("us");
         expect(provenance.provenance.appId).toBe(appId);
-        expect(provenance.analysis.modelName.length).toBeGreaterThan(0);
-        expect(provenance.analysis.promptVersions.length).toBeGreaterThan(0);
+
+        // Recompute source counts directly from raw reviews
+        const computedCounts: Record<string, number> = {};
+        for (const r of rawArtifact.reviews) {
+          computedCounts[r.source] = (computedCounts[r.source] ?? 0) + 1;
+        }
+
+        if (sourceEvidence.provider === "cache") {
+          expect(["local-cache-real", "local-cache-real-mixed"]).toContain(provenance.provenance.reviewData);
+          expect(sourceEvidence.cache).toBeDefined();
+          const cacheEvidence = sourceEvidence.cache!;
+
+          const archivePath = path.join(dir, cacheEvidence.rawFile);
+          expect(existsSync(archivePath)).toBe(true);
+          const archiveContent = readFileSync(archivePath, "utf8");
+          const byteLength = Buffer.byteLength(archiveContent, "utf8");
+          const sha256 = createHash("sha256").update(archiveContent, "utf8").digest("hex");
+
+          expect(cacheEvidence.byteLength).toBe(byteLength);
+          expect(cacheEvidence.sha256).toBe(sha256);
+          expect(cacheEvidence.sourceCounts).toEqual(computedCounts);
+          expect(provenance.provenance.cache).toEqual(cacheEvidence);
+
+          const parsedArchive = JSON.parse(archiveContent) as { reviews: RawReview[] };
+          expect(parsedArchive.reviews).toEqual(rawArtifact.reviews);
+
+          const expectedRawRefs = rawArtifact.reviews.map(
+            (_, index) => `${cacheEvidence.rawFile}#/reviews/${index}`,
+          );
+          expect(rawArtifact.rawRefs).toHaveLength(300);
+          expect(rawArtifact.rawRefs).toEqual(expectedRawRefs);
+          expect(cleanedArtifact.reviews.map((review) => review.rawRef)).toEqual(expectedRawRefs);
+        } else if (sourceEvidence.provider === "apple-rss") {
+          expect(provenance.provenance.reviewData).toBe("apple-rss-real");
+          expect(Object.keys(computedCounts)).toEqual(["apple-rss"]);
+          for (const r of cleanedArtifact.reviews) {
+            expect(r.source).toBe("apple-rss");
+            expect(r.rawRef).toMatch(/^sources\/apple\//);
+          }
+        } else if (sourceEvidence.provider === "serpapi") {
+          expect(provenance.provenance.reviewData).toBe("serpapi-apple-reviews-real");
+          expect(Object.keys(computedCounts)).toEqual(["serpapi-apple-reviews"]);
+          for (const r of cleanedArtifact.reviews) {
+            expect(r.source).toBe("serpapi-apple-reviews");
+          }
+        }
       });
 
-      it("has replayable artifacts with valid traceability", () => {
+      it("maintains consistent runId and event IDs across manifest and events.ndjson", () => {
         const manifest = JSON.parse(readFileSync(path.join(dir, "manifest.json"), "utf8")) as {
+          runId: string;
           status: string;
           canReplay: boolean;
         };
+        expect(manifest.runId).toBe(runId);
         expect(manifest.status).toBe("completed");
         expect(manifest.canReplay).toBe(true);
-        expect(existsSync(path.join(dir, "events.ndjson"))).toBe(true);
 
+        const eventsText = readFileSync(path.join(dir, "events.ndjson"), "utf8").trim();
+        const events = eventsText.split("\n").filter(Boolean).map((l) => JSON.parse(l));
+        expect(events.length).toBeGreaterThan(0);
+
+        const seenEventIds = new Set<string>();
+        for (const ev of events) {
+          expect(ev.runId).toBe(runId);
+          expect(ev.eventId).toBe(`${runId}-${ev.sequence}`);
+          expect(seenEventIds.has(ev.eventId)).toBe(false);
+          seenEventIds.add(ev.eventId);
+        }
+      });
+
+      it("has replayable artifacts with valid traceability", () => {
         const finalReport = JSON.parse(
           readFileSync(path.join(dir, "artifacts", "final-report.attempt-01.json"), "utf8"),
         ) as { prd: { findings: unknown[]; requirements: unknown[]; tests: unknown[] }; report: { valid: boolean } };
@@ -58,19 +140,21 @@ describe("real demo fixtures", () => {
         expect(bundle.manifest.status).toBe("completed");
         expect(bundle.events.length).toBeGreaterThan(0);
         expect(bundle.artifacts["final-report"]).toBeDefined();
+
+        const sourceEvidence = JSON.parse(
+          readFileSync(path.join(dir, "artifacts", "source-evidence.attempt-01.json"), "utf8"),
+        ) as AppStoreReviewSourceSummary;
+        const cacheEvidence = sourceEvidence.cache!;
+        const archivedFiles = (bundle.sourceFiles ?? []).filter(
+          (file) => file.relativePath === cacheEvidence.rawFile,
+        );
+        expect(archivedFiles).toHaveLength(1);
+        const archived = archivedFiles[0];
+        expect(Buffer.byteLength(archived.content, "utf8")).toBe(cacheEvidence.byteLength);
+        expect(createHash("sha256").update(archived.content, "utf8").digest("hex")).toBe(cacheEvidence.sha256);
       });
 
       it("is valid against the CURRENT traceability validator (re-derives from the corpus)", () => {
-        // The stored report.valid is a historical snapshot: replay never
-        // re-runs the validator, so a drift between the fixture and the current
-        // rules would stay hidden. Re-validate the fixture corpus + PRD with the
-        // live validator to surface any drift (violation codes are listed in the
-        // failure message so the fix is actionable).
-        //
-        // The authoritative PRD lives in final-report (the orchestrator publishes
-        // `prd.attempt-01.json` before the tests stage fills it in, so that
-        // intermediate artifact carries no tests; the final report carries the
-        // completed review→test chain). Validate THAT artifact.
         const cleaned = JSON.parse(
           readFileSync(path.join(dir, "artifacts", "cleaned-reviews.attempt-01.json"), "utf8"),
         ) as { reviews: NormalizedReview[] };
@@ -79,8 +163,6 @@ describe("real demo fixtures", () => {
         ) as { prd: Prd; report: { valid: boolean } };
         expect(finalReport.report.valid).toBe(true);
 
-        // Legacy fixtures carry no contentGroupId (schema default ""); keep the
-        // validator's reviewId fallback intact by not fabricating one.
         const reviewMap = new Map<string, NormalizedReview>();
         for (const r of cleaned.reviews) {
           reviewMap.set(r.reviewId, { ...r, contentGroupId: r.contentGroupId ?? "" });

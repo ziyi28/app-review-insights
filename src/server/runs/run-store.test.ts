@@ -116,10 +116,18 @@ describe("RunStore", () => {
     expect(content).toBe("{\"ok\":true}");
   });
 
+  it("writes a cache source file atomically under sources/cache", async () => {
+    const runId = store.createRunId();
+    await store.writeSourceFile(runId, "sources/cache/reviews.attempt-01.json", "{\"schemaVersion\":\"1\"}");
+    const content = await store.readSourceFile(runId, "sources/cache/reviews.attempt-01.json");
+    expect(content).toBe("{\"schemaVersion\":\"1\"}");
+  });
+
   it("rejects a source path escaping the run directory", async () => {
     const runId = store.createRunId();
     await expect(store.writeSourceFile(runId, "../outside.txt", "x")).rejects.toThrow(/escapes|not allowed/i);
     await expect(store.writeSourceFile(runId, "sources/apple/../../outside.txt", "x")).rejects.toThrow(/escapes|not allowed/i);
+    await expect(store.writeSourceFile(runId, "sources/cache/../../outside.txt", "x")).rejects.toThrow(/escapes|not allowed/i);
     await expect(store.writeSourceFile(runId, "C:/evil.txt", "x")).rejects.toThrow(/escapes|not allowed/i);
   });
 
@@ -139,5 +147,9 @@ describe("RunStore", () => {
     await store.writeSourceFile(runId, "sources/apple/page-01.attempt-01.json", "first");
     await expect(store.writeSourceFile(runId, "sources/apple/page-01.attempt-01.json", "second")).rejects.toThrow(/already exists/i);
     expect(await store.readSourceFile(runId, "sources/apple/page-01.attempt-01.json")).toBe("first");
+
+    await store.writeSourceFile(runId, "sources/cache/reviews.attempt-01.json", "first-cache");
+    await expect(store.writeSourceFile(runId, "sources/cache/reviews.attempt-01.json", "second-cache")).rejects.toThrow(/already exists/i);
+    expect(await store.readSourceFile(runId, "sources/cache/reviews.attempt-01.json")).toBe("first-cache");
   });
 });

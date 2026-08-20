@@ -133,6 +133,24 @@ describe("loadReplayRun", () => {
     ]);
   });
 
+  it("reads back cached archived source files", async () => {
+    const runId = store.createRunId();
+    await seedRun(runId);
+    const runDir = path.join(dir, runId);
+    const cacheDir = path.join(runDir, "sources", "cache");
+    mkdirSync(cacheDir, { recursive: true });
+    writeFileSync(
+      path.join(cacheDir, "reviews.attempt-01.json"),
+      '{"schemaVersion":"1","reviews":[]}',
+    );
+
+    const loaded = await loadReplayRun([dir], runId);
+    expect(loaded.sourceFiles).toContainEqual({
+      relativePath: "sources/cache/reviews.attempt-01.json",
+      content: '{"schemaVersion":"1","reviews":[]}',
+    });
+  });
+
   it("returns no sourceFiles for a run without a sources directory", async () => {
     const runId = store.createRunId();
     await seedRun(runId);

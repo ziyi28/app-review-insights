@@ -1,17 +1,29 @@
 {
   "kind": "app-store-reviews",
-  "provider": "apple-rss",
+  "provider": "cache",
   "appId": "839285684",
   "storefront": "US",
   "status": "complete",
-  "selection": "live",
-  "liveCount": 300,
-  "stableCount": 0,
+  "selection": "stable",
+  "liveCount": 100,
+  "stableCount": 300,
   "reviewCount": 300,
-  "collectedAt": "2026-08-20T07:46:51.577Z",
+  "reviewLimit": 300,
+  "collectedAt": "2026-08-20T09:27:58.998Z",
   "forcedRefresh": false,
-  "providerCached": false,
+  "providerCached": true,
   "requestCount": 6,
   "searchCount": 0,
-  "searchId": null
+  "searchId": null,
+  "cache": {
+    "rawFile": "sources/cache/reviews.attempt-01.json",
+    "byteLength": 129646,
+    "sha256": "82f3b0567de8c321954965979d95608b5e9680475b693a45cf5d21708cd97ca8",
+    "cacheUpdatedAt": "2026-08-20T04:55:49.684Z",
+    "bootstrapRunId": null,
+    "sourceCounts": {
+      "apple-rss": 100,
+      "serpapi-apple-reviews": 200
+    }
+  }
 }

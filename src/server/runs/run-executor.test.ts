@@ -220,6 +220,7 @@ describe("executeReplayTask", () => {
     bundle.sourceFiles = [
       { relativePath: "sources/apple/page-01.attempt-01.json", content: "{\"raw\":true}" },
       { relativePath: "sources/import/input.csv", content: "id,body,rating,updatedAt\n" },
+      { relativePath: "sources/cache/reviews.attempt-01.json", content: '{"schemaVersion":"1","reviews":[]}' },
     ];
     const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay");
     await executeReplayTask({ runId, store, bundle, delayMs: 0, publisher });
@@ -230,5 +231,7 @@ describe("executeReplayTask", () => {
     expect(readF).toBe("{\"raw\":true}");
     const readC = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "sources", "import", "input.csv"), "utf8"));
     expect(readC).toBe("id,body,rating,updatedAt\n");
+    const readCache = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "sources", "cache", "reviews.attempt-01.json"), "utf8"));
+    expect(readCache).toBe('{"schemaVersion":"1","reviews":[]}');
   });
 });

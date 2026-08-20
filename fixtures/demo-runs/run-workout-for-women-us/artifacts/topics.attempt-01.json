@@ -2,417 +2,290 @@
   "topics": [
     {
       "id": "topic-1",
-      "label": "免费训练收缩与订阅墙阻断核心内容",
-      "description": "多个长期用户反映，过去可免费使用的训练逐步被订阅墙、免费次数限制或重新引导后的付费限制取代，导致免费版几乎失去可用性。",
+      "label": "免费内容缩减与付费墙争议",
+      "description": "大量用户反映应用从过去完全免费或宽松免费，转变为仅提供极少量免费课程（如1-2个），其余内容均被锁定在付费墙后，导致长期免费用户感到被剥夺和失望。",
       "candidateIds": [
         "topic-candidate-1@c0",
+        "topic-candidate-1@c1",
+        "topic-candidate-2@c2",
         "topic-candidate-1@c3",
-        "topic-candidate-1@c4",
-        "topic-candidate-1@c6"
+        "topic-candidate-2@c5",
+        "topic-candidate-5@c6"
       ],
       "reviewIds": [
-        "532d8387f97d9c75a9ee",
         "bd8caabf1d2f9ad94601",
         "b2f48b50e9df71b0593f",
         "526ba3f9d7cd7235b3ac",
-        "2b697a53cc2edbddb631",
         "9cb44e90c6ede33dfbd1",
         "07cf52646c9238c9e6fe",
         "3ec16e43e078775aaf5a",
         "da07445c1744cbe25d36",
         "cef60918f6f573ae118d",
-        "5a40025573b2c55b1963",
+        "3b2b62f088eab9e89cb1",
+        "8245c7145ec1a4fc37da",
+        "00cd9e97a384c0ac217b",
+        "6ac627d4a1065d304f4f",
+        "e418e03e459fa89a2333",
+        "e41f2bf26411eb266065",
+        "7c3a61bf7072d97e0760",
+        "901125aaee17c5617802",
+        "66cd501c5867801ba857",
+        "a48a1004b1c7fb400abe",
+        "b336d30bd0c5bb4c158b",
+        "ce914d45a09ffcb8351b",
         "19dd801156be88554d22",
+        "1f437acb3f7e7e8c10b3",
+        "fec6299a11560eaa8f62",
         "1e69a0302e47a4ef87e7",
-        "cb0cc8ac89a9761a3b16",
         "c9338a41a33df24b016d",
         "446debb488c9e30a47dd",
-        "453d414ea6a6bf40613e",
+        "c5cec2597485411001ba",
         "b87d5108f1c3d560a191",
         "d12437b2f22497298e1b",
-        "4f2cf6597c046f4c579d",
         "665cd14c6001dacd0a84",
-        "b13ecc45b66030acc2d7",
-        "bc8c57bc004f780e2a19",
         "b5db1fbb2e56d1b56e16",
         "ea2a981452bdd7fb7f68",
         "dc4faf66d83960f53218",
         "d209ae2dfd97ff0bdb80",
-        "a9a965a3ee3756a838f8",
-        "a3219e1290028aaf4834",
-        "beffe6788ff06768a18c",
-        "4395008b5af14e4a1615",
-        "19245404c6e294fa0231",
-        "2c27621158b0b10ba11f",
-        "0515592adfe6c089a8ea",
-        "4a97f4d4338874d4a871",
-        "370a4d8f25cfb867adfb",
-        "0989bab8169f5de29fa0"
+        "453d414ea6a6bf40613e",
+        "0975a5a2992339e60625",
+        "474aa2e44c378c760f59",
+        "bc8c57bc004f780e2a19",
+        "8cab578e3ab71d8124a9",
+        "7d290018e8b744dc0b55",
+        "7e2302afb4e5dac12a13",
+        "4bb3f46e84c78d125a84",
+        "af48b9baedefbffda432",
+        "e4b8fa7ef7269260f815",
+        "19e1a0f890dbf73868f7",
+        "8f0ffce208065e602a36"
       ],
       "focusAreaIds": [
         "focus-1",
-        "focus-2",
         "focus-3",
-        "focus-4"
+        "focus-2"
       ]
     },
     {
       "id": "topic-2",
-      "label": "试用转付费、扣费取消与账户支持透明度不足",
-      "description": "用户反馈试用结束提醒、扣费时间、计费周期、取消订阅、退款、账户恢复和客服入口不够清晰，部分人还遇到试用期内或取消后仍被收费的问题。",
+      "label": "订阅陷阱与扣费透明度问题",
+      "description": "用户对订阅服务的价值产生质疑，特别是针对试用期后自动扣费且提醒不清的“订阅陷阱”现象，以及认为应用内容陈旧、缺乏新意，导致付费体验不佳。",
       "candidateIds": [
         "topic-candidate-2@c0",
         "topic-candidate-2@c1",
         "topic-candidate-1@c2",
-        "topic-candidate-3@c3",
-        "topic-candidate-3@c4",
-        "topic-candidate-3@c5",
-        "topic-candidate-2@c6"
+        "topic-candidate-1@c4",
+        "topic-candidate-4@c6",
+        "topic-candidate-1@c5"
       ],
       "reviewIds": [
         "5a310ecbcc0d162e1695",
-        "532d8387f97d9c75a9ee",
-        "2b697a53cc2edbddb631",
-        "81c5ef921b9360061f5b",
+        "650898959bd82e63206f",
+        "fe9979317b3fb1d3fd33",
         "2d0a7d5d889b7f4de13f",
-        "6e7b4ef2cf918ebb80ce",
-        "bf94119a8b706c458cb6",
-        "99cbb7383d6102fcdeb2",
         "254d2037990ae969a8ef",
+        "057e159b7bddd6afc1f7",
+        "4a65db7daae585298853",
+        "1f53844516962706834c",
         "9cc1869bad531fa85168",
+        "89423ad6ef906442af8a",
         "c2384f92fb2ec7a76e6b",
         "3db3756c43b8043720be",
-        "89423ad6ef906442af8a",
-        "b32b36938d72793e8ace",
-        "7a160bd56131157f4752",
-        "c5cec2597485411001ba",
         "4f2cf6597c046f4c579d",
-        "474aa2e44c378c760f59",
-        "c9338a41a33df24b016d",
+        "f8eb72f77f1bd83b00c8",
         "cc85fc2414bb9b897dfd",
         "14811281319525325893",
         "7aaf37a74c0b10a4cc33",
-        "e5bcd8f734f355e9c8b4",
-        "342561b8e8592cc0b63a",
-        "85861b1ae4ea322bed91",
+        "842e5e0f16697cf1a01a",
+        "f7056bce85c297605c99",
+        "58d6f7a97c358d824e92",
+        "e5b8843ff3eecb453ed7",
+        "a0b0f9da4e31b7a6f52d",
         "2c27621158b0b10ba11f",
-        "3041a3e4c84f6e84e057",
-        "55bfd9115408f9880868",
         "ea303adaff4ec227d28c",
-        "c837abacb62f11bf392f"
+        "370a4d8f25cfb867adfb",
+        "4a97f4d4338874d4a871"
       ],
       "focusAreaIds": [
         "focus-1",
-        "focus-2",
-        "focus-3",
-        "focus-4"
+        "focus-3"
       ]
     },
     {
       "id": "topic-3",
-      "label": "订阅价格与内容价值评价两极分化",
-      "description": "部分用户认为订阅比健身房便宜、内容丰富且物有所值，另一部分用户则因应用从免费转向收费、价格偏高或内容重复而否定订阅价值。",
+      "label": "AI生成内容引发的质量担忧",
+      "description": "部分用户反感应用中大量出现的AI生成内容（如“ai slop”），认为这导致了工作流内容的同质化、缺乏创意，甚至影响了应用原有的趣味性和有效性，是引发不满的重要争议点。",
       "candidateIds": [
-        "topic-candidate-3@c2",
-        "topic-candidate-2@c3",
-        "topic-candidate-1@c5"
+        "topic-candidate-3@c0",
+        "topic-candidate-4@c1",
+        "topic-candidate-3@c4"
       ],
       "reviewIds": [
-        "ad0f0a182963a5d7ec0e",
-        "e41f2bf26411eb266065",
-        "9cc1869bad531fa85168",
-        "ce914d45a09ffcb8351b",
-        "a48a1004b1c7fb400abe",
-        "53974bcc26a0d788626b",
-        "0e621260607a04cf082e",
-        "2e0026d69a6bca97b90a",
-        "5a40025573b2c55b1963",
-        "1ae1015baaba922f02d0",
-        "fec6299a11560eaa8f62",
-        "028401fef9603d6d798d",
-        "0975a5a2992339e60625",
-        "893a5614aeb5510fceb5",
-        "d92cce6e9e7960f75948",
-        "89626a77cb324252fb52",
-        "32e7a4d8aaa1b9789f74",
-        "abde41fc0222660ff656",
-        "9209576b87ce4944ca28",
-        "bf3841e67602dc01e0b2",
-        "842e5e0f16697cf1a01a",
-        "a0b0f9da4e31b7a6f52d"
+        "9cb44e90c6ede33dfbd1",
+        "07cf52646c9238c9e6fe",
+        "da07445c1744cbe25d36",
+        "3b2b62f088eab9e89cb1",
+        "61cabebf911229cac631",
+        "1a50245eec24db09a48c",
+        "f663a47722d240c912da"
       ],
       "focusAreaIds": [
-        "focus-1",
-        "focus-2",
         "focus-3",
-        "focus-4"
+        "focus-2"
       ]
     },
     {
       "id": "topic-4",
-      "label": "训练前广告过长且难以退出",
-      "description": "用户反映训练前或训练间的广告时长过长、频率过高，广告结束后关闭或进入训练的流程不清晰，严重延迟训练开始并降低留存。",
+      "label": "健身训练易用性与个性化不足",
+      "description": "尽管许多用户称赞应用易用，但也有用户指出训练计划缺乏针对性（如腹部训练无效）、动作动画与名称不符、缺乏教练直接沟通渠道以及问卷形式化等问题，影响了训练的有效性和个性化体验。",
       "candidateIds": [
-        "topic-candidate-3@c0",
-        "topic-candidate-2@c4",
-        "topic-candidate-2@c5",
-        "topic-candidate-3@c6"
+        "topic-candidate-5@c0",
+        "topic-candidate-3@c3",
+        "topic-candidate-4@c4",
+        "topic-candidate-3@c5"
+      ],
+      "reviewIds": [
+        "115d5850e71f15b90e06",
+        "532d8387f97d9c75a9ee",
+        "3106eb540494230378ad",
+        "ea2f7fa6e2f1bb6f05e7",
+        "1763ea088fd3e7930562",
+        "d12437b2f22497298e1b",
+        "d2556889c59bcc869614",
+        "cb1ac0588b2aee125248",
+        "32e7a4d8aaa1b9789f74",
+        "63e3062c81dc6548b47e",
+        "23279288b9997ed880fa",
+        "0177e49b6144656eb965"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-5",
+      "label": "广告体验与退出机制缺陷",
+      "description": "用户抱怨广告过多，且在观看长广告（如90秒）后无法顺利退出或进入应用，严重影响使用体验，尤其是对于免费用户而言，这成为阻碍其使用应用的主要障碍。",
+      "candidateIds": [
+        "topic-candidate-4@c0",
+        "topic-candidate-6@c1",
+        "topic-candidate-5@c2",
+        "topic-candidate-2@c4"
       ],
       "reviewIds": [
         "650898959bd82e63206f",
         "db42152cb6701158c515",
         "fe9979317b3fb1d3fd33",
-        "d209ae2dfd97ff0bdb80",
-        "a9a965a3ee3756a838f8",
-        "a3219e1290028aaf4834",
-        "b13ecc45b66030acc2d7",
-        "1e0fb9be01863f607fa3",
-        "b4467727f123a07beea9",
-        "f65d70e0417408b7a7e4",
-        "db79928046519e7ffdcd",
-        "76e57a90688ac2de17a6",
-        "72cf0fc6b2f25ec4e1ac",
-        "8cab578e3ab71d8124a9",
-        "af48b9baedefbffda432",
-        "7e2302afb4e5dac12a13",
-        "4bb3f46e84c78d125a84",
-        "7252a9f2ad243e056c5f",
-        "3ca68eec045e1b37f414"
-      ],
-      "focusAreaIds": [
-        "focus-1",
-        "focus-2",
-        "focus-3",
-        "focus-4",
-        "focus-5"
-      ]
-    },
-    {
-      "id": "topic-5",
-      "label": "广告外部跳转与更新回退破坏训练流程",
-      "description": "用户反馈训练过程中可能被广告或未经预期的外部网站跳转打断，甚至自动打开购物网站；部分用户还认为更新后整体体验出现回退。",
-      "candidateIds": [
-        "topic-candidate-5@c1",
-        "topic-candidate-6@c3"
-      ],
-      "reviewIds": [
         "00cd9e97a384c0ac217b",
         "1bb8f0373e0adebba25d",
-        "e418e03e459fa89a2333",
-        "05c7797497c5392fea09",
-        "a294f3b4369a18c41112",
-        "b87d5108f1c3d560a191"
+        "d107eea15f4792afbd34",
+        "cc63855d1f2503b23e1a",
+        "dc081bbd9f90b64de064",
+        "b4467727f123a07beea9",
+        "a9a965a3ee3756a838f8",
+        "1e0fb9be01863f607fa3",
+        "db79928046519e7ffdcd"
       ],
       "focusAreaIds": [
-        "focus-1",
-        "focus-2",
         "focus-3",
-        "focus-5"
+        "focus-1"
       ]
     },
     {
       "id": "topic-6",
-      "label": "个性化计划与避开部位约束失效",
-      "description": "用户希望根据目标和身体限制获得稳定的个性化计划，但计划可能重复训练同一部位、重置安排，或在选择避开膝部和腹部后仍继续安排相关动作。",
+      "label": "内容多样性与长期价值认可",
+      "description": "与负面反馈形成对比，许多用户（包括长期用户）高度评价应用的多样性（瑜伽、舞蹈、面部锻炼等）、对各类人群（包括老年人、男性）的适用性以及其带来的健康成果，认为其具有长期订阅价值。",
       "candidateIds": [
-        "topic-candidate-4@c0",
-        "topic-candidate-3@c1",
-        "topic-candidate-4@c6"
+        "topic-candidate-6@c0",
+        "topic-candidate-3@c2",
+        "topic-candidate-4@c2",
+        "topic-candidate-4@c4",
+        "topic-candidate-6@c5",
+        "topic-candidate-4@c5"
       ],
       "reviewIds": [
-        "5d1265b4e9446c005c51",
-        "532d8387f97d9c75a9ee",
-        "3106eb540494230378ad",
-        "9da57f57ebdd56b6120d",
-        "524f63457a5ef399d53d",
-        "7c03e40938a5150170b6",
-        "8b3ecc88d531ca13f99a",
-        "2e30b59bb5f6189f1ffb",
-        "81c5ef921b9360061f5b",
-        "23279288b9997ed880fa",
-        "0177e49b6144656eb965"
+        "975a8039341c0455d71c",
+        "59da5315b1ba645f80d1",
+        "5d81518b07b4f763ee34",
+        "b6bbb3a3897286c5dfba",
+        "7a8772021b2ab31d2438",
+        "31283c9ec942265487b0",
+        "dcbe5d2eca410ca2cba0",
+        "cabdff406a23d7967880",
+        "3c49af9bb0aef09a3fdc",
+        "53974bcc26a0d788626b",
+        "e0d1838121012adeedaa",
+        "a955019b111c1254e598",
+        "4e04afaf3f05b33e8392",
+        "bc941bc3922c58def761",
+        "c7ed3b29dfdc1ebd1d1e",
+        "cb1ac0588b2aee125248",
+        "32e7a4d8aaa1b9789f74",
+        "63e3062c81dc6548b47e",
+        "beffe6788ff06768a18c",
+        "4f4f568a6e07b7a3f99d",
+        "fc8b82ae91c9af5d52ed",
+        "aafc03c23d2d3473c752",
+        "147246da15a901319615",
+        "4567fdc8c64cf4387eed",
+        "af48b9baedefbffda432",
+        "42a3722f697ca6fa429c",
+        "0b8fc13d97546607d5e6"
       ],
       "focusAreaIds": [
         "focus-1",
         "focus-2",
-        "focus-3",
-        "focus-5"
+        "focus-3"
       ]
     },
     {
       "id": "topic-7",
-      "label": "动作指导一致性与训练内容新鲜度不足",
-      "description": "用户认可动作演示和丰富课程，但也指出动作名称、动画和语音指导可能不一致，训练内容重复或过时，部分新内容质量和更新频率不足。",
+      "label": "订阅管理与客服支持缺失",
+      "description": "用户在尝试取消订阅或处理扣费问题时，发现应用内缺乏明确的管理入口，且客服渠道（如支持表单）经常失效或无法提交。这种“只进不出”的订阅管理体验严重损害了用户信任，是引发1星差评的重要推手。",
       "candidateIds": [
-        "topic-candidate-5@c0",
-        "topic-candidate-5@c4",
+        "topic-candidate-3@c1",
+        "topic-candidate-6@c2",
+        "topic-candidate-3@c6",
         "topic-candidate-5@c5"
       ],
       "reviewIds": [
-        "3be7316ce81208055d3f",
-        "6f0a12ef34e67ffba208",
-        "31283c9ec942265487b0",
-        "532d8387f97d9c75a9ee",
-        "5a310ecbcc0d162e1695",
-        "07cf52646c9238c9e6fe",
-        "da07445c1744cbe25d36",
-        "b13ecc45b66030acc2d7",
-        "52ecbbc862689ee97897",
-        "e48f507238167347f923",
-        "abec4e956a261a973827",
-        "55d763820c6068e5fa96",
-        "61cabebf911229cac631",
-        "98fa3a30eb191e9b4f92",
-        "98a39e78a98fde68f2ad",
-        "f663a47722d240c912da"
+        "bf94119a8b706c458cb6",
+        "99cbb7383d6102fcdeb2",
+        "77c4c9530f50cd03d548",
+        "254d2037990ae969a8ef",
+        "89423ad6ef906442af8a",
+        "9cc1869bad531fa85168",
+        "85861b1ae4ea322bed91",
+        "55bfd9115408f9880868",
+        "42aa8fc8624e8b26fb11"
       ],
       "focusAreaIds": [
-        "focus-1",
-        "focus-2",
         "focus-3",
-        "focus-5"
+        "focus-1"
       ]
     },
     {
       "id": "topic-8",
-      "label": "训练强度、节奏与特殊人群适配不足",
-      "description": "短时训练易于坚持，但部分用户认为节奏过快、强度不足或动作不够自然；孕期用户、年长用户及其他有身体限制的人群也需要更细致的安全提示、替代动作和训练路径。",
+      "label": "数据同步与设备兼容性技术问题",
+      "description": "用户在更换新手机或升级Apple Watch后，遇到历史进度数据丢失以及新设备无法正确记录锻炼数据的问题。这影响了用户对应用长期价值的信任，属于影响用户体验的显著技术痛点。",
       "candidateIds": [
-        "topic-candidate-6@c0",
-        "topic-candidate-4@c4",
-        "topic-candidate-4@c5"
+        "topic-candidate-5@c4"
       ],
       "reviewIds": [
-        "cd44fa5e5bcee7d9097f",
-        "b59aecf5be92f4db84c0",
-        "1763ea088fd3e7930562",
-        "115d5850e71f15b90e06",
-        "b6bbb3a3897286c5dfba",
-        "271b4216564210ed2a5c",
-        "a5900337c9421dc68dbc",
-        "52ecbbc862689ee97897",
-        "89f15c4184fe51fd54d2",
-        "5e9ea710a133198a495c",
-        "1a50245eec24db09a48c",
-        "39f537e8298befa28a06",
-        "cb1ac0588b2aee125248",
-        "abec4e956a261a973827",
-        "d8b0365890e12753b065",
-        "9dcf6dee35426a0c9035",
-        "f2bb995e4a1d10521898",
-        "1a8557f142bc630824ef",
-        "63e3062c81dc6548b47e",
-        "32e7a4d8aaa1b9789f74",
-        "98fa3a30eb191e9b4f92"
-      ],
-      "focusAreaIds": [
-        "focus-2",
-        "focus-3",
-        "focus-5",
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-9",
-      "label": "短时、易跟练的训练体验",
-      "description": "许多用户喜欢短时、灵活、适合居家和忙碌日程的训练，认为动作演示清晰、初学者容易跟上，能够帮助建立持续锻炼习惯。",
-      "candidateIds": [
-        "topic-candidate-4@c2",
-        "topic-candidate-6@c5"
-      ],
-      "reviewIds": [
-        "e31ce6efec06e76b6208",
-        "dcbe5d2eca410ca2cba0",
-        "4e04afaf3f05b33e8392",
-        "bc941bc3922c58def761",
-        "a955019b111c1254e598",
-        "3c49af9bb0aef09a3fdc",
-        "e464459c8a34dfebbcd8",
-        "dc081bbd9f90b64de064",
         "d92cce6e9e7960f75948"
       ],
-      "focusAreaIds": [
-        "focus-2",
-        "focus-5",
-        "focus-1"
-      ]
-    },
-    {
-      "id": "topic-10",
-      "label": "健身目标与示范形象需要更包容",
-      "description": "部分用户反感将女性身体物化、以变得有吸引力或减重作为默认目标，认为应用应提供更多元真实的示范形象，并支持健康、力量、柔韧性等非体重导向目标。",
-      "candidateIds": [
-        "topic-candidate-4@c1",
-        "topic-candidate-6@c4"
-      ],
-      "reviewIds": [
-        "3b2b62f088eab9e89cb1",
-        "2649ae357c3944c13195",
-        "51d4b3f25ab831d4417f"
-      ],
-      "focusAreaIds": [
-        "focus-2",
-        "focus-3",
-        "focus-1",
-        "focus-5"
-      ]
-    },
-    {
-      "id": "topic-11",
-      "label": "付费内容下载、登录恢复与进度同步不足",
-      "description": "付费用户仍可能无法下载训练内容，登出或更换设备后无法恢复订阅和训练进度，部分Apple Watch设备也存在记录兼容性问题。",
-      "candidateIds": [
-        "topic-candidate-5@c2",
-        "topic-candidate-6@c5"
-      ],
-      "reviewIds": [
-        "2ff93f30d9ab93a6194a",
-        "703ac1f2b8f6912efbb6",
-        "cabdff406a23d7967880",
-        "d92cce6e9e7960f75948"
-      ],
-      "focusAreaIds": [
-        "focus-1",
-        "focus-2",
-        "focus-4",
-        "focus-5"
-      ]
-    },
-    {
-      "id": "topic-12",
-      "label": "训练交互与记录选项不足",
-      "description": "用户希望在计时与次数、声音提示、音乐或播客兼容、手表记录以及拉伸和瑜伽等训练类型之间拥有更灵活、准确的交互选项。",
-      "candidateIds": [
-        "topic-candidate-5@c3"
-      ],
-      "reviewIds": [
-        "2e0026d69a6bca97b90a",
-        "feaae9dce2297b34ac2e",
-        "4a9e233a7d40327ddd01",
-        "d12437b2f22497298e1b"
-      ],
-      "focusAreaIds": [
-        "focus-2",
-        "focus-5"
-      ]
+      "focusAreaIds": []
     }
   ],
   "warnings": [
     {
       "code": "INVALID_TOPIC_EVIDENCE",
-      "message": "dropped topic-candidate-1 (bad citation or quote)"
-    },
-    {
-      "code": "INVALID_TOPIC_EVIDENCE",
-      "message": "dropped topic-candidate-2 (bad citation or quote)"
-    },
-    {
-      "code": "INVALID_TOPIC_EVIDENCE",
-      "message": "dropped topic-candidate-4 (bad citation or quote)"
+      "message": "dropped topic-candidate-5 (bad citation or quote)"
     },
     {
       "code": "TOPIC_CANDIDATES_TRUNCATED",
-      "message": "kept 36 of 43 discovered candidates (goal-aware selection); 7 excess dropped deterministically"
+      "message": "kept 36 of 37 discovered candidates (goal-aware selection); 1 excess dropped deterministically"
     }
   ]
 }

@@ -104,11 +104,12 @@ export async function loadReplayRun(roots: string[], runId: string): Promise<Rep
 
     // Read back archived source files (raw Apple responses / imported files) so
     // a replay can re-materialize them in the new run directory. Only the safe
-    // sources/apple|import trees are enumerated; a manifest can never name
-    // arbitrary paths. Old runs and fixtures without sources/ simply have none.
+    // sources/apple|import|cache trees are enumerated; a manifest can never
+    // name arbitrary paths. Old runs and fixtures without sources/ simply have
+    // none.
     const sourceFiles: SourceFile[] = [];
     const sourcesRoot = path.join(runDir, "sources");
-    for (const sub of ["apple", "import"] as const) {
+    for (const sub of ["apple", "import", "cache"] as const) {
       const dir = path.join(sourcesRoot, sub);
       let files: string[];
       try {

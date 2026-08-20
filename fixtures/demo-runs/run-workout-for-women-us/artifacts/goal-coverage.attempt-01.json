@@ -4,105 +4,57 @@
   "items": [
     {
       "focusAreaId": "focus-1",
-      "label": "影响最大的用户问题",
+      "label": "订阅付费价值争议",
       "status": "covered",
       "findingIds": [
         "finding-1",
         "finding-2",
         "finding-3",
-        "finding-4",
-        "finding-5"
+        "finding-6"
       ],
       "requirementIds": [
         "req-3",
-        "req-7",
-        "req-6",
         "req-1",
         "req-2",
-        "req-4"
+        "req-5",
+        "req-6"
       ]
     },
     {
       "focusAreaId": "focus-2",
-      "label": "可执行的改进机会",
+      "label": "健身训练易用性争议",
       "status": "covered",
       "findingIds": [
         "finding-1",
-        "finding-2",
-        "finding-3",
         "finding-4",
         "finding-5",
-        "finding-7"
+        "finding-6"
       ],
       "requirementIds": [
         "req-3",
-        "req-7",
-        "req-6",
-        "req-1",
-        "req-2",
         "req-4",
-        "req-5"
+        "req-6"
       ]
     },
     {
       "focusAreaId": "focus-3",
-      "label": "最具争议的功能点及冲突反馈",
+      "label": "最具争议的功能点识别",
       "status": "covered",
       "findingIds": [
         "finding-1",
-        "finding-2",
-        "finding-3",
-        "finding-4",
-        "finding-7"
-      ],
-      "requirementIds": [
-        "req-3",
-        "req-7",
-        "req-6",
-        "req-1",
-        "req-2",
-        "req-4",
-        "req-5"
-      ]
-    },
-    {
-      "focusAreaId": "focus-4",
-      "label": "订阅付费价值与价格反馈",
-      "status": "covered",
-      "findingIds": [
-        "finding-1",
-        "finding-2",
-        "finding-3",
-        "finding-4"
-      ],
-      "requirementIds": [
-        "req-3",
-        "req-7",
-        "req-6",
-        "req-1",
-        "req-2",
-        "req-4"
-      ]
-    },
-    {
-      "focusAreaId": "focus-5",
-      "label": "健身训练易用性",
-      "status": "covered",
-      "findingIds": [
         "finding-2",
         "finding-3",
         "finding-4",
         "finding-5",
-        "finding-7"
+        "finding-6"
       ],
       "requirementIds": [
-        "req-6",
-        "req-7",
+        "req-3",
         "req-1",
         "req-2",
-        "req-3",
+        "req-5",
         "req-4",
-        "req-5"
+        "req-6"
       ]
     }
   ]

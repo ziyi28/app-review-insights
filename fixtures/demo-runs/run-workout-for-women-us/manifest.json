@@ -17,58 +17,58 @@
       "reviewLimit": 300
     }
   },
-  "createdAt": "2026-08-20T07:47:03.882Z",
-  "updatedAt": "2026-08-20T08:05:52.841Z",
+  "createdAt": "2026-08-20T09:28:12.819Z",
+  "updatedAt": "2026-08-20T09:45:33.544Z",
   "stages": {
     "source": {
       "status": "completed",
-      "startedAt": "2026-08-20T07:47:03.886Z",
-      "finishedAt": "2026-08-20T07:47:03.902Z"
+      "startedAt": "2026-08-20T09:28:12.821Z",
+      "finishedAt": "2026-08-20T09:28:12.840Z"
     },
     "prepare": {
       "status": "completed",
-      "startedAt": "2026-08-20T07:47:03.905Z",
-      "finishedAt": "2026-08-20T07:47:04.081Z"
+      "startedAt": "2026-08-20T09:28:12.841Z",
+      "finishedAt": "2026-08-20T09:28:12.944Z"
     },
     "scope": {
       "status": "completed",
-      "startedAt": "2026-08-20T07:47:04.082Z",
-      "finishedAt": "2026-08-20T07:47:24.756Z"
+      "startedAt": "2026-08-20T09:28:12.945Z",
+      "finishedAt": "2026-08-20T09:28:32.149Z"
     },
     "topics": {
       "status": "completed",
-      "startedAt": "2026-08-20T07:47:24.757Z",
-      "finishedAt": "2026-08-20T07:52:17.650Z"
+      "startedAt": "2026-08-20T09:28:32.150Z",
+      "finishedAt": "2026-08-20T09:33:28.284Z"
     },
     "findings": {
       "status": "completed",
-      "startedAt": "2026-08-20T07:52:17.650Z",
-      "finishedAt": "2026-08-20T07:59:43.841Z"
+      "startedAt": "2026-08-20T09:33:28.284Z",
+      "finishedAt": "2026-08-20T09:40:18.871Z"
     },
     "evidence-validation": {
       "status": "completed",
-      "startedAt": "2026-08-20T07:59:43.842Z",
-      "finishedAt": "2026-08-20T07:59:43.845Z"
+      "startedAt": "2026-08-20T09:40:18.872Z",
+      "finishedAt": "2026-08-20T09:40:18.875Z"
     },
     "planning": {
       "status": "completed",
-      "startedAt": "2026-08-20T07:59:43.846Z",
-      "finishedAt": "2026-08-20T08:02:26.629Z"
+      "startedAt": "2026-08-20T09:40:18.876Z",
+      "finishedAt": "2026-08-20T09:41:40.314Z"
     },
     "requirement-evidence": {
       "status": "completed",
-      "startedAt": "2026-08-20T08:02:26.629Z",
-      "finishedAt": "2026-08-20T08:04:09.090Z"
+      "startedAt": "2026-08-20T09:41:40.315Z",
+      "finishedAt": "2026-08-20T09:44:13.072Z"
     },
     "tests": {
       "status": "completed",
-      "startedAt": "2026-08-20T08:04:09.098Z",
-      "finishedAt": "2026-08-20T08:05:52.830Z"
+      "startedAt": "2026-08-20T09:44:13.081Z",
+      "finishedAt": "2026-08-20T09:45:33.534Z"
     },
     "traceability": {
       "status": "completed",
-      "startedAt": "2026-08-20T08:05:52.831Z",
-      "finishedAt": "2026-08-20T08:05:52.836Z"
+      "startedAt": "2026-08-20T09:45:33.535Z",
+      "finishedAt": "2026-08-20T09:45:33.539Z"
     }
   },
   "artifacts": {
@@ -139,61 +139,68 @@
   },
   "limitations": [
     {
-      "code": "SCOPE_LIMITATION",
-      "message": "缺少国家、地区或应用商店 storefront 字段，无法严格筛选美国用户评论；语言不能作为美国来源的可靠替代。",
+      "code": "SERPAPI_RATE_OR_QUOTA_EXHAUSTED",
+      "message": "SerpApi request failed (HTTP 429)"
+    },
+    {
+      "code": "RSS_UNSTABLE_PAGINATION",
+      "message": "Page 3 is empty while 10 pages are advertised; ending pagination early",
       "params": {
-        "detail": "缺少国家、地区或应用商店 storefront 字段，无法严格筛选美国用户评论；语言不能作为美国来源的可靠替代。"
+        "page": 3,
+        "lastPage": 10
+      }
+    },
+    {
+      "code": "LOCAL_HISTORY_SELECTED",
+      "message": "Live review collection was short of limit (100/300); selected verified local cache snapshot of 300 reviews"
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "数据源受限：SerpApi请求失败（HTTP 429），部分数据可能不完整。",
+      "params": {
+        "detail": "数据源受限：SerpApi请求失败（HTTP 429），部分数据可能不完整。"
       }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "仅有汇总统计，没有评论文本或主题标签，无法直接识别具体功能点、问题类型及改进机会。",
+      "message": "数据源受限：RSS分页不稳定，第3页为空但声称有10页，分页提前结束，可能遗漏部分评论。",
       "params": {
-        "detail": "仅有汇总统计，没有评论文本或主题标签，无法直接识别具体功能点、问题类型及改进机会。"
+        "detail": "数据源受限：RSS分页不稳定，第3页为空但声称有10页，分页提前结束，可能遗漏部分评论。"
       }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "缺少按问题或功能划分的频次、情感和影响指标，无法从现有统计单独判断哪些问题影响最大。",
+      "message": "数据源受限：由于实时收集未达上限（100/300），使用了本地缓存的300条评论快照，可能不代表最新全量数据。",
       "params": {
-        "detail": "缺少按问题或功能划分的频次、情感和影响指标，无法从现有统计单独判断哪些问题影响最大。"
+        "detail": "数据源受限：由于实时收集未达上限（100/300），使用了本地缓存的300条评论快照，可能不代表最新全量数据。"
       }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "缺少同一功能的正负反馈配对或主题级情感数据，无法确认哪些功能存在用户喜欢与反感并存的争议。",
+      "message": "语言过滤：仅分析英文（en）评论，排除了其他语言和未指定语言的评论。",
       "params": {
-        "detail": "缺少同一功能的正负反馈配对或主题级情感数据，无法确认哪些功能存在用户喜欢与反感并存的争议。"
+        "detail": "语言过滤：仅分析英文（en）评论，排除了其他语言和未指定语言的评论。"
       }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "无法仅凭现有数据评估订阅价格或付费价值的具体原因，也无法具体定位健身训练流程中的易用性障碍。",
+      "message": "评分过滤：仅分析1、2、4、5星评论，排除了3星评论，以聚焦于极端正面和负面的争议反馈。",
       "params": {
-        "detail": "无法仅凭现有数据评估订阅价格或付费价值的具体原因，也无法具体定位健身训练流程中的易用性障碍。"
-      }
-    },
-    {
-      "code": "INSUFFICIENT_EVIDENCE",
-      "message": "2 of 8 findings have insufficient evidence for broad or critical claims",
-      "params": {
-        "count": 2,
-        "total": 8
+        "detail": "评分过滤：仅分析1、2、4、5星评论，排除了3星评论，以聚焦于极端正面和负面的争议反馈。"
       }
     }
   ],
   "canReplay": true,
   "modelUsage": {
-    "model": "gpt-5.6-luna",
-    "provider": "http://127.0.0.1:8317",
+    "model": "qwen3.8-27b",
+    "provider": "https://dashscope.aliyuncs.com",
     "temperature": 0.1,
-    "calls": 30,
-    "attempts": 30,
+    "calls": 27,
+    "attempts": 27,
     "retries": 0,
     "retryReasons": [],
     "promptVersions": [
       "scope@2",
-      "topics.discovery@3",
       "topics.discovery@3",
       "topics.discovery@3",
       "topics.discovery@3",
@@ -209,10 +216,8 @@
       "findings@4",
       "findings@4",
       "findings@4",
-      "findings@4",
       "findings.consolidation@1",
       "planning@3",
-      "requirement-evidence@1",
       "requirement-evidence@1",
       "requirement-evidence@1",
       "requirement-evidence@1",
@@ -232,9 +237,7 @@
       "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
       "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
       "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
-      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
       "05a196bcf97d3835f83cb52e200600d7b49378b1bdcea8c845198aa4a64cd281",
-      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
       "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
       "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
       "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
@@ -252,46 +255,41 @@
       "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
       "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
       "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
       "c1a87a5ea0ade36fd151d3bb4bdc0af6847865c0de961beefdc18adaaccc2be4"
     ],
-    "totalTokens": 273016,
+    "totalTokens": 312419,
     "durationsMs": [
-      20667,
-      51294,
-      61996,
-      63720,
-      51204,
-      46971,
-      71265,
-      56858,
-      51769,
-      132142,
-      87803,
-      88648,
-      110868,
-      74688,
-      97288,
-      113907,
-      112630,
-      128134,
-      132108,
-      162777,
-      39192,
-      41555,
-      49700,
-      6552,
-      23351,
-      12439,
-      8677,
-      45208,
-      39911,
-      103720
+      19195,
+      66140,
+      68167,
+      80431,
+      58803,
+      69778,
+      85264,
+      63152,
+      108025,
+      127664,
+      139407,
+      142631,
+      97889,
+      115374,
+      132743,
+      115390,
+      57893,
+      81431,
+      55507,
+      79481,
+      81478,
+      34821,
+      19661,
+      23702,
+      40089,
+      73270,
+      80446
     ]
   },
   "promptVersions": [
     "scope@2",
-    "topics.discovery@3",
     "topics.discovery@3",
     "topics.discovery@3",
     "topics.discovery@3",
@@ -307,10 +305,8 @@
     "findings@4",
     "findings@4",
     "findings@4",
-    "findings@4",
     "findings.consolidation@1",
     "planning@3",
-    "requirement-evidence@1",
     "requirement-evidence@1",
     "requirement-evidence@1",
     "requirement-evidence@1",

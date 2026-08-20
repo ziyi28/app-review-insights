@@ -3,65 +3,62 @@
     {
       "id": "ver-1",
       "name": "1.0.0",
-      "summary": "修复订阅透明度、扣费与权益恢复问题，并让免费训练和广告流程可预期、可退出且不中断训练。",
-      "rationale": "优先处理finding-3、finding-1、finding-4和finding-5揭示的高影响问题。扣费、取消失败、已购权益不可用和训练中外部跳转具有最高严重度；免费入口和长广告则反复阻断核心训练场景。该版本以中等到大型的基础流程和状态管理改造换取较高用户影响收益。",
+      "summary": "核心信任修复与付费体验优化",
+      "rationale": "优先解决导致用户信任受损最严重的问题，包括订阅扣费透明度、客服支持缺失以及免费内容边界不清。这些问题直接影响了用户留存和口碑，且实施范围相对可控，依赖较少。",
       "requirementIds": [
         "req-1",
         "req-2",
-        "req-3",
-        "req-4"
+        "req-3"
       ]
     },
     {
       "id": "ver-2",
       "name": "1.1.0",
-      "summary": "改善训练模式适配和Premium内容价值，并建立能够区分冲突反馈的订阅价值度量。",
-      "rationale": "在核心访问和计费链路稳定后，处理finding-2和finding-7中的价值与易用性问题。证据显示存在明确但比例有限的正负两端反馈，因此采用可配置训练模式、内容适配和分群反馈，而不是单方面取消付费或只增加内容。该版本包含小型交互改造、中大型内容与推荐改造，以及中等范围的数据建设。",
+      "summary": "内容质量提升与个性化增强",
+      "rationale": "在修复核心信任问题后，重点提升内容质量和个性化体验，以应对AI内容争议和训练有效性质疑。这些改进需要依赖内容团队和算法优化，实施范围较大，适合在后续版本中推进。",
       "requirementIds": [
+        "req-4",
         "req-5",
-        "req-6",
-        "req-7"
+        "req-6"
       ]
     }
   ],
   "decisions": [
     {
       "requirementId": "req-1",
-      "priority": "P0",
+      "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
         "severity": "critical",
         "userImpact": "high",
         "implementationScope": "medium",
         "dependencyRequirementIds": [],
-        "rationale": "Severity=critical，因为意外扣费和无法取消会造成直接财务损失与信任损害；Evidence Strength=high，finding-3有较高支持度；Confidence=high；Frequency=从多个独立内容组反复出现，虽不能代表总体发生率；User Impact=high，影响试用转化、退款和品牌信任；Implementation Scope=medium，需要重做订阅确认、提醒、状态同步和管理入口；Dependency=无，适合作为V1基础能力。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "rationale": "该问题严重损害用户信任，且涉及法律合规风险（如自动扣费提醒）。实施范围中等，需协调后端通知系统和前端UI，但无外部依赖。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 26,
-          "corpusReviewCount": 300,
-          "supportRatio": 0.08666666666666667
+          "supportingReviewCount": 20,
+          "corpusReviewCount": 243,
+          "supportRatio": 0.0823045267489712
         }
       }
     },
     {
       "requirementId": "req-2",
-      "priority": "P0",
+      "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "critical",
+        "severity": "high",
         "userImpact": "high",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [
-          "req-1"
-        ],
-        "rationale": "Severity=critical，因为用户已经付款却无法登录或使用权益；Evidence Strength=high，finding-3包含多类独立的登录、恢复和付费访问投诉；Confidence=high；Frequency=问题在多个场景重复出现，但具体发生率仍未知；User Impact=high，直接影响付费留存和退款压力；Implementation Scope=large，涉及身份、收据校验、跨设备状态和内容权限；Dependency=依赖req-1定义一致的套餐和订阅状态。",
-        "evidenceStrength": "high",
-        "confidence": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "客服支持缺失直接影响用户问题解决和信任恢复。实施范围中等，需优化客服流程和工具，但无外部依赖。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 26,
-          "corpusReviewCount": 300,
-          "supportRatio": 0.08666666666666667
+          "supportingReviewCount": 20,
+          "corpusReviewCount": 243,
+          "supportRatio": 0.0823045267489712
         }
       }
     },
@@ -70,38 +67,38 @@
       "priority": "P1",
       "versionId": "ver-1",
       "planningFactors": {
-        "severity": "high",
+        "severity": "critical",
         "userImpact": "high",
-        "implementationScope": "medium",
-        "dependencyRequirementIds": [
-          "req-1"
-        ],
-        "rationale": "Severity=high，因为订阅墙直接阻断用户的核心训练场景；Evidence Strength=medium至high，finding-1有较多支持且finding-4进一步证明入口会被广告或Premium弹窗阻断；Confidence=中等和高置信度并存，且存在少量用户仍可使用免费训练的冲突证据；Frequency=访问阻断反馈反复出现，但账户、版本和地区差异尚未量化；User Impact=high，影响免费用户激活、转化和信任；Implementation Scope=medium，需要统一内容权限、标签、限制规则和入口状态；Dependency=依赖req-1提供可信的订阅状态和套餐信息。",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "该问题直接影响用户第一印象和留存。实施范围较小，主要涉及UI/UX调整和内容策略，无外部依赖。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 40,
-          "corpusReviewCount": 300,
-          "supportRatio": 0.13333333333333333
+          "supportingReviewCount": 42,
+          "corpusReviewCount": 243,
+          "supportRatio": 0.1728395061728395
         }
       }
     },
     {
       "requirementId": "req-4",
       "priority": "P1",
-      "versionId": "ver-1",
+      "versionId": "ver-2",
       "planningFactors": {
-        "severity": "critical",
-        "userImpact": "high",
-        "implementationScope": "medium",
-        "dependencyRequirementIds": [],
-        "rationale": "Severity=critical，未经操作跳转外部网站并可能重复发生，属于训练流程控制和安全信任问题；Evidence Strength=high至medium，finding-4有较多广告中断证据，finding-5虽样本较少但描述具体且严重；Confidence=高和中等并存；Frequency=长广告和无法退出反馈较为重复，外部跳转频率尚不明确；User Impact=high，直接中断训练并可能导致流失；Implementation Scope=medium，涉及广告SDK回调、深链拦截、状态保存和异常恢复；Dependency=无，可独立作为V1风险修复。",
+        "severity": "high",
+        "userImpact": "medium",
+        "implementationScope": "large",
+        "dependencyRequirementIds": [
+          "req-1"
+        ],
+        "rationale": "该问题影响用户长期留存和口碑，但实施范围较大，需协调内容团队和算法优化。依赖req-1（订阅管理优化）以确保用户有足够动力尝试新内容。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 20,
-          "corpusReviewCount": 300,
-          "supportRatio": 0.06666666666666667
+          "supportingReviewCount": 27,
+          "corpusReviewCount": 243,
+          "supportRatio": 0.1111111111111111
         }
       }
     },
@@ -112,55 +109,36 @@
       "planningFactors": {
         "severity": "medium",
         "userImpact": "medium",
-        "implementationScope": "small",
-        "dependencyRequirementIds": [],
-        "rationale": "Severity=medium，主要是适配性和易用性问题而非核心访问故障；Evidence Strength=medium但支持样本较少；Confidence=medium；Frequency=当前证据显示为低频明确请求，不能推断普遍需求；User Impact=medium，对偏好次数制的用户影响明显，同时多数用户仍认可整体易用性；Implementation Scope=small至medium，主要涉及训练数据模型、播放器状态和界面切换；Dependency=无，可在V2独立交付。",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [
+          "req-3"
+        ],
+        "rationale": "该问题影响免费用户体验，但实施范围中等，需协调广告SDK和UI/UX。依赖req-3（免费内容边界明确）以平衡免费用户和付费用户的体验。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 3,
-          "corpusReviewCount": 300,
-          "supportRatio": 0.01
+          "supportingReviewCount": 13,
+          "corpusReviewCount": 243,
+          "supportRatio": 0.053497942386831275
         }
       }
     },
     {
       "requirementId": "req-6",
-      "priority": "P1",
-      "versionId": "ver-2",
-      "planningFactors": {
-        "severity": "high",
-        "userImpact": "high",
-        "implementationScope": "large",
-        "dependencyRequirementIds": [
-          "req-3"
-        ],
-        "rationale": "Severity=high，因为Premium内容质量直接决定订阅是否被认为值得持续支付；Evidence Strength=medium，finding-2同时包含正面和负面内容质量反馈；Confidence=medium；Frequency=支持度有限但冲突模式清晰，不能估计总体付费满意度；User Impact=high，影响订阅转化、续费和训练效果感知；Implementation Scope=large，涉及内容元数据、推荐逻辑、反馈闭环和内容运营；Dependency=依赖req-3先明确免费与Premium边界，避免内容价值判断继续被访问阻断混淆。",
-        "evidenceStrength": "medium",
-        "confidence": "medium",
-        "frequency": {
-          "supportingReviewCount": 6,
-          "corpusReviewCount": 300,
-          "supportRatio": 0.02
-        }
-      }
-    },
-    {
-      "requirementId": "req-7",
-      "priority": "P1",
+      "priority": "P2",
       "versionId": "ver-2",
       "planningFactors": {
         "severity": "medium",
-        "userImpact": "high",
-        "implementationScope": "medium",
+        "userImpact": "low",
+        "implementationScope": "large",
         "dependencyRequirementIds": [],
-        "rationale": "Severity=medium，主要解决决策和体验诊断风险，但能防止错误的定价或内容策略；Evidence Strength=medium，finding-1和finding-2均有明确冲突反馈；Confidence=medium；Frequency=冲突反馈具有实质性但总体比例和用户分群仍未知；User Impact=high，因为错误解读会同时伤害免费转化、付费续费和训练体验；Implementation Scope=medium，需要反馈入口、事件埋点、用户状态关联和报表；Dependency=无，可与V2功能改造并行建设。",
+        "rationale": "该问题影响长期用户信任，但实施范围较大，需协调后端数据同步和前端UI/UX。无外部依赖，但优先级较低，因为受影响用户比例较小。",
         "evidenceStrength": "medium",
         "confidence": "medium",
         "frequency": {
-          "supportingReviewCount": 30,
-          "corpusReviewCount": 300,
-          "supportRatio": 0.1
+          "supportingReviewCount": 12,
+          "corpusReviewCount": 243,
+          "supportRatio": 0.04938271604938271
         }
       }
     }

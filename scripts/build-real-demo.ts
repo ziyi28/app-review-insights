@@ -21,7 +21,7 @@
  *   GOAL          (analysis goal fed to the pipeline)
  *   OUTPUT_LOCALE (en | zh-CN, default "en")
  */
-import { promises as fs } from "node:fs";
+import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
 import { RunStore } from "../src/server/runs/run-store";
 import { EventPublisher } from "../src/server/streaming/event-publisher";
@@ -31,9 +31,10 @@ import { loadConfig, readEnvLocal } from "../src/server/config";
 import { collectSerpApiReviews } from "../src/server/sources/serpapi-collector";
 import { collectAppleReviews } from "../src/server/sources/apple-rss-collector";
 import { AppleReviewCacheStore } from "../src/server/sources/apple-review-cache";
+import { archiveCachedFixtureReviews, type CacheFixtureArchiveEvidence } from "../src/server/sources/cache-fixture-archive";
 import { validateTraceability } from "../src/domain/traceability/validate";
 import { prepareReviews } from "../src/domain/reviews/prepare";
-import type { Limitation } from "../src/server/sources/source-types";
+import type { Limitation, SourceFile } from "../src/server/sources/source-types";
 import type { RawReview } from "../src/domain/contracts/review";
 import type { Prd } from "../src/domain/contracts/analysis";
 
@@ -76,20 +77,22 @@ export async function buildRealDemo(): Promise<string> {
   const canonicalUrl = `https://apps.apple.com/us/app/id${appId}`;
   const now = () => new Date().toISOString();
 
-  // Collect reviews through the same provider-first logic as the live preview:
-  // SerpApi when configured and it returns reviews, otherwise Apple RSS. This
-  // matters because some apps (e.g. workout-for-women) return an empty RSS feed
-  // but have live reviews via SerpApi.
   const collectedAt = now();
-  let provider: "serpapi" | "apple-rss";
+  let provider: "serpapi" | "apple-rss" | "cache";
+  let selection: "live" | "stable" = "live";
+  let providerCached = false;
   let reviews: RawReview[];
   let rawRefs: string[];
+  let sourceFiles: SourceFile[] = [];
   let limitations: Limitation[];
   let status: "complete" | "suspect-empty" | "partial" | "failed";
   let requestCount: number;
   let searchCount: number;
   let searchId: string | null;
   let forcedRefresh: boolean;
+  let liveCount = 0;
+  let stableCount = 0;
+  let cacheEvidence: CacheFixtureArchiveEvidence | undefined;
 
   const reviewLimit = Number(process.env.DEMO_REVIEW_LIMIT || process.env.REVIEW_LIMIT) || 300;
 
@@ -106,6 +109,7 @@ export async function buildRealDemo(): Promise<string> {
       provider = "serpapi";
       reviews = serp.reviews;
       rawRefs = serp.rawRefs;
+      sourceFiles = [];
       limitations = serp.limitations;
       status = serp.status;
       requestCount = serp.evidence.requestCount;
@@ -113,7 +117,6 @@ export async function buildRealDemo(): Promise<string> {
       searchId = serp.evidence.searchIds.at(-1) ?? null;
       forcedRefresh = true;
     } else {
-      // Preserve every SerpApi limitation before falling back to RSS.
       const rss = await collectAppleReviews({
         fetchFn: fetch,
         sleep,
@@ -127,6 +130,7 @@ export async function buildRealDemo(): Promise<string> {
       provider = "apple-rss";
       reviews = rss.reviews;
       rawRefs = rss.rawRefs;
+      sourceFiles = rss.sourceFiles;
       limitations = [...serp.limitations, ...rss.limitations];
       status = rss.status;
       requestCount = rss.pages.reduce((n, p) => n + p.attempt, 0);
@@ -148,6 +152,7 @@ export async function buildRealDemo(): Promise<string> {
     provider = "apple-rss";
     reviews = rss.reviews;
     rawRefs = rss.rawRefs;
+    sourceFiles = rss.sourceFiles;
     limitations = rss.limitations;
     status = rss.status;
     requestCount = rss.pages.reduce((n, p) => n + p.attempt, 0);
@@ -156,30 +161,47 @@ export async function buildRealDemo(): Promise<string> {
     forcedRefresh = false;
   }
 
+  liveCount = reviews.length;
+
   if (reviews.length < reviewLimit) {
     const cacheStore = new AppleReviewCacheStore(cfg.sourceCacheDir);
     const cached = await cacheStore.readCache("us", appId);
-    if (cached && cached.reviews && cached.reviews.length > 0) {
-      provider = "apple-rss";
-      reviews = cached.reviews.slice(0, reviewLimit);
-      rawRefs = reviews.map((r) => r.sourceReviewId);
-      limitations = [];
+    if (cached && cached.reviews && cached.reviews.length >= reviewLimit) {
+      const selectedReviews = cached.reviews.slice(0, reviewLimit);
+      const archive = archiveCachedFixtureReviews(cached, selectedReviews);
+      provider = "cache";
+      selection = "stable";
+      providerCached = true;
+      reviews = selectedReviews;
+      rawRefs = archive.rawRefs;
+      sourceFiles = archive.sourceFiles;
+      cacheEvidence = archive.evidence;
+      stableCount = selectedReviews.length;
       status = "complete";
       requestCount = Math.ceil(reviews.length / 50);
       searchCount = 0;
       searchId = null;
       forcedRefresh = false;
-      console.log(`Using cached raw reviews for app ${appId}: ${reviews.length} reviews (limit: ${reviewLimit})`);
+      limitations.push({
+        code: "LOCAL_HISTORY_SELECTED",
+        message: `Live review collection was short of limit (${liveCount}/${reviewLimit}); selected verified local cache snapshot of ${stableCount} reviews`,
+        stage: "source",
+      });
+      console.log(`Using archived local cache reviews for app ${appId}: ${reviews.length} reviews (limit: ${reviewLimit})`);
+    } else {
+      throw new Error(
+        `Insufficient reviews for app ${appId} (live: ${liveCount}, cache: ${cached?.reviews?.length ?? 0}, required: ${reviewLimit}); cannot build demo fixture`,
+      );
     }
-  }
-
-  if (reviews.length === 0) {
-    throw new Error(`No reviews collected for app ${appId} (status: ${status}); cannot build a demo fixture`);
   }
 
   if (reviews.length > reviewLimit) {
     reviews = reviews.slice(0, reviewLimit);
     rawRefs = rawRefs.slice(0, reviewLimit);
+  }
+
+  if (reviews.length !== reviewLimit || rawRefs.length !== reviewLimit) {
+    throw new Error(`Target fixture must have exactly ${reviewLimit} reviews and rawRefs, got ${reviews.length}/${rawRefs.length}`);
   }
 
   const sourceSummary: AppStoreReviewSourceSummary = {
@@ -188,16 +210,18 @@ export async function buildRealDemo(): Promise<string> {
     appId,
     storefront: "US",
     status,
-    selection: "live",
-    liveCount: reviews.length,
-    stableCount: 0,
+    selection,
+    liveCount,
+    stableCount,
     reviewCount: reviews.length,
+    reviewLimit,
     collectedAt,
     forcedRefresh,
-    providerCached: false,
+    providerCached,
     requestCount,
     searchCount,
     searchId,
+    cache: cacheEvidence,
   };
 
   const store = new RunStore(cfg.runsDir);
@@ -220,11 +244,12 @@ export async function buildRealDemo(): Promise<string> {
         previewId: `demo-${appId}`,
         appId,
         canonicalUrl,
-        selection: "live",
+        selection,
         reviews,
         rawRefs,
         limitations,
         sourceSummary,
+        sourceFiles,
       },
     },
     fetchFn: fetch,
@@ -275,12 +300,41 @@ export async function buildRealDemo(): Promise<string> {
   await fs.mkdir(fixtureDir, { recursive: true });
   await fs.cp(sourceDir, fixtureDir, { recursive: true });
 
-  // Rebase the fixture run id to the stable demo id so the offline demo is
-  // deterministic (events still carry the original author run id inside, which
-  // replay re-stamps anyway).
+  // Rebase the fixture run id to the stable demo id and rewrite events.ndjson
   const manifestPath = path.join(fixtureDir, "manifest.json");
   const current = JSON.parse(await fs.readFile(manifestPath, "utf8")) as Record<string, unknown>;
   await fs.writeFile(manifestPath, JSON.stringify({ ...current, runId: fixtureName }, null, 2), "utf8");
+
+  const eventsPath = path.join(fixtureDir, "events.ndjson");
+  if (existsSync(eventsPath)) {
+    const rawEvents = await fs.readFile(eventsPath, "utf8");
+    const rewritten = rawEvents
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const ev = JSON.parse(line) as { sequence: number; runId: string; eventId?: string };
+        ev.runId = fixtureName;
+        ev.eventId = `${fixtureName}-${ev.sequence}`;
+        return JSON.stringify(ev);
+      })
+      .join("\n") + "\n";
+    await fs.writeFile(eventsPath, rewritten, "utf8");
+  }
+
+  let reviewData: string;
+  let captureMethod: string;
+  if (provider === "serpapi") {
+    reviewData = "serpapi-apple-reviews-real";
+    captureMethod = "SerpApi Apple Reviews engine (country=us, sort=mostrecent, no_cache=true)";
+  } else if (provider === "apple-rss") {
+    reviewData = "apple-rss-real";
+    captureMethod = "Apple Customer Reviews RSS (sequential, max 10 pages, >=500ms delay)";
+  } else {
+    const distinctSources = Object.keys(cacheEvidence?.sourceCounts ?? {});
+    reviewData = distinctSources.length > 1 ? "local-cache-real-mixed" : "local-cache-real";
+    captureMethod = `Verified local immutable cache archive (${cacheEvidence?.rawFile}, sha256=${cacheEvidence?.sha256})`;
+  }
 
   // Write the provenance declaration the fixture requires: it records the real
   // data source, storefront, privacy minimization, and the model analysis.
@@ -288,16 +342,25 @@ export async function buildRealDemo(): Promise<string> {
   const provenance = {
     provenance: {
       schemaVersion: "1",
-      reviewData: provider === "serpapi" ? "serpapi-apple-reviews-real" : "apple-rss-real",
+      reviewData,
       storefront: "us",
       appId,
       capturedAt: collectedAt,
-      captureMethod:
-        provider === "serpapi"
-          ? "SerpApi Apple Reviews engine (country=us, sort=mostrecent, no_cache=true)"
-          : "Apple Customer Reviews RSS (sequential, max 10 pages, >=500ms delay)",
+      captureMethod,
       privacyMinimization:
         "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained",
+      ...(cacheEvidence
+        ? {
+            cache: {
+              rawFile: cacheEvidence.rawFile,
+              byteLength: cacheEvidence.byteLength,
+              sha256: cacheEvidence.sha256,
+              cacheUpdatedAt: cacheEvidence.cacheUpdatedAt,
+              bootstrapRunId: cacheEvidence.bootstrapRunId,
+              sourceCounts: cacheEvidence.sourceCounts,
+            },
+          }
+        : {}),
     },
     analysis: {
       executionMode: "live",

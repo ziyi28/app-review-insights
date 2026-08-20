@@ -118,10 +118,10 @@ export class RunStore {
 
   /**
    * Atomically writes a raw source file (response body / imported file) into
-   * the run directory. Only run-relative paths under `sources/apple/` or
-   * `sources/import/` are accepted; the resolved target must stay inside the
-   * run directory (path traversal / SSRF guard). The same path may never be
-   * overwritten, so archived source bytes are immutable.
+   * the run directory. Only run-relative paths under `sources/apple/`,
+   * `sources/import/`, or `sources/cache/` are accepted; the resolved target must
+   * stay inside the run directory (path traversal / SSRF guard). The same path
+   * may never be overwritten, so archived source bytes are immutable.
    */
   async writeSourceFile(runId: string, relativePath: string, content: string): Promise<void> {
     const runDir = this.resolveRunDir(runId);
@@ -129,7 +129,7 @@ export class RunStore {
     // Both the raw prefix and the RESOLVED path must stay inside the sources
     // tree: `sources/apple/../../x.json` starts with a valid prefix but
     // resolves outside it, and a bare absolute path never starts under sources.
-    if (!/^sources\/(apple|import)\//.test(relativePath)) {
+    if (!/^sources\/(apple|import|cache)\//.test(relativePath)) {
       throw new Error(`Source file path not allowed: ${relativePath}`);
     }
     const resolved = path.resolve(sourcesRoot, relativePath.replace(/^sources\//, ""));

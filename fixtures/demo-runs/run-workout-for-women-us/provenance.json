@@ -1,20 +1,31 @@
 {
   "provenance": {
     "schemaVersion": "1",
-    "reviewData": "apple-rss-real",
+    "reviewData": "local-cache-real-mixed",
     "storefront": "us",
     "appId": "839285684",
-    "capturedAt": "2026-08-20T07:46:51.577Z",
-    "captureMethod": "Apple Customer Reviews RSS (sequential, max 10 pages, >=500ms delay)",
-    "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained"
+    "capturedAt": "2026-08-20T09:27:58.998Z",
+    "captureMethod": "Verified local immutable cache archive (sources/cache/reviews.attempt-01.json, sha256=82f3b0567de8c321954965979d95608b5e9680475b693a45cf5d21708cd97ca8)",
+    "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained",
+    "cache": {
+      "rawFile": "sources/cache/reviews.attempt-01.json",
+      "byteLength": 129646,
+      "sha256": "82f3b0567de8c321954965979d95608b5e9680475b693a45cf5d21708cd97ca8",
+      "cacheUpdatedAt": "2026-08-20T04:55:49.684Z",
+      "bootstrapRunId": null,
+      "sourceCounts": {
+        "apple-rss": 100,
+        "serpapi-apple-reviews": 200
+      }
+    }
   },
   "analysis": {
     "executionMode": "live",
     "outputLocale": "zh-CN",
     "goal": "分析美国应用商店用户评论中影响最大的问题与改进机会。识别最具争议的功能点（部分用户喜欢但另一部分用户反感），尤其是关于订阅付费价值与健身训练易用性方面。明确记录冲突的反馈而非忽略。",
     "modelProvider": "OpenAI-compatible endpoint",
-    "modelName": "gpt-5.6-luna",
-    "reasoningEffort": "high",
+    "modelName": "qwen3.8-27b",
+    "reasoningEffort": "medium",
     "temperature": 0.1,
     "promptVersions": [
       "scope@2",
