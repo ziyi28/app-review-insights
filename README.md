@@ -203,8 +203,8 @@ SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance
 - 模型只会收到目标、带稳定 ID 的评论、确定性统计和此前已允许的 ID。
 - 证据摘录必须是所引用评论正文的精确子串——摘录与正文同样施加 NFC 规范化 + 空白折叠后比对
   （允许与原文存在大小写与空白差异）；样本数量和置信度由代码计算，绝不取自模型。
-- 没有有效支撑的发现会被删除；没有支撑的想法会变成独立的 `assumptions`，绝不会成为需求。
-- 追溯是确定性校验的；一次受约束的修订可以删除/修复/降级，但不能新增引用或新摘录。再次失败
+- 没有有效支撑的发现会被删除；没有支撑的想法会变成独立的 `assumptions`（按 `insufficient-finding`、`rejected-requirement` 或 `model` 严格追踪来源），绝不会成为需求。
+- 追溯是确定性校验的；一次受约束的修订可以修复或补充，但严禁删空或降级原有的充分证据（必须保留所有已有充分 finding），且不能新增未经语料支撑的引用或新摘录。再次失败
   是明确的：运行以 `run.failed` 结束，失败的 manifest 携带
   `TRACEABILITY_INVALID_AFTER_REVISION` —— 绝不捏造成功。修订后的产物以 attempt-02 发布，
   因此界面永远不会展示修订前的陈旧输出。
@@ -235,7 +235,7 @@ SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance
   被覆盖。测试的**发现 ID 与优先级由代码**根据需求图推导（所关联需求的 finding 并集；
   取最紧急的优先级），并以同样方式校验 —— 模型从不提供它们，篡改会被拒绝为
   `TEST_FINDING_MISMATCH` / `TEST_PRIORITY_MISMATCH`。
-- 假设永远不会成为需求，也永远不会生成测试。
+- 假设永远不会成为需求，也永远不会生成测试；所有假设均受严格来源溯源与 review 集合一致性约束。
 - **旧缓存回放兼容。** 在充分性 / 直接发现契约之前生成的缓存产物仍可回放：没有
   `evidenceSufficiency` 字段的 finding 只展示置信度；缺少 `findingIds` / `priority` 的测试用例
   会在展示层从其需求推导。自带的 fixtures 不会被改写。
@@ -246,8 +246,9 @@ SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance
 - 每次运行都可以从快照离线回放，无需网络、无需模型；界面的 **缓存回放** 模式会列出可回放的
   运行，并在新的运行 ID 下重新物化所有产物，标记为 **缓存回放**，且从不调用 Apple 或模型。
 - `fixtures/demo-runs/` 下自带真实演示 fixture，为美国区 App Store 的真实抓取（300 条评论）、
-  由真实模型（如 gpt5.6luna）分析、已做隐私最小化处理、带完整溯源：
+  由真实模型分析、已做隐私最小化处理、带完整溯源：
   - `run-workout-for-women-us/` —— App ID 839285684（「Workout for Women」，包含 300 条美国区真实评论与全链路闭环证明）。
+  - 缓存源归档于 `sources/cache/reviews.attempt-01.json`，带严格 SHA-256 校验与混合来源（Apple RSS + SerpApi）真实计数记录。
   - 保留评论 ID / 评分 / 标题 / 正文 / 版本 / 时间戳，移除评论者昵称、作者 URI 和敏感请求头；
     其 `provenance.json` 记录抓取时间、来源 URL 模式、商店地区、模型、推理强度和提示词版本。
 - 真实快照会被如实标记。应用绝不把 mock、规则后备或静态文本伪装成实时模型结果。
@@ -286,7 +287,7 @@ src/domain/contracts/    Zod schemas（reviews、analysis、events、runs）
 src/domain/reviews/      normalize、dedupe、language、stats
 src/domain/analysis/     evidence、confidence
 src/domain/traceability/ 确定性校验器
-src/server/sources/      App Store URL、Apple RSS 采集器/解析器、导入
+src/server/sources/      App Store URL、Apple RSS 采集器/解析器、导入、缓存归档
 src/server/model/        OpenAI 兼容客户端、脚本化客户端、提示词
 src/server/runs/         run store、catalog、replay
 src/server/pipeline/     各阶段 + orchestrator
@@ -306,7 +307,7 @@ fixtures/demo-runs/      真实、可回放快照
 - 评论者身份字段不会被存储；自带 fixture 已做隐私最小化处理。
 - **本地交付与安全边界**：
   - 开发与启动服务默认严格绑定 `127.0.0.1`（`npm run dev` 与 `npm run start` 均指定 `-H 127.0.0.1`），避免非预期的局域网或公网暴露；
-  - 非导入类 API 请求体限制为 64KB（防范异常请求和内存消耗）；
+  - `POST /api/runs` 流式请求体上限为 8 MiB（支持大型导入），`POST /api/config` 与 `POST /api/source-previews` 真实流式请求体上限为 64 KiB（防范异常请求和内存消耗）；
   - 本系统定位为本地单用户辅助工具，未设多用户鉴权，严禁直接暴露在公共未授信网络中。
 
 ## 非目标

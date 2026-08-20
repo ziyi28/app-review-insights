@@ -269,9 +269,11 @@ versions, and failure handling.
   original in letter case); sample counts and confidence are computed by code,
   never taken from the model.
 - Findings with no valid support are deleted; unsupported ideas become separate
-  `assumptions`, never requirements.
+  `assumptions` (strictly tracked by origins: `insufficient-finding`, `rejected-requirement`, or `model`), never requirements.
 - Traceability is validated deterministically; a single constrained revision
-  may delete/fix/downgrade but may not add citations or new excerpts. A second
+  may fix or supply omissions, but is strictly forbidden from deleting or degrading
+  existing sufficient evidence (all pre-revision sufficient findings must be preserved),
+  and cannot add ungrounded citations or new excerpts. A second
   failure is explicit: the run ends with `run.failed` and a failed manifest
   carrying `TRACEABILITY_INVALID_AFTER_REVISION` — never a fabricated success.
   Revised artifacts are published as attempt-02 so the UI never shows stale
@@ -313,7 +315,8 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
   graph (union of the linked requirements' findings; most urgent priority) and
   validated the same way — the model never supplies them, and tampering is
   rejected as `TEST_FINDING_MISMATCH` / `TEST_PRIORITY_MISMATCH`.
-- Assumptions are never requirements and never generate tests.
+- Assumptions are never requirements and never generate tests; all assumptions are
+  strictly bound by origin provenance and review union subset constraints.
 - **Legacy replay compatibility.** Cached artifacts produced before the
   sufficiency / direct-finding contracts stay replayable: findings without an
   `evidenceSufficiency` field show confidence only, and test cases missing
@@ -328,11 +331,12 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
   all artifacts under a fresh run id, labeled **Cached Replay**, and it never
   calls Apple or the model.
 - A **real** demo fixture ships under `fixtures/demo-runs/`, captured from the US
-  App Store (300 reviews) and analyzed by a real model (e.g. gpt5.6luna),
+  App Store (300 reviews) and analyzed by a real model,
   privacy-minimized, with full provenance:
   - `run-workout-for-women-us/` — App ID 839285684 ("Workout for Women"),
     the assessment's primary example with 300 real US reviews and complete
     traceability closure.
+  - Cached raw reviews are archived at `sources/cache/reviews.attempt-01.json` with strict SHA-256 validation and truthful mixed-source counts (Apple RSS + SerpApi).
   - Retains review id / rating / title / body / version / timestamp and removes
     reviewer nickname, author URI, and sensitive headers; its `provenance.json`
     records capture time, source URL pattern, storefront, model, reasoning
@@ -379,7 +383,7 @@ src/domain/contracts/    Zod schemas (reviews, analysis, events, runs)
 src/domain/reviews/      normalize, dedupe, language, stats
 src/domain/analysis/     evidence, confidence
 src/domain/traceability/ deterministic validator
-src/server/sources/      App Store URL, Apple RSS collector/parser, import
+src/server/sources/      App Store URL, Apple RSS collector/parser, import, cache archive
 src/server/model/        OpenAI-compatible client, scripted client, prompts
 src/server/runs/         run store, catalog, replay
 src/server/pipeline/     stages + orchestrator
@@ -402,7 +406,9 @@ fixtures/demo-runs/      real, replayable snapshot
   - Development and startup servers are strictly bound to `127.0.0.1` by default
     (`dev` and `start` scripts include `-H 127.0.0.1`) to prevent unintended exposure
     on local area networks or the public internet.
-  - Non-import API request bodies are limited to 64KB (preventing memory exhaustion).
+  - `POST /api/runs` streaming body cap is 8 MiB (supporting large imports), while
+    `POST /api/config` and `POST /api/source-previews` streaming body caps are 64 KiB
+    (preventing memory exhaustion).
   - This is a local single-user tool with no external multi-tenant authentication;
     do not expose it directly to untrusted public networks.
 

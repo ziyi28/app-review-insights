@@ -7,7 +7,11 @@ const root = process.cwd();
 const README_FILES = {
   "README.md": {
     sections: [
+      "它做什么",
+      "界面截图",
       "快速开始",
+      "网络环境",
+      "后台任务与刷新恢复",
       "数据来源与限制",
       "模型提供方与配置",
       "提示词与幻觉控制",
@@ -16,7 +20,9 @@ const README_FILES = {
       "缓存回放与数据真实性",
       "失败处理",
       "测试",
+      "项目结构",
       "隐私与安全",
+      "非目标",
     ],
     capabilities: [
       "证据验证",
@@ -29,11 +35,18 @@ const README_FILES = {
       "apple_reviews",
       "no_cache=true",
       "Apple RSS 降级采集",
+      "8 MiB",
+      "64 KiB",
+      "sources/cache/",
     ],
   },
   "README.en.md": {
     sections: [
+      "What it does",
+      "Screenshots",
       "Quick Start",
+      "Network Environment",
+      "Background Tasks and Refresh Recovery",
       "Data Sources and Limitations",
       "Model Provider and Configuration",
       "Prompt and Hallucination Controls",
@@ -42,7 +55,9 @@ const README_FILES = {
       "Cached Replay and Data Authenticity",
       "Failure Handling",
       "Testing",
+      "Project Structure",
       "Privacy and Security",
+      "Non-goals",
     ],
     capabilities: [
       "Evidence Validation",
@@ -55,6 +70,9 @@ const README_FILES = {
       "apple_reviews",
       "no_cache=true",
       "Apple RSS fallback",
+      "8 MiB",
+      "64 KiB",
+      "sources/cache/",
     ],
   },
 };
@@ -83,17 +101,25 @@ const FORBIDDEN_STATEMENTS = [
   "No automatic retries",
 ];
 
+function extractH2(markdown) {
+  return markdown
+    .split(/\r?\n/u)
+    .filter((line) => line.startsWith("## "))
+    .map((line) => line.slice(3).trim());
+}
+
 let failed = false;
 
 const readmeContents = new Map();
 for (const [file, { sections, capabilities }] of Object.entries(README_FILES)) {
   const readme = readFileSync(path.join(root, file), "utf8");
   readmeContents.set(file, readme);
-  for (const heading of sections) {
-    if (!readme.includes(`## ${heading}`)) {
-      console.error(`${file} missing section: ## ${heading}`);
-      failed = true;
-    }
+  const actualSections = extractH2(readme);
+  if (JSON.stringify(actualSections) !== JSON.stringify(sections)) {
+    console.error(
+      `${file}: H2 sequence mismatch; expected ${JSON.stringify(sections)}, got ${JSON.stringify(actualSections)}`,
+    );
+    failed = true;
   }
   for (const token of capabilities) {
     if (!readme.includes(token)) {
