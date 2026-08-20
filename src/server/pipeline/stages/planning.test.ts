@@ -130,9 +130,23 @@ type PlanningResponse = {
 function context(
   overrides: Partial<PlanningStageContext> = {},
   planningResponse: PlanningResponse = PLANNING_RESPONSE,
-  findingsOverride: Finding[] = findings,
+  findingsOverride: Finding[] = [SUFFICIENT_FINDING],
 ): PlanningStageContext {
-  const generate = vi.fn(async () => planningResponse);
+  const generate = vi.fn(async () => {
+    // If using the default SUFFICIENT_FINDING with default PLANNING_RESPONSE, map finding-1 to finding-2
+    if (planningResponse === PLANNING_RESPONSE && findingsOverride.length === 1 && findingsOverride[0].id === "finding-2") {
+      return {
+        ...PLANNING_RESPONSE,
+        requirements: [
+          {
+            ...PLANNING_RESPONSE.requirements[0],
+            findingIds: ["finding-2"],
+          },
+        ],
+      };
+    }
+    return planningResponse;
+  });
   return {
     model: { generate } as never,
     findings: findingsOverride,
@@ -145,9 +159,9 @@ function context(
 describe("runPlanningStage", () => {
   it("produces requirements that reference findings and derive source reviews", async () => {
     const result = await runPlanningStage(context());
-    expect(result.prd.requirements[0].findingIds).toContain("finding-1");
+    expect(result.prd.requirements[0].findingIds).toContain("finding-2");
     // sourceReviewIds must be deterministically derived from finding evidence.
-    expect(result.prd.requirements[0].sourceReviewIds.sort()).toEqual(["r1", "r2"]);
+    expect(result.prd.requirements[0].sourceReviewIds.sort()).toEqual(["r8", "r9"]);
   });
 
   it("moves unsupported ideas into assumptions, not requirements", async () => {
@@ -177,22 +191,35 @@ describe("runPlanningStage", () => {
     expect(result.warnings.some((w) => w.code === "UNSUPPORTED_REQUIREMENT")).toBe(true);
   });
 
-  it("keeps assumptions separate from requirements", async () => {
+  it("keeps assumptions separate from requirements and preserves origins", async () => {
     const result = await runPlanningStage(context());
-    expect(result.prd.assumptions).toHaveLength(1);
-    expect(result.prd.assumptions[0].id).toMatch(/^asm-/);
+    expect(result.prd.assumptions.length).toBeGreaterThanOrEqual(1);
+    for (const a of result.prd.assumptions) {
+      expect(a.id).toMatch(/^asm-/);
+    }
   });
 
-  it("downgrades a requirement backed only by insufficient findings", async () => {
+  it("rejects a requirement backed only by insufficient findings and turns it into an assumption", async () => {
     // finding-1 is insufficient; model returns P1/ver-1 for it.
-    const result = await runPlanningStage(context());
-    expect(result.prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
-    // The version no longer claims a requirement that does not point to it.
+    const result = await runPlanningStage(context({}, PLANNING_RESPONSE, [findings[0]]));
+    // The requirement is rejected and does not enter PRD requirements
+    expect(result.prd.requirements).toHaveLength(0);
     expect(result.prd.versions).toHaveLength(0);
-    expect(result.warnings.some((w) => w.code === "INSUFFICIENT_EVIDENCE_PRIORITY_DOWNGRADED")).toBe(true);
+    expect(result.warnings.some((w) => w.code === "REQUIREMENT_REJECTED_INSUFFICIENT_EVIDENCE")).toBe(true);
+
+    // It is preserved as a rejected-requirement assumption
+    const rejectedAsm = result.prd.assumptions.find((a) => a.id === "asm-rejected-req-1");
+    expect(rejectedAsm).toBeDefined();
+    expect(rejectedAsm?.origin).toBe("rejected-requirement");
+    expect(rejectedAsm?.sourceFindingIds).toEqual(["finding-1"]);
+
+    // The insufficient finding also generated an insufficient-finding assumption
+    const insufficientAsm = result.prd.assumptions.find((a) => a.id === "asm-insufficient-finding-1");
+    expect(insufficientAsm).toBeDefined();
+    expect(insufficientAsm?.origin).toBe("insufficient-finding");
   });
 
-  it("keeps model priority when at least one linked finding is sufficient", async () => {
+  it("strips insufficient findings from a requirement that has mixed findings and keeps sufficient ones", async () => {
     const planningResponse: PlanningResponse = {
       title: "Release plan",
       overview: "Address timer and pricing",
@@ -213,8 +240,12 @@ describe("runPlanningStage", () => {
       assumptions: [],
     };
     const result = await runPlanningStage(context({}, planningResponse, [findings[0], SUFFICIENT_FINDING]));
-    expect(result.prd.requirements[0]).toMatchObject({ priority: "P1", versionId: "ver-1" });
-    expect(result.warnings.some((w) => w.code === "INSUFFICIENT_EVIDENCE_PRIORITY_DOWNGRADED")).toBe(false);
+    expect(result.prd.requirements).toHaveLength(1);
+    expect(result.prd.requirements[0].findingIds).toEqual(["finding-2"]);
+    expect(result.prd.requirements[0].sourceReviewIds.sort()).toEqual(["r8", "r9"]);
+    expect(result.warnings.some((w) => w.code === "PLANNING_INSUFFICIENT_FINDING_DROPPED")).toBe(true);
+    // Insufficient finding generated an assumption
+    expect(result.prd.assumptions.some((a) => a.id === "asm-insufficient-finding-1")).toBe(true);
   });
 
   it("caps a model P0 to P1 when a factor is missing", async () => {
@@ -323,29 +354,29 @@ describe("runPlanningStage", () => {
         },
         {
           id: "req-2",
-          findingIds: ["finding-1"], // insufficient evidence -> versionId becomes null
+          findingIds: ["finding-3"],
           title: "B",
           description: "d",
           priority: "P2",
           acceptanceCriteria: ["b"],
-          versionId: "ver-1",
+          versionId: null, // intentionally unscheduled
           planningFactors: PLANNING_FACTORS,
         },
       ],
       assumptions: [],
     };
-    const result = await runPlanningStage(context({}, planningResponse, [STRONG_SUFFICIENT_FINDING, findings[0]]));
+    const result = await runPlanningStage(context({}, planningResponse, [STRONG_SUFFICIENT_FINDING]));
     // req-1 stays scheduled, but its dependency on unscheduled req-2 is pruned.
     expect(result.prd.requirements[0].versionId).toBe("ver-1");
     expect(result.prd.requirements[0].planningFactors!.dependencyRequirementIds).toEqual([]);
     expect(result.warnings.some((w) => w.code === "PLANNING_DEPENDENCY_UNSCHEDULED")).toBe(true);
-    // req-2 itself is dropped to unscheduled (insufficient evidence).
+    // req-2 is unscheduled.
     expect(result.prd.requirements[1].versionId).toBeNull();
   });
 
   it("keeps one version from one version and two versions from two versions", async () => {
     const one = await runPlanningStage(context());
-    expect(one.prd.versions).toHaveLength(0); // req-1 dropped (insufficient)
+    expect(one.prd.versions).toHaveLength(1);
 
     const two: PlanningResponse = {
       title: "Release plan",

@@ -24,6 +24,22 @@ const PAGE1 = JSON.stringify({
         title: { label: "Great" },
         content: { label: "I love the workout variety and easy to follow at home.", attributes: { type: "text" } },
       },
+      {
+        id: { label: "r2" },
+        updated: { label: "2026-07-02T10:00:00Z" },
+        "im:rating": { label: "5" },
+        "im:version": { label: "3.2.1" },
+        title: { label: "Nice variety" },
+        content: { label: "Superb workout variety and great routines.", attributes: { type: "text" } },
+      },
+      {
+        id: { label: "r3" },
+        updated: { label: "2026-07-03T10:00:00Z" },
+        "im:rating": { label: "5" },
+        "im:version": { label: "3.2.1" },
+        title: { label: "Awesome" },
+        content: { label: "I really enjoy the workout variety offered here.", attributes: { type: "text" } },
+      },
     ],
     link: [],
   },
@@ -65,14 +81,14 @@ async function buildScript(): Promise<string[]> {
   const { prepareReviews } = await import("@/domain/reviews/prepare");
   const parsed = parseAppleRssJson(PAGE1);
   const prepared = prepareReviews({ kind: "collected", reviews: parsed.reviews, rawRefs: parsed.rawRefs, limitations: [] });
-  const review = prepared.reviews[0];
-  const rid = review.reviewId;
+  const rids = prepared.reviews.map((r) => r.reviewId);
+  const rid = rids[0];
 
   return [
     // scope
     JSON.stringify({ interpretation: "Pricing focus", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
     // topic discovery
-    JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Workout quality", description: "d", supportingReviewIds: [rid], quote: "workout variety" }] }),
+    JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Workout quality", description: "d", supportingReviewIds: rids, quote: "workout variety" }] }),
     // topic consolidation
     JSON.stringify({ topics: [{ id: "topic-1", label: "Workout quality", description: "d", candidateIds: ["topic-candidate-1"] }] }),
     // findings
@@ -83,8 +99,8 @@ async function buildScript(): Promise<string[]> {
           topicIds: ["topic-1"],
           title: "Loves variety",
           summary: "Users praise workout variety",
-          supportingReviewIds: [rid],
-          evidenceExcerpts: [{ reviewId: rid, excerpt: "workout variety" }],
+          supportingReviewIds: rids,
+          evidenceExcerpts: rids.map((id) => ({ reviewId: id, excerpt: "workout variety" })),
           conflictingReviewIds: [],
           uncertainties: [],
           limitations: [],
@@ -116,12 +132,12 @@ async function buildScript(): Promise<string[]> {
       ],
       assumptions: [],
     }),
-    // requirement-evidence: the single candidate review directly supports req-1.
-    JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "praises workout variety" }] }),
+    // requirement-evidence: the candidate reviews directly support req-1.
+    JSON.stringify({ requirementId: "req-1", verdicts: rids.map((id) => ({ reviewId: id, relation: "direct", confidence: 1, reason: "praises workout variety" })) }),
     // tests
     JSON.stringify({
       tests: [
-        { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "logged in", steps: ["open app", "browse workouts"], expectedResult: "new workouts listed" },
+        { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: rids, testType: "manual", precondition: "logged in", steps: ["open app", "browse workouts"], expectedResult: "new workouts listed" },
       ],
     }),
   ];
@@ -188,14 +204,14 @@ describe("executeRun (live pipeline)", () => {
     expect(evIdx).toBeGreaterThan(fIdx);
     expect(pIdx).toBeGreaterThan(evIdx);
 
-    const stats = (await store.readArtifact(runId, "stats", 1)) as { rawCount?: number };
-    expect(stats.rawCount).toBe(1);
+    const stats = (await store.readArtifact(runId, "stats", 1)) as { rawCount: number };
+    expect(stats.rawCount).toBe(3);
     const topicCandidates = (await store.readArtifact(runId, "topic-candidates", 1)) as { candidates: unknown[] };
     expect(topicCandidates.candidates).toHaveLength(1);
-    const evidence = (await store.readArtifact(runId, "evidence-validation", 1)) as { validFindingCount?: number };
-    expect(evidence.validFindingCount).toBe(1);
-    const versionPlan = (await store.readArtifact(runId, "version-plan", 1)) as { decisions?: unknown[] };
-    expect(versionPlan.decisions).toHaveLength(1);
+    const evidenceReport = (await store.readArtifact(runId, "evidence-validation", 1)) as { findings: unknown[] };
+    expect(evidenceReport.findings).toHaveLength(1);
+    const versionPlan = (await store.readArtifact(runId, "version-plan", 1)) as { versions: unknown[]; decisions: unknown[] };
+    expect(versionPlan.versions).toHaveLength(1);
   });
 
   it("publishes live progress events while model stages run", async () => {
@@ -212,7 +228,6 @@ describe("executeRun (live pipeline)", () => {
       stage: string;
       data: { message: string };
     }[];
-    // Every model stage emits at least one progress message (scope, topics,
     // findings, planning, tests), and the deterministic source/prepare stages
     // announce themselves too so the UI is never silent at run start.
     expect(progress.length).toBeGreaterThanOrEqual(7);
@@ -224,7 +239,7 @@ describe("executeRun (live pipeline)", () => {
     expect(stages.has("prepare")).toBe(true);
     expect(progress.some((p) => /batch|review/i.test(p.data.message))).toBe(true);
     // The collected-count message from the source stage must reflect the page.
-    expect(progress.some((p) => p.stage === "source" && /collected 1 reviews/.test(p.data.message))).toBe(true);
+    expect(progress.some((p) => p.stage === "source" && /collected 3 reviews/.test(p.data.message))).toBe(true);
   });
 
   it("applies scope filters so only matching reviews reach the model stages", async () => {
@@ -380,7 +395,7 @@ describe("executeRun (live pipeline)", () => {
     expect(model.callIndex).toBe(7);
     // The selected dataset is persisted as a run-local raw-reviews artifact.
     const rawArtifact = (await store.readArtifact(runId, "raw-reviews", 1)) as { reviews: unknown[] };
-    expect(rawArtifact.reviews).toHaveLength(1);
+    expect(rawArtifact.reviews).toHaveLength(3);
   });
 
   it("propagates RSS_CACHE_AUGMENTED and keeps RSS_SUSPECT_EMPTY for a stable selection over an empty live", async () => {
@@ -481,13 +496,64 @@ describe("executeRun (live pipeline)", () => {
     expect(model.callIndex).toBe(0);
   });
 
-  it("keeps a valid-but-insufficient finding and downgrades its requirement to P2 with no version", async () => {
-    // corpus = 1 review; finding survives with exact excerpt but its evidence
-    // is insufficient (2-support floor not met). The requirement must be
-    // pinned to P2/null by the deterministic guardrail even though the model
-    // returned P1/ver-1, and the version must not claim it.
-    const model = new ScriptedModelClient(await buildScript());
+  it("short-circuits to assumption-only PRD when all findings have insufficient evidence", async () => {
+    // Single review in corpus -> finding evidence is insufficient.
+    // Under the evidence gate, planning/tests stages do not run, PRD has 0 requirements,
+    // and empty downstream artifacts are written.
+    const oneReviewPage = JSON.stringify({
+      feed: {
+        entry: [
+          {
+            id: { label: "r1" },
+            updated: { label: "2026-07-01T10:00:00Z" },
+            "im:rating": { label: "5" },
+            "im:version": { label: "3.2.1" },
+            title: { label: "Great" },
+            content: { label: "I love the workout variety and easy to follow at home.", attributes: { type: "text" } },
+          },
+        ],
+        link: [],
+      },
+    });
+    const { parseAppleRssJson } = await import("@/server/sources/apple-rss-parser");
+    const { prepareReviews } = await import("@/domain/reviews/prepare");
+    const parsed = parseAppleRssJson(oneReviewPage);
+    const prepared = prepareReviews({ kind: "collected", reviews: parsed.reviews, rawRefs: parsed.rawRefs, limitations: [] });
+    const rid = prepared.reviews[0].reviewId;
+
+    const model = new ScriptedModelClient([
+      // scope
+      JSON.stringify({ interpretation: "Pricing focus", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
+      // topic discovery
+      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Workout quality", description: "d", supportingReviewIds: [rid], quote: "workout variety" }] }),
+      // topic consolidation
+      JSON.stringify({ topics: [{ id: "topic-1", label: "Workout quality", description: "d", candidateIds: ["topic-candidate-1"] }] }),
+      // findings
+      JSON.stringify({
+        findings: [
+          {
+            id: "finding-1",
+            topicIds: ["topic-1"],
+            title: "Loves variety",
+            summary: "Users praise workout variety",
+            supportingReviewIds: [rid],
+            evidenceExcerpts: [{ reviewId: rid, excerpt: "workout variety" }],
+            conflictingReviewIds: [],
+            uncertainties: [],
+            limitations: [],
+          },
+        ],
+      }),
+    ]);
     const deps = makeDeps(model);
+    deps.fetchFn = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes("/page=1/")) {
+        return new Response(oneReviewPage, { status: 200, headers: { "content-type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ feed: { entry: [] } }), { status: 200 });
+    }) as unknown as typeof fetch;
+
     const runId = store.createRunId();
     const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
 
@@ -496,19 +562,24 @@ describe("executeRun (live pipeline)", () => {
     const manifest = await store.readManifest(runId);
     expect(manifest.status).toBe("completed");
     expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
-    // planning/tests still run (a finding exists, it is just insufficient),
-    // so the full 7-stage script executes.
-    expect(model.callIndex).toBe(7);
+    expect(manifest.canReplay).toBe(true);
+    // Short-circuited at 4 calls (scope, topics x2, findings) - no planning/evidence/tests calls
+    expect(model.callIndex).toBe(4);
+
     const prd = (await store.readArtifact(runId, "prd", 1)) as {
-      requirements: { priority: string; versionId: string | null }[];
-      versions: { requirementIds: string[] }[];
+      requirements: unknown[];
+      versions: unknown[];
       findings: { evidenceSufficiency: { status: string } }[];
+      assumptions: { id: string; origin?: string }[];
     };
     expect(prd.findings[0].evidenceSufficiency.status).toBe("insufficient");
-    expect(prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
-    // The version that only claimed the downgraded requirement is deleted:
-    // an empty version cannot survive normalization.
+    expect(prd.requirements).toHaveLength(0);
     expect(prd.versions).toHaveLength(0);
+    expect(prd.assumptions.some((a) => a.id === "asm-insufficient-finding-1")).toBe(true);
+
+    // Empty artifacts are written to disk for UI integrity
+    const versionPlan = (await store.readArtifact(runId, "version-plan", 1)) as { versions: unknown[] };
+    expect(versionPlan.versions).toHaveLength(0);
   });
 
   it("short-circuits with insufficient-evidence when no findings survive", async () => {
@@ -721,8 +792,8 @@ describe("executeRun (live pipeline)", () => {
     // so the ONLY reason it stays insufficient is the partial source.
     expect(prd.findings[0].evidenceSufficiency.status).toBe("insufficient");
     expect(prd.findings[0].evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
-    expect(prd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
-    // The version that only claimed the downgraded requirement is dropped.
+    expect(prd.requirements).toHaveLength(0);
+    // The version plan artifact is empty.
     const versionPlan = (await store.readArtifact(runId, "version-plan", 1)) as { versions: { requirementIds: string[] }[] };
     expect(versionPlan.versions).toHaveLength(0);
   });

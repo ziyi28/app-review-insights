@@ -6,6 +6,9 @@ export type ConfidenceLevel = z.infer<typeof ConfidenceLevelSchema>;
 export const PrioritySchema = z.enum(["P0", "P1", "P2"]);
 export type Priority = z.infer<typeof PrioritySchema>;
 
+export const ClosureStatusSchema = z.enum(["closed", "partial", "assumption-only", "invalid"]);
+export type ClosureStatus = z.infer<typeof ClosureStatusSchema>;
+
 /**
  * The seven decision factors behind a version planning decision. Severity,
  * User Impact, Implementation Scope, Dependency and rationale are the model's
@@ -183,11 +186,17 @@ export const RequirementSchema = z.object({
 });
 export type Requirement = z.infer<typeof RequirementSchema>;
 
+export const AssumptionOriginSchema = z.enum(["model", "insufficient-finding", "rejected-requirement"]);
+export type AssumptionOrigin = z.infer<typeof AssumptionOriginSchema>;
+
 /** An explicit assumption that is NOT evidence-backed. */
 export const AssumptionSchema = z.object({
   id: z.string().regex(/^asm-/).min(1),
   text: z.string().min(1).max(2_000),
   basis: z.string().min(1).max(2_000),
+  origin: AssumptionOriginSchema.default("model"),
+  sourceFindingIds: z.array(z.string()).default([]),
+  sourceReviewIds: z.array(z.string()).default([]),
 });
 export type Assumption = z.infer<typeof AssumptionSchema>;
 

@@ -4,6 +4,7 @@ import { derivePlanningFactors, priorityWithinFactorCap } from "@/domain/plannin
 import { computeGoalCoverage, uncoveredFocusAreaIds, repairIsMonotonic } from "@/domain/analysis/goal-coverage";
 import { modelProgressRelay, type StageModelClient } from "../dependencies";
 import { reviewIdsForFindings } from "@/domain/traceability/evidence-sources";
+import { createAssumptionFromInsufficientFinding } from "@/domain/analysis/sufficiency";
 
 export type PlanningStageContext = {
   model: StageModelClient;
@@ -29,7 +30,7 @@ export type PlanningWithCoverageResult = PlanningStageResult & {
 
 /**
  * Normalizes a planning model output into a protocol-valid PRD plus a
- * version-plan artifact. Only requirements that reference an existing finding
+ * version-plan artifact. Only requirements that reference sufficient findings
  * survive. Each surviving requirement gets its seven planning factors: the
  * semantic ones (severity, user impact, scope, dependencies, rationale) come
  * from the model; evidence strength, confidence and frequency are recomputed
@@ -52,12 +53,20 @@ export function normalizePlanningOutput(
 ): PlanningStageResult {
   const warnings: { code: string; message: string }[] = [];
   const findingIndex = new Map(findings.map((f) => [f.id, f]));
+  const sufficientFindingIds = new Set(
+    findings.filter((f) => f.evidenceSufficiency?.status === "sufficient").map((f) => f.id),
+  );
+  const insufficientFindings = findings.filter((f) => f.evidenceSufficiency?.status === "insufficient");
 
-  // First pass: collect the requirement ids that have valid finding links so
-  // dependencies can only ever point at surviving requirements.
+  // Every insufficient finding deterministically generates a tracking assumption.
+  const insufficientAssumptions: Assumption[] = insufficientFindings.map(createAssumptionFromInsufficientFinding);
+  const rejectedAssumptions: Assumption[] = [];
+
+  // First pass: collect the requirement ids that have valid sufficient finding links
+  // so dependencies can only ever point at surviving requirements.
   const supportedRequirementIds = new Set<string>();
   for (const req of output.requirements) {
-    if (req.findingIds.some((id) => findingIndex.has(id))) {
+    if (req.findingIds.some((id) => sufficientFindingIds.has(id))) {
       supportedRequirementIds.add(req.id);
     }
   }
@@ -66,11 +75,38 @@ export function normalizePlanningOutput(
   const versionIndex = new Set(output.versions.map((v) => v.id));
 
   for (const req of output.requirements) {
-    const validFindingIds = req.findingIds.filter((id) => findingIndex.has(id));
+    const validFindingIds = req.findingIds.filter((id) => sufficientFindingIds.has(id));
     if (validFindingIds.length === 0) {
-      warnings.push({ code: "UNSUPPORTED_REQUIREMENT", message: `dropped ${req.id} (no valid finding links)` });
+      const existingFindingIds = req.findingIds.filter((id) => findingIndex.has(id));
+      if (existingFindingIds.length > 0) {
+        // The requirement cited findings that all have insufficient evidence.
+        // Convert to a rejected-requirement assumption.
+        const sourceReviewIds = reviewIdsForFindings(existingFindingIds, findings);
+        rejectedAssumptions.push({
+          id: `asm-rejected-${req.id}`,
+          text: req.description ? `${req.title}: ${req.description}`.slice(0, 2000) : req.title.slice(0, 2000),
+          basis: `Requirement rejected: referenced finding(s) (${existingFindingIds.join(", ")}) lack sufficient evidence`.slice(0, 2000),
+          origin: "rejected-requirement",
+          sourceFindingIds: existingFindingIds,
+          sourceReviewIds,
+        });
+        warnings.push({
+          code: "REQUIREMENT_REJECTED_INSUFFICIENT_EVIDENCE",
+          message: `rejected ${req.id} (all referenced findings lack sufficient evidence)`,
+        });
+      } else {
+        warnings.push({ code: "UNSUPPORTED_REQUIREMENT", message: `dropped ${req.id} (no valid finding links)` });
+      }
       continue;
     }
+
+    if (validFindingIds.length < req.findingIds.length) {
+      warnings.push({
+        code: "PLANNING_INSUFFICIENT_FINDING_DROPPED",
+        message: `${req.id} had insufficient or unknown finding links removed`,
+      });
+    }
+
     // Dependencies may only reference surviving requirements and never
     // themselves; anything else is dropped and surfaced as a warning.
     const dependencyRequirementIds = [...new Set(
@@ -146,11 +182,24 @@ export function normalizePlanningOutput(
     }
   }
 
-  const assumptions: Assumption[] = output.assumptions.map((a) => ({
+  const modelAssumptions: Assumption[] = output.assumptions.map((a) => ({
     id: a.id,
     text: a.text,
     basis: a.basis,
+    origin: "model" as const,
+    sourceFindingIds: [],
+    sourceReviewIds: [],
   }));
+
+  // Merge all assumptions while deduplicating IDs
+  const seenAsmIds = new Set<string>();
+  const assumptions: Assumption[] = [];
+  for (const a of [...insufficientAssumptions, ...rejectedAssumptions, ...modelAssumptions]) {
+    if (!seenAsmIds.has(a.id)) {
+      seenAsmIds.add(a.id);
+      assumptions.push(a);
+    }
+  }
 
   // Second pass: only requirements that actually target a version may be
   // listed in it, and versions left with no requirements are deleted so the

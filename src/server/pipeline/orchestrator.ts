@@ -6,6 +6,7 @@ import { prepareReviews } from "@/domain/reviews/prepare";
 import { validateTraceability } from "@/domain/traceability/validate";
 import { buildEvidenceValidationReport } from "@/domain/analysis/evidence-validation";
 import { computeGoalCoverage } from "@/domain/analysis/goal-coverage";
+import { createAssumptionFromInsufficientFinding } from "@/domain/analysis/sufficiency";
 import { runScopeStage } from "./stages/scope";
 import { runTopicsStage } from "./stages/topics";
 import { runFindingsStage, normalizeFindings } from "./stages/findings";
@@ -481,12 +482,18 @@ export async function executeRun(
     // finding is short of the evidentiary bar, cannot support a broad or
     // critical plan. A run with ZERO findings stops here — no planning/tests
     // model calls, no PRD/test artifacts, and a final report that cannot be
-    // replayed as a complete analysis. A run that has findings (even if all
-    // are insufficient) still proceeds; the planning stage pins their
-    // requirements to P2 with no target version.
+    // replayed as a complete analysis.
+    // A run where all findings have insufficient evidence also stops here:
+    // planning, requirement-evidence, and tests stages are not invoked.
+    // Instead, an assumption-only PRD is generated, empty artifacts are written,
+    // and outcome is set to insufficient-evidence while allowing replay.
     const insufficientFindings = findingsResult.findings.filter(
       (finding) => finding.evidenceSufficiency.status === "insufficient",
     );
+    const sufficientFindings = findingsResult.findings.filter(
+      (finding) => finding.evidenceSufficiency.status === "sufficient",
+    );
+
     if (findingsResult.findings.length === 0 || insufficientFindings.length > 0) {
       const limitation: Limitation = {
         code: "INSUFFICIENT_EVIDENCE",
@@ -507,7 +514,69 @@ export async function executeRun(
     if (findingsResult.findings.length === 0) {
       await publishArtifact("final-report", 1, { prd: null, report: null, limitations });
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-evidence", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+      return;
+    }
+
+    if (sufficientFindings.length === 0) {
+      const assumptions = findingsResult.findings.map(createAssumptionFromInsufficientFinding);
+      const assumptionOnlyPrd: Prd = {
+        outputLocale,
+        title: goal,
+        overview: "Analysis completed with insufficient evidence to support formal product requirements.",
+        findings: findingsResult.findings,
+        requirements: [],
+        versions: [],
+        tests: [],
+        assumptions,
+      };
+      if (focusAreas.length > 0) {
+        goalCoverageArtifact = computeGoalCoverage(focusAreas, findingsResult.findings, [], false);
+        assumptionOnlyPrd.goalCoverage = goalCoverageArtifact;
+        await publishArtifact("goal-coverage", 1, goalCoverageArtifact);
+      }
+
+      await publishArtifact("version-plan", 1, { versions: [], decisions: [] });
+      await publishArtifact("requirement-evidence", 1, {
+        verdicts: [],
+        summary: { directCount: 0, partialCount: 0, noneCount: 0, totalJudged: 0 },
+        warnings: [],
+      });
+      await publishArtifact("prd", 1, assumptionOnlyPrd);
+      await publishArtifact("tests", 1, { tests: [], prd: assumptionOnlyPrd, warnings: [] });
+
+      await startStage("traceability");
+      const reviewMap = new Map(analysisReviews.map((r) => [r.reviewId, r]));
+      const report = validateTraceability(assumptionOnlyPrd, analysisReviews.map((r) => r.reviewId), reviewMap);
+      await publishArtifact("traceability", 1, report);
+      await endStage("traceability");
+
+      await publishArtifact("final-report", 1, {
+        prd: assumptionOnlyPrd,
+        report,
+        limitations,
+        goalCoverage: goalCoverageArtifact,
+      });
+
+      await publisher.publish({
+        type: "run.completed",
+        runId,
+        data: { outcome: "insufficient-evidence", limitations },
+      });
+      await finalizeManifest(
+        runId,
+        "completed",
+        stages,
+        limitations,
+        true,
+        executionMode,
+        manifestArtifacts,
+        store,
+        goal,
+        deps.model,
+        createdAt,
+        metadata,
+      );
       return;
     }
 

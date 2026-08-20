@@ -318,4 +318,48 @@ describe("analysis contracts", () => {
     });
     expect(prd.versions).toHaveLength(1);
   });
+
+  describe("AssumptionSchema", () => {
+    it("defaults origin to model and source IDs to empty arrays for backward compatibility", () => {
+      const parsed = AssumptionSchema.parse({ id: "asm-1", text: "text", basis: "basis" });
+      expect(parsed.origin).toBe("model");
+      expect(parsed.sourceFindingIds).toEqual([]);
+      expect(parsed.sourceReviewIds).toEqual([]);
+    });
+
+    it("accepts insufficient-finding and rejected-requirement origins with source IDs", () => {
+      const asm1 = AssumptionSchema.parse({
+        id: "asm-insufficient-1",
+        text: "Low evidence claim",
+        basis: "Reasons: SUPPORT_BELOW_MINIMUM",
+        origin: "insufficient-finding",
+        sourceFindingIds: ["finding-1"],
+        sourceReviewIds: ["r1", "r2"],
+      });
+      expect(asm1.origin).toBe("insufficient-finding");
+      expect(asm1.sourceFindingIds).toEqual(["finding-1"]);
+      expect(asm1.sourceReviewIds).toEqual(["r1", "r2"]);
+
+      const asm2 = AssumptionSchema.parse({
+        id: "asm-rejected-req-1",
+        text: "Rejected req title",
+        basis: "Referenced findings lack evidence",
+        origin: "rejected-requirement",
+        sourceFindingIds: ["finding-1"],
+        sourceReviewIds: ["r1"],
+      });
+      expect(asm2.origin).toBe("rejected-requirement");
+    });
+
+    it("rejects unknown origin", () => {
+      expect(() =>
+        AssumptionSchema.parse({
+          id: "asm-1",
+          text: "text",
+          basis: "basis",
+          origin: "invalid-origin" as unknown,
+        }),
+      ).toThrow();
+    });
+  });
 });

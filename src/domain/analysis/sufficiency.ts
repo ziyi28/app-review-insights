@@ -1,4 +1,4 @@
-import type { EvidenceSufficiency } from "@/domain/contracts/analysis";
+import type { Assumption, EvidenceSufficiency, Finding } from "@/domain/contracts/analysis";
 import type { SourceStatus } from "./confidence";
 
 /**
@@ -30,3 +30,29 @@ export function assessEvidenceSufficiency(input: {
     reasons,
   };
 }
+
+/**
+ * Creates a deterministic assumption entity for an insufficient finding so that
+ * the claim is preserved for verification without entering formal requirements.
+ */
+export function createAssumptionFromInsufficientFinding(finding: Finding): Assumption {
+  const reasonText = finding.evidenceSufficiency.reasons.length > 0
+    ? finding.evidenceSufficiency.reasons.join(", ")
+    : "INSUFFICIENT_EVIDENCE";
+  const uncertaintiesText = finding.uncertainties.length > 0
+    ? ` Uncertainties: ${finding.uncertainties.join("; ")}.`
+    : "";
+  const basis = `Evidence insufficient for broad claim (${reasonText}). Supporting: ${finding.supportingReviewIds.length}, Conflicting: ${finding.conflictingReviewIds.length}.${uncertaintiesText}`.slice(0, 2000);
+  const text = (finding.summary || finding.title).slice(0, 2000);
+  const sourceReviewIds = [...new Set([...finding.supportingReviewIds, ...finding.conflictingReviewIds])];
+
+  return {
+    id: `asm-insufficient-${finding.id}`,
+    text,
+    basis,
+    origin: "insufficient-finding",
+    sourceFindingIds: [finding.id],
+    sourceReviewIds,
+  };
+}
+

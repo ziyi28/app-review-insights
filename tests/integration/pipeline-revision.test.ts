@@ -40,7 +40,8 @@ describe("executeRun (revision path)", () => {
         schemaVersion: "1",
         reviews: [
           { id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
-          { id: "b2", body: "Cannot afford the premium price", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b2", body: "Cannot afford the premium price, it is too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b3", body: "Far too expensive for a basic app", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
         ],
       }),
     });
@@ -52,13 +53,13 @@ describe("executeRun (revision path)", () => {
       // scope
       JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
       // discovery
-      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: [rid], quote: "too expensive" }] }),
+      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: rids, quote: "too expensive" }] }),
       // consolidation
       JSON.stringify({ topics: [{ id: "topic-1", label: "Price", description: "d", candidateIds: ["topic-candidate-1"] }] }),
       // findings (valid, cites the real review id)
       JSON.stringify({
         findings: [
-          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: rids, evidenceExcerpts: rids.map((id) => ({ reviewId: id, excerpt: "too expensive" })), conflictingReviewIds: [], uncertainties: [], limitations: [] },
         ],
       }),
       // planning (valid requirement)
@@ -67,22 +68,22 @@ describe("executeRun (revision path)", () => {
         requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
-      // requirement-evidence: the single candidate review supports req-1.
-      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
+      // requirement-evidence: the candidate reviews support req-1.
+      JSON.stringify({ requirementId: "req-1", verdicts: rids.map((id) => ({ reviewId: id, relation: "direct", confidence: 1, reason: "price complaint" })) }),
       // tests (cites a ghost review -> TEST_REVIEW_OUTSIDE_EVIDENCE -> traceability fails)
       JSON.stringify({
         tests: [
           { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" },
         ],
       }),
-      // revision: fixes the test to cite the real review
+      // revision: fixes the test to cite the real reviews
       JSON.stringify({
         findings: [
-          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: rids, evidenceExcerpts: rids.map((id) => ({ reviewId: id, excerpt: "too expensive" })), conflictingReviewIds: [], uncertainties: [], limitations: [] },
         ],
         requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         tests: [
-          { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" },
+          { id: "test-1", requirementIds: ["req-1"], sourceReviewIds: rids, testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" },
         ],
         assumptions: [],
         note: "fixed test citation",
@@ -111,46 +112,85 @@ describe("executeRun (revision path)", () => {
     }
   });
 
-  it("recomputes P2/null for a requirement whose only finding stays insufficient after revision", async () => {
+  it("rejects an insufficient finding requirement and converts it to assumption during revision", async () => {
     const parse = parseImportedReviews({
       fileName: "r.json",
       mediaType: "application/json",
       content: JSON.stringify({
         schemaVersion: "1",
-        reviews: [{ id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" }],
+        reviews: [
+          { id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b2", body: "Cannot afford the premium price, it is too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b3", body: "Far too expensive for a basic app", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b4", body: "Random crash on open once", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+        ],
       }),
     });
     const prepared = prepareReviews({ kind: "import", parse });
-    const rid = prepared.reviews[0].reviewId;
+    const rids = prepared.reviews.filter((r) => r.includedInAnalysis).map((r) => r.reviewId);
+    const rid1 = rids[0];
+    const rid2 = rids[1];
+    const rid3 = rids[2];
+    const rid4 = rids[3];
 
     const model = new ScriptedModelClient([
       JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
-      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: [rid], quote: "too expensive" }] }),
-      JSON.stringify({ topics: [{ id: "topic-1", label: "Price", description: "d", candidateIds: ["topic-candidate-1@c0"] }] }),
-      // findings (1 support in a 1-review corpus -> insufficient)
       JSON.stringify({
-        findings: [
-          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        topics: [
+          { id: "topic-candidate-1", label: "App issues", description: "d", supportingReviewIds: rids, quote: "too expensive" },
         ],
       }),
-      // planning: model wants P1 but the guardrail already pins it to P2/null.
       JSON.stringify({
-        title: "Plan", overview: "x", versions: [], requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
+        topics: [
+          { id: "topic-1", label: "App issues", description: "d", candidateIds: ["topic-candidate-1@c0"] },
+        ],
+      }),
+      // findings discovery
+      JSON.stringify({
+        findings: [
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid1, rid2, rid3], evidenceExcerpts: [{ reviewId: rid1, excerpt: "too expensive" }, { reviewId: rid2, excerpt: "too expensive" }, { reviewId: rid3, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+          { id: "finding-2", topicIds: ["topic-1"], title: "Rare complaint", summary: "x", supportingReviewIds: [rid1], evidenceExcerpts: [{ reviewId: rid1, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+        ],
+      }),
+      // findings consolidation
+      JSON.stringify({
+        groups: [
+          { id: "finding-1", title: "Too expensive", summary: "x", candidateIds: ["finding-1"] },
+          { id: "finding-2", title: "Rare complaint", summary: "x", candidateIds: ["finding-2"] },
+        ],
+      }),
+      // planning: req-1 points to finding-1 (sufficient)
+      JSON.stringify({
+        title: "Plan", overview: "x", versions: [{ id: "ver-1", name: "1.0.0", summary: "x", rationale: "x", requirementIds: ["req-1"] }],
+        requirements: [
+          { id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } },
+        ],
         assumptions: [],
       }),
-      // requirement-evidence: the single candidate review supports req-1.
-      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
+      // requirement-evidence
+      JSON.stringify({
+        requirementId: "req-1",
+        verdicts: [
+          { reviewId: rid1, relation: "direct", confidence: 1, reason: "price complaint" },
+          { reviewId: rid2, relation: "direct", confidence: 1, reason: "price complaint" },
+          { reviewId: rid3, relation: "direct", confidence: 1, reason: "price complaint" },
+        ],
+      }),
       // tests cite a ghost review -> traceability fails -> revision runs
       JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
-      // revision: same insufficient finding, still requests P1.
+      // revision: includes req-1 (sufficient) and introduces req-2 (citing insufficient finding-2)
       JSON.stringify({
         findings: [
-          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid1, rid2, rid3], evidenceExcerpts: [{ reviewId: rid1, excerpt: "too expensive" }, { reviewId: rid2, excerpt: "too expensive" }, { reviewId: rid3, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+          { id: "finding-2", topicIds: ["topic-1"], title: "Rare complaint", summary: "x", supportingReviewIds: [rid1], evidenceExcerpts: [{ reviewId: rid1, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
         ],
-        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
-        tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }],
+        requirements: [
+          { id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } },
+          { id: "req-2", findingIds: ["finding-2"], title: "Fix rare issue", description: "x", priority: "P1", acceptanceCriteria: ["fixed"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "Fix rare" } },
+        ],
+        tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid1, rid2, rid3], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }],
         assumptions: [],
-        note: "fixed test citation",
+        note: "fixed test citation and added rare requirement",
       }),
     ]);
 
@@ -162,13 +202,17 @@ describe("executeRun (revision path)", () => {
 
     const manifest = await store.readManifest(runId);
     expect(manifest.status).toBe("completed");
-    // The revised PRD (attempt-02) must still carry the deterministic guardrail.
+    // The revised PRD (attempt-02) must reject req-2 (backed only by insufficient finding-2)
+    // and convert it to a rejected-requirement assumption, keeping req-1.
     const revisedPrd = (await store.readArtifact(runId, "prd", 2)) as {
-      requirements: { priority: string; versionId: string | null }[];
-      findings: { evidenceSufficiency: { status: string } }[];
+      requirements: { id: string; priority: string; versionId: string | null }[];
+      findings: { id: string; evidenceSufficiency: { status: string } }[];
+      assumptions: { id: string; origin?: string }[];
     };
-    expect(revisedPrd.findings[0].evidenceSufficiency.status).toBe("insufficient");
-    expect(revisedPrd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
+    expect(revisedPrd.requirements).toHaveLength(1);
+    expect(revisedPrd.requirements[0].id).toBe("req-1");
+    expect(revisedPrd.assumptions.some((a) => a.id === "asm-rejected-req-2")).toBe(true);
+    expect(revisedPrd.assumptions.some((a) => a.id === "asm-insufficient-finding-2")).toBe(true);
   });
 
   it("fails explicitly (run.failed + manifest failed) when revision leaves traceability invalid", async () => {
@@ -177,35 +221,41 @@ describe("executeRun (revision path)", () => {
       mediaType: "application/json",
       content: JSON.stringify({
         schemaVersion: "1",
-        reviews: [{ id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" }],
+        reviews: [
+          { id: "b1", body: "Subscription is way too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b2", body: "Cannot afford the premium price, it is too expensive", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+          { id: "b3", body: "Far too expensive for a basic app", rating: 1, updatedAt: "2026-07-01T00:00:00Z" },
+        ],
       }),
     });
     const prepared = prepareReviews({ kind: "import", parse });
-    const rid = prepared.reviews[0].reviewId;
+    const rids = prepared.reviews.filter((r) => r.includedInAnalysis).map((r) => r.reviewId);
+    const rid = rids[0];
 
     const model = new ScriptedModelClient([
       JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
-      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: [rid], quote: "too expensive" }] }),
+      JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Price", description: "d", supportingReviewIds: rids, quote: "too expensive" }] }),
       JSON.stringify({ topics: [{ id: "topic-1", label: "Price", description: "d", candidateIds: ["topic-candidate-1@c0"] }] }),
       JSON.stringify({
         findings: [
-          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: rids, evidenceExcerpts: rids.map((id) => ({ reviewId: id, excerpt: "too expensive" })), conflictingReviewIds: [], uncertainties: [], limitations: [] },
         ],
       }),
       JSON.stringify({
-        title: "Plan", overview: "x", versions: [], requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
+        title: "Plan", overview: "x", versions: [{ id: "ver-1", name: "1.0.0", summary: "x", rationale: "x", requirementIds: ["req-1"] }],
+        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         assumptions: [],
       }),
-      // requirement-evidence: the single candidate review supports req-1.
-      JSON.stringify({ requirementId: "req-1", verdicts: [{ reviewId: rid, relation: "direct", confidence: 1, reason: "price complaint" }] }),
+      // requirement-evidence: candidate reviews support req-1.
+      JSON.stringify({ requirementId: "req-1", verdicts: rids.map((id) => ({ reviewId: id, relation: "direct", confidence: 1, reason: "price complaint" })) }),
       // tests cite a ghost review -> traceability fails -> revision runs
       JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
-      // revision still leaves the requirement uncovered (empty tests)
+      // revision still leaves the requirement uncovered (empty tests -> REQUIREMENT_UNTESTED violation)
       JSON.stringify({
         findings: [
-          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: [rid], evidenceExcerpts: [{ reviewId: rid, excerpt: "too expensive" }], conflictingReviewIds: [], uncertainties: [], limitations: [] },
+          { id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x", supportingReviewIds: rids, evidenceExcerpts: rids.map((id) => ({ reviewId: id, excerpt: "too expensive" })), conflictingReviewIds: [], uncertainties: [], limitations: [] },
         ],
-        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: null, planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
+        requirements: [{ id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } }],
         tests: [],
         assumptions: [],
         note: "could not fix",
@@ -227,12 +277,7 @@ describe("executeRun (revision path)", () => {
     expect(manifest.limitations.some((l) => l.code === "TRACEABILITY_INVALID_AFTER_REVISION")).toBe(true);
   });
 
-  it("does not re-upgrade a partial source to complete during revision", async () => {
-    // Regression: the revision stage re-normalizes model output, and it must
-    // thread the SAME authoritative source status. A partial source that kept a
-    // finding insufficient via SOURCE_NOT_COMPLETE cannot be silently upgraded
-    // to complete by the revision path, which would let a P2 requirement jump
-    // back to P1 with a version.
+  it("keeps partial source findings insufficient with SOURCE_NOT_COMPLETE and produces assumption-only PRD", async () => {
     const rawReviews: RawReview[] = Array.from({ length: 100 }, (_, i) => ({
       sourceReviewId: `rev-${i + 1}`,
       source: "apple-rss",
@@ -249,9 +294,6 @@ describe("executeRun (revision path)", () => {
       version: null,
       updatedAt: "2026-07-01T10:00:00Z",
     }));
-    // The revision ledger is keyed by STABLE reviewId, so the script must cite
-    // the stable ids for the three distinct supporting reviews (computed through
-    // the same deterministic prepare path the orchestrator uses).
     const prepared = prepareReviews({
       kind: "collected",
       reviews: rawReviews,
@@ -270,8 +312,7 @@ describe("executeRun (revision path)", () => {
       JSON.stringify({ topics: [{ id: "topic-candidate-1", label: "Pricing", description: "d", supportingReviewIds: [rid1, rid2, rid3], quote: "price is too high" }] }),
       // topic consolidation
       JSON.stringify({ topics: [{ id: "topic-1", label: "Pricing", description: "d", candidateIds: ["topic-candidate-1"] }] }),
-      // findings: 3 supports in a 100-review corpus — only the partial source
-      // keeps it insufficient.
+      // findings: 3 supports in a 100-review corpus — the partial source keeps it insufficient.
       JSON.stringify({
         findings: [
           {
@@ -285,46 +326,6 @@ describe("executeRun (revision path)", () => {
             conflictingReviewIds: [], uncertainties: [], limitations: [],
           },
         ],
-      }),
-      // planning: model requests P1 in a version; guardrail pins to P2/null.
-      JSON.stringify({
-        title: "Plan", overview: "x",
-        versions: [{ id: "ver-1", name: "1.0.0", summary: "x", rationale: "x", requirementIds: ["req-1"] }],
-        requirements: [
-          { id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } },
-        ],
-        assumptions: [],
-      }),
-      // requirement-evidence: all three candidate reviews support req-1.
-      JSON.stringify({ requirementId: "req-1", verdicts: [
-        { reviewId: rid1, relation: "direct", confidence: 1, reason: "price complaint" },
-        { reviewId: rid2, relation: "direct", confidence: 1, reason: "price complaint" },
-        { reviewId: rid3, relation: "direct", confidence: 1, reason: "price complaint" },
-      ] }),
-      // tests cite a ghost review -> traceability fails -> revision runs
-      JSON.stringify({ tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: ["ghost-review"], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }] }),
-      // revision: fixes the test citation but keeps requesting P1/ver-1. The
-      // deterministic re-normalization must still downgrade it to P2/null and
-      // the finding must still report SOURCE_NOT_COMPLETE.
-      JSON.stringify({
-        findings: [
-          {
-            id: "finding-1", topicIds: ["topic-1"], title: "Too expensive", summary: "x",
-            supportingReviewIds: [rid1, rid2, rid3],
-            evidenceExcerpts: [
-              { reviewId: rid1, excerpt: "price is too high" },
-              { reviewId: rid2, excerpt: "price is too high" },
-              { reviewId: rid3, excerpt: "price is too high" },
-            ],
-            conflictingReviewIds: [], uncertainties: [], limitations: [],
-          },
-        ],
-        requirements: [
-          { id: "req-1", findingIds: ["finding-1"], title: "Lower price", description: "x", priority: "P1", acceptanceCriteria: ["cheaper"], versionId: "ver-1", planningFactors: { severity: "high", userImpact: "high", implementationScope: "small", dependencyRequirementIds: [], rationale: "High user impact, small scope" } },
-        ],
-        tests: [{ id: "test-1", requirementIds: ["req-1"], sourceReviewIds: [rid1, rid2, rid3], testType: "manual", precondition: "", steps: ["s"], expectedResult: "ok" }],
-        assumptions: [],
-        note: "fixed test citation",
       }),
     ]);
 
@@ -367,18 +368,19 @@ describe("executeRun (revision path)", () => {
     const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "live");
     await executeRun(runId, "Understand pricing", "en", deps, publisher, store);
 
-    const events = await collectEvents(runId);
-    expect(events.some((e) => (e as { type: string }).type === "revision.started")).toBe(true);
     const manifest = await store.readManifest(runId);
     expect(manifest.status).toBe("completed");
-    // The REVISED finding (attempt-02) must still carry the partial-source
-    // insufficiency, and the revised requirement must stay pinned to P2/null.
-    const revisedPrd = (await store.readArtifact(runId, "prd", 2)) as {
-      requirements: { priority: string; versionId: string | null }[];
+    expect(manifest.limitations.some((l) => l.code === "SERPAPI_PARTIAL")).toBe(true);
+    expect(manifest.limitations.some((l) => l.code === "INSUFFICIENT_EVIDENCE")).toBe(true);
+
+    const prd = (await store.readArtifact(runId, "prd", 1)) as {
+      requirements: unknown[];
       findings: { evidenceSufficiency: { status: string; reasons: string[] } }[];
+      assumptions: { id: string; origin?: string }[];
     };
-    expect(revisedPrd.findings[0].evidenceSufficiency.status).toBe("insufficient");
-    expect(revisedPrd.findings[0].evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
-    expect(revisedPrd.requirements[0]).toMatchObject({ priority: "P2", versionId: null });
+    expect(prd.findings[0].evidenceSufficiency.status).toBe("insufficient");
+    expect(prd.findings[0].evidenceSufficiency.reasons).toContain("SOURCE_NOT_COMPLETE");
+    expect(prd.requirements).toHaveLength(0);
+    expect(prd.assumptions.some((a) => a.id === "asm-insufficient-finding-1")).toBe(true);
   });
 });
