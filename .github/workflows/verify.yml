@@ -17,16 +17,40 @@ jobs:
           fetch-depth: 0
 
       - name: Check git whitespace errors
+        shell: bash
         run: |
+          TARGET="${{ github.sha }}"
+
+          check_range() {
+            local base="$1"
+            local target="$2"
+
+            if git rev-parse --verify "${base}^{commit}" >/dev/null 2>&1; then
+              git diff --check "$base" "$target"
+              return
+            fi
+
+            echo "::warning::Whitespace baseline $base is unavailable; checking only $target against its parent."
+            local parent
+            parent="$(git rev-parse --verify "${target}^" 2>/dev/null || true)"
+            if [ -n "$parent" ]; then
+              git diff --check "$parent" "$target"
+            else
+              local empty_tree
+              empty_tree="$(git hash-object -t tree /dev/null)"
+              git diff --check "$empty_tree" "$target"
+            fi
+          }
+
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            git diff --check ${{ github.event.pull_request.base.sha }} ${{ github.sha }}
+            check_range "${{ github.event.pull_request.base.sha }}" "$TARGET"
           else
             BEFORE="${{ github.event.before }}"
             if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
               EMPTY_TREE=$(git hash-object -t tree /dev/null)
-              git diff --check $EMPTY_TREE ${{ github.sha }}
+              git diff --check "$EMPTY_TREE" "$TARGET"
             else
-              git diff --check $BEFORE ${{ github.sha }}
+              check_range "$BEFORE" "$TARGET"
             fi
           fi
 
