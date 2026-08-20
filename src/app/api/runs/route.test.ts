@@ -389,6 +389,25 @@ describe("POST /api/runs preview-backed live", () => {
     const sourceEvidence = (await store.readArtifact(body.runId, "source-evidence", 1)) as Record<string, unknown>;
     expect(sourceEvidence.reviewLimit).toBe(100);
   });
+
+  it("rejects chunked request body exceeding 8 MiB without Content-Length with 413", async () => {
+    const limit = 8 * 1024 * 1024;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(limit));
+        controller.enqueue(new Uint8Array([1]));
+        controller.close();
+      },
+    });
+    const request = new Request("http://localhost/api/runs", {
+      method: "POST",
+      body,
+      headers: { "content-type": "application/json" },
+      duplex: "half",
+    } as RequestInit);
+    const res = await POST(request);
+    expect(res.status).toBe(413);
+  });
 });
 
 describe("GET /api/runs listing", () => {

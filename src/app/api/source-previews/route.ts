@@ -4,8 +4,11 @@ import { z } from "zod";
 import { loadConfig } from "@/server/config";
 import { parseAppStoreUrl } from "@/server/sources/app-store-url";
 import { buildPreviewSnapshot, pruneExpiredPreviews, type SourcePreview, type LiveProvider } from "@/server/sources/source-preview";
+import { readBodyWithLimit, RequestBodyTooLargeError } from "@/server/http/read-body-with-limit";
 
 export const runtime = "nodejs";
+
+const MAX_PREVIEW_BYTES = 64 * 1024;
 
 export const SourcePreviewRequestSchema = z.object({
   protocolVersion: z.literal("1"),
@@ -23,7 +26,7 @@ export type SourcePreviewRequest = z.infer<typeof SourcePreviewRequestSchema>;
  */
 export async function POST(req: Request) {
   const contentLength = Number(req.headers.get("content-length") || 0);
-  if (contentLength > 64 * 1024) {
+  if (contentLength > MAX_PREVIEW_BYTES) {
     return problem("413", "payload too large");
   }
 
@@ -32,9 +35,19 @@ export async function POST(req: Request) {
   // Lazy cleanup of expired previews on the write path.
   await pruneExpiredPreviews(cfg.sourcePreviewsDir, new Date().toISOString());
 
+  let raw: string;
+  try {
+    raw = await readBodyWithLimit(req.body, MAX_PREVIEW_BYTES);
+  } catch (err) {
+    if (err instanceof RequestBodyTooLargeError) {
+      return problem("413", "payload too large", err.message);
+    }
+    return problem("400", "invalid request body");
+  }
+
   let body: unknown;
   try {
-    body = await req.json();
+    body = JSON.parse(raw);
   } catch {
     return problem("400", "invalid JSON body");
   }

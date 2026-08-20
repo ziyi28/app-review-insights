@@ -15,6 +15,8 @@ import type { Limitation } from "@/server/sources/apple-rss-collector";
 import { readPreview, isPreviewExpired, buildPreviewSnapshot, type SourcePreview } from "@/server/sources/source-preview";
 import { extractAppNameFromUrl, parseAppStoreUrl } from "@/server/sources/app-store-url";
 
+import { readBodyWithLimit, RequestBodyTooLargeError } from "@/server/http/read-body-with-limit";
+
 export const runtime = "nodejs";
 
 // The background pipeline can run for tens of minutes; allow the route (and its
@@ -99,13 +101,22 @@ export async function POST(req: Request) {
   const cfg = loadConfig();
   const store = new RunStore(cfg.runsDir);
 
+  // Fast-fail on Content-Length header if provided
+  const contentLength = Number(req.headers.get("content-length") || 0);
+  if (contentLength > MAX_REQUEST_BYTES) {
+    return problem("413", "request body too large", `content-length exceeds ${MAX_REQUEST_BYTES} bytes`);
+  }
+
   // Read the raw body with a byte cap before JSON.parse so a huge request
   // cannot exhaust memory first and only then get rejected.
   let raw: string;
   try {
     raw = await readBodyWithLimit(req.body, MAX_REQUEST_BYTES);
   } catch (err) {
-    return problem("413", "request body too large", err instanceof Error ? err.message : String(err));
+    if (err instanceof RequestBodyTooLargeError) {
+      return problem("413", "request body too large", err.message);
+    }
+    return problem("400", "invalid request body", err instanceof Error ? err.message : String(err));
   }
 
   let parsedBody: unknown;
@@ -130,25 +141,6 @@ export async function POST(req: Request) {
 
 function problem(status: string, title: string, detail?: string): NextResponse {
   return NextResponse.json({ type: "about:blank", title, status, detail }, { status: Number(status), headers: { "content-type": "application/problem+json" } });
-}
-
-async function readBodyWithLimit(body: ReadableStream<Uint8Array> | null, maxBytes: number): Promise<string> {
-  if (!body) return "";
-  const reader = body.getReader();
-  const decoder = new TextDecoder();
-  let size = 0;
-  let text = "";
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    size += value.byteLength;
-    if (size > maxBytes) {
-      await reader.cancel();
-      throw new Error(`exceeds ${maxBytes} bytes`);
-    }
-    text += decoder.decode(value, { stream: true });
-  }
-  return text + decoder.decode();
 }
 
 /**

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
 import { loadConfig, isModelConfigured, isModelApiKeyConfigured, persistRuntimeConfig, isSerpApiConfigured, type RuntimeModelConfig } from "@/server/config";
 import { ConfigUpdateSchema } from "@/domain/contracts/config";
+import { readBodyWithLimit, RequestBodyTooLargeError } from "@/server/http/read-body-with-limit";
 
 export const runtime = "nodejs";
+
+const MAX_CONFIG_BYTES = 64 * 1024;
 
 /** Non-sensitive configuration status for the UI. Never exposes keys. */
 function configStatus(cfg: ReturnType<typeof loadConfig>) {
@@ -38,13 +41,23 @@ export async function GET() {
  */
 export async function POST(req: Request) {
   const contentLength = Number(req.headers.get("content-length") || 0);
-  if (contentLength > 64 * 1024) {
+  if (contentLength > MAX_CONFIG_BYTES) {
     return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
+
+  let raw: string;
+  try {
+    raw = await readBodyWithLimit(req.body, MAX_CONFIG_BYTES);
+  } catch (err) {
+    if (err instanceof RequestBodyTooLargeError) {
+      return NextResponse.json({ error: "payload too large", detail: err.message }, { status: 413 });
+    }
+    return NextResponse.json({ error: "invalid request body" }, { status: 400 });
   }
 
   let body: unknown;
   try {
-    body = await req.json();
+    body = JSON.parse(raw);
   } catch {
     return NextResponse.json({ error: "invalid JSON body" }, { status: 400 });
   }

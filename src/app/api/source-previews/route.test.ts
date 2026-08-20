@@ -237,4 +237,23 @@ describe("POST /api/source-previews", () => {
     expect(res.status).toBe(200);
     expect(new URL(capturedUrl).searchParams.get("country")).toBe("us");
   });
+
+  it("rejects chunked request body exceeding 64 KiB without Content-Length with 413", async () => {
+    const limit = 64 * 1024;
+    const body = new ReadableStream<Uint8Array>({
+      start(controller) {
+        controller.enqueue(new Uint8Array(limit));
+        controller.enqueue(new Uint8Array([1]));
+        controller.close();
+      },
+    });
+    const request = new Request("http://localhost/api/source-previews", {
+      method: "POST",
+      body,
+      headers: { "content-type": "application/json" },
+      duplex: "half",
+    } as RequestInit);
+    const res = await POST(request);
+    expect(res.status).toBe(413);
+  });
 });
