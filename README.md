@@ -245,14 +245,11 @@ SocialCrawl 活动集成已删除；旧回放可能仍显示旧来源 provenance
 
 - 每次运行都可以从快照离线回放，无需网络、无需模型；界面的 **缓存回放** 模式会列出可回放的
   运行，并在新的运行 ID 下重新物化所有产物，标记为 **缓存回放**，且从不调用 Apple 或模型。
-- `fixtures/demo-runs/` 下自带**两个真实**演示 fixture，均为美国区 App Store 的真实抓取、
-  由真实模型分析、已做隐私最小化处理、带完整溯源：
-  - `run-x-twitter-us/` —— App ID 333903271（「X」）；
-  - `run-workout-for-women-us/` —— App ID 839285684（「Workout for Women」，即本评估的主示例）。
-  - 刻意附带两个不同品类 App，用于证明流水线未针对任何单一 App 写死。
-  - 每个 fixture 保留评论 ID / 评分 / 标题 / 正文 / 版本 / 时间戳，移除评论者昵称、作者
-    URI 和敏感请求头；其 `provenance.json` 记录抓取时间、来源 URL 模式、商店地区、模型、
-    temperature 和提示词版本。
+- `fixtures/demo-runs/` 下自带真实演示 fixture，为美国区 App Store 的真实抓取（300 条评论）、
+  由真实模型（如 gpt5.6luna）分析、已做隐私最小化处理、带完整溯源：
+  - `run-workout-for-women-us/` —— App ID 839285684（「Workout for Women」，包含 300 条美国区真实评论与全链路闭环证明）。
+  - 保留评论 ID / 评分 / 标题 / 正文 / 版本 / 时间戳，移除评论者昵称、作者 URI 和敏感请求头；
+    其 `provenance.json` 记录抓取时间、来源 URL 模式、商店地区、模型、推理强度和提示词版本。
 - 真实快照会被如实标记。应用绝不把 mock、规则后备或静态文本伪装成实时模型结果。
 
 ## 失败处理
@@ -307,7 +304,10 @@ fixtures/demo-runs/      真实、可回放快照
 - 运行快照绝不包含 API Key；模型使用元数据只记录 provider / model / temperature /
   version / duration / tokens。
 - 评论者身份字段不会被存储；自带 fixture 已做隐私最小化处理。
-- 这是本地单用户应用。不要直接暴露到公网。
+- **本地交付与安全边界**：
+  - 开发与启动服务默认严格绑定 `127.0.0.1`（`npm run dev` 与 `npm run start` 均指定 `-H 127.0.0.1`），避免非预期的局域网或公网暴露；
+  - 非导入类 API 请求体限制为 64KB（防范异常请求和内存消耗）；
+  - 本系统定位为本地单用户辅助工具，未设多用户鉴权，严禁直接暴露在公共未授信网络中。
 
 ## 非目标
 

@@ -327,18 +327,16 @@ fields, limits, and validation behavior. Same-origin dedupe is exact only.
   model; the UI's **Cached Replay** mode lists replayable runs and re-materializes
   all artifacts under a fresh run id, labeled **Cached Replay**, and it never
   calls Apple or the model.
-- Two **real** demo fixtures ship under `fixtures/demo-runs/`, each a real
-  capture from the US App Store analyzed by a real model, privacy-minimized,
-  with full provenance:
-  - `run-x-twitter-us/` — App ID 333903271 ("X");
-  - `run-workout-for-women-us/` — App ID 839285684 ("Workout for Women"), the
-    assessment's primary example.
-  - Shipping two different app categories is intentional: it demonstrates the
-    pipeline is not hard-coded to any single app.
-  - Each fixture retains review id / rating / title / body / version / timestamp
-    and removes reviewer nickname, author URI, and sensitive headers; its
-    `provenance.json` records capture time, source URL pattern, storefront,
-    model, temperature, and prompt versions.
+- A **real** demo fixture ships under `fixtures/demo-runs/`, captured from the US
+  App Store (300 reviews) and analyzed by a real model (e.g. gpt5.6luna),
+  privacy-minimized, with full provenance:
+  - `run-workout-for-women-us/` — App ID 839285684 ("Workout for Women"),
+    the assessment's primary example with 300 real US reviews and complete
+    traceability closure.
+  - Retains review id / rating / title / body / version / timestamp and removes
+    reviewer nickname, author URI, and sensitive headers; its `provenance.json`
+    records capture time, source URL pattern, storefront, model, reasoning
+    effort, and prompt versions.
 - Real snapshots are marked as such. The app never pretends a mock, a rule
   fallback, or a static text is a live model result.
 
@@ -400,8 +398,13 @@ fixtures/demo-runs/      real, replayable snapshot
   provider/model/temperature/version/duration/tokens.
 - Reviewer identity fields are not stored; the bundled fixture is
   privacy-minimized.
-- This is a local, single-user app. Do not expose it directly to the public
-  internet.
+- **Local Delivery & Security Boundaries**:
+  - Development and startup servers are strictly bound to `127.0.0.1` by default
+    (`dev` and `start` scripts include `-H 127.0.0.1`) to prevent unintended exposure
+    on local area networks or the public internet.
+  - Non-import API request bodies are limited to 64KB (preventing memory exhaustion).
+  - This is a local single-user tool with no external multi-tenant authentication;
+    do not expose it directly to untrusted public networks.
 
 ## Non-goals
 

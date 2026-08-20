@@ -22,6 +22,11 @@ export type SourcePreviewRequest = z.infer<typeof SourcePreviewRequestSchema>;
  * carries only summaries — full reviews never leave the server.
  */
 export async function POST(req: Request) {
+  const contentLength = Number(req.headers.get("content-length") || 0);
+  if (contentLength > 64 * 1024) {
+    return problem("413", "payload too large");
+  }
+
   const cfg = loadConfig();
 
   // Lazy cleanup of expired previews on the write path.

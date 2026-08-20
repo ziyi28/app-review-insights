@@ -37,6 +37,11 @@ export async function GET() {
  * tasks. The response re-reports status only; the API key is never returned.
  */
 export async function POST(req: Request) {
+  const contentLength = Number(req.headers.get("content-length") || 0);
+  if (contentLength > 64 * 1024) {
+    return NextResponse.json({ error: "payload too large" }, { status: 413 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();

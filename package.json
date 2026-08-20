@@ -4,9 +4,9 @@
   "description": "Local, model-driven analysis of App Store user reviews into evidence-grounded product plans",
   "scripts": {
     "test": "npm run test:unit",
-    "dev": "next dev",
+    "dev": "next dev -H 127.0.0.1",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -H 127.0.0.1",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run --project unit --project unit:dom",
