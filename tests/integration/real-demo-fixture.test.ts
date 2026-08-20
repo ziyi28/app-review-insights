@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { execFileSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { createHash } from "node:crypto";
 import path from "node:path";
@@ -100,6 +101,22 @@ describe("real demo fixtures", () => {
             expect(r.source).toBe("serpapi-apple-reviews");
           }
         }
+      });
+
+      it("pins cached source archives to LF line endings in Git", () => {
+        const sourceEvidence = JSON.parse(
+          readFileSync(path.join(dir, "artifacts", "source-evidence.attempt-01.json"), "utf8"),
+        ) as AppStoreReviewSourceSummary;
+        const cacheEvidence = sourceEvidence.cache!;
+        const archivePath = path.join(dir, cacheEvidence.rawFile);
+        const gitArchivePath = path.relative(process.cwd(), archivePath).split(path.sep).join("/");
+        const eolAttribute = execFileSync(
+          "git",
+          ["check-attr", "eol", "--", gitArchivePath],
+          { cwd: process.cwd(), encoding: "utf8" },
+        ).trim();
+
+        expect(eolAttribute).toContain("eol: lf");
       });
 
       it("maintains consistent runId and event IDs across manifest and events.ndjson", () => {

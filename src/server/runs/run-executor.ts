@@ -159,7 +159,7 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
     }
 
     // Re-materialize the source run's archived raw files. writeSourceFile only
-    // accepts safe sources/apple|import paths and rejects overwrites, so a
+    // accepts safe sources/apple|import|cache paths and rejects overwrites, so a
     // malicious bundle can never plant or clobber files outside those trees.
     for (const file of bundle.sourceFiles ?? []) {
       await store.writeSourceFile(runId, file.relativePath, file.content);

@@ -9,7 +9,7 @@ export type ReplayBundle = {
   manifest: RunManifest;
   events: unknown[];
   artifacts: Record<string, unknown>;
-  /** Raw source files archived under sources/apple|import, read back for replay. */
+  /** Raw source files archived under sources/apple|import|cache, read back for replay. */
   sourceFiles?: SourceFile[];
 };
 
