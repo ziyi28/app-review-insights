@@ -67,7 +67,7 @@ describe("DELETE /api/runs/[runId]", () => {
   });
 
   it("returns 404 for a bundled fixture id (fixtures are not deletable)", async () => {
-    const res = await del("run-x-twitter-us");
+    const res = await del("run-workout-for-women-us");
     expect(res.status).toBe(404);
   });
 
@@ -116,18 +116,11 @@ describe("DELETE /api/runs/[runId]", () => {
 
 describe("GET /api/runs/[runId] (bundled fixture viewing)", () => {
   it("returns 200 for a bundled fixture run id", async () => {
-    const res = await get("run-x-twitter-us");
-    expect(res.status).toBe(200);
-    const manifest = (await res.json()) as { runId: string; status: string; goal?: string };
-    expect(manifest.runId).toBe("run-x-twitter-us");
-    expect(manifest.status).toBe("completed");
-  });
-
-  it("returns 200 for the workout fixture", async () => {
     const res = await get("run-workout-for-women-us");
     expect(res.status).toBe(200);
-    const manifest = (await res.json()) as { runId: string };
+    const manifest = (await res.json()) as { runId: string; status: string; goal?: string };
     expect(manifest.runId).toBe("run-workout-for-women-us");
+    expect(manifest.status).toBe("completed");
   });
 
   it("returns 404 for a run id in neither root", async () => {
@@ -138,8 +131,8 @@ describe("GET /api/runs/[runId] (bundled fixture viewing)", () => {
   it("prefers a runtime run when a fixture shares the same id", async () => {
     // A runtime run with the same id as a fixture must win.
     const store = new RunStore(process.env.RUNS_DIR!);
-    await store.writeManifest("run-x-twitter-us", {
-      runId: "run-x-twitter-us",
+    await store.writeManifest("run-workout-for-women-us", {
+      runId: "run-workout-for-women-us",
       status: "completed",
       executionMode: "live",
       createdAt: "2026-08-12T00:00:00Z",
@@ -150,20 +143,20 @@ describe("GET /api/runs/[runId] (bundled fixture viewing)", () => {
       limitations: [],
       canReplay: true,
     });
-    const res = await get("run-x-twitter-us");
+    const res = await get("run-workout-for-women-us");
     expect(res.status).toBe(200);
     const manifest = (await res.json()) as { goal: string };
     expect(manifest.goal).toBe("RUNTIME WINS");
   });
 
   it("keeps fixture runs read-only: GET works, DELETE still 404", async () => {
-    const getRes = await get("run-x-twitter-us");
+    const getRes = await get("run-workout-for-women-us");
     expect(getRes.status).toBe(200);
     // The same fixture id must never be deletable even though GET now finds it.
-    const delRes = await del("run-x-twitter-us");
+    const delRes = await del("run-workout-for-women-us");
     expect(delRes.status).toBe(404);
     // The fixture directory is untouched.
-    const fixtureDir = path.join(process.cwd(), "fixtures", "demo-runs", "run-x-twitter-us");
+    const fixtureDir = path.join(process.cwd(), "fixtures", "demo-runs", "run-workout-for-women-us");
     expect(existsSync(fixtureDir)).toBe(true);
   });
 });

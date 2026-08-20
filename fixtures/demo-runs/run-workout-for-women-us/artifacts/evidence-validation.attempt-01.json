@@ -1,56 +1,64 @@
 {
-  "validFindingCount": 9,
-  "rejectedFindingCount": 0,
-  "sufficientCount": 5,
-  "insufficientCount": 4,
+  "validFindingCount": 8,
+  "rejectedFindingCount": 2,
+  "sufficientCount": 6,
+  "insufficientCount": 2,
   "findings": [
     {
       "findingId": "finding-1",
-      "supportCount": 58,
-      "corpusCount": 439,
-      "supportRatio": 0.13211845102505695,
-      "conflictCount": 23,
+      "supportCount": 24,
+      "corpusCount": 300,
+      "supportRatio": 0.08,
+      "conflictCount": 13,
       "confidence": "medium",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
       "findingId": "finding-2",
-      "supportCount": 40,
-      "corpusCount": 439,
-      "supportRatio": 0.09111617312072894,
-      "conflictCount": 7,
-      "confidence": "high",
+      "supportCount": 6,
+      "corpusCount": 300,
+      "supportRatio": 0.02,
+      "conflictCount": 4,
+      "confidence": "medium",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
       "findingId": "finding-3",
-      "supportCount": 33,
-      "corpusCount": 439,
-      "supportRatio": 0.07517084282460136,
-      "conflictCount": 8,
+      "supportCount": 26,
+      "corpusCount": 300,
+      "supportRatio": 0.08666666666666667,
+      "conflictCount": 2,
       "confidence": "high",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
       "findingId": "finding-4",
-      "supportCount": 7,
-      "corpusCount": 439,
-      "supportRatio": 0.015945330296127564,
-      "conflictCount": 11,
-      "confidence": "medium",
-      "sufficiency": "insufficient",
-      "reasons": [
-        "CONFLICT_NOT_MINOR"
-      ]
+      "supportCount": 16,
+      "corpusCount": 300,
+      "supportRatio": 0.05333333333333334,
+      "conflictCount": 1,
+      "confidence": "high",
+      "sufficiency": "sufficient",
+      "reasons": []
     },
     {
       "findingId": "finding-5",
-      "supportCount": 9,
-      "corpusCount": 439,
-      "supportRatio": 0.02050113895216401,
+      "supportCount": 4,
+      "corpusCount": 300,
+      "supportRatio": 0.013333333333333334,
+      "conflictCount": 0,
+      "confidence": "medium",
+      "sufficiency": "sufficient",
+      "reasons": []
+    },
+    {
+      "findingId": "finding-6",
+      "supportCount": 6,
+      "corpusCount": 300,
+      "supportRatio": 0.02,
       "conflictCount": 9,
       "confidence": "medium",
       "sufficiency": "insufficient",
@@ -59,50 +67,38 @@
       ]
     },
     {
-      "findingId": "finding-6",
-      "supportCount": 20,
-      "corpusCount": 439,
-      "supportRatio": 0.04555808656036447,
-      "conflictCount": 14,
-      "confidence": "medium",
-      "sufficiency": "sufficient",
-      "reasons": []
-    },
-    {
       "findingId": "finding-7",
-      "supportCount": 6,
-      "corpusCount": 439,
-      "supportRatio": 0.01366742596810934,
-      "conflictCount": 2,
+      "supportCount": 3,
+      "corpusCount": 300,
+      "supportRatio": 0.01,
+      "conflictCount": 1,
       "confidence": "medium",
       "sufficiency": "sufficient",
       "reasons": []
     },
     {
       "findingId": "finding-8",
-      "supportCount": 3,
-      "corpusCount": 439,
-      "supportRatio": 0.00683371298405467,
-      "conflictCount": 3,
-      "confidence": "medium",
+      "supportCount": 2,
+      "corpusCount": 300,
+      "supportRatio": 0.006666666666666667,
+      "conflictCount": 4,
+      "confidence": "low",
       "sufficiency": "insufficient",
       "reasons": [
+        "SUPPORT_BELOW_MINIMUM",
         "SUPPORT_RATIO_BELOW_MINIMUM",
         "CONFLICT_NOT_MINOR"
       ]
-    },
-    {
-      "findingId": "finding-9",
-      "supportCount": 3,
-      "corpusCount": 439,
-      "supportRatio": 0.00683371298405467,
-      "conflictCount": 0,
-      "confidence": "medium",
-      "sufficiency": "insufficient",
-      "reasons": [
-        "SUPPORT_RATIO_BELOW_MINIMUM"
-      ]
     }
   ],
-  "rejected": []
+  "rejected": [
+    {
+      "code": "UNSUPPORTED_FINDING",
+      "message": "dropped finding-1 (no supported reviews have an exact excerpt)"
+    },
+    {
+      "code": "UNSUPPORTED_FINDING",
+      "message": "dropped finding-4 (no supported reviews have an exact excerpt)"
+    }
+  ]
 }

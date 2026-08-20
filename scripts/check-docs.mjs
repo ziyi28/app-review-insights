@@ -70,10 +70,6 @@ const REQUIRED_SCRIPTS = [
 ];
 
 const REQUIRED_FIXTURES = [
-  "fixtures/demo-runs/run-x-twitter-us/manifest.json",
-  "fixtures/demo-runs/run-x-twitter-us/provenance.json",
-  "fixtures/demo-runs/run-x-twitter-us/events.ndjson",
-  "fixtures/demo-runs/run-x-twitter-us/artifacts/final-report.attempt-01.json",
   "fixtures/demo-runs/run-workout-for-women-us/manifest.json",
   "fixtures/demo-runs/run-workout-for-women-us/provenance.json",
   "fixtures/demo-runs/run-workout-for-women-us/events.ndjson",

@@ -4,118 +4,105 @@
   "items": [
     {
       "focusAreaId": "focus-1",
-      "label": "High-impact problems",
+      "label": "影响最大的用户问题",
       "status": "covered",
       "findingIds": [
         "finding-1",
         "finding-2",
         "finding-3",
-        "finding-6",
-        "finding-7"
+        "finding-4",
+        "finding-5"
       ],
       "requirementIds": [
-        "req-1",
         "req-3",
-        "req-8",
         "req-7",
+        "req-6",
+        "req-1",
         "req-2",
-        "req-5",
-        "req-6"
+        "req-4"
       ]
     },
     {
       "focusAreaId": "focus-2",
-      "label": "Improvement opportunities",
+      "label": "可执行的改进机会",
       "status": "covered",
       "findingIds": [
         "finding-1",
         "finding-2",
         "finding-3",
-        "finding-6",
+        "finding-4",
+        "finding-5",
         "finding-7"
       ],
       "requirementIds": [
-        "req-1",
         "req-3",
-        "req-8",
         "req-7",
+        "req-6",
+        "req-1",
         "req-2",
-        "req-5",
-        "req-6"
+        "req-4",
+        "req-5"
       ]
     },
     {
       "focusAreaId": "focus-3",
-      "label": "Controversial features with mixed sentiment",
+      "label": "最具争议的功能点及冲突反馈",
       "status": "covered",
       "findingIds": [
         "finding-1",
+        "finding-2",
         "finding-3",
-        "finding-6",
+        "finding-4",
         "finding-7"
       ],
       "requirementIds": [
-        "req-1",
         "req-3",
-        "req-8",
+        "req-7",
+        "req-6",
+        "req-1",
         "req-2",
-        "req-5",
-        "req-6"
+        "req-4",
+        "req-5"
       ]
     },
     {
       "focusAreaId": "focus-4",
-      "label": "Subscription payment value",
+      "label": "订阅付费价值与价格反馈",
       "status": "covered",
       "findingIds": [
         "finding-1",
         "finding-2",
-        "finding-3"
+        "finding-3",
+        "finding-4"
       ],
       "requirementIds": [
-        "req-1",
         "req-3",
-        "req-8",
         "req-7",
-        "req-2"
+        "req-6",
+        "req-1",
+        "req-2",
+        "req-4"
       ]
     },
     {
       "focusAreaId": "focus-5",
-      "label": "Workout training usability",
+      "label": "健身训练易用性",
       "status": "covered",
       "findingIds": [
-        "finding-3",
-        "finding-6",
-        "finding-7"
-      ],
-      "requirementIds": [
-        "req-2",
-        "req-3",
-        "req-8",
-        "req-5",
-        "req-6"
-      ]
-    },
-    {
-      "focusAreaId": "focus-6",
-      "label": "Conflicting feedback documentation",
-      "status": "covered",
-      "findingIds": [
-        "finding-1",
         "finding-2",
         "finding-3",
-        "finding-6",
+        "finding-4",
+        "finding-5",
         "finding-7"
       ],
       "requirementIds": [
-        "req-1",
-        "req-3",
-        "req-8",
+        "req-6",
         "req-7",
+        "req-1",
         "req-2",
-        "req-5",
-        "req-6"
+        "req-3",
+        "req-4",
+        "req-5"
       ]
     }
   ]

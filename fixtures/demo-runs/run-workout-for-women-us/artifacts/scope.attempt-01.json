@@ -1,50 +1,39 @@
 {
-  "interpretation": "This analysis uses the 500 provided reviews dated 2025-08-20 to 2026-08-16 to identify the most impactful issues and improvement opportunities, detect controversial features where users are polarized, and specifically examine subscription payment value and workout usability. It will preserve conflicting feedback rather than suppressing it. The available dimensions support segmentation by rating, app version, language, and date; however, country or App Store region cannot be verified, so the US App Store scope is approximated by English-language reviews.",
+  "interpretation": "基于提供的300条评论统计，分析用户最关注的问题与潜在改进机会，并重点考察订阅付费价值、健身训练易用性及用户对具体功能的分歧。当前数据可按评分、版本、语言和日期范围进行范围限定，但不包含美国地区或应用商店国家维度，因此无法严格确认样本仅来自美国用户；同时，统计数据不包含评论文本、主题、情感或功能归因，无法仅凭现有统计直接识别具体争议功能、问题影响程度或正负反馈冲突，需要进一步使用评论内容分析。",
   "filters": {
-    "rating": [
-      1,
-      2,
-      3,
-      4,
-      5
-    ],
+    "rating": [],
     "versions": [],
-    "languages": [
-      "en"
-    ],
-    "minDate": "2025-08-20T00:00:00.000Z",
-    "maxDate": "2026-08-16T00:00:00.000Z"
+    "languages": [],
+    "minDate": null,
+    "maxDate": null
   },
   "explicitLimitations": [
-    "No country or App Store region field is available; US App Store cannot be filtered or verified directly.",
-    "Language is not a reliable proxy for store region; filtering to English may exclude relevant non-English US reviews or include English reviews from other regions.",
-    "Impact and controversy cannot be measured directly from the provided aggregates; they must be inferred from frequency, rating patterns, and sentiment.",
-    "Version distribution is fragmented, so version-specific conclusions may have limited sample sizes."
+    "缺少国家、地区或应用商店 storefront 字段，无法严格筛选美国用户评论；语言不能作为美国来源的可靠替代。",
+    "仅有汇总统计，没有评论文本或主题标签，无法直接识别具体功能点、问题类型及改进机会。",
+    "缺少按问题或功能划分的频次、情感和影响指标，无法从现有统计单独判断哪些问题影响最大。",
+    "缺少同一功能的正负反馈配对或主题级情感数据，无法确认哪些功能存在用户喜欢与反感并存的争议。",
+    "无法仅凭现有数据评估订阅价格或付费价值的具体原因，也无法具体定位健身训练流程中的易用性障碍。"
   ],
   "focusAreas": [
     {
       "id": "focus-1",
-      "label": "High-impact problems"
+      "label": "影响最大的用户问题"
     },
     {
       "id": "focus-2",
-      "label": "Improvement opportunities"
+      "label": "可执行的改进机会"
     },
     {
       "id": "focus-3",
-      "label": "Controversial features with mixed sentiment"
+      "label": "最具争议的功能点及冲突反馈"
     },
     {
       "id": "focus-4",
-      "label": "Subscription payment value"
+      "label": "订阅付费价值与价格反馈"
     },
     {
       "id": "focus-5",
-      "label": "Workout training usability"
-    },
-    {
-      "id": "focus-6",
-      "label": "Conflicting feedback documentation"
+      "label": "健身训练易用性"
     }
   ]
 }

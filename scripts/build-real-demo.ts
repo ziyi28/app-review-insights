@@ -31,8 +31,11 @@ import { loadConfig, readEnvLocal } from "../src/server/config";
 import { collectSerpApiReviews } from "../src/server/sources/serpapi-collector";
 import { collectAppleReviews } from "../src/server/sources/apple-rss-collector";
 import { AppleReviewCacheStore } from "../src/server/sources/apple-review-cache";
+import { validateTraceability } from "../src/domain/traceability/validate";
+import { prepareReviews } from "../src/domain/reviews/prepare";
 import type { Limitation } from "../src/server/sources/source-types";
 import type { RawReview } from "../src/domain/contracts/review";
+import type { Prd } from "../src/domain/contracts/analysis";
 
 const DEFAULT_APP_ID = "839285684";
 const DEFAULT_APP_NAME = "Workout for Women";
@@ -50,7 +53,16 @@ export async function buildRealDemo(): Promise<string> {
     if (process.env[k] === undefined) process.env[k] = v;
   }
   const cfg = loadConfig();
-  if (!cfg.modelBaseUrl || !cfg.modelName) {
+  const modelBaseUrl = process.env.MODEL_BASE_URL || cfg.modelBaseUrl;
+  const modelApiKey = process.env.MODEL_API_KEY !== undefined ? process.env.MODEL_API_KEY : cfg.modelApiKey;
+  const modelName = process.env.MODEL_NAME || cfg.modelName;
+  const validEfforts = ["low", "medium", "high", "max"] as const;
+  const modelReasoningEffort = (process.env.MODEL_REASONING_EFFORT && validEfforts.includes(process.env.MODEL_REASONING_EFFORT as any))
+    ? (process.env.MODEL_REASONING_EFFORT as "low" | "medium" | "high" | "max")
+    : cfg.modelReasoningEffort;
+  const modelTimeoutMs = Number(process.env.MODEL_TIMEOUT_MS) || cfg.modelTimeoutMs || 900_000;
+
+  if (!modelBaseUrl || !modelName) {
     throw new Error("MODEL_BASE_URL and MODEL_NAME are required");
   }
 
@@ -76,6 +88,8 @@ export async function buildRealDemo(): Promise<string> {
   let searchCount: number;
   let searchId: string | null;
   let forcedRefresh: boolean;
+
+  const reviewLimit = Number(process.env.DEMO_REVIEW_LIMIT || process.env.REVIEW_LIMIT) || 300;
 
   if (cfg.serpApiKey) {
     const serp = await collectSerpApiReviews({
@@ -140,11 +154,10 @@ export async function buildRealDemo(): Promise<string> {
     forcedRefresh = false;
   }
 
-  if (reviews.length === 0) {
+  if (reviews.length < reviewLimit) {
     const cacheStore = new AppleReviewCacheStore(cfg.sourceCacheDir);
     const cached = await cacheStore.readCache("us", appId);
     if (cached && cached.reviews && cached.reviews.length > 0) {
-      const reviewLimit = Number(process.env.REVIEW_LIMIT) || 500;
       provider = "apple-rss";
       reviews = cached.reviews.slice(0, reviewLimit);
       rawRefs = reviews.map((r) => r.sourceReviewId);
@@ -160,6 +173,11 @@ export async function buildRealDemo(): Promise<string> {
 
   if (reviews.length === 0) {
     throw new Error(`No reviews collected for app ${appId} (status: ${status}); cannot build a demo fixture`);
+  }
+
+  if (reviews.length > reviewLimit) {
+    reviews = reviews.slice(0, reviewLimit);
+    rawRefs = rawRefs.slice(0, reviewLimit);
   }
 
   const sourceSummary: AppStoreReviewSourceSummary = {
@@ -184,10 +202,12 @@ export async function buildRealDemo(): Promise<string> {
   const runId = store.createRunId();
   const publisher = new EventPublisher(store, () => new Date().toISOString(), "live");
   const model = new OpenAiCompatibleClient({
-    baseUrl: cfg.modelBaseUrl,
-    apiKey: cfg.modelApiKey ?? "",
-    model: cfg.modelName,
+    baseUrl: modelBaseUrl,
+    apiKey: modelApiKey ?? "",
+    model: modelName,
     jsonMode: cfg.modelJsonMode,
+    reasoningEffort: modelReasoningEffort,
+    timeoutMs: modelTimeoutMs,
   });
 
   const deps: ExecuteDeps = {
@@ -225,7 +245,7 @@ export async function buildRealDemo(): Promise<string> {
     },
   };
 
-  console.log(`Collecting + analyzing app ${appId} (${appName}, ${provider}, ${reviews.length} reviews) -> ${runId}`);
+  console.log(`Collecting + analyzing app ${appId} (${appName}, ${provider}, ${reviews.length} reviews, model: ${modelName}, reasoning: ${modelReasoningEffort}) -> ${runId}`);
   await executeRun(runId, goal, outputLocale, deps, publisher, store, "live", true, metadata);
 
   const manifest = await store.readManifest(runId);
@@ -233,6 +253,16 @@ export async function buildRealDemo(): Promise<string> {
   if (manifest.status !== "completed") {
     console.log("Limitations:", JSON.stringify(manifest.limitations, null, 2));
     throw new Error(`Run did not complete (status: ${manifest.status}); fixture not written`);
+  }
+
+  // Validate traceability using the authoritative domain validator before saving fixture
+  const finalReport = (await store.readArtifact(runId, "final-report", manifest.artifacts["final-report"]?.attempt ?? 1)) as { prd: Prd };
+  const prepared = prepareReviews({ kind: "collected", reviews, rawRefs, limitations });
+  const reviewMap = new Map(prepared.reviews.map((r) => [r.reviewId, r]));
+  const traceReport = validateTraceability(finalReport.prd, prepared.reviews.map((r) => r.reviewId), reviewMap);
+  console.log("Traceability valid:", traceReport.valid, "closureStatus:", traceReport.closureStatus, "violations:", traceReport.violations.length);
+  if (!traceReport.valid) {
+    throw new Error(`Traceability invalid: ${JSON.stringify(traceReport.violations, null, 2)}`);
   }
 
   // Materialize the completed run into the bundled fixture so the offline demo
@@ -272,7 +302,8 @@ export async function buildRealDemo(): Promise<string> {
       outputLocale,
       goal,
       modelProvider: "OpenAI-compatible endpoint",
-      modelName: cfg.modelName,
+      modelName,
+      reasoningEffort: modelReasoningEffort,
       temperature: 0.1,
       promptVersions,
     },

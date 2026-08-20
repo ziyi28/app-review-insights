@@ -14,8 +14,7 @@ const FIXTURE_ROOT = path.join(process.cwd(), "fixtures", "demo-runs");
 // hard-coded to any single app.
 const FIXTURES = [
   // Captured via build-real-demo.ts against real US App Store reviews;
-  // both ship with verified US storefront provenance.
-  { runId: "run-x-twitter-us", appId: "333903271", reviewData: "apple-rss-real" },
+  // ships with verified US storefront provenance.
   { runId: "run-workout-for-women-us", appId: "839285684", reviewData: "apple-rss-real" },
 ];
 

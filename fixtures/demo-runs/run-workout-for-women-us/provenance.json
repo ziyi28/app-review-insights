@@ -4,7 +4,7 @@
     "reviewData": "apple-rss-real",
     "storefront": "us",
     "appId": "839285684",
-    "capturedAt": "2026-08-19T09:32:21.955Z",
+    "capturedAt": "2026-08-20T07:46:51.577Z",
     "captureMethod": "Apple Customer Reviews RSS (sequential, max 10 pages, >=500ms delay)",
     "privacyMinimization": "reviewer nickname, author URI, and sensitive headers removed; review id/rating/title/body/version/updatedAt retained"
   },
@@ -13,7 +13,8 @@
     "outputLocale": "zh-CN",
     "goal": "分析美国应用商店用户评论中影响最大的问题与改进机会。识别最具争议的功能点（部分用户喜欢但另一部分用户反感），尤其是关于订阅付费价值与健身训练易用性方面。明确记录冲突的反馈而非忽略。",
     "modelProvider": "OpenAI-compatible endpoint",
-    "modelName": "deepseek-v4-pro-0813",
+    "modelName": "gpt-5.6-luna",
+    "reasoningEffort": "high",
     "temperature": 0.1,
     "promptVersions": [
       "scope@2",

@@ -5,13 +5,13 @@
   "storefront": "US",
   "status": "complete",
   "selection": "live",
-  "liveCount": 500,
+  "liveCount": 300,
   "stableCount": 0,
-  "reviewCount": 500,
-  "collectedAt": "2026-08-19T09:32:21.955Z",
+  "reviewCount": 300,
+  "collectedAt": "2026-08-20T07:46:51.577Z",
   "forcedRefresh": false,
   "providerCached": false,
-  "requestCount": 10,
+  "requestCount": 6,
   "searchCount": 0,
   "searchId": null
 }

@@ -1,31 +1,175 @@
 {
   "reviews": [
     {
+      "sourceReviewId": "14444266843",
+      "source": "apple-rss",
+      "title": "Best App Ever",
+      "body": "Best workout app ever love so many options of working out and all kinds of fun activities like yoga, dancing, chair workouts, wall workouts and even face exercises! \nI’ve been using this app for years and will forever use it a recommend to friends and family!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T21:02:22.000Z"
+    },
+    {
+      "sourceReviewId": "14442997949",
+      "source": "apple-rss",
+      "title": "WFW is awesome",
+      "body": "Love the convenience of this app and the various workouts available!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T14:19:38.000Z"
+    },
+    {
+      "sourceReviewId": "14442648331",
+      "source": "apple-rss",
+      "title": "Love my workouts!",
+      "body": "I always enjoy these quick effective workouts. I don’t think I’ll ever go back in the gym as long as I have workout women!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T12:38:42.000Z"
+    },
+    {
+      "sourceReviewId": "14442641789",
+      "source": "apple-rss",
+      "title": "Best free workout app ever!",
+      "body": "Really enjoying the quick whole workouts!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T12:36:43.000Z"
+    },
+    {
+      "sourceReviewId": "14442640253",
+      "source": "apple-rss",
+      "title": "5 Stars!",
+      "body": "Easy to follow and is great for any skill level! Keeps you motivated too!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T12:36:14.000Z"
+    },
+    {
+      "sourceReviewId": "14442632113",
+      "source": "apple-rss",
+      "title": "Great way to learn new exercises",
+      "body": "This app is amazing. It gets results but it also teaches you hundreds of new exercises",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T12:33:42.000Z"
+    },
+    {
+      "sourceReviewId": "14442585341",
+      "source": "apple-rss",
+      "title": "Tough Workout but Doable",
+      "body": "Variety of workouts to choose from, different areas to target, and multiple time groups to work with! Music is an amazing addition to the Yoga workouts!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T12:19:14.000Z"
+    },
+    {
+      "sourceReviewId": "14442458794",
+      "source": "apple-rss",
+      "title": "Perfect to stay in shape at home",
+      "body": "Perfect to stay in shape at home",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T11:38:37.000Z"
+    },
+    {
+      "sourceReviewId": "14442323653",
+      "source": "apple-rss",
+      "title": "Best exercise app out there!",
+      "body": "The only thing wrong with this app is that people might just think it’s for women. It’s perfect and my husband and I use it regularly at the gym and at home. It’s the best!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T10:52:14.000Z"
+    },
+    {
+      "sourceReviewId": "14442232355",
+      "source": "apple-rss",
+      "title": "Best free workout app",
+      "body": "This was the easiest to use and nicest free workout app I found. It also updates frequently with new workouts, collections and programs. I ended up getting a subscription when it was on sale and I’m enjoying the new custom programs.  Though sometimes the names and animations of the exercises don’t match.",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T10:18:39.000Z"
+    },
+    {
+      "sourceReviewId": "14441213900",
+      "source": "apple-rss",
+      "title": "Music",
+      "body": "Don’t ASK for my input if you will not do anything about my suggestion which I submitted a long ago with absolutely no response from anyone! \n \nMessage below sent to you already. \n\nI would also like to know if the calories burned information can be upgraded as well because the few calories results are not very inspiring! It’s also getting old to see that I’ve only burned a few calories. This definitely needs an upgrade! I am also requesting if I can speak to a training coach directly over the phone to see if my workouts can be customized further! So far I never received a call back!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-18T03:09:46.000Z"
+    },
+    {
+      "sourceReviewId": "14440541974",
+      "source": "apple-rss",
+      "title": "ADDS!!",
+      "body": "i'm a teen who uses this app!! but there are so many adds and things you cannot use unless you have the subscription 😔😔",
+      "rating": 4,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-17T22:52:45.000Z"
+    },
+    {
+      "sourceReviewId": "14440495914",
+      "source": "apple-rss",
+      "title": "Great",
+      "body": "Great and free great workouts",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-17T22:34:44.000Z"
+    },
+    {
+      "sourceReviewId": "14438997721",
+      "source": "apple-rss",
+      "title": "Update: 08/17/26",
+      "body": "Still using and loving this app! Highly recommend! The workouts are amazing! I’ve been using this app for years and it gets me back in shape! Keep it up !!!!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-17T14:26:54.000Z"
+    },
+    {
+      "sourceReviewId": "14438826496",
+      "source": "apple-rss",
+      "title": "Results",
+      "body": "You will see results in about 3 months if you do exactly what the app is asking you to do and have a good diet. This app has changed my life ❤️",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-17T13:38:03.000Z"
+    },
+    {
+      "sourceReviewId": "14438600600",
+      "source": "apple-rss",
+      "title": "Love these workouts",
+      "body": "There are so many to choose from and for all different parts of the body and ability levels.",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-17T12:30:12.000Z"
+    },
+    {
+      "sourceReviewId": "14434575041",
+      "source": "apple-rss",
+      "title": "Great Workout For Health",
+      "body": "I have made the Workout for Women a daily routine for several years and plan to continue this routine. It has helped me maintain my health, strength, and energy.  A great start to every day; a wonderful part of my life!",
+      "rating": 5,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-16T12:24:30.000Z"
+    },
+    {
       "sourceReviewId": "14433741544",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "scam",
       "body": "Gives you one workout then tries to make you pay for more",
       "rating": 1,
       "version": "8.5.0",
-      "updatedAt": "2026-08-16T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14434575041",
-      "source": "serpapi-apple-reviews",
-      "title": "Great Workout For Health",
-      "body": "I have made the Workout for Women a daily routine for several years and plan to continue this routine. It has helped me maintain my health, strength, and energy. A great start to every day; a wonderful part of my life!",
-      "rating": 5,
-      "version": "8.5.0",
-      "updatedAt": "2026-08-16T00:00:00.000Z"
+      "updatedAt": "2026-08-16T06:59:23.000Z"
     },
     {
       "sourceReviewId": "14428758054",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Love this app",
       "body": "When I retired I wanted to do nothing but quickly realized that’s not an option. You must move your 68 year old body. I do the daily 8 minute workout and it’s been a literal life saver. I’ve stretched the 8 minute work out to 35 minutes daily by adding my own program. I’m on the advanced level which took 7 months and I’ve lost 16 pounds and kept them off. I don’t do plank as it’s damaging to older wrists, elbows, shoulders and knees but that’s my only complaint. I’m grateful to have found this app.",
       "rating": 5,
       "version": "8.5.0",
-      "updatedAt": "2026-08-15T00:00:00.000Z"
+      "updatedAt": "2026-08-15T00:29:48.000Z"
     },
     {
       "sourceReviewId": "14426816828",
@@ -37,733 +181,733 @@
       "updatedAt": "2026-08-14T00:00:00.000Z"
     },
     {
-      "sourceReviewId": "14421357217",
-      "source": "serpapi-apple-reviews",
-      "title": "Used to be great",
-      "body": "Like other people have said, this used to be an awesome app. Now you get like two free workouts and then you gotta pay. Ai slop everywhere. I miss when it was free and fun. 👎",
-      "rating": 1,
-      "version": "8.5.0",
-      "updatedAt": "2026-08-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14422561156",
-      "source": "serpapi-apple-reviews",
-      "title": "Eh.",
-      "body": "It’s okay I guess? I mean it was fine the first time I did it but I don’t wanna pay the subscription.. why pay a subscription for your body getting a workout?",
-      "rating": 3,
-      "version": "8.5.0",
-      "updatedAt": "2026-08-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14423833481",
-      "source": "serpapi-apple-reviews",
-      "title": "No longer free to use",
-      "body": "I had to update my previous 5 star review. I was using this app for years but now they’ve changed it so I am unable to do any workouts without paying. It says my free access has been reached. Really sad to have to use a different app now.",
-      "rating": 1,
-      "version": "8.5.0",
-      "updatedAt": "2026-08-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14424309790",
-      "source": "serpapi-apple-reviews",
-      "title": "used to be waaay more free options",
-      "body": "I used this app a lot between 2020 and 2024, came back to it, and I can barely use anything since you can only do one workout with an ad or the rest are behind a paywall.",
-      "rating": 1,
-      "version": "8.5.0",
-      "updatedAt": "2026-08-13T00:00:00.000Z"
-    },
-    {
       "sourceReviewId": "14424510771",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Amiyah",
       "body": "I loved this it made me so slim I look like a pencil",
       "rating": 5,
       "version": "8.5.0",
-      "updatedAt": "2026-08-13T00:00:00.000Z"
+      "updatedAt": "2026-08-13T23:17:56.000Z"
+    },
+    {
+      "sourceReviewId": "14424309790",
+      "source": "apple-rss",
+      "title": "used to be waaay more free options",
+      "body": "I used this app a lot between 2020 and 2024, came back to it, and I can barely use anything since you can only do one workout with an ad or the rest are behind a paywall.",
+      "rating": 1,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-13T21:59:17.000Z"
+    },
+    {
+      "sourceReviewId": "14423833481",
+      "source": "apple-rss",
+      "title": "No longer free to use",
+      "body": "I had to update my previous 5 star review. I was using this app for years but now they’ve changed it so I am unable to do any workouts without paying. It says my free access has been reached. Really sad to have to use a different app now.",
+      "rating": 1,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-13T19:05:33.000Z"
+    },
+    {
+      "sourceReviewId": "14422561156",
+      "source": "apple-rss",
+      "title": "Eh.",
+      "body": "It’s okay I guess? I mean it was fine the first time \n I did it but I don’t wanna pay the subscription.. why pay a subscription for your body getting a workout?",
+      "rating": 3,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-13T12:43:16.000Z"
+    },
+    {
+      "sourceReviewId": "14421357217",
+      "source": "apple-rss",
+      "title": "Used to be great",
+      "body": "Like other people have said, this used to be an awesome app. Now you get like two free workouts and then you gotta pay. Ai slop everywhere. I miss when it was free and fun. 👎",
+      "rating": 1,
+      "version": "8.5.0",
+      "updatedAt": "2026-08-13T05:06:21.000Z"
     },
     {
       "sourceReviewId": "14412891541",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "amazing!!!",
       "body": "really good. helped motivate me and kept the workouts easy, fun, and productive. i just wish there were more free courses, or the option to watch an add to use all of the courses that are premium.",
       "rating": 4,
       "version": "8.4.29",
-      "updatedAt": "2026-08-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14408658475",
-      "source": "serpapi-apple-reviews",
-      "title": "Used to be free, not anymore",
-      "body": "I used to love this app for daily, quick workouts, but they recently changed it so you are unable to use it for free. Very disappointed in the changes this app has had, lots of AI use for their workouts as well. Sad to see this app go downhill.",
-      "rating": 1,
-      "version": "8.4.29",
-      "updatedAt": "2026-08-10T00:00:00.000Z"
+      "updatedAt": "2026-08-11T02:49:27.000Z"
     },
     {
       "sourceReviewId": "14411802642",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Impossible to exit ads",
       "body": "Even after you watch the 90 second ads, there’s no way to get out of it and proceed to the app. Total waste of time.",
       "rating": 1,
       "version": "8.5.0",
-      "updatedAt": "2026-08-10T00:00:00.000Z"
+      "updatedAt": "2026-08-10T19:57:40.000Z"
+    },
+    {
+      "sourceReviewId": "14408658475",
+      "source": "apple-rss",
+      "title": "Used to be free, not anymore",
+      "body": "I used to love this app for daily, quick workouts, but they recently changed it so you are unable to use it for free. Very disappointed in the changes this app has had, lots of AI use for their workouts as well. Sad to see this app go downhill.",
+      "rating": 1,
+      "version": "8.4.29",
+      "updatedAt": "2026-08-10T01:06:39.000Z"
     },
     {
       "sourceReviewId": "14401657445",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Abs",
       "body": "I didn’t feel anything on my stomach where I’m supposed to get abs",
       "rating": 4,
       "version": "8.4.29",
-      "updatedAt": "2026-08-08T00:00:00.000Z"
+      "updatedAt": "2026-08-08T05:45:14.000Z"
     },
     {
       "sourceReviewId": "14397715067",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "disappointed, hidden charges and app quality has gone downhill",
-      "body": "This app has become a money grab. I have used this app for a long time, but the current version is extremely disappointing. The biggest issue is the subscription trap. I signed up for a trial expecting a trial experience, but I was charged afterward without a clear enough reminder. I have reported this to Apple because this kind of payment experience is not acceptable. What makes it worse is that the app itself is getting worse every year. The workouts are outdated, repetitive, and lack creativity. It feels like the team is recycling old content instead of creating new and useful fitness programs. For a paid fitness app, the lack of fresh content is unacceptable. I also noticed that critical reviews disappear, which makes me question how much the company values honest user feedback. This app used to have potential, but now it feels like the priority is getting subscriptions rather than delivering a quality fitness experience. Save your money and look for a better fitness app.",
+      "body": "This app has become a money grab.\nI have used this app for a long time, but the current version is extremely disappointing.\nThe biggest issue is the subscription trap. I signed up for a trial expecting a trial experience, but I was charged afterward without a clear enough reminder. I have reported this to Apple because this kind of payment experience is not acceptable.\nWhat makes it worse is that the app itself is getting worse every year. The workouts are outdated, repetitive, and lack creativity. It feels like the team is recycling old content instead of creating new and useful fitness programs. For a paid fitness app, the lack of fresh content is unacceptable.\nI also noticed that critical reviews disappear, which makes me question how much the company values honest user feedback.\nThis app used to have potential, but now it feels like the priority is getting subscriptions rather than delivering a quality fitness experience.\nSave your money and look for a better fitness app.",
       "rating": 1,
       "version": "8.4.29",
-      "updatedAt": "2026-08-07T00:00:00.000Z"
+      "updatedAt": "2026-08-07T05:38:14.000Z"
     },
     {
       "sourceReviewId": "14395044140",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Do not buy",
       "body": "I downloaded this app, thinking it would be different from all the other Workout apps that I used in the past, but that is not the case the questionnaire is the exact same from all the other Workout apps that I’ve downloaded.",
       "rating": 1,
       "version": "8.4.29",
-      "updatedAt": "2026-08-06T00:00:00.000Z"
+      "updatedAt": "2026-08-06T13:48:32.000Z"
     },
     {
       "sourceReviewId": "14386691397",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "I enjoyed this app",
       "body": "This app made me feel the burn and so far it’s been great",
       "rating": 4,
       "version": "8.4.29",
-      "updatedAt": "2026-08-04T00:00:00.000Z"
+      "updatedAt": "2026-08-04T12:41:07.000Z"
     },
     {
       "sourceReviewId": "14381025970",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Is forcing me out of the free option",
       "body": "I’ve been using this app for years for free and recently they’ve refused to let me work out using their app unless I pay, saying I’ve used my limit, which is absolutely ridiculous",
       "rating": 1,
       "version": "8.4.28",
-      "updatedAt": "2026-08-03T00:00:00.000Z"
+      "updatedAt": "2026-08-03T02:44:45.000Z"
     },
     {
       "sourceReviewId": "14373055910",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "AMAZING",
       "body": "✨You better get it now✨",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-08-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14364512490",
-      "source": "serpapi-apple-reviews",
-      "title": "Good workout app for woman",
-      "body": "I think this is one of the best workout apps, It has really good plans and you do not have to pay and great if you want to get in shape if you are a mom or someone who works at home I 100% recommend.",
-      "rating": 5,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14365412685",
-      "source": "serpapi-apple-reviews",
-      "title": "False advertising",
-      "body": "Stop putting stuff under free thats not free if I wanted to pay for it I would get a personal trainer",
-      "rating": 1,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14366479265",
-      "source": "serpapi-apple-reviews",
-      "title": "Not as Good as it Used To Be",
-      "body": "I’ve been using this app on and off for a few years. I’ve always felt it was worth the money, and could feel soreness the next day where the daily workout would target. However, since the app remodel, the daily workout seems so inconsistent. It has me doing legs every single day, I’m 10 days in, and I’ve never done arms. I have to keep resetting the Plan Settings because they keep changing or defaulting without notice. It’s frustrating because I loved the app back then, but it just doesn’t work for me now.",
-      "rating": 3,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14366900095",
-      "source": "serpapi-apple-reviews",
-      "title": "Military workout",
-      "body": "I would like a longer interval time but overall I loved my first workout!",
-      "rating": 5,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-30T00:00:00.000Z"
+      "updatedAt": "2026-08-01T03:15:55.000Z"
     },
     {
       "sourceReviewId": "14367493057",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Not worth it anymore. I’m disappointed.",
       "body": "I used to use this app alllll the time in 2020 I recently decided I wanted to use it again, but it’s not the same at ALL. It’s all AI slip and you have to pay. It used to be free and easy to use and so helpful and effective. Now it’s useless. I wouldn’t recommend getting this app at all.",
       "rating": 1,
       "version": "8.4.28",
-      "updatedAt": "2026-07-30T00:00:00.000Z"
+      "updatedAt": "2026-07-30T18:15:57.000Z"
     },
     {
-      "sourceReviewId": "14360927559",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout for women home and gym",
-      "body": "Great app can already feel it working within just two days",
+      "sourceReviewId": "14366900095",
+      "source": "apple-rss",
+      "title": "Military workout",
+      "body": "I would like a longer interval time but overall I loved my first workout!",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-07-29T00:00:00.000Z"
+      "updatedAt": "2026-07-30T15:17:49.000Z"
     },
     {
-      "sourceReviewId": "14363613368",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this app",
-      "body": "Love that fact I can do it any where and is diferente routine every time never dull",
+      "sourceReviewId": "14366479265",
+      "source": "apple-rss",
+      "title": "Not as Good as it Used To Be",
+      "body": "I’ve been using this app on and off for a few years. I’ve always felt it was worth the money, and could feel soreness the next day where the daily workout would target. However, since the app remodel, the daily workout seems so inconsistent. It has me doing legs every single day, I’m 10 days in, and I’ve never done arms. I have to keep resetting the Plan Settings because they keep changing or defaulting without notice. It’s frustrating because I loved the app back then, but it just doesn’t work for me now.",
+      "rating": 3,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-30T13:19:13.000Z"
+    },
+    {
+      "sourceReviewId": "14365412685",
+      "source": "apple-rss",
+      "title": "False advertising",
+      "body": "Stop putting stuff under free thats not free if I wanted to pay for it I would get a personal trainer",
+      "rating": 1,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-30T06:50:13.000Z"
+    },
+    {
+      "sourceReviewId": "14364512490",
+      "source": "apple-rss",
+      "title": "Good workout app for woman",
+      "body": "I think this is one of the best workout apps, It has really good plans and you do not have to pay and great if you want to get in shape if you are a mom or someone who works at home I 100% recommend.",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-07-29T00:00:00.000Z"
+      "updatedAt": "2026-07-30T00:51:23.000Z"
     },
     {
       "sourceReviewId": "14364018861",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "BEST WORKOUT FITNESS APP FOR WOMEN THAT IVE EVER EXPERIENCED (WOULD RECOMMEND)",
       "body": "This app is (THE BEST) in my opinion and so far I’ve felt refreshed and proud of myself and the experience was amazing. (Again would highly recommend)",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-07-29T00:00:00.000Z"
+      "updatedAt": "2026-07-29T21:39:00.000Z"
+    },
+    {
+      "sourceReviewId": "14363613368",
+      "source": "apple-rss",
+      "title": "Love this app",
+      "body": "Love that fact I can do it any where and is diferente routine every time never dull",
+      "rating": 5,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-29T19:14:26.000Z"
+    },
+    {
+      "sourceReviewId": "14360927559",
+      "source": "apple-rss",
+      "title": "Workout for women home and gym",
+      "body": "Great app can already feel it working within just two days",
+      "rating": 5,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-29T03:41:05.000Z"
+    },
+    {
+      "sourceReviewId": "14359950060",
+      "source": "apple-rss",
+      "title": "Used all the time, now I’ve  deleted it",
+      "body": "I used to love workout women, before they were bought out. I’d use the free workouts every time, when it was real women avatars during the workouts and not some cheesy AI mockups showing unrealistic images for the different kinds of workouts. (Like a tiny waist and big butt) like whattt? It NEVER used to be like this! You can miss me with this lousy marketing makeover design that looks SO fake. It’s literally all AI. I’m so sad to see the original company/developer is no longer in charge of this app bc I used it all the time plus everything is behind some sketchy paywall. Cheap and cheesy (weird ads too, not even like normal ones you would usually see) third tier developer has made it so horrible and unable to use and most of all FAKE AI women used everywhere.",
+      "rating": 1,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-28T21:28:48.000Z"
     },
     {
       "sourceReviewId": "14357059177",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Aa",
       "body": "Love this app so so muchhhh",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-07-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14359950060",
-      "source": "serpapi-apple-reviews",
-      "title": "Used all the time, now I’ve deleted it",
-      "body": "I used to love workout women, before they were bought out. I’d use the free workouts every time, when it was real women avatars during the workouts and not some cheesy AI mockups showing unrealistic images for the different kinds of workouts. (Like a tiny waist and big butt) like whattt? It NEVER used to be like this! You can miss me with this lousy marketing makeover design that looks SO fake. It’s literally all AI. I’m so sad to see the original company/developer is no longer in charge of this app bc I used it all the time plus everything is behind some sketchy paywall. Cheap and cheesy (weird ads too, not even like normal ones you would usually see) third tier developer has made it so horrible and unable to use and most of all FAKE AI women used everywhere.",
-      "rating": 1,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14353095830",
-      "source": "serpapi-apple-reviews",
-      "title": "Injury",
-      "body": "Overall a great app however if I select to avoid knees why does it still have lots of squats and lunges. I have to just skip over those workouts and I would like if it was actually tailored to me like it says.",
-      "rating": 3,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-27T00:00:00.000Z"
+      "updatedAt": "2026-07-28T05:04:53.000Z"
     },
     {
       "sourceReviewId": "14354823157",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Short. Sweet. To the point",
       "body": "I love that each exercise is only 30-45 seconds. I can do (almost) anything for 30-45 seconds!",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-07-27T00:00:00.000Z"
+      "updatedAt": "2026-07-27T15:48:35.000Z"
+    },
+    {
+      "sourceReviewId": "14353095830",
+      "source": "apple-rss",
+      "title": "Injury",
+      "body": "Overall a great app however if I select to avoid knees why does it still have lots of squats and lunges. I have to just skip over those workouts and I would like if it was actually tailored to me like it says.",
+      "rating": 3,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-27T05:46:16.000Z"
     },
     {
       "sourceReviewId": "14344823980",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Workout for women",
       "body": "Feels great it’s like we get this whole thing to ourselves to work and make ourselves sleep better for ourselves",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-07-25T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14342854364",
-      "source": "serpapi-apple-reviews",
-      "title": "Handling of issues is poor",
-      "body": "Workout part was fine BUT Wanting to cancel my year long payment from renewing but unable to figure out how. The app doesn’t have an account with my email and when I tried asking their customer support it doesn’t submit my question because it’s flagged for likely to be spam?? Very frustrating",
-      "rating": 2,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-24T00:00:00.000Z"
+      "updatedAt": "2026-07-25T02:53:15.000Z"
     },
     {
       "sourceReviewId": "14343192193",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Good workouts",
       "body": "This is a great at-home workout with lots of variety and great instructions. I do miss working out with others but this is great when you need to get in a workout on your own time.",
       "rating": 5,
       "version": "8.4.26",
-      "updatedAt": "2026-07-24T00:00:00.000Z"
+      "updatedAt": "2026-07-24T16:51:21.000Z"
     },
     {
-      "sourceReviewId": "14334052046",
-      "source": "serpapi-apple-reviews",
-      "title": "Review",
-      "body": "10000/10 All exercises are not impossible to do…and they are also very effective",
-      "rating": 5,
-      "version": "8.4.26",
-      "updatedAt": "2026-07-22T00:00:00.000Z"
+      "sourceReviewId": "14342854364",
+      "source": "apple-rss",
+      "title": "Handling of issues is poor",
+      "body": "Workout part was fine BUT Wanting to cancel my year long payment from renewing but unable to figure out how. The app doesn’t have an account with my email and when I tried asking their customer support it doesn’t submit my question because it’s flagged for likely to be spam?? Very frustrating",
+      "rating": 2,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-24T15:11:57.000Z"
     },
     {
       "sourceReviewId": "14334995806",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Horrible",
       "body": "I have used this app for YEARS. I loved it due to it being free and also easy but now everything is behind a paywall. I can’t even use basic workouts I used to do for free anymore. This is upsetting to know how much things have changed to where everything needs to be behind a paywall.",
       "rating": 1,
       "version": "8.4.28",
-      "updatedAt": "2026-07-22T00:00:00.000Z"
+      "updatedAt": "2026-07-22T16:23:48.000Z"
     },
     {
-      "sourceReviewId": "14328378845",
-      "source": "serpapi-apple-reviews",
-      "title": "Mama Bear",
-      "body": "Mom of 6, wanting to get into shape. I love the options. My favorite right now is the dumbbell workout! I’m sweating and feeling the burn! Perfect amount of time for this busy Mama Bear! ♥️",
+      "sourceReviewId": "14334052046",
+      "source": "apple-rss",
+      "title": "Review",
+      "body": "10000/10 \nAll exercises are not impossible to do…and they are also very effective",
       "rating": 5,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14329131554",
-      "source": "serpapi-apple-reviews",
-      "title": "Not free",
-      "body": "I downloaded it for at least 7 days free but at day 3 it doesn’t work and ask for the payment ….after I rate yesterday for it today it doesn’t work It’s bad",
-      "rating": 5,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14330268991",
-      "source": "serpapi-apple-reviews",
-      "title": "Toxic Fitness Culture",
-      "body": "Good app overall for daily fitness training. I just have a few thoughts. I feel this app is objectifying women’s bodies rather than focusing on heath or strength. Plays into toxic fitness culture and manipulative marketing. When you first get started by choosing your “body type” and “goals” the imagery of the women is unreal. Cartoonish women that are busty, skinny waist, wide hips. Not how real women look. And then when you answer the motivational prompts, they ask like “do you want to get fit?” And u click yes. But then they ask you “do you want to be attractive?” This is not a motivational question to lift women up. A much better question would be “do you want to feel strong?” Or something like it. Very disappointed by this.",
-      "rating": 3,
-      "version": "8.4.28",
-      "updatedAt": "2026-07-21T00:00:00.000Z"
+      "version": "8.4.26",
+      "updatedAt": "2026-07-22T11:48:38.000Z"
     },
     {
       "sourceReviewId": "14330714176",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Love this app!",
       "body": "This is my second year with this app. It has everything from face yoga to military style workouts. Customized or ladies choice. I am truly not a gym enthusiast, by the time I get ready, drive to the gym etc I have already had a workout at home. The cost is more than fair as well, basically a year subscription for the cost of one month at the gym, in my area (Boston). I mirror it to my TV and bounce around my living room lol and it works! So happy with the results and grateful to the developers for an app that does what it promised.",
       "rating": 5,
       "version": "8.4.28",
-      "updatedAt": "2026-07-21T00:00:00.000Z"
+      "updatedAt": "2026-07-21T15:12:50.000Z"
+    },
+    {
+      "sourceReviewId": "14330268991",
+      "source": "apple-rss",
+      "title": "Toxic Fitness Culture",
+      "body": "Good app overall for daily fitness training. I just have a few thoughts. I feel this app is objectifying women’s bodies rather than focusing on heath or strength. Plays into toxic fitness culture and manipulative marketing. When you first get started by choosing your “body type” and “goals” the imagery of the women is unreal. Cartoonish women that are busty, skinny waist, wide hips. Not how real women look. And then when you answer the motivational prompts, they ask like “do you want to get fit?” And u click yes. But then they ask you “do you want to be attractive?” This is not a motivational question to lift women up. A much better question would be “do you want to feel strong?” Or something like it. Very disappointed by this.",
+      "rating": 3,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-21T13:06:50.000Z"
+    },
+    {
+      "sourceReviewId": "14329131554",
+      "source": "apple-rss",
+      "title": "Not free",
+      "body": "I downloaded it for at least 7 days free but at day 3 it doesn’t work and ask for the payment ….after I rate yesterday for it today it doesn’t work \nIt’s bad",
+      "rating": 5,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-21T05:55:07.000Z"
+    },
+    {
+      "sourceReviewId": "14328378845",
+      "source": "apple-rss",
+      "title": "Mama Bear",
+      "body": "Mom of 6, wanting to get into shape. I love the options. My favorite right now is the dumbbell workout! I’m sweating and feeling the burn! Perfect amount of time for this busy Mama Bear! ♥️",
+      "rating": 5,
+      "version": "8.4.28",
+      "updatedAt": "2026-07-21T00:55:16.000Z"
     },
     {
       "sourceReviewId": "14324972618",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Very easy to follow!",
       "body": "I haven’t worked out in years. Its an app that’s easy to use. Some things are free but to get the full advantage you would need to pay a fee.",
       "rating": 5,
       "version": "8.4.27",
-      "updatedAt": "2026-07-20T00:00:00.000Z"
+      "updatedAt": "2026-07-20T04:35:18.000Z"
     },
     {
-      "sourceReviewId": "14320776504",
-      "source": "serpapi-apple-reviews",
-      "title": "THIS APP IS STUPID DONT RECOMMEND",
-      "body": "Okay so I read all the reviews and naturally I thought it would be a good app so I downloaded it and I logged in and everything and when I tried to click to do an exercise, all would pop up is like premium something basically that I had to pay and it did that for everything I tried to do and literally didn’t even get single exercise in. This app is so stupid. I don’t recommend. Please don’t download this and waste your time like I did.",
-      "rating": 1,
+      "sourceReviewId": "14324253567",
+      "source": "apple-rss",
+      "title": "Not bad",
+      "body": "You have to pay to feel proud  and I don’t like that",
+      "rating": 2,
       "version": "8.4.27",
-      "updatedAt": "2026-07-19T00:00:00.000Z"
+      "updatedAt": "2026-07-19T23:46:23.000Z"
     },
     {
       "sourceReviewId": "14322864027",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Updates",
       "body": "Loved this app, paid for it. Sadly it gets worse with every update.",
       "rating": 2,
       "version": "8.4.27",
-      "updatedAt": "2026-07-19T00:00:00.000Z"
+      "updatedAt": "2026-07-19T15:49:42.000Z"
     },
     {
-      "sourceReviewId": "14324253567",
-      "source": "serpapi-apple-reviews",
-      "title": "Not bad",
-      "body": "You have to pay to feel proud and I don’t like that",
-      "rating": 2,
+      "sourceReviewId": "14320776504",
+      "source": "apple-rss",
+      "title": "THIS APP IS STUPID DONT RECOMMEND",
+      "body": "Okay so I read all the reviews and naturally I thought it would be a good app so I downloaded it and I logged in and everything and when I tried to click to do an exercise, all would pop up is like premium something basically that I had to pay and it did that for everything I tried to do and literally didn’t even get single exercise in. This app is so stupid. I don’t recommend. Please don’t download this and waste your time like I did.",
+      "rating": 1,
       "version": "8.4.27",
-      "updatedAt": "2026-07-19T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14312293284",
-      "source": "serpapi-apple-reviews",
-      "title": "Really good app",
-      "body": "This app is the best. I definitely recommend to people who want to start. Work out It’s really good. And it helped loose weight. It was really good.👍👍👍👍👍👍",
-      "rating": 5,
-      "version": "8.4.26",
-      "updatedAt": "2026-07-17T00:00:00.000Z"
+      "updatedAt": "2026-07-19T03:29:21.000Z"
     },
     {
       "sourceReviewId": "14314433809",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Quality Declining",
       "body": "I’ve been using this app since 2018. I used to really love it. Every workout was free (without ads) and there was a lot to choose from. In the past couple months they’ve put everything behind a paywall and randomly during my workouts the app redirects me to Shein’s website. This is extremely disappointing.",
       "rating": 1,
       "version": "8.4.27",
-      "updatedAt": "2026-07-17T00:00:00.000Z"
+      "updatedAt": "2026-07-17T14:12:19.000Z"
+    },
+    {
+      "sourceReviewId": "14312293284",
+      "source": "apple-rss",
+      "title": "Really good app",
+      "body": "This app is the best. I definitely recommend to people who want to start. Work out It’s really good. And it helped loose weight. It was really good.👍👍👍👍👍👍",
+      "rating": 5,
+      "version": "8.4.26",
+      "updatedAt": "2026-07-17T01:03:06.000Z"
     },
     {
       "sourceReviewId": "14308859067",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Download right now",
       "body": "Love it",
       "rating": 5,
       "version": "8.4.27",
-      "updatedAt": "2026-07-16T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14306466803",
-      "source": "serpapi-apple-reviews",
-      "title": "No longer free????",
-      "body": "I’ve been using and loving this app for years. Now after recent update, it won’t let me do anything without a subscription. Still claims that you can use for free, so please fix this!!! Tried to contact and it said my email couldn’t be sent. Hoping they read these??",
-      "rating": 2,
-      "version": "8.4.27",
-      "updatedAt": "2026-07-15T00:00:00.000Z"
+      "updatedAt": "2026-07-16T04:55:57.000Z"
     },
     {
       "sourceReviewId": "14307471563",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Love This App",
       "body": "Finally I’m motivated!!! Daily!!!",
       "rating": 5,
       "version": "8.4.26",
-      "updatedAt": "2026-07-15T00:00:00.000Z"
+      "updatedAt": "2026-07-15T20:00:05.000Z"
+    },
+    {
+      "sourceReviewId": "14306466803",
+      "source": "apple-rss",
+      "title": "No longer free????",
+      "body": "I’ve been using and loving this app for years. Now after recent update, it won’t let me do anything without a subscription. Still claims that you can use for free, so please fix this!!! Tried to contact and it said my email couldn’t be sent. Hoping they read these??",
+      "rating": 2,
+      "version": "8.4.27",
+      "updatedAt": "2026-07-15T14:52:38.000Z"
     },
     {
       "sourceReviewId": "14303029084",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Paying",
       "body": "I’m not paying to workout that is stupid",
       "rating": 3,
       "version": "8.4.27",
-      "updatedAt": "2026-07-14T00:00:00.000Z"
+      "updatedAt": "2026-07-14T17:55:53.000Z"
+    },
+    {
+      "sourceReviewId": "14297707993",
+      "source": "apple-rss",
+      "title": "Poor handling of informing people of their subscription and where to find out information about it",
+      "body": "Hi,\n\nI subscribed to what I thought was a year plan for 39.99 and a 6 day trial. It did not let me know before the trail was over so I couldn’t cancel it. I was going to keep it but then discovered that it was 39.99 per month not 39.99 for the entire year. This was very misleading. When I tried to go into your app to see my subscription detail I could not find it any where. \n\nI would like a refund of the money that was taken out of my account. And I have already cancelled my subscription",
+      "rating": 1,
+      "version": "8.4.26",
+      "updatedAt": "2026-07-13T11:29:12.000Z"
     },
     {
       "sourceReviewId": "14297668170",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Perfect for in your 50’s",
       "body": "This is a great workout especially for women in their 50’s .",
       "rating": 5,
       "version": "8.4.26",
-      "updatedAt": "2026-07-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14297707993",
-      "source": "serpapi-apple-reviews",
-      "title": "Poor handling of informing people of their subscription and where to find out information about it",
-      "body": "Hi, I subscribed to what I thought was a year plan for 39.99 and a 6 day trial. It did not let me know before the trail was over so I couldn’t cancel it. I was going to keep it but then discovered that it was 39.99 per month not 39.99 for the entire year. This was very misleading. When I tried to go into your app to see my subscription detail I could not find it any where. I would like a refund of the money that was taken out of my account. And I have already cancelled my subscription",
-      "rating": 1,
-      "version": "8.4.26",
-      "updatedAt": "2026-07-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14290422468",
-      "source": "serpapi-apple-reviews",
-      "title": "Full Body Slim",
-      "body": "Great App",
-      "rating": 5,
-      "version": "8.4.26",
-      "updatedAt": "2026-07-11T00:00:00.000Z"
+      "updatedAt": "2026-07-13T11:15:19.000Z"
     },
     {
       "sourceReviewId": "14291852699",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "I cannot log into app",
       "body": "I paid for a year membership and I cannot log into the account because it says it does not exist. I’ve tried to message the company and it says my message seems like spam and my inquiry won’t be submitted. I’ve tried multiple ways to submit to bypass this with no luck. There is no way to contact them otherwise and now I have 8 months that’s I paid for left that I do not have access to and all I want is to be able to access the app. So now what…",
       "rating": 1,
       "version": "8.4.26",
-      "updatedAt": "2026-07-11T00:00:00.000Z"
+      "updatedAt": "2026-07-11T22:45:23.000Z"
+    },
+    {
+      "sourceReviewId": "14290422468",
+      "source": "apple-rss",
+      "title": "Full Body Slim",
+      "body": "Great App",
+      "rating": 5,
+      "version": "8.4.26",
+      "updatedAt": "2026-07-11T14:48:09.000Z"
     },
     {
       "sourceReviewId": "14286721683",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "capitalism ruined it",
       "body": "i used this app back in 2023 to lose weight i downloaded it back in 2026 EVERYTHING requires money , everything is behind a paywall.. why make a app free if you’re gonna do mini in-app purchases for everything.",
       "rating": 1,
       "version": "8.4.26",
-      "updatedAt": "2026-07-10T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14279948531",
-      "source": "serpapi-apple-reviews",
-      "title": "Deleted after years of use",
-      "body": "I used to LOVE this app. It allowed me to access work outs on my own time, in my own way. It was free forever, then recently required 90sec ads to do workouts, which was fine. All of a sudden I couldn’t access anything without paying an outrageous price. Apparently for them, money is more important than helping all people now. Used to be great, now is not at all.",
-      "rating": 1,
-      "version": "8.4.26",
-      "updatedAt": "2026-07-09T00:00:00.000Z"
+      "updatedAt": "2026-07-10T16:19:28.000Z"
     },
     {
       "sourceReviewId": "14280991777",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Crazy",
       "body": "It really doesn’t work",
       "rating": 3,
       "version": "8.4.26",
-      "updatedAt": "2026-07-09T00:00:00.000Z"
+      "updatedAt": "2026-07-09T07:04:50.000Z"
     },
     {
-      "sourceReviewId": "14276064361",
-      "source": "serpapi-apple-reviews",
-      "title": "Free trial wasn’t free",
-      "body": "I wanted to try the free trial, I was told in app that there would be no charge until the end of the free trial and you guys immediately charged me! Now there is just a charge pending and I can’t pay for it. I’d like the trial to be cancelled so I don’t get charged the 39.99! I’m broke as hell and this is just ruining my experience. I used to use this app for free all the time and now suddenly I HAVE to pay or use a free trial? This is very disheartening. Please cancel my trial and cancel the payment so I don’t get charged. Thanks. Also wanted to just contact support for this but kept getting flagged as “spam” so yeah.",
+      "sourceReviewId": "14279948531",
+      "source": "apple-rss",
+      "title": "Deleted after years of use",
+      "body": "I used to LOVE this app. It allowed me to access work outs on my own time, in my own way. It was free forever, then recently required 90sec ads to do workouts, which was fine. All of a sudden I couldn’t access anything without paying an outrageous price. Apparently for them, money is more important than helping all people now. Used to be great, now is not at all.",
       "rating": 1,
       "version": "8.4.26",
-      "updatedAt": "2026-07-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14276572019",
-      "source": "serpapi-apple-reviews",
-      "title": "Great workouts",
-      "body": "I’m just starting and they have all types of exercises and all types of levels so u choose the one that’s best for you",
-      "rating": 5,
-      "version": "8.4.25",
-      "updatedAt": "2026-07-08T00:00:00.000Z"
+      "updatedAt": "2026-07-09T00:10:06.000Z"
     },
     {
       "sourceReviewId": "14277925854",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "The SHEIN ads are out of control",
       "body": "While you’re working out, the app will close and the Shein website will open and this will happen multiple times without you prompting or touching your phone",
       "rating": 1,
       "version": "8.4.25",
-      "updatedAt": "2026-07-08T00:00:00.000Z"
+      "updatedAt": "2026-07-08T12:59:25.000Z"
     },
     {
-      "sourceReviewId": "14274175102",
-      "source": "serpapi-apple-reviews",
-      "title": "Nice",
-      "body": "I love it",
+      "sourceReviewId": "14276572019",
+      "source": "apple-rss",
+      "title": "Great workouts",
+      "body": "I’m just starting and they have all types of exercises and all types of levels so u choose the one that’s best for you",
       "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-07-07T00:00:00.000Z"
+      "updatedAt": "2026-07-08T04:01:24.000Z"
     },
     {
-      "sourceReviewId": "14275420028",
-      "source": "serpapi-apple-reviews",
-      "title": "Cost",
-      "body": "I get it life is not easy you have to pay for stuff but really? Why does it have to cost money I want a workout im under 18 no job how do I pay? Still the question were understandable seemed like it was really gonna help",
-      "rating": 4,
+      "sourceReviewId": "14276064361",
+      "source": "apple-rss",
+      "title": "Free trial wasn’t free",
+      "body": "I wanted to try the free trial, I was told in app that there would be no charge until the end of the free trial and you guys immediately charged me! Now there is just a charge pending and I can’t pay for it. I’d like the trial to be cancelled so I don’t get charged the 39.99! I’m broke as hell and this is just ruining my experience. I used to use this app for free all the time and now suddenly I HAVE to pay or use a free trial? This is very disheartening. Please cancel my trial and cancel the payment so I don’t get charged. Thanks. Also wanted to just contact support for this but kept getting flagged as “spam” so yeah.",
+      "rating": 1,
       "version": "8.4.26",
-      "updatedAt": "2026-07-07T00:00:00.000Z"
+      "updatedAt": "2026-07-08T00:45:43.000Z"
     },
     {
       "sourceReviewId": "14275682276",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Updates",
       "body": "I’ve had this app for over five years now and I’ve loved them, but hate how they kept going from completely free to charging for everything now. Really great app but not paying for it.",
       "rating": 4,
       "version": "8.4.26",
-      "updatedAt": "2026-07-07T00:00:00.000Z"
+      "updatedAt": "2026-07-07T22:15:30.000Z"
     },
     {
-      "sourceReviewId": "14270786563",
-      "source": "serpapi-apple-reviews",
-      "title": "Started great, then locked up",
-      "body": "The app allows you to access almost everything at the start, and then begins to restrict. I’ve had the app for over a year now and I am unable to do anything at all. I cannot do saved workouts or any other plan that I used to be able to access after watching over a minute of ads.",
-      "rating": 2,
+      "sourceReviewId": "14275420028",
+      "source": "apple-rss",
+      "title": "Cost",
+      "body": "I get it life is not easy you have to pay for stuff but really? Why does it have to cost money I want a workout im under 18 no job how do I pay? Still the question were understandable seemed like it was really gonna help",
+      "rating": 4,
+      "version": "8.4.26",
+      "updatedAt": "2026-07-07T20:38:21.000Z"
+    },
+    {
+      "sourceReviewId": "14274175102",
+      "source": "apple-rss",
+      "title": "Nice",
+      "body": "I love it",
+      "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-07-06T00:00:00.000Z"
+      "updatedAt": "2026-07-07T14:13:54.000Z"
     },
     {
       "sourceReviewId": "14271423099",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Very good!",
       "body": "A very good app for motivation and everything, it’s fun to do for me at least, I love the warm ups and cool downs and demonstrations. Worth the money really.",
       "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-07-06T00:00:00.000Z"
+      "updatedAt": "2026-07-06T20:45:22.000Z"
+    },
+    {
+      "sourceReviewId": "14270786563",
+      "source": "apple-rss",
+      "title": "Started great, then locked up",
+      "body": "The app allows you to access almost everything at the start, and then begins to restrict. I’ve had the app for over a year now and I am unable to do anything at all. I cannot do saved workouts or any other plan that I used to be able to access after watching over a minute of ads.",
+      "rating": 2,
+      "version": "8.4.25",
+      "updatedAt": "2026-07-06T17:20:45.000Z"
     },
     {
       "sourceReviewId": "14264918620",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Idk",
       "body": "It made me pay after the first day and u didn’t like it",
       "rating": 1,
       "version": "8.4.25",
-      "updatedAt": "2026-07-05T00:00:00.000Z"
+      "updatedAt": "2026-07-05T06:49:12.000Z"
     },
     {
       "sourceReviewId": "14260733949",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Maggie",
-      "body": "It's ok",
+      "body": "It's  ok",
       "rating": 4,
       "version": "8.4.25",
-      "updatedAt": "2026-07-04T00:00:00.000Z"
+      "updatedAt": "2026-07-04T05:08:01.000Z"
     },
     {
       "sourceReviewId": "14254614594",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "The best!!",
       "body": "This app has everything you need to get in shape and be healthy. Very easy to follow good music and great workouts. Highly recommended.",
       "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-07-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14249980354",
-      "source": "serpapi-apple-reviews",
-      "title": "Great app, downloads impossible",
-      "body": "This app and the workouts are great. Even with a paid subscription, you cannot download. No help or steps from online searches help.",
-      "rating": 3,
-      "version": "8.4.25",
-      "updatedAt": "2026-07-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14250373918",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this app!",
-      "body": "Finally found an app that fits my workout needs!",
-      "rating": 5,
-      "version": "8.4.25",
-      "updatedAt": "2026-07-01T00:00:00.000Z"
+      "updatedAt": "2026-07-02T17:27:16.000Z"
     },
     {
       "sourceReviewId": "14251432995",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Very good app",
       "body": "I am really enjoying this app… lots of different options.",
       "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-07-01T00:00:00.000Z"
+      "updatedAt": "2026-07-01T23:30:25.000Z"
     },
     {
-      "sourceReviewId": "14243194565",
-      "source": "serpapi-apple-reviews",
-      "title": "Nothing but paywalls",
-      "body": "Is there anything that is free on this app anymore?? Even workouts I had previously saved now ask you to pay. Ridiculous",
-      "rating": 1,
+      "sourceReviewId": "14250373918",
+      "source": "apple-rss",
+      "title": "Love this app!",
+      "body": "Finally found an app that fits my workout needs!",
+      "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-06-30T00:00:00.000Z"
+      "updatedAt": "2026-07-01T17:29:44.000Z"
+    },
+    {
+      "sourceReviewId": "14249980354",
+      "source": "apple-rss",
+      "title": "Great app, downloads impossible",
+      "body": "This app and the workouts are great. Even with a paid subscription, you cannot download. No help or steps from online searches help.",
+      "rating": 3,
+      "version": "8.4.25",
+      "updatedAt": "2026-07-01T15:39:13.000Z"
     },
     {
       "sourceReviewId": "14246967026",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Cannot access paid subscription",
       "body": "I was logged out of the app recently and cannot log back in to access my workouts and benefits of my paid subscription",
       "rating": 3,
       "version": "8.4.25",
-      "updatedAt": "2026-06-30T00:00:00.000Z"
+      "updatedAt": "2026-06-30T22:30:32.000Z"
+    },
+    {
+      "sourceReviewId": "14243194565",
+      "source": "apple-rss",
+      "title": "Nothing but paywalls",
+      "body": "Is there anything that is free on this app anymore?? Even workouts I had previously saved now ask you to pay. Ridiculous",
+      "rating": 1,
+      "version": "8.4.25",
+      "updatedAt": "2026-06-30T01:47:03.000Z"
     },
     {
       "sourceReviewId": "14241644246",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Great for beginners",
       "body": "I’ve been off and on with the Sweat app but it’s a lot of dedication from the start. Workout for Women from home and gym it’s great for beginners and it’s not killer or time consuming. I can fit 20 min or less anytime in between my schedule. Works out aren’t out of this world and one can sustain it for beginners. Def recommend!",
       "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-06-29T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14227812994",
-      "source": "serpapi-apple-reviews",
-      "title": "Thank you",
-      "body": "Im Liking the app so far thanks so Much!!!",
-      "rating": 5,
-      "version": "8.4.25",
-      "updatedAt": "2026-06-26T00:00:00.000Z"
+      "updatedAt": "2026-06-29T16:45:23.000Z"
     },
     {
       "sourceReviewId": "14229833137",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Good, but...",
       "body": "I LOVE this app. Great workouts for all ages. But... I am on the free version and there are a lot of things that I can't do without paying. Still has good options for the free version but please allow the free version to make me able to do more things.",
       "rating": 4,
       "version": "8.4.25",
-      "updatedAt": "2026-06-26T00:00:00.000Z"
+      "updatedAt": "2026-06-26T19:13:48.000Z"
+    },
+    {
+      "sourceReviewId": "14227812994",
+      "source": "apple-rss",
+      "title": "Thank you",
+      "body": "Im\nLiking the app so far thanks so Much!!!",
+      "rating": 5,
+      "version": "8.4.25",
+      "updatedAt": "2026-06-26T08:50:46.000Z"
     },
     {
       "sourceReviewId": "14225692756",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "￼So great",
       "body": "Short workouts perfect for anyday",
       "rating": 5,
       "version": "8.4.25",
-      "updatedAt": "2026-06-25T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14220597773",
-      "source": "serpapi-apple-reviews",
-      "title": "The Best Workout App in the World",
-      "body": "Update, June 24, 2026 - I’ve been using this app for a while and I like it even more than when I started. One of the rare and fantastic things about the workouts is that they are genuinely well thought out, really nicely put together. It seems a person sat down and thought this through and put the exercises in the right order and the most beneficial exercises. So, there are no surprises. The workouts do what they say they will do. Anyway, I do wish they’d put out some new PROGRAMS, though I’m sure at some point they will. ———- I am absolutely crazy about this app. It has everything, almost (no tai chi, yet). All types of exercises and yoga . . . Of various lengths. I am on a 30 day dumbbell program right now. The variety of exercises in that one program is amazing. I’ve never seen some of those moves. Also, doing a 7-minute workout in the morning; love those unique moves, too. Basically, you get this and you don’t need anything else. I downloaded dozens of workout apps and this is the one who stood out way, way above the others; nothing even compares. Totally love it!",
-      "rating": 5,
-      "version": "8.4.24",
-      "updatedAt": "2026-06-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14221168828",
-      "source": "serpapi-apple-reviews",
-      "title": "Subscriptions",
-      "body": "The is a good workout app but the only thing that i don’t like is that it said it was giving me a free subscription because it was my first time using this app, i get the subscription and its charged me 30 dollars idk if i did something wrong but warning, just stick to the free version and don’t be scammed like me 😭",
-      "rating": 3,
-      "version": "8.4.25",
-      "updatedAt": "2026-06-24T00:00:00.000Z"
+      "updatedAt": "2026-06-25T18:51:31.000Z"
     },
     {
       "sourceReviewId": "14222226181",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Scam and expensive",
       "body": "Cancelled my subscription and then received not one but two charges in the same day totaling almost $100!!! Don’t do it! Not worth it.",
       "rating": 1,
       "version": "8.4.25",
-      "updatedAt": "2026-06-24T00:00:00.000Z"
+      "updatedAt": "2026-06-24T21:58:30.000Z"
+    },
+    {
+      "sourceReviewId": "14221168828",
+      "source": "apple-rss",
+      "title": "Subscriptions",
+      "body": "The is a good workout app but the only thing that i don’t like is that it said it was giving me a free subscription because it was my first time using this app, i get the subscription and its charged me 30 dollars idk if i did something wrong but warning, just stick to the free version and don’t be scammed like me 😭",
+      "rating": 3,
+      "version": "8.4.25",
+      "updatedAt": "2026-06-24T16:06:59.000Z"
+    },
+    {
+      "sourceReviewId": "14220597773",
+      "source": "apple-rss",
+      "title": "The Best Workout App in the World",
+      "body": "Update, June 24, 2026 - I’ve been using this app for a while and I like it even more than when I started.  One of the rare and fantastic things about the workouts is that they are genuinely well thought out, really nicely put together.  It seems a person sat down and thought this through and put the exercises in the right order and the most beneficial exercises.  So, there are no surprises.  The workouts do what they say they will do.  Anyway, I do wish they’d put out some new PROGRAMS, though I’m sure at some point they will.   ———-         I am absolutely crazy about this app.  It has everything, almost (no tai chi, yet).  All types of exercises and yoga . . . Of various lengths.  I am on a 30 day dumbbell program right now.  The variety of exercises in that one program is amazing.  I’ve never seen some of those moves.  Also, doing a 7-minute workout in the morning; love those unique moves, too.  Basically, you get this and you don’t need anything else.  I downloaded dozens of workout apps and this is the one who stood out way, way above the others; nothing even compares. Totally love it!",
+      "rating": 5,
+      "version": "8.4.24",
+      "updatedAt": "2026-06-24T13:22:35.000Z"
     },
     {
       "sourceReviewId": "14217181753",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Good but why subscription??!!😭",
       "body": "The app is good! I had it once before but I stopped using it then I started using again then bam u have to get a subscription on the 4th day. I don’t know why but I just hope it won’t happen again. Anyway besides that the app is pretty good. Though I do suggest getting younger ages below 18 because some girls who want to change and get a bit healthier in 6th grade or older can be a better version of themselves.",
       "rating": 5,
       "version": "8.4.24",
-      "updatedAt": "2026-06-23T00:00:00.000Z"
+      "updatedAt": "2026-06-23T15:49:01.000Z"
     },
     {
       "sourceReviewId": "14212862587",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Subscription",
       "body": "Cancelled subscription and still got charged for it. No spot in app to manage no place on website either. Went to contact support and every time I hit submit it would say the request couldn’t be submitted because it’s spam. Don’t get app it not free it will make you sign up for a subscription and not let you cancel it.",
       "rating": 1,
       "version": "8.4.24",
-      "updatedAt": "2026-06-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "14209021980",
-      "source": "serpapi-apple-reviews",
-      "title": "Great app",
-      "body": "Love the variety of the workouts and being able to choose different programs",
-      "rating": 5,
-      "version": "8.4.23",
-      "updatedAt": "2026-06-21T00:00:00.000Z"
+      "updatedAt": "2026-06-22T13:28:51.000Z"
     },
     {
       "sourceReviewId": "14210920635",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Free Version So Frustrating",
       "body": "I do not care if I have to watch ads but what I do care about is if I get a pop up screen with no continuation option only advertising the paid version. The workout is available with ads yet the interface traps you with their predatory ads.",
       "rating": 1,
       "version": "8.4.24",
-      "updatedAt": "2026-06-21T00:00:00.000Z"
+      "updatedAt": "2026-06-21T23:55:36.000Z"
     },
     {
-      "sourceReviewId": "14203283136",
-      "source": "serpapi-apple-reviews",
-      "title": "My #1.",
-      "body": "Life changing. <3",
+      "sourceReviewId": "14209021980",
+      "source": "apple-rss",
+      "title": "Great app",
+      "body": "Love the variety of the workouts and being able to choose different programs",
       "rating": 5,
-      "version": "8.4.24",
-      "updatedAt": "2026-06-20T00:00:00.000Z"
+      "version": "8.4.23",
+      "updatedAt": "2026-06-21T13:10:42.000Z"
     },
     {
       "sourceReviewId": "14204125134",
-      "source": "serpapi-apple-reviews",
+      "source": "apple-rss",
       "title": "Free trial SCAM",
       "body": "I downloaded this app yesterday and I wanted to try the 1-week free trial, but once I used the Apple Pay feature to subscribe to the free trial I was charged $29.99!? Dealing with my bank now to get my money back but it literally said I would not get charged until a week after.",
       "rating": 1,
       "version": "8.4.24",
-      "updatedAt": "2026-06-20T00:00:00.000Z"
+      "updatedAt": "2026-06-20T06:19:22.000Z"
+    },
+    {
+      "sourceReviewId": "14203283136",
+      "source": "apple-rss",
+      "title": "My #1.",
+      "body": "Life changing. <3",
+      "rating": 5,
+      "version": "8.4.24",
+      "updatedAt": "2026-06-20T00:38:51.000Z"
     },
     {
       "sourceReviewId": "14190183704",
@@ -2555,1951 +2699,308 @@
       "rating": 1,
       "version": "8.4.14",
       "updatedAt": "2026-01-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13619400556",
-      "source": "serpapi-apple-reviews",
-      "title": "Good",
-      "body": "I feel so good right now",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13622148439",
-      "source": "serpapi-apple-reviews",
-      "title": "Start of my healthy journey",
-      "body": "My first workout and it was amazing! Everything is put together for you. I am a beginner and don’t have time to go to the gym. This was perfect! I love it. Recommend 100%",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13617706760",
-      "source": "serpapi-apple-reviews",
-      "title": "Wonderful",
-      "body": "I’ve only been using this app for a little while now and it’s pretty great. The routines are easy to follow and the way it helps keep you on track and going is awesome. Thank you guys for this app.",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-10T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13614000308",
-      "source": "serpapi-apple-reviews",
-      "title": "I was charged",
-      "body": "I was charged $42 when it said one week free trial. It charged me immediately. 30 mins after I tried to get a refund. In regard to it was supposed to be free. Apple won’t refund me. I contacted the app numerous times with no response.",
-      "rating": 1,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13607353005",
-      "source": "serpapi-apple-reviews",
-      "title": "Ruined by AI, paywalls, and ads",
-      "body": "I've been using this app since 2020. The design was immaculate and the app was simplistic and convenient. However, they have absolutely ruined it all with blatantly AI-generated pictures. They used to use real models and real bodies, and now there is AI everywhere. They've locked the basic workouts I used to do daily behind a paywall or a 90 second ad. It's ridiculous. I will no longer support this app.",
-      "rating": 1,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13609933250",
-      "source": "serpapi-apple-reviews",
-      "title": "A very good workout",
-      "body": "Love it make me feel good",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13596132017",
-      "source": "serpapi-apple-reviews",
-      "title": "Awesome app!!!",
-      "body": "I love it keep me engaged and motivated. I always look forward to the quotes. Really recommend to give it a change and set your mind to it.!",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-05T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13591652687",
-      "source": "serpapi-apple-reviews",
-      "title": "Hehe",
-      "body": "I love this app, it’s my first day. Hope I don’t have to pay later this week.",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-04T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13590453969",
-      "source": "serpapi-apple-reviews",
-      "title": "Great app",
-      "body": "So many variations of workouts, there is no excuse to not find something you are in the mood to do. Any kind of movement is better than sitting. Stretch, dance, difficult. It has it all. 😊",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13583933851",
-      "source": "serpapi-apple-reviews",
-      "title": "Hello workout for women",
-      "body": "Ok so they fixed my issue that I had with this app so thank you very much (workout for women) team. Umm so maybe in the next update u guys can maybe add a strength training section in the app and maybe if this can sync with the Apple Watch that would be great too Update: Jan, 1,2026. So I would like it if you could add real people on this in the workout tab. Cuz it would be easier to follow for me.",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13585170397",
-      "source": "serpapi-apple-reviews",
-      "title": "Just right!",
-      "body": "I haven’t worked out in many months. I found this app, and it’s perfect for me. Already feel my arthritic knee getting better!",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2026-01-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13575127201",
-      "source": "serpapi-apple-reviews",
-      "title": "Awesome!",
-      "body": "I absolutely love this app! I have been doing it goin on 3 weeks and losing weight!",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2025-12-31T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13569909417",
-      "source": "serpapi-apple-reviews",
-      "title": "Do not get this app",
-      "body": "Charges without my consent. Back in June I did the mistake to enroll and got charge, I call/email and finally after many attempts for it cancel. Now December they started to charge me again when I don’t even have the app. Emailed them 4 times and no money back. Do not enroll unless you want them to take your money.",
-      "rating": 1,
-      "version": "8.4.13",
-      "updatedAt": "2025-12-29T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13559150251",
-      "source": "serpapi-apple-reviews",
-      "title": "It is a good app",
-      "body": "This was a good app. I kind of skipped a few because it was pretty hard, but besides that it was a great app it was so helpful.",
-      "rating": 4,
-      "version": "8.4.13",
-      "updatedAt": "2025-12-27T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13560322989",
-      "source": "serpapi-apple-reviews",
-      "title": "Love it",
-      "body": "I’m loving this app it’s easy to use has lots of options for whatever you want or need!! I highly recommend this 🤩",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2025-12-27T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13546742799",
-      "source": "serpapi-apple-reviews",
-      "title": "You should try it",
-      "body": "It really helping me learn my goal and keeping me and shape.",
-      "rating": 5,
-      "version": "8.4.13",
-      "updatedAt": "2025-12-23T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13522230524",
-      "source": "serpapi-apple-reviews",
-      "title": "NICE APP!!",
-      "body": "this app helps me sm!! it’s so helpful when it comes to women trying to lose weight and keeps it motivating with the music and notifications!! 100% recommend!!",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13523707314",
-      "source": "serpapi-apple-reviews",
-      "title": "Great program!",
-      "body": "Great program, to be successful just need consistency. It is doable, fun, created for everyone needs. I love it.",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13524495097",
-      "source": "serpapi-apple-reviews",
-      "title": "Greedy",
-      "body": "This app never had so many ads I’m tired of the greed",
-      "rating": 1,
-      "version": "8.4.13",
-      "updatedAt": "2025-12-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13513874498",
-      "source": "serpapi-apple-reviews",
-      "title": "Great one!",
-      "body": "Its very effective. The workouts are very beautifully crafted, hits the target, amazing app i found so far. It feels like coach and gym is in the app.",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-14T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13500817516",
-      "source": "serpapi-apple-reviews",
-      "title": "Hamberg",
-      "body": "Love this app - it has so many varieties",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13495153118",
-      "source": "serpapi-apple-reviews",
-      "title": "Disappointed",
-      "body": "I used to use this app ALL the time. I’ve been using it multiple times a week, sometimes multiple times a day, but ever since they started charging for every single workout it makes me not want to use it. This used to be my favorite app and I have told so many different people about it. I liked being able to follow a workout for free and just be able to workout at home. Adding the in app purchases to this app ruined it.",
-      "rating": 1,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13484214955",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout for beginners",
-      "body": "This is only my second day using it but it’s pretty awesome. It has so many different workouts and they make it really easy because they have a lady on the screen to show you exactly how to do the workout.",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13482386137",
-      "source": "serpapi-apple-reviews",
-      "title": "Good all around body toner",
-      "body": "This is a great all around body workout, get toned, increase circuits to your level. You can change exercises to your desire incase of injury or discomfort. Love it",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13468612274",
-      "source": "serpapi-apple-reviews",
-      "title": "Good app needs more detail",
-      "body": "They app is great idk results yet but it’s free some things I with too we are how you diet can play into it and also while it’s guiding workouts how u can see what ur working on",
-      "rating": 4,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13468981921",
-      "source": "serpapi-apple-reviews",
-      "title": "Good free exercise app!",
-      "body": "This free app has a bunch of good ad-supported workout sequences with mostly-useful instructions for each exercise. keeps track of exercise history and lets you input any exercise you do outside the app too! I’m not crazy about the app’s new AI-generated exercise videos, but the app seems to still have exercise routine content that doesn’t use them.",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-12-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13469616499",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout under 7 minutes",
-      "body": "Been fan of this app for long time. Love this app.",
-      "rating": 5,
-      "version": "8.4.10",
-      "updatedAt": "2025-12-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13470705103",
-      "source": "serpapi-apple-reviews",
-      "title": "Help",
-      "body": "I am giving this one star, but not because I don’t like the app but because I am unable to contact support. Every time I try their contact form says this must be spam. Even though all I did was ask a question and put in my name and email address. There’s no capture or anything so no way to submit a form I guess? That being said, when setting up my profile, there is a check box for no jumping. I did not check it at the time, but wanted to redo that and check no jumping. However, I was unable to find that setting in my profile anywhere on the free version of the app. So I went ahead and paid for premium, because I do like the app, and hoped that once I had premium, the setting would reveal itself. It did not I am unable to find any way to turn off the stupid jumping. And I can’t contact support since their support form does not work. I will be canceling unless someone gets in touch with me.",
-      "rating": 1,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13465447339",
-      "source": "serpapi-apple-reviews",
-      "title": "Súper recomendada me encanta",
-      "body": "Me encanta esta aplicación por que tiene bastantes ejercicios y aparte marca el tiempo se los súper recomiendo a los que esta. Iniciando en el mundo del ejercicio",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-12-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13460732651",
-      "source": "serpapi-apple-reviews",
-      "title": "The best workout app ever",
-      "body": "Today I did a stretch to get my feet on track before my Washington DC trip I am at 199.5 pounds right now but i will be slimmer by the time I’m on the plane to Washington",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13460916824",
-      "source": "serpapi-apple-reviews",
-      "title": "Lucy",
-      "body": "Easy to stay consistent with a routine",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-12-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13461153193",
-      "source": "serpapi-apple-reviews",
-      "title": "I love it because",
-      "body": "I like this app because I like how it keeps your personally things and helped me get straight and stronger",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-12-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13461362447",
-      "source": "serpapi-apple-reviews",
-      "title": "Perfect for Beginners",
-      "body": "Love this app! The exercises are easy to follow with animation of how to do each exercise. I use this app everyday and it helped me lose 75lbs!",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-12-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13454693992",
-      "source": "serpapi-apple-reviews",
-      "title": "3 year now!",
-      "body": "I’m at the point where I’m ready to cancel my gym membership. This app has everything! I love the programs and the intense 7 min workouts. No excuses! This app is awesome!",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-29T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13449193738",
-      "source": "serpapi-apple-reviews",
-      "title": "Glitch",
-      "body": "Tried to get the deal and put my apple password in and it vibrate clicked and gave a check mark showing it accepted but the it went to the page right before that like nothing had happened and it’s not showing up on my apple subscription page. I hope I don’t get billed!!",
-      "rating": 1,
-      "version": "8.4.11",
-      "updatedAt": "2025-11-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13452470058",
-      "source": "serpapi-apple-reviews",
-      "title": "⭐️⭐️AMAZING ⭐️⭐️",
-      "body": "This app is by far the best app I’ve ever had. ever since I got this app I’ve never felt more comfortable about my body, thank you so very much whoever created this app is a legend and genius! ⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️⭐️ Right after you finish your workout, they have a nice quote that will keep you going. Also they have videos to make you feel better and help you if you want to go on a diet or something. They also explain everything that way you understand what you’re doing during your workout 🏋️‍♀️ but not just that before you even start start working out or get into the app they have a survey for you with a bunch of questions. That way they can understand your body type your abilities you’re experiencing working out and so many more also they have plans if you would like to pay and it’s also free but you would have to watch a 90 second ad. But as long as I’m getting in my I don’t care about any ads. It hurts a whole entire calendar for you and explains to you exactly when you’re gonna hit your goal right now it’s November. It said I’ll hit my goal on January 25 I’m so excited!!!",
-      "rating": 5,
-      "version": "8.4.11",
-      "updatedAt": "2025-11-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13448443149",
-      "source": "serpapi-apple-reviews",
-      "title": "Amazing benefits",
-      "body": "This app is amazing! I like how I felt then and now after kids, I want to get back into it.",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-27T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13442424710",
-      "source": "serpapi-apple-reviews",
-      "title": "Review on the workouts",
-      "body": "The best",
-      "rating": 5,
-      "version": "8.4.10",
-      "updatedAt": "2025-11-26T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13441157806",
-      "source": "serpapi-apple-reviews",
-      "title": "very good",
-      "body": "i love it",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-25T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13433714169",
-      "source": "serpapi-apple-reviews",
-      "title": "Senior",
-      "body": "Selections come through each time. 👍",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13431716290",
-      "source": "serpapi-apple-reviews",
-      "title": "I’ve been using this app since 2019",
-      "body": "The aggressive ad display they’ve been running recently and purchase incentives every time you press a button is becoming agitating to the point that I’m considering deleting this app. It is so unpleasant. I have paid for subscriptions on and off over the years with this app, but I found I am more than happy to have limited access to some of the workouts and services, if I get to choose to pay or not. This is a horrible move on their part.",
-      "rating": 1,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-23T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13428133084",
-      "source": "serpapi-apple-reviews",
-      "title": "Love it❤️",
-      "body": "The workout seems a bit challenging for beginners wanting a core workout but it gives you overall strength. I was going to tap out but then I kept pushing through. Amazing workout app😍",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13428931706",
-      "source": "serpapi-apple-reviews",
-      "title": "Breezy",
-      "body": "Having workouts designed to fit into my lifestyle is a win. I’m using the free version and there’s still so much being offered. Well designed!",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13417554101",
-      "source": "serpapi-apple-reviews",
-      "title": "It actually works!",
-      "body": "It’s all mentality I went from 176 to 133!",
-      "rating": 5,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-19T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13412460046",
-      "source": "serpapi-apple-reviews",
-      "title": "App is down",
-      "body": "The app is down a lot, makes it impossible to fully use the subscription",
-      "rating": 1,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-18T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13413997601",
-      "source": "serpapi-apple-reviews",
-      "title": "Really like this app",
-      "body": "I really enjoy this app! I love the time frames of these exercises. It helps as a busy mom. I also like how there are many options to choose from! 💪",
-      "rating": 5,
-      "version": "8.4.8",
-      "updatedAt": "2025-11-18T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13410341533",
-      "source": "serpapi-apple-reviews",
-      "title": "What a waste..",
-      "body": "First it brings you through a bunch of questions to answer for a personal workout, which is ok. But then you have to sign up for a year’s membership even though it claims you get a week free- it charged my card after less than a half hour. Then you get into the app and where are all the exercises? There are maybe 5 that are more than 10 minutes. Not worth it at all. Wish I would have read the 1 star review before even downloading.",
-      "rating": 1,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13397631724",
-      "source": "serpapi-apple-reviews",
-      "title": "Good for nothing and disappointing",
-      "body": "What happened? This free app used to be my go to for workouts that I could pick and do at random and still get results. Sure they were never amazing, but at least you got something to work with. Now you want me to take quizzes, force me to choose a goal of weight loss for a healthy BMI ??? and make me sit through 2 minutes of ads just to do one 5 minute workout? If I lost the weight your app told me to lose I would be scary unhealthy and have to lose so much muscle… I reinstalled this for my winter program and remembered why I got rid of this in the first place and deleted immediately. Yikes.",
-      "rating": 1,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-14T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13392918697",
-      "source": "serpapi-apple-reviews",
-      "title": "Subscription",
-      "body": "They will not allow me to cancel my subscription and keep charging my card the workouts do not help at all",
-      "rating": 1,
-      "version": "8.4.9",
-      "updatedAt": "2025-11-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13378116606",
-      "source": "serpapi-apple-reviews",
-      "title": "Good but not good",
-      "body": "I don’t like have we have to pay for it after you’re fist workout",
-      "rating": 3,
-      "version": "8.4.8",
-      "updatedAt": "2025-11-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13371497134",
-      "source": "serpapi-apple-reviews",
-      "title": "$$",
-      "body": "I had this app years ago but I deleted it. I went back to bring it back and found out now it costs $. Such a shame.",
-      "rating": 1,
-      "version": "8.4.8",
-      "updatedAt": "2025-11-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13372142378",
-      "source": "serpapi-apple-reviews",
-      "title": "This app is getting me fit!",
-      "body": "Love their programs! It has helped me get fit!!! I also like that fact that they are broken down into areas you want to work on!",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13372571498",
-      "source": "serpapi-apple-reviews",
-      "title": "Dodisso",
-      "body": "Estoy empezando y me encanta funciona increible si estás interesado en cambiar tu fisico recomiendo está aplicacion al 100./. Gracias !!",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13368167228",
-      "source": "serpapi-apple-reviews",
-      "title": "It works",
-      "body": "I do the 9 minutes gym and I see improvements for such a short time.",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13363097231",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout Women",
-      "body": "I love love love this app! It’s everything that I need!",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13359088406",
-      "source": "serpapi-apple-reviews",
-      "title": "Great tool for work out",
-      "body": "Enjoy doing my work out with the videos.",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-05T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13360007768",
-      "source": "serpapi-apple-reviews",
-      "title": "Hate the ads",
-      "body": "I love the app. Hate that they added ads and they don’t have as many free workouts.",
-      "rating": 4,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-05T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13354022206",
-      "source": "serpapi-apple-reviews",
-      "title": "Awesome Workout",
-      "body": "This workout was just what I needed to get a quick morning sweat in",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-04T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13356262116",
-      "source": "serpapi-apple-reviews",
-      "title": "Meh-",
-      "body": "Used to be better now you need to watch ads for the free workouts which is fine but the ads are glitchy and you can’t always make it back to the workout.",
-      "rating": 2,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-04T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13353160740",
-      "source": "serpapi-apple-reviews",
-      "title": "Great workout",
-      "body": "The work I need, when a I have the time.",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13345372272",
-      "source": "serpapi-apple-reviews",
-      "title": "Kind of creepy now",
-      "body": "I used to use this app a while ago and it was great (and free). When I got on this time it gave me a quiz with a bunch of creepy ai generated women which was really weird. And now it wants me to pay or watch ads for an app that used to be free. Pretty disappointing.",
-      "rating": 1,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13348553324",
-      "source": "serpapi-apple-reviews",
-      "title": "Amazing",
-      "body": "I absolutely loved my first workout that I have ever done on here before it was the first time I ever have used this app and I just felt like I was getting a little overweight so I started to do workout and now right now I feel energized. I feel ready and I feel like I can conquer my goal.",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13348702852",
-      "source": "serpapi-apple-reviews",
-      "title": "No longer worth it",
-      "body": "This app used to be great until they started pushing a subscription model and forcing you to watch 90 second ads before each workout. I’ve used this app for 5+ years, going to look for a new one now.",
-      "rating": 1,
-      "version": "8.4.7",
-      "updatedAt": "2025-11-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13323395831",
-      "source": "serpapi-apple-reviews",
-      "title": "Support non responsive",
-      "body": "If I could get a response from the 7m fitness I would give them a 5. I contacted them about a login problem and have not heard anything.",
-      "rating": 2,
-      "version": "8.4.7",
-      "updatedAt": "2025-10-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13326180802",
-      "source": "serpapi-apple-reviews",
-      "title": "Pros and cons",
-      "body": "Some workouts are great even without the paid premium. It has workouts, yoga, stretches and, etc. You’re able to move your focus to different parts of your body but if there was a better way to narrow down to specifics that would be great. Although lately I have been feeling unmotivated to use this app for my workouts and yoga even. I am currently very much pregnant and about to pop but during the beginning of my pregnancy I was on my workouts but I wanted to focus on prenatal workouts to get my body ready for this baby. So I switched up my settings (apparently pregnancy is a special needs) and went searching for workouts. I found the prenatal program and I tried it out. I was about 17-18 weeks at that point and I was getting my baby bump. Tell me why their prenatal workouts/yoga have you laying on your stomach doing single leg raises or supermans. Like wouldn’t they know that pregnant women shouldn’t be putting pressure on your stomach?? Apparently not… but I haven’t used this app since June and I’m writing this in October trying out my old workouts and yoga since I never liked working out on my stomach but I need to get the ball rolling since I’m expecting to have my baby soon. It’s just crazy how a women’s workout app doesn’t even accommodate to pregnant women as much as you would expect them to. Very strange but simple fix yeah? I get you can skip the parts that you don’t want to do but I hate having to stop my groove just to run up and and tap on my screen when there should be no need to skip a stomach workout on a prenatal program.",
-      "rating": 3,
-      "version": "8.4.0",
-      "updatedAt": "2025-10-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13326194043",
-      "source": "serpapi-apple-reviews",
-      "title": "G",
-      "body": "G",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-10-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13326458365",
-      "source": "serpapi-apple-reviews",
-      "title": "Used to be great",
-      "body": "This used to be such a great app & was my favorite for my abs day in the gym or for at home workouts. Now I can’t access anything without needing to watch an ad & the ad never clicks off after the 90 seconds are done…",
-      "rating": 1,
-      "version": "8.4.7",
-      "updatedAt": "2025-10-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13326941249",
-      "source": "serpapi-apple-reviews",
-      "title": "Best workout",
-      "body": "As a teenager, this is a really good workout. I really like this workout. I feel like it’s really simple and really easy. You do feel a burn after lol I did it while listening to my Apple Music and you can listen to anything on here you get to choose what music you wanna listen to through Apple Music or Spotify whatever it doesn’t matter I have a monthly I pay for it monthly and it’s just a very very good app. I have for one year is $3.99 monthly if I wanted to pay monthly lol but I absolutely love this. I definitely recommend downloading it.",
-      "rating": 4,
-      "version": "8.4.7",
-      "updatedAt": "2025-10-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13319341320",
-      "source": "serpapi-apple-reviews",
-      "title": "Forcing subscription",
-      "body": "Really great app until they started trying to get you to buy their subscription- short ads are fine but 90 sec seems a little long. I was still okay with it until I opened it tonight and it won’t even let me do the workout after an ad, it just keeps trying to get me to sign up for the subscription and won’t let me into the workout. I think I’ve literally had this app for 7 or 8 years and loved it but won’t keep using it if it’s decided not to have at least some free workouts anymore😅",
-      "rating": 1,
-      "version": "8.4.7",
-      "updatedAt": "2025-10-27T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13317780798",
-      "source": "serpapi-apple-reviews",
-      "title": "The app that made me start moving my body again",
-      "body": "After spending so much time trying to find the right YouTube videos or an app I finally found it. I paid for the 40 dollar yearly subscription and have no regrets. So much cheaper than a gym membership and feels similar to having a personal trainer. 10/10 reccomend. Beginner and advanced training in not only work outs but stretching and yoga too. I can also pair with Spotify in the app which is fantastic",
-      "rating": 5,
-      "version": "8.4.7",
-      "updatedAt": "2025-10-26T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13305694749",
-      "source": "serpapi-apple-reviews",
-      "title": "Love it",
-      "body": "I love this app",
-      "rating": 5,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13306013356",
-      "source": "serpapi-apple-reviews",
-      "title": "I love this seven minute workouts",
-      "body": "It has really helped me to build a nightly routine that I can sustain. I am able to get off the couch daily.",
-      "rating": 5,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13301960596",
-      "source": "serpapi-apple-reviews",
-      "title": "False advertising",
-      "body": "When i first got the app today and finished all the questions, it asked me if i want to the the subscription for 7days for free then its gonna be $30+ something dollars for a yr subscription. It charged me right away the full year subscription.",
-      "rating": 1,
-      "version": "8.4.6",
-      "updatedAt": "2025-10-23T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13303567783",
-      "source": "serpapi-apple-reviews",
-      "title": "Too many ads",
-      "body": "I’ve used this app for years and I’m fine with watching ads. The only thing is that it says ‘watch 90 seconds of ads’ so I let the timer run for 90 seconds click x and it still has me watch it 2 or 3 more times. So every time I now have to watch 9 minutes of ads for a 10 minute workout? Kinda ridiculous.",
-      "rating": 2,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-23T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13304884199",
-      "source": "serpapi-apple-reviews",
-      "title": "#1 On Programs :)",
-      "body": "A1 Sauce; The Best, Perfect;)!*Amen.",
-      "rating": 5,
-      "version": "8.4.6",
-      "updatedAt": "2025-10-23T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13300319435",
-      "source": "serpapi-apple-reviews",
-      "title": "Best workout",
-      "body": "If you’re lazy person who doesn’t want to go to the gym who doesn’t like pain after workout this app is the best choice for you.",
-      "rating": 5,
-      "version": "8.4.6",
-      "updatedAt": "2025-10-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13300675774",
-      "source": "serpapi-apple-reviews",
-      "title": "NOT FREE",
-      "body": "Don’t waste your time downloading the app and filling out the questions unless you’re okay with paying to use the app.",
-      "rating": 1,
-      "version": "8.4.6",
-      "updatedAt": "2025-10-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13301302187",
-      "source": "serpapi-apple-reviews",
-      "title": "Extrasides",
-      "body": "Joanna",
-      "rating": 4,
-      "version": "8.4.6",
-      "updatedAt": "2025-10-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13294006266",
-      "source": "serpapi-apple-reviews",
-      "title": "Best workouts to lose weight",
-      "body": "I recently downloaded the app and I love how it sends reminders and I’m typically the type of person that would give up if I see no progress but I lost 15 pounds in 2 weeks and that really keeps me motivated I do drink a lot of water do fasting but I still eat whatever I want I highly recommend this app it",
-      "rating": 5,
-      "version": "8.4.6",
-      "updatedAt": "2025-10-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13297024291",
-      "source": "serpapi-apple-reviews",
-      "title": "Great app",
-      "body": "I can find a work out for whatever I need on any given day. I can focus on whole body, arms, legs, butt, or even a relaxing yoga.",
-      "rating": 5,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13297190671",
-      "source": "serpapi-apple-reviews",
-      "title": "ads",
-      "body": "started adding ads into the “free” workouts unless you pay",
-      "rating": 3,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13289658165",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout- plus ads :(",
-      "body": "I have been using this app for awhile and I like it a lot! I like how you can target certain areas and tailor your workout to the level of intensity you want. I am disappointed that they are pushing more for a paid membership or ad watching to get the content. I feel as if before there was a lot more freedom without needing to have a membership or make a payment.",
-      "rating": 4,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-20T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13289991767",
-      "source": "serpapi-apple-reviews",
-      "title": "Great plans and very doable",
-      "body": "This app has been helping me maintain my fitness for 6+ years. There’s so many options and even on days that you don’t feel like moving, there is something on here that can get you started! By the end of it I’m always ready to add something else. It’s a great app and program. It’s much cheaper than a gym membership and I can do everything in the price of my home with no equipment 🩷",
-      "rating": 5,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-20T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13291958453",
-      "source": "serpapi-apple-reviews",
-      "title": "No longer user friendly",
-      "body": "It was a free app, now you either have to pay to use it or watch ads.",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-20T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13292397140",
-      "source": "serpapi-apple-reviews",
-      "title": "90s ad just to unlock workout",
-      "body": "I’ve been using this app to workout almost everyday for the past 4 years and never have i ever come across a problem with this app until today, i recently found out that i have to watch a 90 second ad just to “unlock” a workout and the only around it is to just buy premium?",
-      "rating": 1,
-      "version": "8.4.6",
-      "updatedAt": "2025-10-20T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13286847331",
-      "source": "serpapi-apple-reviews",
-      "title": "Great variety of workouts",
-      "body": "Excellent app - lots of varied short workouts to mix and match. On a busy day I can stick to one. Other days I choose a couple plus a cooldown. The positive messages up front are inspiring too. It’d be great if EVERY workout had the verbal prompts to indicate when a move is half done and to count down to the end of the move. That makes it easier to track how it’s going without having to look at the screen.",
-      "rating": 4,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-19T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13283075896",
-      "source": "serpapi-apple-reviews",
-      "title": "New to yoga and this is what I needed!",
-      "body": "This app is great. Easy to use and would recommend!",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-18T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13276561838",
-      "source": "serpapi-apple-reviews",
-      "title": "Unusable now",
-      "body": "A once decent app now unusable thanks to constant pop ups and not even being able to do free workouts without getting a pop up that requires you to watch a 90 sec ad and can’t be closed. Do yourself a favor and find a different workout app.",
-      "rating": 1,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13277714926",
-      "source": "serpapi-apple-reviews",
-      "title": "Best workout app ever!!",
-      "body": "Great variety and lots of fun! Easy to use",
-      "rating": 5,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13279496098",
-      "source": "serpapi-apple-reviews",
-      "title": "Update ruined it",
-      "body": "I loved using this as a FREE app for workouts. Now they make you watch a 90 second add or pay. Lame.",
-      "rating": 1,
-      "version": "8.4.5",
-      "updatedAt": "2025-10-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13275776619",
-      "source": "serpapi-apple-reviews",
-      "title": "Great app for making habits",
-      "body": "I have not been an active person my entire life but this app has been a great habit builder for me",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-16T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13271431113",
-      "source": "serpapi-apple-reviews",
-      "title": "WW",
-      "body": "So, they updated!! You’re now able to do ANY workout-have to watch an ad for about 30-60 secs, but it’s awesome now!!! 🙃🙂🤍",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-15T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13263649064",
-      "source": "serpapi-apple-reviews",
-      "title": "Cass",
-      "body": "I absolutely love this app! Well worth the purchase!!",
-      "rating": 5,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-14T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13260537795",
-      "source": "serpapi-apple-reviews",
-      "title": "The Best",
-      "body": "This is hands down the best workout program I’ve ever tried and I’ve done the apps and the gym and the online coaching. This is truly amazing for me!",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13260913885",
-      "source": "serpapi-apple-reviews",
-      "title": "Lower back rehab",
-      "body": "Great work out, really enjoy it!",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13263119240",
-      "source": "serpapi-apple-reviews",
-      "title": "Used to be great now awful",
-      "body": "The introduction of 90 second ads is ridiculous. I can see 10 second ads, but 90 seconds ads with ads while working out is too much. I’m getting out.",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13255657355",
-      "source": "serpapi-apple-reviews",
-      "title": "Sick",
-      "body": "This app is actually good and free not like the other ones I feel good",
-      "rating": 4,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-12T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13256799761",
-      "source": "serpapi-apple-reviews",
-      "title": "Recently gone downhill",
-      "body": "I’ve used the free version of this app for several years but in the last few months its really changed and gone downhill. Many of the routines can’t be accessed any more, if they’re locked or not isn’t indicated until you try to start, and the ones that are still available require watching a 90sec ad movie first. Older version was much better.",
-      "rating": 1,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-12T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13257950903",
-      "source": "serpapi-apple-reviews",
-      "title": "It works!",
-      "body": "These workouts have so far helped me lose 19 pounds. Keep in mind I’m also in the Keto diet, but I have to say when I miss a couple of days to workout, my weight plateaus for a while. After I go back to my regular workout schedule, I’m losing the pounds again. So stay consistent!",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-12T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13252986705",
-      "source": "serpapi-apple-reviews",
-      "title": "Love it!",
-      "body": "I use this app solely for the daily 8 minute work out. Love it!!! It’s the perfect amount of exercise to get your heart going & to tone your body. I swear by it. I never go to a gym. & cant really make an excuse to skip an 8 minute work out",
-      "rating": 5,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13253299417",
-      "source": "serpapi-apple-reviews",
-      "title": "I love this app",
-      "body": "I am in amazing shape and the 7 mins a day keeps me fantastic!!!! I have been using this for 7 years now 😘😘😘😘",
-      "rating": 5,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13253514555",
-      "source": "serpapi-apple-reviews",
-      "title": "Great workout",
-      "body": "5",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13248906839",
-      "source": "serpapi-apple-reviews",
-      "title": "DO NOT GET!!!!!!!!!!!",
-      "body": "Made me pay even if though working out should be free",
-      "rating": 1,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-10T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13249718088",
-      "source": "serpapi-apple-reviews",
-      "title": "ADS",
-      "body": "I got this app 8 years ago when everything was free, now there is so much you have to pay for. And now you have to watch 2 minutes of ads for a 6 minute workout.",
-      "rating": 2,
-      "version": "8.4.4",
-      "updatedAt": "2025-10-10T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13242191965",
-      "source": "serpapi-apple-reviews",
-      "title": "Doable",
-      "body": "Knowing i have instructions for next exercise and a time limit makes exercising manageable. I also appreciate that i can do a workout that doesn’t include floor exercises. I adjust for my age/ abilities ( late 50s/prefer low energy activities).",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13244858271",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout",
-      "body": "Good",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13239553168",
-      "source": "serpapi-apple-reviews",
-      "title": "Disappointed",
-      "body": "I’ve been using this app for years and it’s really helped me with taking care of myself to the point i was eventually able to workout at the gym consistently. However, reopening the app recently I got slapped in the face with ads and subscription plans. I could not touch or try anything without this popping up. In the past everything used to be free to use, now you guys are just like every other money grabbing app. This was a pretty stupid idea on the companies part. No one is able to afford anything right now, so why would your app be the exception? Genuinely disappointed and will be deleting the app after years of use. Greediness will be your downfall.",
-      "rating": 2,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13240204611",
-      "source": "serpapi-apple-reviews",
-      "title": "Take the ads away",
-      "body": "This app “was” literally my favorite workout app and now it’s not yesterday morning I logged into see I have to wait 3 minutes before my workout just so I don’t have to pay, if this is a health and fitness app why shouldn’t it be free to all, not saying I can’t afford it, but I’m not paying the price for some I could use for free.",
-      "rating": 2,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13233550262",
-      "source": "serpapi-apple-reviews",
-      "title": "Awful scam",
-      "body": "Can’t log in, no one replies to emails for support. Just after paying a subscription I can’t access the account or anything. Waste of time and money.",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13233639096",
-      "source": "serpapi-apple-reviews",
-      "title": "Yay",
-      "body": "Amazing",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13229411842",
-      "source": "serpapi-apple-reviews",
-      "title": "Annoying new long ads",
-      "body": "This app used to be perfect but now to do the free workouts you have to watch a 90 second ad… too much",
-      "rating": 3,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13229681578",
-      "source": "serpapi-apple-reviews",
-      "title": "Best Workout App",
-      "body": "I’ve been using this app for over 7 years. It’s the best workout app. I love the programs, target areas, and the little one off sessions. I love how it ranges from beginner to advanced. I am 2 months postpartum and am using the app again to get my pre- pregnancy body back. It’s great when I literally only have 7 minutes to work out most days as a busy mom of 2",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13230489820",
-      "source": "serpapi-apple-reviews",
-      "title": "Love it!",
-      "body": "Great at home workout app.",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13230741736",
-      "source": "serpapi-apple-reviews",
-      "title": "Really good",
-      "body": "It totally works u just have to put effort in it would be better if the ads were shorter though",
-      "rating": 4,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13225289544",
-      "source": "serpapi-apple-reviews",
-      "title": "It worked so well",
-      "body": "Thank you",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-05T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13227967658",
-      "source": "serpapi-apple-reviews",
-      "title": "Great Way to Start My Day",
-      "body": "Great way to start the day, good for you & fun. What could be better.",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-05T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13216232095",
-      "source": "serpapi-apple-reviews",
-      "title": "Boo! They added ads.",
-      "body": "Had a good streak going. Now I have to buy premium or watch a 90 second add before I can do my workout. Lame. Oh well.",
-      "rating": 3,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13218657373",
-      "source": "serpapi-apple-reviews",
-      "title": "Great",
-      "body": "Love this app!!! So easy to use with great exercises!!! Fun Programs!!!",
-      "rating": 5,
-      "version": "8.4.2",
-      "updatedAt": "2025-10-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13218733966",
-      "source": "serpapi-apple-reviews",
-      "title": "Misleading, Scam, not free trial at all!",
-      "body": "The app shows free trial to start and already it charged me after one day. When I ask for the refund, they showed it was not eligible for a refund. Don’t fall for the scam!!",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13219986607",
-      "source": "serpapi-apple-reviews",
-      "title": "Variety of Workouts",
-      "body": "This app is helpful for all levels of exercise experience from beginner to advanced. I enjoy to variety and flexible to switch types of workouts whenever I choose. You can choose freestyle or a program, 5 min or combine workouts for a longer time.",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13214513415",
-      "source": "serpapi-apple-reviews",
-      "title": "Amazing",
-      "body": "I always see results right away whenever I go back to working out with this app they are free and some you have to pay for but I do the free one because well I can’t Pat haha but I love this app very much",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13210248534",
-      "source": "serpapi-apple-reviews",
-      "title": "Great App",
-      "body": "💕love it",
-      "rating": 5,
-      "version": "8.4.2",
-      "updatedAt": "2025-10-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13211340862",
-      "source": "serpapi-apple-reviews",
-      "title": "Best workout app I’ve had",
-      "body": "I have gained some weight and fell out of shape over the last 4 years. I tried to go to the gym and do workouts I used to do and I couldn’t do the same intensity. It would really kick my confidence down. I downloaded this app on a whim, and I’m seriously so happy I did. I went with beginner and I’m loving these daily 30 minutes. Cool bonus 7-8 minute mini workouts as well. I still break a sweat but I get that dopamine spike because I can actually finish! Makes me want to come back. If you have a similar experience I highly recommend this app and starting at beginner!",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-10-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13202681220",
-      "source": "serpapi-apple-reviews",
-      "title": "🔥🔥🔥",
-      "body": "This app will give you so many options: where you want to work on, yoga, abs, butt, etc.! It’s a great app! I totally recommend it, the one thing I don’t like is you have to pay within 5-7 days and it’s a little annoying! But totally worth it!",
-      "rating": 4,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13203174109",
-      "source": "serpapi-apple-reviews",
-      "title": "Ads",
-      "body": "I loved this app. However 90 second ads have now been added for each workout. Every time you want to do a workout, no matter if you’re doing workouts back to back you have to wait a minute and half to start each workout. I am uninstalling this app.",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13205373934",
-      "source": "serpapi-apple-reviews",
-      "title": "Lost it’s appeal",
-      "body": "Price gauging is unnecessary. A gym membership costing the same as an at home work out. Pls be fr",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13206625002",
-      "source": "serpapi-apple-reviews",
-      "title": "STOP FORCING ME TO PAY MONEY",
-      "body": "I go in to my day four workout and imagine my surprise when I see this ad that won’t let me click out at all and I can’t work out unless I pay some money and I’m so confused so stop making me pay money for working out at home",
-      "rating": 2,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13198623166",
-      "source": "serpapi-apple-reviews",
-      "title": "Too Many Ads",
-      "body": "I've been using this app for at least 5 years now and absolutely loved it, but that is no longer the case... I loved that I can pick and choose different workouts with different durations. I also loved that I have the option to do free workouts. After a recent update, they implemented 90 second ads which I am fine with watching but many of these ads are broken. I would finish watching an ad but the exit button never shows up and I end up watching another 90 second ad again. It has become VERY FRUSTRATING. I feel like I'm watching an endless cycle of ads and can never get to my workouts. I'm very disappointed with how this workout app has become and made the ultimate decision to leave and find something else.",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-29T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13198996935",
-      "source": "serpapi-apple-reviews",
-      "title": "90 sec ad for one workout",
-      "body": "90 sec ad for one workout this new thing is very annoying",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-29T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13200389230",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this app!",
-      "body": "It’s making me download a subscription to do workout. Not happy",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-29T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13196423058",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this app",
-      "body": "First day and i’m already loving the app. This has helped find what workouts are fit for me",
-      "rating": 5,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13196854291",
-      "source": "serpapi-apple-reviews",
-      "title": "Time to leave!",
-      "body": "Upsetting they added ADs. Time to find a new app after using this one for 5+ years! Disappointed they sold out to have ADs. The price point per year for a subscription too expensive for no ADs. This isn’t Hulu, we don’t need to see ADs to workout. Not ok.",
-      "rating": 1,
-      "version": "8.4.3",
-      "updatedAt": "2025-09-28T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13189953294",
-      "source": "serpapi-apple-reviews",
-      "title": "Letty",
-      "body": "Ibarra",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-27T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13188542535",
-      "source": "serpapi-apple-reviews",
-      "title": "Download worthy!",
-      "body": "Love this app! I’ve had it forever, my trusted go to when I need to stretch.",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-09-26T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13178142178",
-      "source": "serpapi-apple-reviews",
-      "title": "Great workouts and lots of variety!",
-      "body": "Thank you!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13178648441",
-      "source": "serpapi-apple-reviews",
-      "title": "So many great options to choose your workout",
-      "body": "Love that I can decide the type of workout, duration, ability level, and more without the decision fatigue of choosing every exercise. It’s encouraging and motivating with the reminders and in workout prompts. The model you follow along with is lifelike not Ai or animated looking. I’ve lost almost 10 lbs since using this app just doing beginner workouts for injury recovery. Highly recommend. 🤩",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13179634611",
-      "source": "serpapi-apple-reviews",
-      "title": "If you want to accomplish a work out , this is the best and it is free. Excellent app work out!",
-      "body": "The best work out app for women. I do not have motivation to do a routine workout but this is Motivating. I finally accomplished a work out routine Excellent !!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13179856775",
-      "source": "serpapi-apple-reviews",
-      "title": "So happy",
-      "body": "I love this app you can workout for 7 minutes or an hour. I’m just getting back after an illness and only doing five or seven minutes. That is what is needed right now. So wherever your fitness level is, this app can help. It’s all about the consistency. I’m grateful that I can have this app for free or go hard-core and do premium. You still get what you need with both. That shows somebody really cares about my health when I have money and when I don’t. that’s an app I can write it at five and give my support.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13179931516",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this app",
-      "body": "I really enjoy the work out on this app. You can find what works for you each and every day. Keep the good workouts coming.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13179932630",
-      "source": "serpapi-apple-reviews",
-      "title": "Best for girls of all ages",
-      "body": "No hidden fees 🔥🔥",
-      "rating": 5,
-      "version": "8.4.2",
-      "updatedAt": "2025-09-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13180616022",
-      "source": "serpapi-apple-reviews",
-      "title": "Good review",
-      "body": "This app is really good at first. I was a little skeptical, but it’s really helped me if you are looking to sweat a lot then I would do this cause I am lot",
-      "rating": 5,
-      "version": "8.4.2",
-      "updatedAt": "2025-09-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13174481205",
-      "source": "serpapi-apple-reviews",
-      "title": "Love 💕",
-      "body": "I love this app. I have been using it off and on for about 5+ years and I always find my way back here when I need workouts that work for me!",
-      "rating": 5,
-      "version": "8.4.2",
-      "updatedAt": "2025-09-23T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13165969323",
-      "source": "serpapi-apple-reviews",
-      "title": "No refund",
-      "body": "I chose one that charged my phone a very small plan each month and they charged me for a whole year I did not even use the app and it was the 3rd day how do I get my money back?",
-      "rating": 1,
-      "version": "8.4.2",
-      "updatedAt": "2025-09-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13166079593",
-      "source": "serpapi-apple-reviews",
-      "title": "Daily 7 Workout",
-      "body": "I love the daily 7 workout but I think it should start over at midnight. Having to wait the full 24 hours instead is not fair or feasible. I don’t have time to wait another 10 minutes or whatever if I’m earlier on my workout than the day before. I’ve had to switch to a different workout app since I pretty much can only do the daily 7 every other day now. Start the daily 7 workout at midnight each day!! Please!",
-      "rating": 3,
-      "version": "8.4.1",
-      "updatedAt": "2025-09-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13162403145",
-      "source": "serpapi-apple-reviews",
-      "title": "Killer Hit",
-      "body": "Awesome",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-20T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13152704241",
-      "source": "serpapi-apple-reviews",
-      "title": "Love love love!",
-      "body": "This app got me back on track after almost 5 years off regular exercise. Now I have worked out EVERY day for the last 10 months. This app makes working out fun and I believe everyone can find 7 minutes a day to fit it in!!",
-      "rating": 3,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-18T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13152825653",
-      "source": "serpapi-apple-reviews",
-      "title": "Great daily workouts",
-      "body": "Loved the workouts, encouraging quotes. I have been improving my health and agility day by day; 8 mins at a time.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-18T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13153334937",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this mini workout!!",
-      "body": "This is a workout I can use for a warm-up before my other workout, or I can use it if I just have a short time to do something to get moving. I love it!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-18T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13146682156",
-      "source": "serpapi-apple-reviews",
-      "title": "I’ve got Time and muscles!",
-      "body": "I love that the workouts are short enough to fit into my morning, but are still challenging enough to get my muscles sore and my heart pumping.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13146957227",
-      "source": "serpapi-apple-reviews",
-      "title": "Music",
-      "body": "Don’t ASK for my input if you will not do anything about my suggestion which I submitted a long ago with absolutely no response from anyone! Message below sent to you already. I would also like to know if the calories burned information can be upgraded as well because the few calories results are not very inspiring! It’s also getting old to see that I’ve only burned a few calories. This definitely needs an upgrade! I am also requesting if I can speak to a training coach directly over the phone to see if my workouts can be customized further! So far I never received a call back!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13148480442",
-      "source": "serpapi-apple-reviews",
-      "title": "Older",
-      "body": "I wish someone would create a program for those of us who are older, Much older with muscles that have contracted and joints that are stiff. Covid did a number on us. The local fitness centers do not take into consideration that we may need a bar to hold on to and arms and legs are needed to help balance us. It can be life threatening trying to work everything at once. Perhaps show different levels of doing some exercises. Or break the exercise into 2 parts. Upper body, lower body. We oldies are not out to run a marathon, but rather to strengthen our core and keep from falling.",
-      "rating": 4,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13148751946",
-      "source": "serpapi-apple-reviews",
-      "title": "Terrible",
-      "body": "Used to be a great workout app but now is so covered in adds you can’t even get one workout done",
-      "rating": 1,
-      "version": "8.4.1",
-      "updatedAt": "2025-09-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13148916957",
-      "source": "serpapi-apple-reviews",
-      "title": "Simple Effective Exercise App!",
-      "body": "This app is straightforward and easy to use with a huge library of free workouts. It’s handy for warm-up and cool-down stretches, quick heart rate boosters throughout the day, or you can put the variety you prefer together for your own, custom workout.",
-      "rating": 5,
-      "version": "8.4.1",
-      "updatedAt": "2025-09-17T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13142822141",
-      "source": "serpapi-apple-reviews",
-      "title": "amazing!",
-      "body": "ive been using this app for years, i have never gone wrong with this 😍!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-16T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13139617426",
-      "source": "serpapi-apple-reviews",
-      "title": "Stole my money",
-      "body": "I wanted to try out the app and its benefits to see if it would fit my needs and if I liked it. It had a 7-day free trial and I had cancelled it before It was supposed to charge me, about 5 days beforehand. It charged me anyway. I do not believe that it is fair and I will not support an app that will just steal money from a person just because they decided they didn’t like it when they put the free trial in place for that reason.",
-      "rating": 1,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-15T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13140737051",
-      "source": "serpapi-apple-reviews",
-      "title": "7 min workout",
-      "body": "Makes my day!",
-      "rating": 4,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-15T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13140959492",
-      "source": "serpapi-apple-reviews",
-      "title": "Great low fat impact aerobics. Great beginner abs and perfect leg exercises!",
-      "body": "I love these exercises! Great low fat impact aerobics, great beginner abs, Pilates, butt, thighs, and hips!! I love this app. I love the arm exercises-my arms look great. I love the Pilate leg exercises, the thigh and butt exercises too.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-15T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13136267411",
-      "source": "serpapi-apple-reviews",
-      "title": "thanks",
-      "body": "love my app 🥰",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-14T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13136292726",
-      "source": "serpapi-apple-reviews",
-      "title": "hamstring work",
-      "body": "loved it !!!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-14T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13136769413",
-      "source": "serpapi-apple-reviews",
-      "title": "Amazing !",
-      "body": "I struggle with my body image and motivation to work out , the work outs are easy to Comprehend and they work the body well!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-14T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13137155519",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout",
-      "body": "The fact that they are short sessions makes it easier to complete on a regular basis. Also exercises are clearly instructed and shown.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-14T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13130979033",
-      "source": "serpapi-apple-reviews",
-      "title": "So far… so good!",
-      "body": "So far I really like the app. I am hoping it will help hold me accountable for my workouts. I see A LOT of people complaining about the app charging a cost and how it used to be free… but nowadays, what is free? Things change.. evolution happens. It’s a great app and well worth the money! I personally don’t mind paying for it especially if I’m going to see results… gym memberships are SO MUCH MORE! This was worth it though… I will continue to monitor and track results.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13131595269",
-      "source": "serpapi-apple-reviews",
-      "title": "Amy S",
-      "body": "THE BEST Workout App ever that is absolutely free, but I upgraded to one of their very reasonable plans to unlock more options. You can choose your own workout routines, depending on the specific target areas you want to work on, or follow the many programs they have. The selections just keep on growing and improvements continue with every update. The Daily 7 Workout has been a part of my daily routine, combined with leg/neck/back stretches, good night pilates or what have you, and I just love it! Thank you so much for this wonderful app and keep up the great work! ❤️❤️",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13132936864",
-      "source": "serpapi-apple-reviews",
-      "title": "Improvements are great! Use this every day",
-      "body": "I love the updated app with the samples that replace clips from YouTube with video produced by Workout for Women. Much better. I also REALLY like that they have added in personal training guidance in the middle of those just like you if were to be at a live workout. I’ve used WW for two years to make workouts accessible (only 7 minutes is doable, which means I CAN workout daily!) and targeted to my abilities. It’s also good at motivating me to start working out and to keep a streak going. It also allows me to listen to whatever I want during a workout! My news app, Audible, Music—I don’t have to settle for an app or youtube video’s sound. Overall, love this app.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-13T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13126641761",
-      "source": "serpapi-apple-reviews",
-      "title": "Awesome Yoga Workouts!",
-      "body": "This app is great! I use it for the yoga exercises. They really help me relieve stress and stretch well! I wish that the programs were still free. They were free when I started using the app but then they became available at a price.",
-      "rating": 4,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-12T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13128432219",
-      "source": "serpapi-apple-reviews",
-      "title": "Workouts that fit into life",
-      "body": "Just try it. You’ll be hooked",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-12T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13128727111",
-      "source": "serpapi-apple-reviews",
-      "title": "Improved up my daily workout",
-      "body": "I’m consistent at working out in some capacity most days. This has pushed my muscles and body more than I do on my own! Highly recommend!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-12T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13123337236",
-      "source": "serpapi-apple-reviews",
-      "title": "Love",
-      "body": "Wish it was cheaper but I’ll stick with free",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13124000247",
-      "source": "serpapi-apple-reviews",
-      "title": "Best of the best!",
-      "body": "Great variety in the workouts!! This is one of the best workout Apps available!!!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13124206882",
-      "source": "serpapi-apple-reviews",
-      "title": "Rellie’s Rebirth",
-      "body": "This is the first workout app that meets and supports my workout goals. I’ve had to adjust my exercise routine to stay active as I've gotten older. After each session, e feel good mentally and physically. My motivation and engagement with working out have increased. Also, I like that the app offers info and resources to support my specific interests and goals.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13126433304",
-      "source": "serpapi-apple-reviews",
-      "title": "Workouts fine but charged you during free trial",
-      "body": "Got charged immediately 43 dollars even though the app said would not be charged. Apple denied request to refund.",
-      "rating": 2,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-11T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13119018239",
-      "source": "serpapi-apple-reviews",
-      "title": "THE BESTTTT",
-      "body": "It’s the best ever!!!!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-10T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13115558521",
-      "source": "serpapi-apple-reviews",
-      "title": "Fun and effective way to get in shape",
-      "body": "Very quick but effective variety of workouts that keep me on task and free from distractions . . More workouts with dumbbells would be great",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13115795255",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this app!",
-      "body": "The workouts are awesome! Quick and easy and with great instructions! You can target whatever area you choose and the impact is easily seen and felt! You can do. Ore than one or just one if that’s all you have time for! Best exercise app for busy people!!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13116164082",
-      "source": "serpapi-apple-reviews",
-      "title": "Great",
-      "body": "Easy to follow. Good exercises to get you in shape!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-09T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13112524465",
-      "source": "serpapi-apple-reviews",
-      "title": "Great for workouts anywhere",
-      "body": "My favorite workout app",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13112980401",
-      "source": "serpapi-apple-reviews",
-      "title": "It just keeps getting better",
-      "body": "It’s the best app for at home workouts without the hassle of going to the gym, has everything you need to get fit at home it just all depends on you and your consistency!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13114265365",
-      "source": "serpapi-apple-reviews",
-      "title": "Awesome 7 Minutes!",
-      "body": "This is the first app that actually gets me sweaty in 7 minutes! Thank you and keep up the great workouts! 💞",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-08T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13109253292",
-      "source": "serpapi-apple-reviews",
-      "title": "Love this app!",
-      "body": "Workouts are short and sweet and to the point! I can fit them in before I get ready for work in the morning, and the daily 7 is not so long or hard that I avoid them.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13109480436",
-      "source": "serpapi-apple-reviews",
-      "title": "Great Workout For Health",
-      "body": "I have made the Workout for Women a daily routine for several years and plan to continue this routine. It has helped me maintain my health, strength, and energy. A great start to every day; a wonderful part of my life!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13109634495",
-      "source": "serpapi-apple-reviews",
-      "title": "Gets my day going!",
-      "body": "Great app- easy to use.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13111315398",
-      "source": "serpapi-apple-reviews",
-      "title": "The best work out app",
-      "body": "I love that it caters to women of all demographics. Very affordable, and offers many free options. I have been using this app for about 3 years. It’s truly the best",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-07T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13104307563",
-      "source": "serpapi-apple-reviews",
-      "title": "Very nice app",
-      "body": "I loss my wight with this app",
-      "rating": 3,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13105415001",
-      "source": "serpapi-apple-reviews",
-      "title": "Way to wake u",
-      "body": "I love the challenges.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13106629904",
-      "source": "serpapi-apple-reviews",
-      "title": "Great app",
-      "body": "It was a very fun work out experience!👍😁",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-06T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13101007031",
-      "source": "serpapi-apple-reviews",
-      "title": "The best workout app!",
-      "body": "This app is the BEST. There’s different workouts with different amounts of time and levels and target body areas! You can do just 1 7 minute workout quick, or you can pile a couple together for an great (sweaty!) workout! I definitely recommend if you’re looking for an at-home workout app!",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-05T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13101376899",
-      "source": "serpapi-apple-reviews",
-      "title": "Best workouts!!!!!",
-      "body": "I love this app!! The workout plans are exactly what I was looking for, it makes me feel the goals I want are achievable. The quotes everyday are great, I use it 7 days a week cuz it never takes up too much time and makes me feel great the rest of the day! Thank you Workout Women.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-05T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13097254640",
-      "source": "serpapi-apple-reviews",
-      "title": "Work out",
-      "body": "Very nice work outs to start the day and get in shape. Even great if you work out mid day. Great exercises for you to do before bed. Love this app",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-04T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13097511925",
-      "source": "serpapi-apple-reviews",
-      "title": "Convenient",
-      "body": "Nice morning starter for a short time. You can change out exercises",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-04T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13097589632",
-      "source": "serpapi-apple-reviews",
-      "title": "Great app for workouts!",
-      "body": "I like the simple graphics for routines and that the app lets me play my own music at the same time.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-04T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13099633329",
-      "source": "serpapi-apple-reviews",
-      "title": "The Free Stuff is Good!",
-      "body": "Yeah there’s some stuff behind a paywall (diet plan, long term programs, their newer workouts…) but their older (FREE!) stuff is still good! Just favorite/heart them to keep tabs on what you like and structure yourself from there and you’re golden. Like do I wish the programs and newer programs were available? Yeah. Am I going to drop them when what I do have access to is still good? No.",
-      "rating": 4,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-04T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13094496089",
-      "source": "serpapi-apple-reviews",
-      "title": "MAKE ALL OF THE Workout free",
-      "body": "so you should get this app if you’re looking for an easy way to get slim but one thing they need to do is make all of them free and I was about to lose all my weight in the bye bye belly challenge but when I tried to do challenge 2 they want me to pay 29.99 or 19.99 and I’m not having it",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13094908505",
-      "source": "serpapi-apple-reviews",
-      "title": "Best free workout app",
-      "body": "This was the easiest to use and nicest free workout app I found. It also updates frequently with new workouts, collections and programs. I ended up getting a subscription when it was on sale and I’m enjoying the new custom programs. Though sometimes the names and animations of the exercises don’t match.",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13094919806",
-      "source": "serpapi-apple-reviews",
-      "title": "thanks",
-      "body": "it's incredible",
-      "rating": 5,
-      "version": "8.3.5",
-      "updatedAt": "2025-09-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13094968335",
-      "source": "serpapi-apple-reviews",
-      "title": "Should mention the paywall before beginning the extensive surveys",
-      "body": "Just wasted my time giving them all my data and surveying about my personal goals just for a paywall to come up at the very end",
-      "rating": 1,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-03T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13089449125",
-      "source": "serpapi-apple-reviews",
-      "title": "Big meek",
-      "body": "I hate it because you need a subscription to use it.",
-      "rating": 1,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13090872118",
-      "source": "serpapi-apple-reviews",
-      "title": "Used to be amazing",
-      "body": "Ever since i subscribed to the app all of my favorite workouts have been deleted. I am no longer able to select the individual workouts. This makes no sense at all. Will prob try a few more times and then unsubscribe. You wound think a subscription would give more incentive not take away from the functionality of the app",
-      "rating": 3,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-02T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13087764767",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout plan",
-      "body": "I really like the app so far I really hope to continue to see where it goes",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-09-01T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13083324959",
-      "source": "serpapi-apple-reviews",
-      "title": "Really gooooddd",
-      "body": "Yall u should try it trust me im not a robot but when i started this workout i was bloatedd and after i finished my stomach was snatched , btw its already the first day and im seeing progress",
-      "rating": 5,
-      "version": "8.4.0",
-      "updatedAt": "2025-08-31T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13078144290",
-      "source": "serpapi-apple-reviews",
-      "title": "Subscription",
-      "body": "Is used to be free. Reallt disapointed.",
-      "rating": 1,
-      "version": "8.4.0",
-      "updatedAt": "2025-08-30T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13064884732",
-      "source": "serpapi-apple-reviews",
-      "title": "Daily 7",
-      "body": "Awesome short workout for anytime of day when you need to move!",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-27T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13060899604",
-      "source": "serpapi-apple-reviews",
-      "title": "Review",
-      "body": "Awesome! I love your app thank you for allowing me to use the free workouts",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-26T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13062725694",
-      "source": "serpapi-apple-reviews",
-      "title": "Content very good",
-      "body": "I’ve had this app for years. I find the content very good. You and pick and choose which exercises you feel like doing including the duration. I also have an issue with this app (I can’t get it to work on my iPad or any other device). I’ve reached out to customer support and thus far only received automated messages. Problem not resolved. Very frustrating because you can only email. There is no phone number or live chat. I’m hoping this review will help me resolve the issue.",
-      "rating": 5,
-      "version": "8.3.5",
-      "updatedAt": "2025-08-26T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13063522064",
-      "source": "serpapi-apple-reviews",
-      "title": "Stretching",
-      "body": "I never stretched consistently until I got this app.",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-26T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13057295271",
-      "source": "serpapi-apple-reviews",
-      "title": "Amazing!!",
-      "body": "Fast and easy workout. I love it",
-      "rating": 5,
-      "version": "8.3.5",
-      "updatedAt": "2025-08-25T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13058877798",
-      "source": "serpapi-apple-reviews",
-      "title": "Great",
-      "body": "Great",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-25T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13060321825",
-      "source": "serpapi-apple-reviews",
-      "title": "Workout women",
-      "body": "Great app!!",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-25T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13055167395",
-      "source": "serpapi-apple-reviews",
-      "title": "Ai voice",
-      "body": "The AiVoice is incredibly annoying. It gives workout motivation statements but repeats them frequently. Within the same sets. Doesn’t really motivate if it’s that fake. Workouts for me aren’t that great for the cost. Deleted",
-      "rating": 2,
-      "version": "8.3.5",
-      "updatedAt": "2025-08-24T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13045985348",
-      "source": "serpapi-apple-reviews",
-      "title": "Many options of exercise!",
-      "body": "I have enjoyed this app so far! I stopped exercising a few years ago and now started having some chronic back pain back from old injury and I knew losing weight and get better shape was the only (& the best) option I can maintain better back. This app gave me very easy start and am looking forward to more exercise and I can’t wait to start seeing my body changing!",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13047913525",
-      "source": "serpapi-apple-reviews",
-      "title": "Get it!",
-      "body": "I’ve had this app prior to pandemic, and I prefer it now than going over to my local gym. I can find all kind of workouts and they even have video showing you how to properly do a work out,….update 2 years later and still loving it . Always pay for the full year and use it as needed specially when I don’t go to my gym",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13048395369",
-      "source": "serpapi-apple-reviews",
-      "title": "Best app ever!!",
-      "body": "I find this app most useful in the morning when I awake and throughout the day. The reminders that are set to keep you on track with your workouts are very help. I really enjoy this workout app.",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-22T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13043697580",
-      "source": "serpapi-apple-reviews",
-      "title": "Won’t let you decline subscription",
-      "body": "I used to love this app but I re downloaded it recently and it’s like it’s no longer free and I don’t like that.",
-      "rating": 1,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13044063344",
-      "source": "serpapi-apple-reviews",
-      "title": "Great work ours",
-      "body": "Love the options of types of workouts and time of length depending on how much time I can work out!",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-21T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13038144596",
-      "source": "serpapi-apple-reviews",
-      "title": "This is amazing work,I just love it all",
-      "body": "Thanks",
-      "rating": 5,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-20T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13039361474",
-      "source": "serpapi-apple-reviews",
-      "title": "So misogynistic and fat shaming",
-      "body": "The onboarding process is shocking. I was expecting something supportive of women and empowering. This app blatantly targets insecurities. Instead of being full of photos of real women and a diversity of bodies, it has AI bodies (🙄) with exaggerated chests and butts. It asks directly \"do you want to be attractive?\" The blatant anti fat bias is vile. So extremely disappointed and will be putting my money toward a different app that doesn't reinforce every terrible manipulation and stereotype out there. I'm guessing this app was developed by men. It sure feels that way.",
-      "rating": 1,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-20T00:00:00.000Z"
-    },
-    {
-      "sourceReviewId": "13039691755",
-      "source": "serpapi-apple-reviews",
-      "title": "have to pay",
-      "body": "it’s a scam you have to pay and they dont even refund your money after the free trial",
-      "rating": 1,
-      "version": "8.3.4",
-      "updatedAt": "2025-08-20T00:00:00.000Z"
     }
   ],
-  "rawRefs": []
+  "rawRefs": [
+    "14444266843",
+    "14442997949",
+    "14442648331",
+    "14442641789",
+    "14442640253",
+    "14442632113",
+    "14442585341",
+    "14442458794",
+    "14442323653",
+    "14442232355",
+    "14441213900",
+    "14440541974",
+    "14440495914",
+    "14438997721",
+    "14438826496",
+    "14438600600",
+    "14434575041",
+    "14433741544",
+    "14428758054",
+    "14426816828",
+    "14424510771",
+    "14424309790",
+    "14423833481",
+    "14422561156",
+    "14421357217",
+    "14412891541",
+    "14411802642",
+    "14408658475",
+    "14401657445",
+    "14397715067",
+    "14395044140",
+    "14386691397",
+    "14381025970",
+    "14373055910",
+    "14367493057",
+    "14366900095",
+    "14366479265",
+    "14365412685",
+    "14364512490",
+    "14364018861",
+    "14363613368",
+    "14360927559",
+    "14359950060",
+    "14357059177",
+    "14354823157",
+    "14353095830",
+    "14344823980",
+    "14343192193",
+    "14342854364",
+    "14334995806",
+    "14334052046",
+    "14330714176",
+    "14330268991",
+    "14329131554",
+    "14328378845",
+    "14324972618",
+    "14324253567",
+    "14322864027",
+    "14320776504",
+    "14314433809",
+    "14312293284",
+    "14308859067",
+    "14307471563",
+    "14306466803",
+    "14303029084",
+    "14297707993",
+    "14297668170",
+    "14291852699",
+    "14290422468",
+    "14286721683",
+    "14280991777",
+    "14279948531",
+    "14277925854",
+    "14276572019",
+    "14276064361",
+    "14275682276",
+    "14275420028",
+    "14274175102",
+    "14271423099",
+    "14270786563",
+    "14264918620",
+    "14260733949",
+    "14254614594",
+    "14251432995",
+    "14250373918",
+    "14249980354",
+    "14246967026",
+    "14243194565",
+    "14241644246",
+    "14229833137",
+    "14227812994",
+    "14225692756",
+    "14222226181",
+    "14221168828",
+    "14220597773",
+    "14217181753",
+    "14212862587",
+    "14210920635",
+    "14209021980",
+    "14204125134",
+    "14203283136",
+    "14190183704",
+    "14185702009",
+    "14187519047",
+    "14174457575",
+    "14174692818",
+    "14174937162",
+    "14165948645",
+    "14166078145",
+    "14167037105",
+    "14162328271",
+    "14163546305",
+    "14157097193",
+    "14160080073",
+    "14149160522",
+    "14152184353",
+    "14144994589",
+    "14147454883",
+    "14148499373",
+    "14144153169",
+    "14144426555",
+    "14138797995",
+    "14140886742",
+    "14131519821",
+    "14131609157",
+    "14132101956",
+    "14129030368",
+    "14118161162",
+    "14120377531",
+    "14120966795",
+    "14115538096",
+    "14112093902",
+    "14106505610",
+    "14106038479",
+    "14102393036",
+    "14097785677",
+    "14092968923",
+    "14093572787",
+    "14089758865",
+    "14091014984",
+    "14084762698",
+    "14080367347",
+    "14082191991",
+    "14082318224",
+    "14083421546",
+    "14080128210",
+    "14069512069",
+    "14069630313",
+    "14067629732",
+    "14068405359",
+    "14068643912",
+    "14063791891",
+    "14059405762",
+    "14056559833",
+    "14048939271",
+    "14049679603",
+    "14040014309",
+    "14032903734",
+    "14033191433",
+    "14029405319",
+    "14028061237",
+    "14028794619",
+    "14024175667",
+    "14024349881",
+    "14025441122",
+    "14019782684",
+    "14015893167",
+    "14011481445",
+    "14013113694",
+    "14009152501",
+    "14005886789",
+    "14002487042",
+    "14002609717",
+    "14000557160",
+    "13993531700",
+    "13989602330",
+    "13979925966",
+    "13981021357",
+    "13981166164",
+    "13976010088",
+    "13976452003",
+    "13972381558",
+    "13962907165",
+    "13959060661",
+    "13955300410",
+    "13955536302",
+    "13956940768",
+    "13957620564",
+    "13953047839",
+    "13947381326",
+    "13933475828",
+    "13929492919",
+    "13925669942",
+    "13918913454",
+    "13909060569",
+    "13910608575",
+    "13910918951",
+    "13912139472",
+    "13905365987",
+    "13905434959",
+    "13905659210",
+    "13906711712",
+    "13907946825",
+    "13903573997",
+    "13899881752",
+    "13900643414",
+    "13901553105",
+    "13895486747",
+    "13897645883",
+    "13890767613",
+    "13891268384",
+    "13892865924",
+    "13883979369",
+    "13885423263",
+    "13886485616",
+    "13881723052",
+    "13873793973",
+    "13870203972",
+    "13866732492",
+    "13864056525",
+    "13856144745",
+    "13858827984",
+    "13859338978",
+    "13849038677",
+    "13851071197",
+    "13845416888",
+    "13848633118",
+    "13842149939",
+    "13840742233",
+    "13841671124",
+    "13837531033",
+    "13838352844",
+    "13838474090",
+    "13819346266",
+    "13814898715",
+    "13806523793",
+    "13797413831",
+    "13799390165",
+    "13796148413",
+    "13787145921",
+    "13783887426",
+    "13780253243",
+    "13782130708",
+    "13775561141",
+    "13773304671",
+    "13766607847",
+    "13766977638",
+    "13759550131",
+    "13754636838",
+    "13744205982",
+    "13745834695",
+    "13742625134",
+    "13736105481",
+    "13736394466",
+    "13728905978",
+    "13729847295",
+    "13731688192",
+    "13721611280",
+    "13714052833",
+    "13710553183",
+    "13710757227",
+    "13706876139",
+    "13704011317",
+    "13705264512",
+    "13701440178",
+    "13698214516",
+    "13693522188",
+    "13687534707",
+    "13689172777",
+    "13683663397",
+    "13685208047",
+    "13679904769",
+    "13680066544",
+    "13681174348",
+    "13682172672",
+    "13674784750",
+    "13675571145",
+    "13669897941",
+    "13660845664",
+    "13663859006",
+    "13657550868",
+    "13653913903",
+    "13655550174",
+    "13656809342",
+    "13657083442",
+    "13649924137",
+    "13651598086",
+    "13647942678",
+    "13642190474",
+    "13644463396",
+    "13645090120",
+    "13645528398",
+    "13637986229",
+    "13638378659",
+    "13640361303",
+    "13641680745",
+    "13634815950",
+    "13636012820",
+    "13633362978",
+    "13630047656"
+  ]
 }

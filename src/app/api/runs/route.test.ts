@@ -424,7 +424,7 @@ describe("GET /api/runs listing", () => {
     const runtimeRun = body.runs.find((r) => r.runId === runId);
     expect(runtimeRun?.deletable).toBe(true);
 
-    const demoRun = body.runs.find((r) => r.runId === "run-x-twitter-us");
+    const demoRun = body.runs.find((r) => r.runId === "run-workout-for-women-us");
     expect(demoRun?.deletable).toBe(false);
   });
 

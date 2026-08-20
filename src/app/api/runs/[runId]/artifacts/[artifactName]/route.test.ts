@@ -97,8 +97,8 @@ describe("GET /api/runs/:runId/artifacts/:artifactName", () => {
 describe("GET artifact (bundled fixture viewing)", () => {
   it("serves a fixture's raw-reviews artifact", async () => {
     const res = await GET(
-      new Request("http://localhost/api/runs/run-x-twitter-us/artifacts/raw-reviews"),
-      { params: Promise.resolve({ runId: "run-x-twitter-us", artifactName: "raw-reviews" }) },
+      new Request("http://localhost/api/runs/run-workout-for-women-us/artifacts/raw-reviews"),
+      { params: Promise.resolve({ runId: "run-workout-for-women-us", artifactName: "raw-reviews" }) },
     );
     expect(res.status).toBe(200);
     const body = (await res.json()) as { reviews: unknown[]; rawRefs?: string[] };
@@ -109,35 +109,35 @@ describe("GET artifact (bundled fixture viewing)", () => {
   it("serves a fixture's prd and final-report", async () => {
     for (const name of ["prd", "final-report"]) {
       const res = await GET(
-        new Request(`http://localhost/api/runs/run-x-twitter-us/artifacts/${name}`),
-        { params: Promise.resolve({ runId: "run-x-twitter-us", artifactName: name }) },
+        new Request(`http://localhost/api/runs/run-workout-for-women-us/artifacts/${name}`),
+        { params: Promise.resolve({ runId: "run-workout-for-women-us", artifactName: name }) },
       );
       expect(res.status).toBe(200);
     }
   });
 
   it("honors the fixture manifest's declared attempt", async () => {
-    const manifest = JSON.parse(await import("node:fs").then((fs) => fs.readFileSync(path.join(process.cwd(), "fixtures", "demo-runs", "run-x-twitter-us", "manifest.json"), "utf8"))) as { artifacts: Record<string, { attempt: number }> };
+    const manifest = JSON.parse(await import("node:fs").then((fs) => fs.readFileSync(path.join(process.cwd(), "fixtures", "demo-runs", "run-workout-for-women-us", "manifest.json"), "utf8"))) as { artifacts: Record<string, { attempt: number }> };
     const prdAttempt = manifest.artifacts.prd.attempt;
     const res = await GET(
-      new Request(`http://localhost/api/runs/run-x-twitter-us/artifacts/prd?attempt=${prdAttempt}`),
-      { params: Promise.resolve({ runId: "run-x-twitter-us", artifactName: "prd" }) },
+      new Request(`http://localhost/api/runs/run-workout-for-women-us/artifacts/prd?attempt=${prdAttempt}`),
+      { params: Promise.resolve({ runId: "run-workout-for-women-us", artifactName: "prd" }) },
     );
     expect(res.status).toBe(200);
   });
 
   it("returns 404 for a fixture artifact that does not exist", async () => {
     const res = await GET(
-      new Request("http://localhost/api/runs/run-x-twitter-us/artifacts/does-not-exist"),
-      { params: Promise.resolve({ runId: "run-x-twitter-us", artifactName: "does-not-exist" }) },
+      new Request("http://localhost/api/runs/run-workout-for-women-us/artifacts/does-not-exist"),
+      { params: Promise.resolve({ runId: "run-workout-for-women-us", artifactName: "does-not-exist" }) },
     );
     expect(res.status).toBe(404);
   });
 
   it("returns 404 for an unknown attempt on a fixture", async () => {
     const res = await GET(
-      new Request("http://localhost/api/runs/run-x-twitter-us/artifacts/prd?attempt=99"),
-      { params: Promise.resolve({ runId: "run-x-twitter-us", artifactName: "prd" }) },
+      new Request("http://localhost/api/runs/run-workout-for-women-us/artifacts/prd?attempt=99"),
+      { params: Promise.resolve({ runId: "run-workout-for-women-us", artifactName: "prd" }) },
     );
     expect(res.status).toBe(404);
   });
@@ -164,7 +164,7 @@ describe("GET artifact (bundled fixture viewing)", () => {
   });
 
   it("does not fall back to fixture artifacts after a runtime manifest owns the run id", async () => {
-    const collidingRunId = "run-x-twitter-us";
+    const collidingRunId = "run-workout-for-women-us";
 
     await store.writeManifest(collidingRunId, {
       runId: collidingRunId,
@@ -195,7 +195,7 @@ describe("GET artifact (bundled fixture viewing)", () => {
   });
 
   it("serves the runtime artifact, not the fixture, once a same-named run owns the id", async () => {
-    const collidingRunId = "run-x-twitter-us";
+    const collidingRunId = "run-workout-for-women-us";
 
     await store.writeArtifact(collidingRunId, "raw-reviews", 1, {
       reviews: [{ id: "runtime-only" }],
@@ -270,7 +270,7 @@ describe("GET artifact (bundled fixture viewing)", () => {
     // A same-named run id whose artifact landed but whose manifest was never
     // written must NOT claim ownership: the fixture's manifest owns the id, so
     // the fixture artifact is served and the orphan is ignored.
-    const collidingRunId = "run-x-twitter-us";
+    const collidingRunId = "run-workout-for-women-us";
     await store.writeArtifact(collidingRunId, "raw-reviews", 1, {
       reviews: [{ id: "runtime-orphan" }],
     });
@@ -284,11 +284,11 @@ describe("GET artifact (bundled fixture viewing)", () => {
     const body = (await res.json()) as { reviews: { sourceReviewId?: string; id?: string }[] };
     expect(body.reviews.length).toBeGreaterThan(0);
     expect(body.reviews.some((r) => r.id === "runtime-orphan")).toBe(false);
-    expect(body.reviews.some((r) => r.sourceReviewId === "14419453273")).toBe(true);
+    expect(body.reviews.some((r) => r.sourceReviewId === "14444266843")).toBe(true);
   });
 
   it("returns 500 for a corrupted runtime manifest instead of falling back to fixture", async () => {
-    const collidingRunId = "run-x-twitter-us";
+    const collidingRunId = "run-workout-for-women-us";
     const runDir = store.resolveRunDir(collidingRunId);
     mkdirSync(runDir, { recursive: true });
     writeFileSync(path.join(runDir, "manifest.json"), "{ not valid json", "utf8");

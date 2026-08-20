@@ -14,61 +14,61 @@
     "source": {
       "kind": "live",
       "appStoreUrl": "https://apps.apple.com/us/app/id839285684",
-      "reviewLimit": 500
+      "reviewLimit": 300
     }
   },
-  "createdAt": "2026-08-19T09:32:31.133Z",
-  "updatedAt": "2026-08-19T10:35:17.537Z",
+  "createdAt": "2026-08-20T07:47:03.882Z",
+  "updatedAt": "2026-08-20T08:05:52.841Z",
   "stages": {
     "source": {
       "status": "completed",
-      "startedAt": "2026-08-19T09:32:31.134Z",
-      "finishedAt": "2026-08-19T09:32:31.146Z"
+      "startedAt": "2026-08-20T07:47:03.886Z",
+      "finishedAt": "2026-08-20T07:47:03.902Z"
     },
     "prepare": {
       "status": "completed",
-      "startedAt": "2026-08-19T09:32:31.147Z",
-      "finishedAt": "2026-08-19T09:32:31.327Z"
+      "startedAt": "2026-08-20T07:47:03.905Z",
+      "finishedAt": "2026-08-20T07:47:04.081Z"
     },
     "scope": {
       "status": "completed",
-      "startedAt": "2026-08-19T09:32:31.327Z",
-      "finishedAt": "2026-08-19T09:33:33.794Z"
+      "startedAt": "2026-08-20T07:47:04.082Z",
+      "finishedAt": "2026-08-20T07:47:24.756Z"
     },
     "topics": {
       "status": "completed",
-      "startedAt": "2026-08-19T09:33:33.794Z",
-      "finishedAt": "2026-08-19T09:48:03.057Z"
+      "startedAt": "2026-08-20T07:47:24.757Z",
+      "finishedAt": "2026-08-20T07:52:17.650Z"
     },
     "findings": {
       "status": "completed",
-      "startedAt": "2026-08-19T09:48:03.057Z",
-      "finishedAt": "2026-08-19T10:15:24.994Z"
+      "startedAt": "2026-08-20T07:52:17.650Z",
+      "finishedAt": "2026-08-20T07:59:43.841Z"
     },
     "evidence-validation": {
       "status": "completed",
-      "startedAt": "2026-08-19T10:15:24.995Z",
-      "finishedAt": "2026-08-19T10:15:24.997Z"
+      "startedAt": "2026-08-20T07:59:43.842Z",
+      "finishedAt": "2026-08-20T07:59:43.845Z"
     },
     "planning": {
       "status": "completed",
-      "startedAt": "2026-08-19T10:15:24.998Z",
-      "finishedAt": "2026-08-19T10:18:55.455Z"
+      "startedAt": "2026-08-20T07:59:43.846Z",
+      "finishedAt": "2026-08-20T08:02:26.629Z"
     },
     "requirement-evidence": {
       "status": "completed",
-      "startedAt": "2026-08-19T10:18:55.456Z",
-      "finishedAt": "2026-08-19T10:30:49.190Z"
+      "startedAt": "2026-08-20T08:02:26.629Z",
+      "finishedAt": "2026-08-20T08:04:09.090Z"
     },
     "tests": {
       "status": "completed",
-      "startedAt": "2026-08-19T10:30:49.197Z",
-      "finishedAt": "2026-08-19T10:35:17.526Z"
+      "startedAt": "2026-08-20T08:04:09.098Z",
+      "finishedAt": "2026-08-20T08:05:52.830Z"
     },
     "traceability": {
       "status": "completed",
-      "startedAt": "2026-08-19T10:35:17.526Z",
-      "finishedAt": "2026-08-19T10:35:17.532Z"
+      "startedAt": "2026-08-20T08:05:52.831Z",
+      "finishedAt": "2026-08-20T08:05:52.836Z"
     }
   },
   "artifacts": {
@@ -140,59 +140,59 @@
   "limitations": [
     {
       "code": "SCOPE_LIMITATION",
-      "message": "No country or App Store region field is available; US App Store cannot be filtered or verified directly.",
+      "message": "缺少国家、地区或应用商店 storefront 字段，无法严格筛选美国用户评论；语言不能作为美国来源的可靠替代。",
       "params": {
-        "detail": "No country or App Store region field is available; US App Store cannot be filtered or verified directly."
+        "detail": "缺少国家、地区或应用商店 storefront 字段，无法严格筛选美国用户评论；语言不能作为美国来源的可靠替代。"
       }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "Language is not a reliable proxy for store region; filtering to English may exclude relevant non-English US reviews or include English reviews from other regions.",
+      "message": "仅有汇总统计，没有评论文本或主题标签，无法直接识别具体功能点、问题类型及改进机会。",
       "params": {
-        "detail": "Language is not a reliable proxy for store region; filtering to English may exclude relevant non-English US reviews or include English reviews from other regions."
+        "detail": "仅有汇总统计，没有评论文本或主题标签，无法直接识别具体功能点、问题类型及改进机会。"
       }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "Impact and controversy cannot be measured directly from the provided aggregates; they must be inferred from frequency, rating patterns, and sentiment.",
+      "message": "缺少按问题或功能划分的频次、情感和影响指标，无法从现有统计单独判断哪些问题影响最大。",
       "params": {
-        "detail": "Impact and controversy cannot be measured directly from the provided aggregates; they must be inferred from frequency, rating patterns, and sentiment."
+        "detail": "缺少按问题或功能划分的频次、情感和影响指标，无法从现有统计单独判断哪些问题影响最大。"
       }
     },
     {
       "code": "SCOPE_LIMITATION",
-      "message": "Version distribution is fragmented, so version-specific conclusions may have limited sample sizes.",
+      "message": "缺少同一功能的正负反馈配对或主题级情感数据，无法确认哪些功能存在用户喜欢与反感并存的争议。",
       "params": {
-        "detail": "Version distribution is fragmented, so version-specific conclusions may have limited sample sizes."
+        "detail": "缺少同一功能的正负反馈配对或主题级情感数据，无法确认哪些功能存在用户喜欢与反感并存的争议。"
+      }
+    },
+    {
+      "code": "SCOPE_LIMITATION",
+      "message": "无法仅凭现有数据评估订阅价格或付费价值的具体原因，也无法具体定位健身训练流程中的易用性障碍。",
+      "params": {
+        "detail": "无法仅凭现有数据评估订阅价格或付费价值的具体原因，也无法具体定位健身训练流程中的易用性障碍。"
       }
     },
     {
       "code": "INSUFFICIENT_EVIDENCE",
-      "message": "4 of 9 findings have insufficient evidence for broad or critical claims",
+      "message": "2 of 8 findings have insufficient evidence for broad or critical claims",
       "params": {
-        "count": 4,
-        "total": 9
+        "count": 2,
+        "total": 8
       }
     }
   ],
   "canReplay": true,
   "modelUsage": {
-    "model": "deepseek-v4-pro-0813",
-    "provider": "https://dashscope.aliyuncs.com",
+    "model": "gpt-5.6-luna",
+    "provider": "http://127.0.0.1:8317",
     "temperature": 0.1,
-    "calls": 53,
-    "attempts": 54,
-    "retries": 1,
-    "retryReasons": [
-      "MODEL_NETWORK_ERROR"
-    ],
+    "calls": 30,
+    "attempts": 30,
+    "retries": 0,
+    "retryReasons": [],
     "promptVersions": [
       "scope@2",
-      "topics.discovery@3",
-      "topics.discovery@3",
-      "topics.discovery@3",
-      "topics.discovery@3",
-      "topics.discovery@3",
       "topics.discovery@3",
       "topics.discovery@3",
       "topics.discovery@3",
@@ -210,26 +210,8 @@
       "findings@4",
       "findings@4",
       "findings@4",
-      "findings@4",
-      "findings@4",
-      "findings@4",
-      "findings@4",
-      "findings@4",
       "findings.consolidation@1",
       "planning@3",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
-      "requirement-evidence@1",
       "requirement-evidence@1",
       "requirement-evidence@1",
       "requirement-evidence@1",
@@ -251,17 +233,7 @@
       "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
       "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
       "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
-      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
-      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
-      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
-      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
-      "d210b32ef36955e33ea1d4a59214ad8fdab1e723287e78be9b5c8d2e73be68b2",
       "05a196bcf97d3835f83cb52e200600d7b49378b1bdcea8c845198aa4a64cd281",
-      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
-      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
-      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
-      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
-      "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
       "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
       "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
       "7a6976a891e316202c610c08e3fe02894ca5351ff881a534fa76b5138fa24218",
@@ -281,85 +253,44 @@
       "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
       "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
       "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
-      "c5faf8ebbd0d0747c40d25e979fd5f008a1d71748e5ab76700227dcb11de3f8f",
       "c1a87a5ea0ade36fd151d3bb4bdc0af6847865c0de961beefdc18adaaccc2be4"
     ],
-    "totalTokens": 832477,
+    "totalTokens": 273016,
     "durationsMs": [
-      62458,
-      126845,
-      136055,
-      171618,
-      130669,
-      151253,
-      146855,
-      164578,
-      147414,
-      122575,
-      182781,
-      174645,
-      190668,
-      176851,
-      87523,
-      234673,
-      244535,
-      251260,
-      183351,
-      200841,
-      266291,
-      208517,
-      281114,
-      262258,
-      218036,
-      259360,
-      232315,
-      183185,
-      281996,
-      210450,
-      120673,
-      134729,
-      148449,
-      32779,
-      63082,
-      39881,
-      124439,
-      23479,
-      89692,
-      84363,
-      92030,
-      165440,
-      125358,
-      29747,
-      177209,
-      59476,
-      175210,
-      67196,
-      33844,
-      50358,
-      100398,
-      106372,
-      268318
+      20667,
+      51294,
+      61996,
+      63720,
+      51204,
+      46971,
+      71265,
+      56858,
+      51769,
+      132142,
+      87803,
+      88648,
+      110868,
+      74688,
+      97288,
+      113907,
+      112630,
+      128134,
+      132108,
+      162777,
+      39192,
+      41555,
+      49700,
+      6552,
+      23351,
+      12439,
+      8677,
+      45208,
+      39911,
+      103720
     ]
   },
   "promptVersions": [
     "scope@2",
-    "topics.discovery@3",
-    "topics.discovery@3",
-    "topics.discovery@3",
-    "topics.discovery@3",
-    "topics.discovery@3",
     "topics.discovery@3",
     "topics.discovery@3",
     "topics.discovery@3",
@@ -377,26 +308,8 @@
     "findings@4",
     "findings@4",
     "findings@4",
-    "findings@4",
-    "findings@4",
-    "findings@4",
-    "findings@4",
-    "findings@4",
     "findings.consolidation@1",
     "planning@3",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
-    "requirement-evidence@1",
     "requirement-evidence@1",
     "requirement-evidence@1",
     "requirement-evidence@1",
