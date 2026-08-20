@@ -1,0 +1,15 @@
+{
+  "kind": "import",
+  "reviewCount": 200,
+  "evidence": {
+    "fileName": "workout-for-women-reviews.json",
+    "mediaType": "application/json",
+    "byteLength": 81079,
+    "sha256": "3dc526c839818fa5e9900351f329ae137fa97ab68ab9f5b6fb815f4a09911996",
+    "schemaVersion": "1"
+  },
+  "errors": [],
+  "warnings": [],
+  "duplicateIndices": [],
+  "conflictIndices": []
+}

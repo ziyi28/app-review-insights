@@ -1,0 +1,117 @@
+{
+  "valid": true,
+  "retried": false,
+  "items": [
+    {
+      "focusAreaId": "focus-1",
+      "label": "Subscription value and pricing concerns",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-2",
+        "finding-3"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-6",
+        "req-10",
+        "req-2",
+        "req-5",
+        "req-3"
+      ]
+    },
+    {
+      "focusAreaId": "focus-2",
+      "label": "Workout training usability and ease of use",
+      "status": "covered",
+      "findingIds": [
+        "finding-3",
+        "finding-4",
+        "finding-5",
+        "finding-6",
+        "finding-7"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-3",
+        "req-10",
+        "req-7",
+        "req-8",
+        "req-9",
+        "req-4",
+        "req-5"
+      ]
+    },
+    {
+      "focusAreaId": "focus-3",
+      "label": "Controversial feature identification (polarized feedback)",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-3",
+        "finding-4",
+        "finding-5"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-6",
+        "req-10",
+        "req-3",
+        "req-7",
+        "req-8",
+        "req-9"
+      ]
+    },
+    {
+      "focusAreaId": "focus-4",
+      "label": "High-impact issues and problems",
+      "status": "covered",
+      "findingIds": [
+        "finding-1",
+        "finding-2",
+        "finding-3",
+        "finding-4",
+        "finding-5",
+        "finding-6",
+        "finding-7"
+      ],
+      "requirementIds": [
+        "req-1",
+        "req-6",
+        "req-10",
+        "req-2",
+        "req-5",
+        "req-3",
+        "req-7",
+        "req-8",
+        "req-9",
+        "req-4"
+      ]
+    },
+    {
+      "focusAreaId": "focus-5",
+      "label": "Improvement opportunities and suggestions",
+      "status": "covered",
+      "findingIds": [
+        "finding-2",
+        "finding-3",
+        "finding-4",
+        "finding-5",
+        "finding-6",
+        "finding-7"
+      ],
+      "requirementIds": [
+        "req-2",
+        "req-5",
+        "req-6",
+        "req-1",
+        "req-3",
+        "req-10",
+        "req-7",
+        "req-8",
+        "req-9",
+        "req-4"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,225 @@
+{
+  "versions": [
+    {
+      "id": "ver-1",
+      "name": "1.0.0",
+      "summary": "信任与基础体验修复：恢复可用的免费基础训练、修复试用计费与取消流程、优化免费版广告体验、修复付费用户登录与进度同步、建立可触达的客服与自助退款入口。",
+      "rationale": "finding-1 支持样本 38/200（占比 19%）是所有发现中频率最高的问题，付费墙阻断会直接造成用户流失；finding-2 为高置信度计费信任问题，严重性 critical；finding-3 支持样本 18/200（9%），广告无法关闭和外部跳转会阻断训练；finding-7 影响已付费用户权益，虽样本较少但用户影响高。这五类问题都优先放在同一版本解决，避免后续功能优化建立在信任已受损的基础上。",
+      "requirementIds": [
+        "req-1",
+        "req-2",
+        "req-3",
+        "req-4",
+        "req-5"
+      ]
+    },
+    {
+      "id": "ver-2",
+      "name": "1.1.0",
+      "summary": "价值、内容与个性化升级：优化订阅价值沟通、提升内容库质量与新鲜度、增强训练计划个性化与特殊需求支持、增加训练强度与动作指导，并建立争议反馈监测与决策日志。",
+      "rationale": "finding-1 的订阅价值两极反馈需要在 free tier 修复后通过透明价值沟通缓解；finding-4 显示长期用户对 AI/重复内容不满，需要内容质量审计；finding-5 涉及膝盖偏好、孕期等安全和特殊需求；finding-6 是明确的改进机会。req-6 依赖 ver-1 中 req-1、req-2 的付费流程修复，因此这些能力放到第二个版本。",
+      "requirementIds": [
+        "req-6",
+        "req-7",
+        "req-8",
+        "req-9",
+        "req-10"
+      ]
+    }
+  ],
+  "decisions": [
+    {
+      "requirementId": "req-1",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "支持样本 38 条、占比 19%，频率最高；置信度 medium 但有大量独立评论。严重性 critical，因为核心训练功能被阻断；改动主要为免费内容配置、权限标识和文案，实施范围 medium。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 49,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.245
+        }
+      }
+    },
+    {
+      "requirementId": "req-2",
+      "priority": "P0",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "critical",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-2 置信度 high，17 条独立评论、占比 8.5%；计费问题直接涉及资金安全，严重性 critical。实施范围主要包括支付流程确认页、订阅管理入口和退款回调，范围 medium。",
+        "evidenceStrength": "high",
+        "confidence": "high",
+        "frequency": {
+          "supportingReviewCount": 17,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.085
+        }
+      }
+    },
+    {
+      "requirementId": "req-3",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-3 置信度 high，18 条评论、占比 9%；广告无法关闭会直接阻断训练，外部跳转还造成安全与体验问题。实施范围涉及时长配置、关闭按钮、广告 SDK 行为约束，范围 medium。",
+        "evidenceStrength": "high",
+        "confidence": "high",
+        "frequency": {
+          "supportingReviewCount": 18,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.09
+        }
+      }
+    },
+    {
+      "requirementId": "req-4",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-7 支持样本 6 条、占比 3%，置信度 medium；虽然频率低，但影响的是已付费用户的核心权益，且客服失联会放大负面传播。实施范围主要是账号系统、同步和恢复购买入口，范围 medium。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 6,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.03
+        }
+      }
+    },
+    {
+      "requirementId": "req-5",
+      "priority": "P1",
+      "versionId": "ver-1",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "客服失联来自 finding-2 和 finding-7，虽是间接证据，但严重性 high，因为用户无法解决计费和账号问题时会转向差评或退款。实施范围是客服表单、工单系统和自助退款流程，范围 medium。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 22,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.11
+        }
+      }
+    },
+    {
+      "requirementId": "req-6",
+      "priority": "P1",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "medium",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [
+          "req-1",
+          "req-2"
+        ],
+        "rationale": "finding-1 有明确冲突证据但置信度 medium；价值沟通不改变产品能力，只改善认知和信任，因此严重性 medium、用户影响 medium。依赖 req-1 和 req-2 确保基础体验和计费修复后再做价值传达，否则可能被视为话术。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 54,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.27
+        }
+      }
+    },
+    {
+      "requirementId": "req-7",
+      "priority": "P1",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "large",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-4 置信度 medium，支持样本 11 条且有明显冲突；内容库是整个应用的核心价值，长期用户流失风险高。实施范围涉及内容审核、生产流程和训练库更新，范围 large。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 11,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.055
+        }
+      }
+    },
+    {
+      "requirementId": "req-8",
+      "priority": "P1",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "high",
+        "userImpact": "high",
+        "implementationScope": "medium",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-5 支持样本只有 5 条、占比 2.5%，置信度 medium；但忽略膝盖偏好可能导致受伤，孕期内容缺失也涉及安全。实施范围主要是计划生成规则、目标选项和内容筛选，范围 medium。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 5,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.025
+        }
+      }
+    },
+    {
+      "requirementId": "req-9",
+      "priority": "P2",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "medium",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "finding-6 置信度 high，但主要是正向基础上的增强建议；finding-5 的间隔时长需求样本很小。严重性 medium，用户影响 medium，改动集中在强度档位、提示文案和计时器配置，范围 small。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 16,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.08
+        }
+      }
+    },
+    {
+      "requirementId": "req-10",
+      "priority": "P2",
+      "versionId": "ver-2",
+      "planningFactors": {
+        "severity": "medium",
+        "userImpact": "low",
+        "implementationScope": "small",
+        "dependencyRequirementIds": [],
+        "rationale": "该需求直接回应用户目标的“明确记录冲突反馈而非忽略”，虽然不直接改变用户体验，但能防止后续设计重蹈覆辙；证据来自 multiple findings，置信度 medium。实施范围为分析标签、看板和文档流程，范围 small。",
+        "evidenceStrength": "medium",
+        "confidence": "medium",
+        "frequency": {
+          "supportingReviewCount": 62,
+          "corpusReviewCount": 200,
+          "supportRatio": 0.31
+        }
+      }
+    }
+  ]
+}

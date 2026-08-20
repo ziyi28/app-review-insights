@@ -1,0 +1,334 @@
+{
+  "topics": [
+    {
+      "id": "topic-1",
+      "label": "付费墙收紧与免费内容缩水引发订阅价值争议",
+      "description": "大量用户反映原本免费或看广告可用的训练被移入付费墙，免费版几乎无法使用；同时部分付费用户认可订阅比健身房划算，形成围绕订阅价值的核心争议。",
+      "candidateIds": [
+        "topic-candidate-1@c0",
+        "topic-candidate-1@c1",
+        "topic-candidate-6@c1",
+        "topic-candidate-2@c2",
+        "topic-candidate-4@c2",
+        "topic-candidate-1@c3",
+        "topic-candidate-3@c4",
+        "topic-candidate-2@c5"
+      ],
+      "reviewIds": [
+        "f1d769915693bff365b5",
+        "7d579ddab7ad9866916e",
+        "41dda90bb7c5bf6a5f50",
+        "1e26434428fd7d297ebd",
+        "aa10fd1c007b0ebde89f",
+        "02bfe99c3421d23ff17d",
+        "cbb69a199b87635d6910",
+        "5a83a72849e12b022595",
+        "6d22e4014053df4dd6eb",
+        "15adc40ae33fa59c6460",
+        "3c469722f1d0864a64bb",
+        "50dd40e82486e9e93aae",
+        "be03fa8fd8bdfb45b97d",
+        "5388376e53d4eca15c60",
+        "cd3e775a272561da7d61",
+        "0567acea07a5f230c350",
+        "1f584730f8580f6b15bd",
+        "8e1dadc88db3cb1e2d52",
+        "4b4d13468d71f994d0a9",
+        "a8cafd51b7cbb04b0ad9",
+        "49f29c1a38b41e2bc8dd",
+        "4fbc4f72bcfecda65727",
+        "eeb35f52212cad12f495",
+        "0b88af6733f38b6a7474",
+        "5a40025573b2c55b1963",
+        "ce914d45a09ffcb8351b",
+        "b336d30bd0c5bb4c158b",
+        "19dd801156be88554d22",
+        "1f437acb3f7e7e8c10b3",
+        "c9338a41a33df24b016d",
+        "1e69a0302e47a4ef87e7",
+        "fec6299a11560eaa8f62",
+        "1ae1015baaba922f02d0",
+        "028401fef9603d6d798d",
+        "4f2cf6597c046f4c579d",
+        "cc63855d1f2503b23e1a",
+        "b46e6db96ab3b39e12b8",
+        "53974bcc26a0d788626b",
+        "cb0cc8ac89a9761a3b16",
+        "0975a5a2992339e60625",
+        "446debb488c9e30a47dd",
+        "453d414ea6a6bf40613e",
+        "d12437b2f22497298e1b",
+        "b87d5108f1c3d560a191",
+        "bc8c57bc004f780e2a19",
+        "665cd14c6001dacd0a84",
+        "b5db1fbb2e56d1b56e16",
+        "ea2a981452bdd7fb7f68",
+        "0e621260607a04cf082e",
+        "dc4faf66d83960f53218",
+        "abde41fc0222660ff656",
+        "9209576b87ce4944ca28",
+        "bf3841e67602dc01e0b2",
+        "a9a965a3ee3756a838f8",
+        "f65d70e0417408b7a7e4",
+        "842e5e0f16697cf1a01a",
+        "a0b0f9da4e31b7a6f52d",
+        "4395008b5af14e4a1615",
+        "8cab578e3ab71d8124a9",
+        "76e57a90688ac2de17a6",
+        "893a5614aeb5510fceb5",
+        "89626a77cb324252fb52"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-2",
+      "label": "免费试用扣费、续订取消与客服失联",
+      "description": "用户反馈免费试用被立即扣款、取消订阅后仍被收费、找不到取消入口，客服请求无人回应或被误判为垃圾信息，严重损害信任。",
+      "candidateIds": [
+        "topic-candidate-2@c0",
+        "topic-candidate-2@c1",
+        "topic-candidate-1@c2",
+        "topic-candidate-6@c2",
+        "topic-candidate-2@c3",
+        "topic-candidate-1@c4",
+        "topic-candidate-5@c5"
+      ],
+      "reviewIds": [
+        "1cf18baaa2b920a6718d",
+        "a714751ef74be8bea80e",
+        "a4c127668e22552df85d",
+        "c352d86551671d7b8d70",
+        "dd0b01e8efe7359b1089",
+        "4fbc4f72bcfecda65727",
+        "eeb35f52212cad12f495",
+        "50dd40e82486e9e93aae",
+        "3108668c8b4ee2438bf7",
+        "3db3756c43b8043720be",
+        "a23ee85600cd3c3ae86f",
+        "f8eb72f77f1bd83b00c8",
+        "7a160bd56131157f4752",
+        "62be00dda9ffd5c8bc7a",
+        "c5cec2597485411001ba",
+        "474aa2e44c378c760f59",
+        "cc85fc2414bb9b897dfd",
+        "14811281319525325893",
+        "7aaf37a74c0b10a4cc33",
+        "85861b1ae4ea322bed91",
+        "342561b8e8592cc0b63a"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-3",
+      "label": "强制长广告与外部跳转严重干扰训练",
+      "description": "免费版在训练前插入90秒至3分钟广告且关闭入口隐蔽；部分用户遭遇应用自动跳转Shein网站；另有用户反映所谓免费带广告档位不透明，变相引导订阅。",
+      "candidateIds": [
+        "topic-candidate-3@c1",
+        "topic-candidate-3@c2",
+        "topic-candidate-2@c4",
+        "topic-candidate-1@c5"
+      ],
+      "reviewIds": [
+        "3ca751f46d64b8b6d725",
+        "3c469722f1d0864a64bb",
+        "bf6882ede9d60abe6519",
+        "c9338a41a33df24b016d",
+        "cc63855d1f2503b23e1a",
+        "d209ae2dfd97ff0bdb80",
+        "a3219e1290028aaf4834",
+        "b4467727f123a07beea9",
+        "db79928046519e7ffdcd",
+        "1e0fb9be01863f607fa3",
+        "76e57a90688ac2de17a6",
+        "72cf0fc6b2f25ec4e1ac",
+        "8cab578e3ab71d8124a9",
+        "7e2302afb4e5dac12a13",
+        "af48b9baedefbffda432"
+      ],
+      "focusAreaIds": [
+        "focus-4",
+        "focus-5",
+        "focus-1",
+        "focus-2",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-4",
+      "label": "AI生成与重复内容导致质量下滑",
+      "description": "长期用户批评训练动作重复、创新不足，AI生成的动作图示与语音指导不一致，且AI塑造的女性身材不真实、带有物化色彩，整体内容质量较旧版下降。",
+      "candidateIds": [
+        "topic-candidate-3@c0",
+        "topic-candidate-6@c0",
+        "topic-candidate-3@c3",
+        "topic-candidate-3@c5"
+      ],
+      "reviewIds": [
+        "cbb69a199b87635d6910",
+        "7d579ddab7ad9866916e",
+        "1e26434428fd7d297ebd",
+        "75d7b5fc1746c4d80026",
+        "1cf18baaa2b920a6718d",
+        "1972c340f1762cd2f9f8",
+        "52ecbbc862689ee97897",
+        "89f15c4184fe51fd54d2",
+        "b13ecc45b66030acc2d7",
+        "d12437b2f22497298e1b",
+        "61cabebf911229cac631"
+      ],
+      "focusAreaIds": [
+        "focus-3",
+        "focus-5",
+        "focus-4",
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-5",
+      "label": "训练体验获得好评：易用、多样、定制化",
+      "description": "用户普遍认可应用对初学者友好、动作示范直观、训练时长适合碎片时间；按个人情况定制计划和接入第三方音乐的体验也受到欢迎。",
+      "candidateIds": [
+        "topic-candidate-5@c0",
+        "topic-candidate-5@c1",
+        "topic-candidate-5@c2",
+        "topic-candidate-4@c4",
+        "topic-candidate-6@c4"
+      ],
+      "reviewIds": [
+        "ab3a2f593db6baa75d7a",
+        "89d39ff177caa228b26f",
+        "6ad576008e6465adc345",
+        "b34f61d4a24155813305",
+        "d331227b060177a24ad3",
+        "12277142053771f844f1",
+        "6acda9e389faa1143883",
+        "4a644a56a8619cd8783c",
+        "021386bdfee491a3baeb",
+        "63ac45e9ef64dcf4fe0f",
+        "b6d75605977aad508231",
+        "f7290fe64a406f83b54f",
+        "35faa42d589b56ba38f2",
+        "668f40f529d9d0dd21ae",
+        "030127cbe4098673f827",
+        "dcb564f577dabd2fe953",
+        "c64a82c6820fc3aeeeb1",
+        "e0d1838121012adeedaa",
+        "edb0da5e3f55117ad807",
+        "17cdc8c508a860319c27",
+        "3c49af9bb0aef09a3fdc",
+        "53974bcc26a0d788626b",
+        "c7ed3b29dfdc1ebd1d1e",
+        "1a50245eec24db09a48c",
+        "5e9ea710a133198a495c",
+        "98fa3a30eb191e9b4f92",
+        "39f537e8298befa28a06",
+        "63e3062c81dc6548b47e",
+        "d723d3091dfcb5ebcacb",
+        "e48f507238167347f923",
+        "55d763820c6068e5fa96",
+        "abec4e956a261a973827",
+        "d8b0365890e12753b065",
+        "9dcf6dee35426a0c9035",
+        "fbfc29ddbb6142d2e40f"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-6",
+      "label": "个性化计划与强度调节不足",
+      "description": "用户选择避免膝盖后仍被安排深蹲/弓步，计划设置会被重置；同时动作难度上限不足，希望提供更高强度和更精细的动作示范，以贴合身体条件。",
+      "candidateIds": [
+        "topic-candidate-4@c0",
+        "topic-candidate-5@c4"
+      ],
+      "reviewIds": [
+        "bd7a17c7711d6f478c76",
+        "22362f152de51b719e6f",
+        "43f4266f074eaa80d2fc",
+        "cb1ac0588b2aee125248",
+        "98a39e78a98fde68f2ad",
+        "42ab00aa53fb637834a4",
+        "32e7a4d8aaa1b9789f74"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-7",
+      "label": "训练模式、设备同步与音乐播放新需求",
+      "description": "用户希望训练支持按次数而非倒计时、连接Apple Watch记录热量、降低语音提示打扰，并增加YouTube Music等音乐服务；这些增强会直接提升付费意愿。",
+      "candidateIds": [
+        "topic-candidate-4@c3",
+        "topic-candidate-6@c5"
+      ],
+      "reviewIds": [
+        "feaae9dce2297b34ac2e",
+        "4a9e233a7d40327ddd01",
+        "2e0026d69a6bca97b90a",
+        "f2bb995e4a1d10521898",
+        "beffe6788ff06768a18c"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5",
+        "focus-1"
+      ]
+    },
+    {
+      "id": "topic-8",
+      "label": "账号登录与跨设备同步影响已购权益",
+      "description": "已付费用户遇到登录提示账号不存在、训练记录无法迁移到新设备、Apple Watch无法识别锻炼等问题，导致付费权益无法正常使用。",
+      "candidateIds": [
+        "topic-candidate-4@c1",
+        "topic-candidate-4@c5"
+      ],
+      "reviewIds": [
+        "3108668c8b4ee2438bf7",
+        "22935659be45db2172e8",
+        "cd9d8211bc907e7935bc",
+        "d92cce6e9e7960f75948",
+        "342561b8e8592cc0b63a"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-9",
+      "label": "内容目标定位需更包容：减重导向与孕期训练缺失",
+      "description": "应用持续强调减重目标，缺少柔韧性等非减脂选项；同时缺少孕期安全的肌力、行动力训练，未覆盖女性用户的多元健身需求。",
+      "candidateIds": [
+        "topic-candidate-5@c3",
+        "topic-candidate-6@c3"
+      ],
+      "reviewIds": [
+        "51d4b3f25ab831d4417f",
+        "a5900337c9421dc68dbc"
+      ],
+      "focusAreaIds": [
+        "focus-3",
+        "focus-4",
+        "focus-5",
+        "focus-2"
+      ]
+    }
+  ],
+  "warnings": []
+}

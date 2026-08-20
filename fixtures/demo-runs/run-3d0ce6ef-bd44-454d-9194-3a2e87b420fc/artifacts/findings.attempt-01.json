@@ -1,0 +1,1139 @@
+{
+  "findings": [
+    {
+      "id": "finding-1",
+      "topicIds": [
+        "topic-1",
+        "topic-2"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-4"
+      ],
+      "sourceFindingIds": [
+        "finding-1@c0",
+        "finding-1@c1",
+        "finding-1@c2",
+        "finding-1@c3",
+        "finding-1@c4",
+        "finding-1@c5"
+      ],
+      "title": "付费墙全面收紧：免费内容大幅缩水，订阅价值引发两极评价",
+      "summary": "大量用户反映原本免费可用的训练被移入付费墙，免费版几乎无法开始任何训练，已保存的训练也被锁定；试用即扣费等收费操作进一步强化“被欺骗”感。与此同时，部分用户认为订阅价格合理、训练效果值得，形成围绕订阅价值的明显两极争议。",
+      "supportingReviewIds": [
+        "7d579ddab7ad9866916e",
+        "1cf18baaa2b920a6718d",
+        "41dda90bb7c5bf6a5f50",
+        "f1d769915693bff365b5",
+        "aa10fd1c007b0ebde89f",
+        "02bfe99c3421d23ff17d",
+        "15adc40ae33fa59c6460",
+        "3c469722f1d0864a64bb",
+        "50dd40e82486e9e93aae",
+        "5388376e53d4eca15c60",
+        "8e1dadc88db3cb1e2d52",
+        "4b4d13468d71f994d0a9",
+        "cd3e775a272561da7d61",
+        "0567acea07a5f230c350",
+        "a23ee85600cd3c3ae86f",
+        "4f2cf6597c046f4c579d",
+        "b336d30bd0c5bb4c158b",
+        "c9338a41a33df24b016d",
+        "5a40025573b2c55b1963",
+        "cb0cc8ac89a9761a3b16",
+        "446debb488c9e30a47dd",
+        "453d414ea6a6bf40613e",
+        "d12437b2f22497298e1b",
+        "b87d5108f1c3d560a191",
+        "bc8c57bc004f780e2a19",
+        "665cd14c6001dacd0a84",
+        "b5db1fbb2e56d1b56e16",
+        "0975a5a2992339e60625",
+        "dc4faf66d83960f53218",
+        "abde41fc0222660ff656",
+        "a9a965a3ee3756a838f8",
+        "9209576b87ce4944ca28",
+        "f65d70e0417408b7a7e4",
+        "842e5e0f16697cf1a01a",
+        "a0b0f9da4e31b7a6f52d",
+        "4395008b5af14e4a1615",
+        "8cab578e3ab71d8124a9",
+        "1e0fb9be01863f607fa3"
+      ],
+      "supportingContentGroupIds": [
+        "053d73ff30d47546e88c",
+        "6b84bc16363bb89f4f31",
+        "c1244711badb4ea1be96",
+        "439565d72e2595ac5e90",
+        "124846ac8caccdda4c75",
+        "47c6c7af78187904ed2c",
+        "63d8ba58e616470745e1",
+        "f69b600407716c168c27",
+        "ab76b1c3c8ee79fd788a",
+        "83376ab82bff6b8559e5",
+        "424d60c3c02783c4a1b9",
+        "e351fe83d7a85af614b9",
+        "62ce47c7d8588d5105a4",
+        "bf726c84a0a49a88630c",
+        "28d14c4705a7f737bac8",
+        "2885ec0dfd5c3e7eb311",
+        "75760d3361166905d5e4",
+        "204618f075d913770a28",
+        "ceb0dea88c779a98c020",
+        "859efd4676f1d2e5ed0f",
+        "871f3117a7ab924f9aaa",
+        "973bd08fe0a0227b113b",
+        "1c8d62b25d93dd3f9320",
+        "68dbecd84839fb282930",
+        "991a2fc8ab1c6b062b5d",
+        "5ecd77bb0f8362c5d1d0",
+        "7586e84dd3e896be5e6c",
+        "dcd866e3b863d6c971f9",
+        "94938657aaf808c78c3e",
+        "36afb6ec9ea7eb5f3a3d",
+        "3c05713a336391ffc184",
+        "5defe956da21b99f0ebf",
+        "c154e50b4ac4eb21ca86",
+        "3079f41d8d11942c38f0",
+        "a43d869c86d244b60f3c",
+        "6ca69e95060f310cffe0",
+        "332cfd124b534d460b20",
+        "df433042b9b223327b69"
+      ],
+      "supportingSampleCount": 38,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "7d579ddab7ad9866916e",
+          "excerpt": "but they recently changed it so you are unable to use it for free"
+        },
+        {
+          "reviewId": "1cf18baaa2b920a6718d",
+          "excerpt": "this app has become a money grab"
+        },
+        {
+          "reviewId": "41dda90bb7c5bf6a5f50",
+          "excerpt": "recently they’ve refused to let me work out using their app unless i pay, saying i’ve used my limit, which is absolutely ridiculous"
+        },
+        {
+          "reviewId": "f1d769915693bff365b5",
+          "excerpt": "but now everything is behind a paywall. i can’t even use basic workouts i used to do for free anymore"
+        },
+        {
+          "reviewId": "aa10fd1c007b0ebde89f",
+          "excerpt": "stop putting stuff under free thats not free"
+        },
+        {
+          "reviewId": "02bfe99c3421d23ff17d",
+          "excerpt": "you have to pay to feel proud and i don’t like that"
+        },
+        {
+          "reviewId": "15adc40ae33fa59c6460",
+          "excerpt": "all would pop up is like premium something basically that i had to pay"
+        },
+        {
+          "reviewId": "3c469722f1d0864a64bb",
+          "excerpt": "they’ve put everything behind a paywall"
+        },
+        {
+          "reviewId": "50dd40e82486e9e93aae",
+          "excerpt": "it won’t let me do anything without a subscription"
+        },
+        {
+          "reviewId": "5388376e53d4eca15c60",
+          "excerpt": "everything requires money"
+        },
+        {
+          "reviewId": "8e1dadc88db3cb1e2d52",
+          "excerpt": "even workouts i had previously saved now ask you to pay"
+        },
+        {
+          "reviewId": "4b4d13468d71f994d0a9",
+          "excerpt": "hate how they kept going from completely free to charging for everything now"
+        },
+        {
+          "reviewId": "cd3e775a272561da7d61",
+          "excerpt": "couldn’t access anything without paying an outrageous price"
+        },
+        {
+          "reviewId": "0567acea07a5f230c350",
+          "excerpt": "unable to do anything at all"
+        },
+        {
+          "reviewId": "a23ee85600cd3c3ae86f",
+          "excerpt": "i wanted to try the 1-week free trial, but once i used the apple pay feature to subscribe to the free trial i was charged $29.99"
+        },
+        {
+          "reviewId": "4f2cf6597c046f4c579d",
+          "excerpt": "i only got to do one session for free. now it wants me to pay for a subscription."
+        },
+        {
+          "reviewId": "b336d30bd0c5bb4c158b",
+          "excerpt": "the second day it was making me have to pay to continue"
+        },
+        {
+          "reviewId": "c9338a41a33df24b016d",
+          "excerpt": "there’s actually no where to choose that option. you are only given the options of paying yearly or monthly."
+        },
+        {
+          "reviewId": "5a40025573b2c55b1963",
+          "excerpt": "now everything i click on they want you to subscribe and that sucks"
+        },
+        {
+          "reviewId": "cb0cc8ac89a9761a3b16",
+          "excerpt": "you have to have the subscription to do anything basically"
+        },
+        {
+          "reviewId": "446debb488c9e30a47dd",
+          "excerpt": "little to no workouts now that you can do for free"
+        },
+        {
+          "reviewId": "453d414ea6a6bf40613e",
+          "excerpt": "now u need premium for every feature"
+        },
+        {
+          "reviewId": "d12437b2f22497298e1b",
+          "excerpt": "just about everything now requires a subscription"
+        },
+        {
+          "reviewId": "b87d5108f1c3d560a191",
+          "excerpt": "blocked off from most of the app unless you pay"
+        },
+        {
+          "reviewId": "665cd14c6001dacd0a84",
+          "excerpt": "now you can’t get anything without a subscription"
+        },
+        {
+          "reviewId": "bc8c57bc004f780e2a19",
+          "excerpt": "didn’t let me do it without buying the premium subscription"
+        },
+        {
+          "reviewId": "b5db1fbb2e56d1b56e16",
+          "excerpt": "all of them require the subscription"
+        },
+        {
+          "reviewId": "0975a5a2992339e60625",
+          "excerpt": "why do i have to pay if there helping me"
+        },
+        {
+          "reviewId": "dc4faf66d83960f53218",
+          "excerpt": "couldn’t access anything without the subscription, none of the workouts, not even the supposedly ‘free’ workouts"
+        },
+        {
+          "reviewId": "abde41fc0222660ff656",
+          "excerpt": "now you have to pay for a subscription to do the exercises"
+        },
+        {
+          "reviewId": "a9a965a3ee3756a838f8",
+          "excerpt": "you can’t even use this app for free more than a few days without them making you pay. it’s no longer a free app"
+        },
+        {
+          "reviewId": "9209576b87ce4944ca28",
+          "excerpt": "you have to pay to subscribe."
+        },
+        {
+          "reviewId": "f65d70e0417408b7a7e4",
+          "excerpt": "now you have to watch a 90 second ad before every workout unless you’d rather pay for premium. paying for subscriptions isn’t something i can just afford"
+        },
+        {
+          "reviewId": "842e5e0f16697cf1a01a",
+          "excerpt": "says it’s free, but it makes you go through a ton of steps, then gives you no way to continue without paying $40/yr."
+        },
+        {
+          "reviewId": "a0b0f9da4e31b7a6f52d",
+          "excerpt": "after filling everything out you find out the app is not free. you only get 7 days free then have to pay. i downloaded this because it said it was free."
+        },
+        {
+          "reviewId": "4395008b5af14e4a1615",
+          "excerpt": "it won’t let me use the app without paying. just the 7 day free trial? no longer actually free?"
+        },
+        {
+          "reviewId": "8cab578e3ab71d8124a9",
+          "excerpt": "i used to be able to work out after an ad now i can’t sad you guys had to ruin it to get ppl to pay subscription"
+        },
+        {
+          "reviewId": "1e0fb9be01863f607fa3",
+          "excerpt": "it makes the whole app feel like a scam and a money grab."
+        }
+      ],
+      "conflictingReviewIds": [
+        "6d22e4014053df4dd6eb",
+        "5a83a72849e12b022595",
+        "0b88af6733f38b6a7474",
+        "53974bcc26a0d788626b",
+        "0e621260607a04cf082e",
+        "52ecbbc862689ee97897",
+        "b13ecc45b66030acc2d7",
+        "32e7a4d8aaa1b9789f74",
+        "42ab00aa53fb637834a4",
+        "abec4e956a261a973827",
+        "893a5614aeb5510fceb5",
+        "0989bab8169f5de29fa0",
+        "beffe6788ff06768a18c",
+        "89626a77cb324252fb52"
+      ],
+      "confidence": {
+        "level": "medium",
+        "method": "deterministic-v2",
+        "reasons": [
+          "38 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 200,
+        "supportRatio": 0.19,
+        "reasons": []
+      },
+      "uncertainties": [
+        "无法确认付费墙是否只针对特定版本或地区；“不付费可用”的用户可能指有限的免费内容而非全部课程。",
+        "无法验证付费墙是否影响所有用户及具体触发条件",
+        "好评用户的“worth the money”可能来自不同订阅计划或使用场景",
+        "一星与五星并存，无法确定整体比例；部分反对订阅的评论来自曾长期使用免费版的老用户。",
+        "无法从评论中准确区分免费版还残留哪些可用的训练内容，以及这些内容随时间变化的具体版本节点。",
+        "付费用户的正面评价可能来自长期训练者，其体验与刚下载即遇到付费墙的新用户不同。",
+        "无法从评论文本确认真实的订阅定价或免费训练数量，只能反映用户感知。",
+        "部分高星评价未明确说明是否付费订阅，冲突仅反映对应用整体价值的判断，而非直接对订阅价格的评价。",
+        "不同用户对免费版可完成的训练数量描述不一致，可能受版本或A/B测试影响。",
+        "广告时长的描述也不一致（90秒 vs 3分钟），无法确定当前普遍值。"
+      ],
+      "limitations": [
+        "仅基于美国区评论文本，未核实当前订阅价格与免费额度；5星评价中的负面描述说明评分与正文可能存在偏差。",
+        "样本主要来自近期负面评论，可能高估付费墙问题的普遍性",
+        "评论者自述，无法核实订阅状态与历史版本差异",
+        "评论列表未包含所有历史版本，无法验证‘以前免费’的真实性。",
+        "基于当前提供的评论样本，不能代表全部美国区用户或所有版本的表现。",
+        "评论内容无法验证用户是否误解了订阅机制或是否成功参与过免费内容。",
+        "样本为单一时点的美国区评论，且评论数量较小。",
+        "AI生成内容相关话题在本批评论中没有直接文本支撑，未纳入分析。",
+        "评论中的“免费”与“付费墙”说法可能因用户所在地区或旧版本体验不同而产生偏差。"
+      ]
+    },
+    {
+      "id": "finding-2",
+      "topicIds": [
+        "topic-2"
+      ],
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-5"
+      ],
+      "sourceFindingIds": [
+        "finding-2@c0",
+        "finding-2@c1",
+        "finding-2@c2",
+        "finding-2@c3",
+        "finding-2@c4"
+      ],
+      "title": "订阅计费不透明与客服失联：试用扣款、取消困难、退款无门",
+      "summary": "用户报告免费试用被立即扣款、未享受承诺的试用天数、取消订阅后仍被重复收费；取消入口缺失，客服表单被误判为垃圾信息或长时间无回复，部分用户向 Apple 申请退款遭拒。这些问题严重损害信任并促使差评。",
+      "supportingReviewIds": [
+        "1cf18baaa2b920a6718d",
+        "a714751ef74be8bea80e",
+        "a4c127668e22552df85d",
+        "c352d86551671d7b8d70",
+        "dd0b01e8efe7359b1089",
+        "4fbc4f72bcfecda65727",
+        "eeb35f52212cad12f495",
+        "3108668c8b4ee2438bf7",
+        "62be00dda9ffd5c8bc7a",
+        "7a160bd56131157f4752",
+        "f8eb72f77f1bd83b00c8",
+        "3db3756c43b8043720be",
+        "c5cec2597485411001ba",
+        "474aa2e44c378c760f59",
+        "cc85fc2414bb9b897dfd",
+        "14811281319525325893",
+        "7aaf37a74c0b10a4cc33"
+      ],
+      "supportingContentGroupIds": [
+        "6b84bc16363bb89f4f31",
+        "b2054f2377da62c551e4",
+        "267243f5d6a065af4853",
+        "c17b45bb710dc4a12e34",
+        "fe2db3a0748d8db1c52c",
+        "69de99128e0acbdfdcc0",
+        "36507d76d20d97c9af68",
+        "daf246597ee3c35808f2",
+        "e5b7b06b40349c7ced57",
+        "265cef3c590c631e5eb9",
+        "bb85875e62fcd46889bf",
+        "cb5be1c537b7164a7e38",
+        "630a3363a30fdc0642c6",
+        "87c4e42a75beafb20f10",
+        "b0ee3e57cb991ac1451f",
+        "183548348c75df892479",
+        "aea0750fc56b40f5b890"
+      ],
+      "supportingSampleCount": 17,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "1cf18baaa2b920a6718d",
+          "excerpt": "i signed up for a trial expecting a trial experience, but i was charged afterward without a clear enough reminder"
+        },
+        {
+          "reviewId": "a714751ef74be8bea80e",
+          "excerpt": "unable to figure out how. the app doesn’t have an account with my email and when i tried asking their customer support it doesn’t submit my question because it’s flagged for likely to be spam?? very frustrating"
+        },
+        {
+          "reviewId": "a4c127668e22552df85d",
+          "excerpt": "i downloaded it for at least 7 days free but at day 3 it doesn’t work and ask for the payment"
+        },
+        {
+          "reviewId": "c352d86551671d7b8d70",
+          "excerpt": "it was 39.99 per month not 39.99 for the entire year"
+        },
+        {
+          "reviewId": "dd0b01e8efe7359b1089",
+          "excerpt": "you guys immediately charged me"
+        },
+        {
+          "reviewId": "4fbc4f72bcfecda65727",
+          "excerpt": "two charges in the same day totaling almost $100"
+        },
+        {
+          "reviewId": "eeb35f52212cad12f495",
+          "excerpt": "its charged me 30 dollars"
+        },
+        {
+          "reviewId": "3108668c8b4ee2438bf7",
+          "excerpt": "my message seems like spam"
+        },
+        {
+          "reviewId": "62be00dda9ffd5c8bc7a",
+          "excerpt": "cancelled subscription and still got charged for it. no spot in app to manage no place on website either."
+        },
+        {
+          "reviewId": "7a160bd56131157f4752",
+          "excerpt": "horrible wouldn’t let me cancel my subscription"
+        },
+        {
+          "reviewId": "f8eb72f77f1bd83b00c8",
+          "excerpt": "they offer a free week then when you accept they charge you."
+        },
+        {
+          "reviewId": "3db3756c43b8043720be",
+          "excerpt": "you told me a free trial for a week and the charged me $19.99 right away."
+        },
+        {
+          "reviewId": "c5cec2597485411001ba",
+          "excerpt": "i was charged the same day i signed up and wasn’t given the advertised 3 days free"
+        },
+        {
+          "reviewId": "474aa2e44c378c760f59",
+          "excerpt": "it’s says free but charges me on the second day"
+        },
+        {
+          "reviewId": "cc85fc2414bb9b897dfd",
+          "excerpt": "i wanted to try the free week trial, and it said- “pay nothing now”, but i got charged $52.99 instantly for the year when that option was not even highlighted. i can’t find any support email or contact to get this rectified."
+        },
+        {
+          "reviewId": "14811281319525325893",
+          "excerpt": "i only signed up for the free trial today and was charged at the moment for a monthly subscription i never wanted. this feels misleading and unfair."
+        },
+        {
+          "reviewId": "7aaf37a74c0b10a4cc33",
+          "excerpt": "app falsely claims to have a free trial but was charged immediately. apple support will not refund the charge despite the app saying i was signing up for a free trial."
+        }
+      ],
+      "conflictingReviewIds": [],
+      "confidence": {
+        "level": "high",
+        "method": "deterministic-v2",
+        "reasons": [
+          "17 distinct supporting content group(s)",
+          "source status: complete"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 200,
+        "supportRatio": 0.085,
+        "reasons": []
+      },
+      "uncertainties": [
+        "a4c127 的评分为5星但内容为负面，可能是误标；未出现任何“计费顺畅”的评论作为对照。",
+        "无法确认扣款是否为订阅条款显示不清或用户误操作",
+        "客服拦截机制的具体规则不明",
+        "扣费问题可能是用户对试用规则误解，但多个独立报告一致。",
+        "明确投诉试用扣费的用户样本只有两则，无法推断整体扣费错误率。",
+        "Apple 拒绝退款可能与平台政策有关，应用方在退款流程中的具体责任并不完全清晰。",
+        "无法独立核实扣款是否因用户误触或界面设计问题。",
+        "评论文本中提到的Apple支持流程不在应用内可见。"
+      ],
+      "limitations": [
+        "相关评论仅3条，样本小；无法验证用户是否错过取消窗口或 App 是否已按政策退款。",
+        "涉及支付问题的评论数量有限且均为单方陈述",
+        "部分评论可能未包含完整的订阅前提示信息",
+        "联系客服失败仅在个例中出现，不代表普遍问题。",
+        "缺少订单截图、客服工单等可核验信息，只能依据用户自述。",
+        "评论样本量小，且未覆盖同一时间段内未遇到扣费问题的用户声音。",
+        "仅3条相关评论，样本小，不能推断整体计费失败率。"
+      ]
+    },
+    {
+      "id": "finding-3",
+      "topicIds": [
+        "topic-3"
+      ],
+      "focusAreaIds": [
+        "focus-4",
+        "focus-5",
+        "focus-2",
+        "focus-1",
+        "focus-3"
+      ],
+      "sourceFindingIds": [
+        "finding-3@c1",
+        "finding-3@c2",
+        "finding-3@c4",
+        "finding-2@c5"
+      ],
+      "title": "免费版强制广告与外部跳转严重破坏训练体验",
+      "summary": "免费用户在训练前被迫观看90秒甚至更长的广告，部分广告关闭按钮被隐藏或极难退出；还有人反映训练中应用会自动跳转到外部购物网站。用户对广告本身有分歧，但普遍认为广告时长、退出难度和强制订阅引导令人反感。",
+      "supportingReviewIds": [
+        "3c469722f1d0864a64bb",
+        "3ca751f46d64b8b6d725",
+        "cd3e775a272561da7d61",
+        "0567acea07a5f230c350",
+        "bf6882ede9d60abe6519",
+        "cc63855d1f2503b23e1a",
+        "c9338a41a33df24b016d",
+        "a294f3b4369a18c41112",
+        "d209ae2dfd97ff0bdb80",
+        "b4467727f123a07beea9",
+        "a3219e1290028aaf4834",
+        "a9a965a3ee3756a838f8",
+        "f65d70e0417408b7a7e4",
+        "db79928046519e7ffdcd",
+        "1e0fb9be01863f607fa3",
+        "72cf0fc6b2f25ec4e1ac",
+        "76e57a90688ac2de17a6",
+        "7e2302afb4e5dac12a13"
+      ],
+      "supportingContentGroupIds": [
+        "f69b600407716c168c27",
+        "b94aea0f5a5c442614bb",
+        "62ce47c7d8588d5105a4",
+        "bf726c84a0a49a88630c",
+        "754ff65fa16122e8d2c3",
+        "4849525f3ef3dd21c4d2",
+        "204618f075d913770a28",
+        "ef387f38c89bbea6143d",
+        "a568748d73d21ed2f6c0",
+        "2efd34fbdbb7f84110b6",
+        "59d95d6bb87bbd24c73e",
+        "3c05713a336391ffc184",
+        "c154e50b4ac4eb21ca86",
+        "f8301c030c70160c0017",
+        "df433042b9b223327b69",
+        "89f127b44df7eaebe8fd",
+        "f84dd2df556fa5fba5cc",
+        "1fb2d3bc6b77e9ff0e29"
+      ],
+      "supportingSampleCount": 18,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "3c469722f1d0864a64bb",
+          "excerpt": "randomly during my workouts the app redirects me to shein’s website"
+        },
+        {
+          "reviewId": "3ca751f46d64b8b6d725",
+          "excerpt": "the app will close and the shein website will open"
+        },
+        {
+          "reviewId": "cd3e775a272561da7d61",
+          "excerpt": "required 90sec ads to do workouts"
+        },
+        {
+          "reviewId": "0567acea07a5f230c350",
+          "excerpt": "watching over a minute of ads"
+        },
+        {
+          "reviewId": "bf6882ede9d60abe6519",
+          "excerpt": "i do not care if i have to watch ads but what i do care about is if i get a pop up screen with no continuation option only advertising the paid version."
+        },
+        {
+          "reviewId": "cc63855d1f2503b23e1a",
+          "excerpt": "as soon as you hit the second day, it fires in your face, a bunch of different ads to get their premium"
+        },
+        {
+          "reviewId": "c9338a41a33df24b016d",
+          "excerpt": "though the free option with ads is shown when they promote the subscription, there’s actually no where to choose that option."
+        },
+        {
+          "reviewId": "a294f3b4369a18c41112",
+          "excerpt": "redirected to the shein website three times during a recent workout."
+        },
+        {
+          "reviewId": "d209ae2dfd97ff0bdb80",
+          "excerpt": "this app punishes you for not paying with ads that are extremely hard to get out of. 90 sec ads for 7 minute workouts then another 30 sec figuring out how to exit the ad."
+        },
+        {
+          "reviewId": "b4467727f123a07beea9",
+          "excerpt": "they’ve hidden the x button so that when the 90s ad finishes, you can’t even get out of the ad without force closing the whole app."
+        },
+        {
+          "reviewId": "a3219e1290028aaf4834",
+          "excerpt": "unpaid version is impossible to use. how do you x out of ads? i have no idea."
+        },
+        {
+          "reviewId": "a9a965a3ee3756a838f8",
+          "excerpt": "they’re so excessively long, and hard to get out of. if you do it wrong, you have to watch the 90 sec long ad all over again"
+        },
+        {
+          "reviewId": "f65d70e0417408b7a7e4",
+          "excerpt": "now you have to watch a 90 second ad before every workout unless you’d rather pay for premium."
+        },
+        {
+          "reviewId": "db79928046519e7ffdcd",
+          "excerpt": "too many adds 90 seconds??? too much."
+        },
+        {
+          "reviewId": "1e0fb9be01863f607fa3",
+          "excerpt": "we have to watch a three minute add before every. single. work out."
+        },
+        {
+          "reviewId": "72cf0fc6b2f25ec4e1ac",
+          "excerpt": "now i’m forced to watch a 90s ad. i’m not opposed to that but it’s takes more than 90s to close them out."
+        },
+        {
+          "reviewId": "76e57a90688ac2de17a6",
+          "excerpt": "every time i try to get my workout in it’s always buy premium or watch a 90 second add"
+        },
+        {
+          "reviewId": "7e2302afb4e5dac12a13",
+          "excerpt": "app become bad after the ads. i stopped using it and found a better app."
+        }
+      ],
+      "conflictingReviewIds": [
+        "abde41fc0222660ff656",
+        "af48b9baedefbffda432",
+        "beffe6788ff06768a18c"
+      ],
+      "confidence": {
+        "level": "high",
+        "method": "deterministic-v2",
+        "reasons": [
+          "18 distinct supporting content group(s)",
+          "source status: complete"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 200,
+        "supportRatio": 0.09,
+        "reasons": []
+      },
+      "uncertainties": [
+        "广告出现频率和时长可能因账号状态而异",
+        "外部网站跳转是否由应用内广告 SDK 引起无法确认",
+        "无法验证广告来源是否为应用自带；Shein跳转可能是第三方广告网络行为。",
+        "仅能反映用户对广告的主观感受，无法核实广告实际时长或关闭按钮的A/B差异。",
+        "广告时长存在90秒与3分钟两种说法，可能因A/B测试或版本差异导致。",
+        "未在本批评论中找到应用自动跳转外部网站的示例。"
+      ],
+      "limitations": [
+        "跳转问题仅有少量报告，可能是特定设备或版本问题",
+        "广告与跳转问题可能在特定iOS版本或第三方网络环境中出现。",
+        "广告相关评论多为负面，仅1条用户表示可接受广告，冲突样本较小。",
+        "用户对广告的负面反馈集中在免费版，付费用户是否受同样影响无法从该样本判断。"
+      ]
+    },
+    {
+      "id": "finding-4",
+      "topicIds": [
+        "topic-4",
+        "topic-5"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-3",
+        "focus-4",
+        "focus-5"
+      ],
+      "sourceFindingIds": [
+        "finding-3@c0",
+        "finding-3@c3",
+        "finding-4@c5"
+      ],
+      "title": "训练内容质量褒贬不一：AI生成、重复性强，长期用户失望而新用户满意",
+      "summary": "一批用户称赞动作多样、易上手、训练有效；但多名老用户称改版后大量使用AI形象/动作、内容重复缺乏创意，甚至语音与动作不一致。同一“内容质量”维度出现明显对立，是当前最具争议的功能点。",
+      "supportingReviewIds": [
+        "1cf18baaa2b920a6718d",
+        "1e26434428fd7d297ebd",
+        "cbb69a199b87635d6910",
+        "75d7b5fc1746c4d80026",
+        "7d579ddab7ad9866916e",
+        "22362f152de51b719e6f",
+        "2e0026d69a6bca97b90a",
+        "89f15c4184fe51fd54d2",
+        "52ecbbc862689ee97897",
+        "67824c2de37247a498b8",
+        "61cabebf911229cac631"
+      ],
+      "supportingContentGroupIds": [
+        "6b84bc16363bb89f4f31",
+        "dedcad4911146577feed",
+        "ee1d8f7a5f2120b654b9",
+        "4764eb97536d808ba057",
+        "053d73ff30d47546e88c",
+        "c5fa40316048e2cb0585",
+        "8ae45795e74b2c086e44",
+        "97d65f428b62308c4666",
+        "656fc28adefe63d0bf81",
+        "123822d54001dfb95dfa",
+        "5fdf8fa90fe05adb3c75"
+      ],
+      "supportingSampleCount": 11,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "1cf18baaa2b920a6718d",
+          "excerpt": "the workouts are outdated, repetitive, and lack creativity"
+        },
+        {
+          "reviewId": "1e26434428fd7d297ebd",
+          "excerpt": "it’s all ai slip and you have to pay"
+        },
+        {
+          "reviewId": "cbb69a199b87635d6910",
+          "excerpt": "fake ai women used everywhere"
+        },
+        {
+          "reviewId": "75d7b5fc1746c4d80026",
+          "excerpt": "cartoonish women that are busty, skinny waist, wide hips"
+        },
+        {
+          "reviewId": "7d579ddab7ad9866916e",
+          "excerpt": "lots of ai use for their workouts as well"
+        },
+        {
+          "reviewId": "22362f152de51b719e6f",
+          "excerpt": "since the app remodel, the daily workout seems so inconsistent"
+        },
+        {
+          "reviewId": "2e0026d69a6bca97b90a",
+          "excerpt": "so convenient, and helps me just get to the exercise without having to do any research"
+        },
+        {
+          "reviewId": "89f15c4184fe51fd54d2",
+          "excerpt": "great app with easy to follow workouts"
+        },
+        {
+          "reviewId": "52ecbbc862689ee97897",
+          "excerpt": "i love the different variations"
+        },
+        {
+          "reviewId": "67824c2de37247a498b8",
+          "excerpt": "i love this app so much"
+        },
+        {
+          "reviewId": "61cabebf911229cac631",
+          "excerpt": "most of the workouts are just ai slop now. the work outs themselves are barely even work outs, the guiding voice is telling you to do one thing while the ai diagram is doing another."
+        }
+      ],
+      "conflictingReviewIds": [
+        "4a644a56a8619cd8783c",
+        "6acda9e389faa1143883",
+        "b34f61d4a24155813305",
+        "b13ecc45b66030acc2d7",
+        "d12437b2f22497298e1b",
+        "f2bb995e4a1d10521898",
+        "f663a47722d240c912da",
+        "818576cbf19f52251034",
+        "d5b25078d199b55fd062"
+      ],
+      "confidence": {
+        "level": "medium",
+        "method": "deterministic-v2",
+        "reasons": [
+          "11 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 200,
+        "supportRatio": 0.055,
+        "reasons": []
+      },
+      "uncertainties": [
+        "无法区分用户反感的是 AI 技术本身还是 AI 形象设计；“AI”相关负面评论可能只代表改版前老用户的怀旧偏差。",
+        "正面和负面评论可能对应不同使用时长：新用户更容易感受到易用性，老用户则更关注内容库的新鲜度。",
+        "评论时间跨度较大，未能区分不同版本的内容质量差异。",
+        "仅一位用户明确提到AI生成问题，“多数训练”的说法无法被独立验证。",
+        "正面评价与AI批评可能针对不同训练类型或不同版本。"
+      ],
+      "limitations": [
+        "没有录屏或版本号佐证，不能确证所有负面都指向同一版本；正面评论主要来自早期或当前版本，可能存在幸存者偏差。",
+        "无法实际核对动作库的重复率或“AI生成内容”的具体程度。",
+        "样本有限，正面与负面评价的数量差异不能用来判断整体用户满意度。",
+        "本主题的负面证据只有一条评论，冲突结论主要反映个别长期用户的体验。"
+      ]
+    },
+    {
+      "id": "finding-5",
+      "topicIds": [
+        "topic-6",
+        "topic-9"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5",
+        "focus-3"
+      ],
+      "sourceFindingIds": [
+        "finding-4@c0",
+        "finding-4@c3"
+      ],
+      "title": "个性化与特殊需求支持不足：膝盖偏好被忽略、计划自动重置、缺乏孕期内容",
+      "summary": "用户选择避免膝盖后仍被安排大量深蹲；每日计划连续多天只练同一部位且设置会自动重置。另有用户批评登录强制设定减重目标、缺乏孕期安全的肌力与柔韧训练，个性化定制未覆盖非减重及孕期用户。",
+      "supportingReviewIds": [
+        "bd7a17c7711d6f478c76",
+        "22362f152de51b719e6f",
+        "2143f3ec8ed35afd12de",
+        "51d4b3f25ab831d4417f",
+        "a5900337c9421dc68dbc"
+      ],
+      "supportingContentGroupIds": [
+        "952555d27ca4a1f83447",
+        "c5fa40316048e2cb0585",
+        "36836a37cfdde365ebba",
+        "090824b38deacb146bd2",
+        "0cb77da9dcb1e61008a2"
+      ],
+      "supportingSampleCount": 5,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "bd7a17c7711d6f478c76",
+          "excerpt": "if i select to avoid knees why does it still have lots of squats and lunges"
+        },
+        {
+          "reviewId": "22362f152de51b719e6f",
+          "excerpt": "it has me doing legs every single day, i’m 10 days in, and i’ve never done arms"
+        },
+        {
+          "reviewId": "2143f3ec8ed35afd12de",
+          "excerpt": "i would like a longer interval time"
+        },
+        {
+          "reviewId": "51d4b3f25ab831d4417f",
+          "excerpt": "you can’t even log in and use the app without setting a weight loss goal"
+        },
+        {
+          "reviewId": "a5900337c9421dc68dbc",
+          "excerpt": "lack of pregnancy safe strength training, mobility and flexibility workouts"
+        }
+      ],
+      "conflictingReviewIds": [
+        "d331227b060177a24ad3",
+        "12277142053771f844f1",
+        "6acda9e389faa1143883",
+        "ab3a2f593db6baa75d7a"
+      ],
+      "confidence": {
+        "level": "medium",
+        "method": "deterministic-v2",
+        "reasons": [
+          "5 distinct supporting content group(s)",
+          "source status: complete",
+          "material conflicting evidence present"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 200,
+        "supportRatio": 0.025,
+        "reasons": []
+      },
+      "uncertainties": [
+        "个性化失效是否由最近的计划算法改动引起无法从评论确认；“腿每天”可能属于计划轮换设计但未向用户解释。",
+        "关于减重导向与孕期内容缺失的声音分别来自个别用户，是否代表广泛需求仍不明确。",
+        "登录流程中的减重目标设置可能只是默认引导，实际是否可跳过无法从评论判断。"
+      ],
+      "limitations": [
+        "负面定制反馈主要来自2条评论；正面评价未覆盖相同功能维度，无法直接对比同一人群。",
+        "样本仅两则相关评论，不能外推为普遍问题。",
+        "用户未提供训练计划页面截图，无法验证减重提示出现的具体场景和频率。"
+      ]
+    },
+    {
+      "id": "finding-6",
+      "topicIds": [
+        "topic-5",
+        "topic-6"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5",
+        "focus-4"
+      ],
+      "sourceFindingIds": [
+        "finding-4@c2",
+        "finding-4@c4"
+      ],
+      "title": "训练易用性受好评，但需丰富内容库并强化强度与动作指导",
+      "summary": "用户普遍认为应用布局清晰、短时训练方便融入日程、动作演示易懂。但付费用户反馈最高强度仍不够难、动作细节指导不足，长期用户也期待更多新节目和可选动作，建议进一步提升强度和内容新鲜度。",
+      "supportingReviewIds": [
+        "edb0da5e3f55117ad807",
+        "3c49af9bb0aef09a3fdc",
+        "e0d1838121012adeedaa",
+        "17cdc8c508a860319c27",
+        "39f537e8298befa28a06",
+        "1a50245eec24db09a48c",
+        "d8b0365890e12753b065",
+        "fbfc29ddbb6142d2e40f",
+        "cb1ac0588b2aee125248",
+        "98a39e78a98fde68f2ad",
+        "5e9ea710a133198a495c"
+      ],
+      "supportingContentGroupIds": [
+        "92c0cb721a819d884b35",
+        "21349a52a61a27ce8703",
+        "8b252517180186311fff",
+        "c81214f83e3897d9b5cb",
+        "03b7793f68914b976c19",
+        "9b7a5eef66327bca9d47",
+        "d2dfbae0b0aa97269827",
+        "f1e00ff580be2c350bce",
+        "86244ba5062419c15389",
+        "e585b4636612c9482dcf",
+        "db6a48aba400e0cb38de"
+      ],
+      "supportingSampleCount": 11,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "edb0da5e3f55117ad807",
+          "excerpt": "the workouts do what they say they will do."
+        },
+        {
+          "reviewId": "3c49af9bb0aef09a3fdc",
+          "excerpt": "you can pick the type of workouts you want to focus on, whether it’s pilates, wall pilates, fitness, postpartum workouts, and more!"
+        },
+        {
+          "reviewId": "e0d1838121012adeedaa",
+          "excerpt": "the app is i would say easy to use especially for beginners because i was a beginner myself."
+        },
+        {
+          "reviewId": "17cdc8c508a860319c27",
+          "excerpt": "love the variety of the workouts and being able to choose different programs"
+        },
+        {
+          "reviewId": "39f537e8298befa28a06",
+          "excerpt": "it shows you what to do and the workouts aren’t super long."
+        },
+        {
+          "reviewId": "1a50245eec24db09a48c",
+          "excerpt": "app layout is great. shows you exactly what to do."
+        },
+        {
+          "reviewId": "d8b0365890e12753b065",
+          "excerpt": "easy to cut in my schedule anytime"
+        },
+        {
+          "reviewId": "fbfc29ddbb6142d2e40f",
+          "excerpt": "quick workouts that really get you moving!"
+        },
+        {
+          "reviewId": "cb1ac0588b2aee125248",
+          "excerpt": "i really want my things be harder and some of the things that even if it’s up to all the way, it’s not that hard"
+        },
+        {
+          "reviewId": "98a39e78a98fde68f2ad",
+          "excerpt": "i just wished it showed how to do it more"
+        },
+        {
+          "reviewId": "5e9ea710a133198a495c",
+          "excerpt": "customizes your workouts based off needs, age, weight, and any struggles that you face."
+        }
+      ],
+      "conflictingReviewIds": [],
+      "confidence": {
+        "level": "high",
+        "method": "deterministic-v2",
+        "reasons": [
+          "11 distinct supporting content group(s)",
+          "source status: complete"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 200,
+        "supportRatio": 0.055,
+        "reasons": []
+      },
+      "uncertainties": [
+        "正面评价样本多为五星，可能高估满意度；‘希望更多内容’不等于对现有内容不满。",
+        "强度不足只来自一条评论，无法判断适用范围。",
+        "“showed how to do it more”可能指动作细节而非整体指导清晰度。"
+      ],
+      "limitations": [
+        "本组评论中未有明确批评训练难用的例子，易用性结论基于少数评论。",
+        "本批评论多为5星训练好评，缺少更广泛的负面样本。",
+        "无法评估实际运动效果或个人化算法的有效性。"
+      ]
+    },
+    {
+      "id": "finding-7",
+      "topicIds": [
+        "topic-8",
+        "topic-2"
+      ],
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5"
+      ],
+      "sourceFindingIds": [
+        "finding-4@c1",
+        "finding-3@c5"
+      ],
+      "title": "已付费用户遭遇登录失败、进度不同步与数据访问障碍",
+      "summary": "部分付费用户更换设备后无法登录、进度未同步或被告知账号不存在；平板端没有登录入口只能重复订阅，且即使有订阅也无法下载内容。联系客服后数日无响应，付费权益在跨设备场景下无法正常兑现。",
+      "supportingReviewIds": [
+        "3108668c8b4ee2438bf7",
+        "22935659be45db2172e8",
+        "cd9d8211bc907e7935bc",
+        "d92cce6e9e7960f75948",
+        "342561b8e8592cc0b63a",
+        "85861b1ae4ea322bed91"
+      ],
+      "supportingContentGroupIds": [
+        "daf246597ee3c35808f2",
+        "808ff6d2635d823f1d40",
+        "d954b5e5154cbe688bce",
+        "cc6eede2fd3f1e220315",
+        "6181d1411837f8ce10de",
+        "ed89be10a17e49c2e8da"
+      ],
+      "supportingSampleCount": 6,
+      "evidenceExcerpts": [
+        {
+          "reviewId": "3108668c8b4ee2438bf7",
+          "excerpt": "cannot log into the account because it says it does not exist"
+        },
+        {
+          "reviewId": "22935659be45db2172e8",
+          "excerpt": "cannot log back in to access my workouts and benefits of my paid subscription"
+        },
+        {
+          "reviewId": "cd9d8211bc907e7935bc",
+          "excerpt": "even with a paid subscription, you cannot download"
+        },
+        {
+          "reviewId": "d92cce6e9e7960f75948",
+          "excerpt": "just got a new phone and none of the data loaded to my new device, even with my log in. i’ve lost a lot of tracked progress which sucks."
+        },
+        {
+          "reviewId": "342561b8e8592cc0b63a",
+          "excerpt": "theres no login option on my tablet. it’s just asking me to resub. i’ve emailed for the last couple of days and noone is responding."
+        },
+        {
+          "reviewId": "85861b1ae4ea322bed91",
+          "excerpt": "you email them and they don’t get back to you ever!"
+        }
+      ],
+      "conflictingReviewIds": [],
+      "confidence": {
+        "level": "medium",
+        "method": "deterministic-v2",
+        "reasons": [
+          "6 distinct supporting content group(s)",
+          "source status: complete"
+        ]
+      },
+      "evidenceSufficiency": {
+        "status": "sufficient",
+        "corpusReviewCount": 200,
+        "supportRatio": 0.03,
+        "reasons": []
+      },
+      "uncertainties": [
+        "登录失败是否与服务器端账号数据迁移有关无法确认",
+        "无法下载问题可能受设备或区域限制",
+        "样本量小且均为负面，无法估计该问题在全部用户中的发生率。",
+        "没有出现成功同步或客服回复的正面案例作为对照。"
+      ],
+      "limitations": [
+        "此类问题多为偶发个案，样本量小",
+        "评论未提供详细设备型号和账号类型",
+        "该结论基于3条评论，只能说明部分付费用户遇到此类问题。"
+      ]
+    }
+  ],
+  "warnings": [],
+  "insufficientEvidence": false,
+  "consolidationAudit": {
+    "candidateCount": 24,
+    "consolidatedCount": 7,
+    "finalCount": 7,
+    "groups": [
+      {
+        "findingId": "finding-1",
+        "sourceFindingIds": [
+          "finding-1@c0",
+          "finding-1@c1",
+          "finding-1@c2",
+          "finding-1@c3",
+          "finding-1@c4",
+          "finding-1@c5"
+        ]
+      },
+      {
+        "findingId": "finding-2",
+        "sourceFindingIds": [
+          "finding-2@c0",
+          "finding-2@c1",
+          "finding-2@c2",
+          "finding-2@c3",
+          "finding-2@c4"
+        ]
+      },
+      {
+        "findingId": "finding-3",
+        "sourceFindingIds": [
+          "finding-3@c1",
+          "finding-3@c2",
+          "finding-3@c4",
+          "finding-2@c5"
+        ]
+      },
+      {
+        "findingId": "finding-4",
+        "sourceFindingIds": [
+          "finding-3@c0",
+          "finding-3@c3",
+          "finding-4@c5"
+        ]
+      },
+      {
+        "findingId": "finding-5",
+        "sourceFindingIds": [
+          "finding-4@c0",
+          "finding-4@c3"
+        ]
+      },
+      {
+        "findingId": "finding-6",
+        "sourceFindingIds": [
+          "finding-4@c2",
+          "finding-4@c4"
+        ]
+      },
+      {
+        "findingId": "finding-7",
+        "sourceFindingIds": [
+          "finding-4@c1",
+          "finding-3@c5"
+        ]
+      }
+    ],
+    "droppedCandidateIds": [],
+    "addedForCoverage": []
+  }
+}

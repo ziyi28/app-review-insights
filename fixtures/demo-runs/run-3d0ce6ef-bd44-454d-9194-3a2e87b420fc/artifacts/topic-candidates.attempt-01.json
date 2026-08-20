@@ -1,0 +1,621 @@
+{
+  "candidates": [
+    {
+      "id": "topic-candidate-1@c0",
+      "label": "付费墙与订阅价值的两极争议",
+      "description": "大量长期用户反映原本免费的核心训练被锁进付费墙，认为App已是圈钱工具；同时也有用户称赞免费计划或认为年费比健身房更划算。正反意见集中在同一订阅价值维度，是当前最突出的争议点。",
+      "supportingReviewIds": [
+        "f1d769915693bff365b5",
+        "7d579ddab7ad9866916e",
+        "41dda90bb7c5bf6a5f50",
+        "1e26434428fd7d297ebd",
+        "aa10fd1c007b0ebde89f",
+        "02bfe99c3421d23ff17d",
+        "cbb69a199b87635d6910",
+        "5a83a72849e12b022595",
+        "6d22e4014053df4dd6eb"
+      ],
+      "quote": "now everything is behind a paywall.",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c0",
+      "label": "订阅试用扣费、续订取消与客服障碍",
+      "description": "有用户在免费试用后被直接扣费且提醒不足；付费用户找不到取消年度续订的入口，客服请求还因被识别为垃圾信息无法提交；另有用户试用第3天就提前被要求付款。这些计费与信任问题比功能问题更易引发差评。",
+      "supportingReviewIds": [
+        "1cf18baaa2b920a6718d",
+        "a714751ef74be8bea80e",
+        "a4c127668e22552df85d"
+      ],
+      "quote": "i signed up for a trial expecting a trial experience, but i was charged afterward without a clear enough reminder",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c0",
+      "label": "AI化改版与不真实女性形象引发强烈不满",
+      "description": "老用户怀念被收购前真实女性教练和免费内容，批评现在大量使用AI生成形象、身材比例不真实且物化女性；还有用户认为动机问卷用想不想变得有吸引力而不是变强壮带有毒健身文化，并建议改为正向激励。",
+      "supportingReviewIds": [
+        "cbb69a199b87635d6910",
+        "7d579ddab7ad9866916e",
+        "1e26434428fd7d297ebd",
+        "75d7b5fc1746c4d80026"
+      ],
+      "quote": "not some cheesy ai mockups showing unrealistic images",
+      "focusAreaIds": [
+        "focus-3",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c0",
+      "label": "训练计划个性化与一致性问题",
+      "description": "用户选择避免膝盖后仍被安排大量深蹲和弓步；改版后每日训练连续多天练腿、从不练手臂，计划设置还会被悄悄重置；还有人练完腹部没有感觉。这些都说明量身定制的承诺与实际体验不符。",
+      "supportingReviewIds": [
+        "bd7a17c7711d6f478c76",
+        "22362f152de51b719e6f",
+        "43f4266f074eaa80d2fc"
+      ],
+      "quote": "if i select to avoid knees why does it still have lots of squats and lunges",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c0",
+      "label": "训练体验好评：易用、高效、多样",
+      "description": "多位用户称赞App简单易用、动作时长适中、能快速燃脂并带来成就感；还有人喜欢每次训练不枯燥，说明当前训练体验仍有较强吸引力，是改进时不应破坏的核心优势。",
+      "supportingReviewIds": [
+        "ab3a2f593db6baa75d7a",
+        "89d39ff177caa228b26f",
+        "6ad576008e6465adc345",
+        "b34f61d4a24155813305",
+        "d331227b060177a24ad3",
+        "12277142053771f844f1",
+        "6acda9e389faa1143883",
+        "4a644a56a8619cd8783c",
+        "021386bdfee491a3baeb",
+        "63ac45e9ef64dcf4fe0f"
+      ],
+      "quote": "really good. helped motivate me and kept the workouts easy, fun, and productive",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c0",
+      "label": "内容同质化与更新停滞",
+      "description": "有付费用户抱怨训练动作过时、重复、缺乏创意，感觉团队在回收旧内容；新用户则表示入门问卷与其它健身App完全一样，缺乏差异化。这反映出用户期待持续的新鲜内容和更强的产品辨识度。",
+      "supportingReviewIds": [
+        "1cf18baaa2b920a6718d",
+        "1972c340f1762cd2f9f8"
+      ],
+      "quote": "the workouts are outdated, repetitive, and lack creativity",
+      "focusAreaIds": [
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c1",
+      "label": "免费健身内容被大面积搬进付费墙",
+      "description": "多位用户指出，该应用从免费/看广告即可训练变成几乎所有内容都需要订阅，甚至之前保存的训练也开始收费；新手可能连一次动作都做不了。用户认为这与“免费使用”的宣传不符，并请求恢复免费访问。",
+      "supportingReviewIds": [
+        "15adc40ae33fa59c6460",
+        "3c469722f1d0864a64bb",
+        "50dd40e82486e9e93aae",
+        "be03fa8fd8bdfb45b97d",
+        "5388376e53d4eca15c60",
+        "cd3e775a272561da7d61",
+        "0567acea07a5f230c350",
+        "1f584730f8580f6b15bd",
+        "8e1dadc88db3cb1e2d52",
+        "4b4d13468d71f994d0a9",
+        "a8cafd51b7cbb04b0ad9",
+        "49f29c1a38b41e2bc8dd"
+      ],
+      "quote": "all of a sudden i couldn’t access anything without paying an outrageous price",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c1",
+      "label": "订阅扣款不透明，免费试用变成立即扣费",
+      "description": "用户反馈试用期未结束就被扣款、价格单位/周期被误解（以为 39.99 美元一年实为每月）、取消订阅后仍被重复扣款；同时应用内客服反复被识别为“垃圾邮件”，用户无法联系解决。",
+      "supportingReviewIds": [
+        "c352d86551671d7b8d70",
+        "dd0b01e8efe7359b1089",
+        "4fbc4f72bcfecda65727",
+        "eeb35f52212cad12f495",
+        "50dd40e82486e9e93aae",
+        "3108668c8b4ee2438bf7"
+      ],
+      "quote": "i was told in app that there would be no charge until the end of the free trial and you guys immediately charged me!",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c1",
+      "label": "训练过程中应用跳转到 Shein 网站",
+      "description": "至少两位用户明确报告：在无任何操作的情况下，训练中应用会自动关闭并打开 Shein 网站，且多次发生。这是一个严重干扰训练、损害信任的高影响问题。",
+      "supportingReviewIds": [
+        "3ca751f46d64b8b6d725",
+        "3c469722f1d0864a64bb"
+      ],
+      "quote": "while you’re working out, the app will close and the shein website will open and this will happen multiple times without you prompting or touching your phone",
+      "focusAreaIds": [
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c1",
+      "label": "付费订阅后仍无法访问已购内容：登录/下载障碍",
+      "description": "部分已付费用户因账号被登出、提示账号不存在而无法登录，订阅版也无法下载训练内容；这直接让已付费权益失效，且缺少可用的支持渠道。",
+      "supportingReviewIds": [
+        "3108668c8b4ee2438bf7",
+        "22935659be45db2172e8",
+        "cd9d8211bc907e7935bc"
+      ],
+      "quote": "i paid for a year membership and i cannot log into the account because it says it does not exist",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c1",
+      "label": "训练内容与课程设计获得好评：对初学者和碎片时间友好",
+      "description": "正面评价集中在动作库丰富、可按水平自选、短时训练易坚持、容易跟着做，特别受到女性/50 岁以上用户和初学者认可；这也说明训练易用性是被认可的，问题主要在付费墙和故障。",
+      "supportingReviewIds": [
+        "b6d75605977aad508231",
+        "f7290fe64a406f83b54f",
+        "35faa42d589b56ba38f2",
+        "668f40f529d9d0dd21ae",
+        "030127cbe4098673f827",
+        "dcb564f577dabd2fe953",
+        "c64a82c6820fc3aeeeb1"
+      ],
+      "quote": "they have all types of exercises and all types of levels so u choose the one that’s best for you",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c1",
+      "label": "付费墙是最大争议点：有人坚决不付，有人认为物有所值",
+      "description": "付费订阅的价值评价呈极端分化：一边是“不付钱锻炼很蠢”“不想付费/被坑”的声音，另一边则有用户明确表示“物有所值”。这种冲突必须被记录，不能简单归为一类投诉。",
+      "supportingReviewIds": [
+        "be03fa8fd8bdfb45b97d",
+        "4b4d13468d71f994d0a9",
+        "49f29c1a38b41e2bc8dd",
+        "1f584730f8580f6b15bd",
+        "4fbc4f72bcfecda65727",
+        "eeb35f52212cad12f495",
+        "0b88af6733f38b6a7474"
+      ],
+      "quote": "i’m not paying to workout that is stupid",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c2",
+      "label": "免费试用承诺与实际扣款不符",
+      "description": "多名用户表示点击免费试用后立即被扣款，或试用期结束前就被收取全款，严重损害信任。",
+      "supportingReviewIds": [
+        "3db3756c43b8043720be",
+        "a23ee85600cd3c3ae86f",
+        "f8eb72f77f1bd83b00c8"
+      ],
+      "quote": "you told me a free trial for a week and the charged me $19.99 right away.",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c2",
+      "label": "付费墙取代原有免费功能",
+      "description": "大量用户抱怨此前可免费使用的训练内容现在全部要求订阅，免费访问基本消失，成为最常见的负面反馈。",
+      "supportingReviewIds": [
+        "5a40025573b2c55b1963",
+        "ce914d45a09ffcb8351b",
+        "b336d30bd0c5bb4c158b",
+        "19dd801156be88554d22",
+        "1f437acb3f7e7e8c10b3",
+        "c9338a41a33df24b016d",
+        "1e69a0302e47a4ef87e7",
+        "fec6299a11560eaa8f62",
+        "1ae1015baaba922f02d0",
+        "028401fef9603d6d798d",
+        "4f2cf6597c046f4c579d",
+        "cc63855d1f2503b23e1a",
+        "b46e6db96ab3b39e12b8"
+      ],
+      "quote": "now everything i click on they want you to subscribe and that sucks",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c2",
+      "label": "“免费带广告”入口不透明，被付费弹窗/广告拦截",
+      "description": "应用宣传可免费看广告使用，但实际没有选择该档位的入口，只有订阅选项或无法跳过的付费推广界面，用户感到被误导。",
+      "supportingReviewIds": [
+        "bf6882ede9d60abe6519",
+        "c9338a41a33df24b016d",
+        "cc63855d1f2503b23e1a"
+      ],
+      "quote": "the interface traps you with their predatory ads.",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c2",
+      "label": "订阅价值评价两极分化",
+      "description": "有长期付费用户认为订阅比健身房划算且简单方便；另一部分用户则认为强制订阅是浪费钱、价格离谱。这是最明显的争议点。",
+      "supportingReviewIds": [
+        "53974bcc26a0d788626b",
+        "ce914d45a09ffcb8351b",
+        "1ae1015baaba922f02d0",
+        "fec6299a11560eaa8f62",
+        "028401fef9603d6d798d",
+        "4f2cf6597c046f4c579d",
+        "5a40025573b2c55b1963"
+      ],
+      "quote": "no match for an expensive gym membership. i prefer this for its simplicity and motivational content.",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c2",
+      "label": "训练易用性与内容多样性受好评，但仍希望增加更多课程",
+      "description": "用户认可应用对初学者友好、导航简单、训练内容多样，同时希望在现有基础上增加更多训练和课程选项。",
+      "supportingReviewIds": [
+        "e0d1838121012adeedaa",
+        "edb0da5e3f55117ad807",
+        "17cdc8c508a860319c27",
+        "3c49af9bb0aef09a3fdc",
+        "53974bcc26a0d788626b",
+        "c7ed3b29dfdc1ebd1d1e"
+      ],
+      "quote": "the app is i would say easy to use especially for beginners because i was a beginner myself.",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c2",
+      "label": "取消订阅困难且客服支持失效",
+      "description": "用户报告无法在应用或网站管理、取消订阅，取消后仍被扣费，联系支持时表单被误判为垃圾信息。",
+      "supportingReviewIds": [
+        "7a160bd56131157f4752",
+        "62be00dda9ffd5c8bc7a"
+      ],
+      "quote": "horrible wouldn’t let me cancel my subscription",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c3",
+      "label": "订阅模式争议：付费墙收紧 vs 付费价值认可",
+      "description": "大量老用户抱怨此前免费或可看广告解锁的训练现在几乎全部要求付费订阅，被反复弹窗引导升级，体验像被强制收费；另一部分付费用户则认为年费订阅带来了明显的健身效果和便利性，属于值得的投入。",
+      "supportingReviewIds": [
+        "cb0cc8ac89a9761a3b16",
+        "0975a5a2992339e60625",
+        "446debb488c9e30a47dd",
+        "453d414ea6a6bf40613e",
+        "d12437b2f22497298e1b",
+        "b87d5108f1c3d560a191",
+        "bc8c57bc004f780e2a19",
+        "665cd14c6001dacd0a84",
+        "b5db1fbb2e56d1b56e16",
+        "ea2a981452bdd7fb7f68",
+        "0e621260607a04cf082e"
+      ],
+      "quote": "every time a pop up would appear stating that i’d have to have a paid plan to use any of them",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c3",
+      "label": "试用与扣费问题：免费试用宣传与实际扣款不符",
+      "description": "有用户反映应用宣传免费试用却在注册当天直接扣款，客服无回应，向 Apple 申请退款也被拒绝；也有用户称应用标注免费但第二天就扣费，严重损害信任。",
+      "supportingReviewIds": [
+        "c5cec2597485411001ba",
+        "474aa2e44c378c760f59"
+      ],
+      "quote": "i signed up for this app because it advertised a fee trial",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c3",
+      "label": "训练内容质量与多样性：赞誉与“重复/名不副实”并存",
+      "description": "部分用户称赞训练动作编排、变化和热身设计，觉得比想象中更好且容易坚持；另一些长期用户则认为新内容重复、像“ai slop”，拉伸/瑜伽等分类与真实内容不符，质量下降。",
+      "supportingReviewIds": [
+        "52ecbbc862689ee97897",
+        "89f15c4184fe51fd54d2",
+        "b13ecc45b66030acc2d7",
+        "d12437b2f22497298e1b"
+      ],
+      "quote": "many of the newer daily workouts are the same things over and over",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-3"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c3",
+      "label": "训练执行与反馈机制改进：次数模式、手表同步和提示音",
+      "description": "用户希望训练时能把倒计时切换为次数计数，能连接 Apple Watch 自动记录消耗热量，并希望提供更不打扰的音频提示音选项，以便边听音乐/播客边训练。",
+      "supportingReviewIds": [
+        "feaae9dce2297b34ac2e",
+        "4a9e233a7d40327ddd01",
+        "2e0026d69a6bca97b90a"
+      ],
+      "quote": "i wish there was a way you could have it switch to reps instead of having a timer for each exercise",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c3",
+      "label": "减重导向过强，忽视非减脂健身目标",
+      "description": "用户指出登录/使用过程中被强制设定减重目标，每个动作都附带减重提示，且没有“增加柔韧性”等非减脂目标选项；这种持续强调对普通用户和青少年可能造成不健康的压力。",
+      "supportingReviewIds": [
+        "51d4b3f25ab831d4417f"
+      ],
+      "quote": "why. is. there. such. a. strong. emphasis. on. weight. loss!?",
+      "focusAreaIds": [
+        "focus-3",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c3",
+      "label": "孕期安全训练内容缺失",
+      "description": "用户认为作为女性健身应用，应提供更多孕期安全的肌力、行动力与柔韧性训练，并针对不同孕期阶段做拆分；目前只有产后和拉伸内容，覆盖不足。",
+      "supportingReviewIds": [
+        "a5900337c9421dc68dbc"
+      ],
+      "quote": "there is a lack of pregnancy safe strength training, mobility and flexibility workouts",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c4",
+      "label": "免费试用与订阅计费的意外扣款问题",
+      "description": "多名用户反馈：原本以为参加免费试用，却在无明确提示下被立即扣除年费或月费；后续找不到客服或退款渠道，引发强烈不信任。",
+      "supportingReviewIds": [
+        "cc85fc2414bb9b897dfd",
+        "14811281319525325893",
+        "7aaf37a74c0b10a4cc33"
+      ],
+      "quote": "i got charged $52.99 instantly for the year",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c4",
+      "label": "免费版强制长广告且难以关闭",
+      "description": "免费用户被90秒广告反复打断，部分广告隐藏关闭按钮，只能强制退出App才能退出；长广告穿插在短训练中严重干扰使用。",
+      "supportingReviewIds": [
+        "d209ae2dfd97ff0bdb80",
+        "a3219e1290028aaf4834",
+        "b4467727f123a07beea9",
+        "db79928046519e7ffdcd"
+      ],
+      "quote": "90 sec ads for 7 minute workouts then another 30 sec figuring out how to exit the ad",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c4",
+      "label": "免费内容被订阅墙锁定：付费价值引发争议",
+      "description": "此前可免费使用的训练内容如今被订阅墙挡住，老用户失望；同时用户对付费与广告的偏好不一，有人宁可看广告也不愿被迫订阅，说明当前变现模式在两边预期之间摇摆，付费价值感偏低。",
+      "supportingReviewIds": [
+        "dc4faf66d83960f53218",
+        "abde41fc0222660ff656",
+        "9209576b87ce4944ca28",
+        "bf3841e67602dc01e0b2",
+        "a9a965a3ee3756a838f8",
+        "f65d70e0417408b7a7e4"
+      ],
+      "quote": "couldn’t access anything without the subscription, none of the workouts, not even the supposedly ‘free’ workouts",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c4",
+      "label": "个性化训练与清晰引导提升使用体验",
+      "description": "大量好评集中在训练按年龄、体重和具体需求定制，界面清楚、动作示范直观、时间长短适合入门，让用户能快速开始并坚持下去。",
+      "supportingReviewIds": [
+        "1a50245eec24db09a48c",
+        "5e9ea710a133198a495c",
+        "98fa3a30eb191e9b4f92",
+        "39f537e8298befa28a06",
+        "63e3062c81dc6548b47e",
+        "d723d3091dfcb5ebcacb"
+      ],
+      "quote": "app layout is great. shows you exactly what to do",
+      "focusAreaIds": [
+        "focus-2"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c4",
+      "label": "训练强度与动作示范需要更精细调节",
+      "description": "在训练难度和示范方面反馈存在分歧：一部分用户觉得难度不足、需要更高强度，另一部分用户觉得强度合适或需要针对年龄和伤病修改动作；还有人希望动作演示更详细。说明强度级别和指导细节仍有优化空间。",
+      "supportingReviewIds": [
+        "cb1ac0588b2aee125248",
+        "98a39e78a98fde68f2ad",
+        "42ab00aa53fb637834a4",
+        "32e7a4d8aaa1b9789f74"
+      ],
+      "quote": "i really want my things be harder and some of the things that even if it’s up to all the way, it’s not that hard",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-3",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c4",
+      "label": "音乐与短时训练的正面反馈及改进方向",
+      "description": "用户喜欢可接入第三方音乐播放自己的歌，也肯定短时间内完成训练很适合忙碌生活；主要改进建议是增加曲库多样性。",
+      "supportingReviewIds": [
+        "e48f507238167347f923",
+        "55d763820c6068e5fa96",
+        "abec4e956a261a973827",
+        "d8b0365890e12753b065",
+        "9dcf6dee35426a0c9035",
+        "fbfc29ddbb6142d2e40f"
+      ],
+      "quote": "especially the option to connect third-party music apps to select our own music for workouts",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-1@c5",
+      "label": "训练前强制看长广告引发强烈争议和用户流失",
+      "description": "多名用户抱怨每次训练前必须观看90秒至3分钟的广告，感到被强迫、像“骗钱”，甚至在开始前退出应用；但也有用户表示虽然要赚取广告，仍然认可效果并给出五星，形成明显的两极反馈。",
+      "supportingReviewIds": [
+        "1e0fb9be01863f607fa3",
+        "76e57a90688ac2de17a6",
+        "72cf0fc6b2f25ec4e1ac",
+        "8cab578e3ab71d8124a9",
+        "7e2302afb4e5dac12a13",
+        "af48b9baedefbffda432"
+      ],
+      "quote": "watch a three minute add before every. single. work out",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-2@c5",
+      "label": "“免费”定位与实际付费墙不符，订阅价值存在冲突评价",
+      "description": "有用户反映填写信息后才发现只有7天免费试用，需订阅才能继续，认为40美元/年太贵；另一些付费用户则认为“物有所值”、价格不贵。这种冲突说明定价和免费提示需要更透明。",
+      "supportingReviewIds": [
+        "842e5e0f16697cf1a01a",
+        "a0b0f9da4e31b7a6f52d",
+        "4395008b5af14e4a1615",
+        "8cab578e3ab71d8124a9",
+        "76e57a90688ac2de17a6",
+        "893a5614aeb5510fceb5",
+        "89626a77cb324252fb52"
+      ],
+      "quote": "says it’s free, but it makes you go through a ton of steps, then gives you no way to continue without paying $40/yr.",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-3",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-3@c5",
+      "label": "AI生成训练内容质量下滑，动作与语音指引不一致",
+      "description": "多年付费用户指出大部分训练是“AI拼凑”，动作图示与语音提示不一致，训练效果名不副实，导致其决定弃用。改善训练内容质量是核心机会。",
+      "supportingReviewIds": [
+        "61cabebf911229cac631"
+      ],
+      "quote": "the guiding voice is telling you to do one thing while the ai diagram is doing another",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4"
+      ]
+    },
+    {
+      "id": "topic-candidate-4@c5",
+      "label": "跨设备数据同步与兼容性问题频发",
+      "description": "用户换手机后训练记录未迁移、Apple Watch无法识别为锻炼、安卓平板无法登录已购账号，导致进度丢失、体验割裂。需要优化云同步和设备兼容性。",
+      "supportingReviewIds": [
+        "d92cce6e9e7960f75948",
+        "342561b8e8592cc0b63a"
+      ],
+      "quote": "none of the data loaded to my new device, even with my log in",
+      "focusAreaIds": [
+        "focus-2",
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-5@c5",
+      "label": "客户支持响应缺失，用户求助无门",
+      "description": "用户发送邮件后长时间无人回复，无法解决订阅、登录等问题，使负面体验升级并失去信任。改善客服响应是重要改进机会。",
+      "supportingReviewIds": [
+        "85861b1ae4ea322bed91",
+        "342561b8e8592cc0b63a"
+      ],
+      "quote": "you email them and they don’t get back to you ever!",
+      "focusAreaIds": [
+        "focus-4",
+        "focus-5"
+      ]
+    },
+    {
+      "id": "topic-candidate-6@c5",
+      "label": "用户提出新功能需求：腹肌训练与音乐流媒体支持",
+      "description": "用户希望增加更多腹部/核心训练，并希望支持YouTube Music，甚至表示加入该功能会提高付费意愿。这些是具体且可提升订阅转化的改进点。",
+      "supportingReviewIds": [
+        "f2bb995e4a1d10521898",
+        "beffe6788ff06768a18c"
+      ],
+      "quote": "i wish that you guys had youtube music on there that we could choose from and then i might actually pay for the premium.",
+      "focusAreaIds": [
+        "focus-1",
+        "focus-2",
+        "focus-5"
+      ]
+    }
+  ],
+  "warnings": []
+}
