@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Finding, Prd, VersionPlanArtifact } from "@/domain/contracts/analysis";
+import type { TraceabilityReport } from "@/domain/traceability/validate";
 
 import type { NormalizedReview } from "@/domain/contracts/review";
 import type { RunEvent } from "@/domain/contracts/events";
@@ -35,8 +36,8 @@ export type ArtifactCache = {
   versionPlan?: VersionPlanArtifact;
   prd?: Prd;
   tests?: { tests: Prd["tests"] };
-  traceability?: { valid: boolean; violations: { code: string; message: string }[] };
-  finalReport?: { prd?: Prd; report?: { valid: boolean; violations: { code: string; message: string }[] }; limitations?: unknown[]; goalCoverage?: GoalCoverageArtifact };
+  traceability?: TraceabilityReport;
+  finalReport?: { prd?: Prd; report?: TraceabilityReport; limitations?: unknown[]; goalCoverage?: GoalCoverageArtifact };
 };
 
 export const AUTO_ADVANCE_ORDER: { key: keyof ArtifactCache; tab: TabId }[] = [

@@ -82,7 +82,6 @@ async function buildScript(): Promise<string[]> {
   const parsed = parseAppleRssJson(PAGE1);
   const prepared = prepareReviews({ kind: "collected", reviews: parsed.reviews, rawRefs: parsed.rawRefs, limitations: [] });
   const rids = prepared.reviews.map((r) => r.reviewId);
-  const rid = rids[0];
 
   return [
     // scope

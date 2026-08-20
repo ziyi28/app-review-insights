@@ -267,6 +267,9 @@ export type Dictionary = {
     tableOfContents: string;
     clearSearch: string;
     copyFullId: string;
+    fullId: string;
+    importFormatHint: string;
+    orWord: string;
     runNotFound: string;
     traceClosureClosed: string;
     traceClosurePartial: string;

@@ -87,7 +87,7 @@ function makePrd(): Prd {
         priority: "P1",
       },
     ],
-    assumptions: [{ id: "asm-1", text: "x", basis: "y" }],
+    assumptions: [{ id: "asm-1", text: "x", basis: "y", origin: "model", sourceFindingIds: [], sourceReviewIds: [] }],
   };
 }
 

@@ -56,9 +56,11 @@ export async function buildRealDemo(): Promise<string> {
   const modelBaseUrl = process.env.MODEL_BASE_URL || cfg.modelBaseUrl;
   const modelApiKey = process.env.MODEL_API_KEY !== undefined ? process.env.MODEL_API_KEY : cfg.modelApiKey;
   const modelName = process.env.MODEL_NAME || cfg.modelName;
-  const validEfforts = ["low", "medium", "high", "max"] as const;
-  const modelReasoningEffort = (process.env.MODEL_REASONING_EFFORT && validEfforts.includes(process.env.MODEL_REASONING_EFFORT as any))
-    ? (process.env.MODEL_REASONING_EFFORT as "low" | "medium" | "high" | "max")
+  const rawEffort = process.env.MODEL_REASONING_EFFORT;
+  const isEffort = (v: string): v is "low" | "medium" | "high" | "max" =>
+    ["low", "medium", "high", "max"].includes(v);
+  const modelReasoningEffort = rawEffort && isEffort(rawEffort)
+    ? rawEffort
     : cfg.modelReasoningEffort;
   const modelTimeoutMs = Number(process.env.MODEL_TIMEOUT_MS) || cfg.modelTimeoutMs || 900_000;
 

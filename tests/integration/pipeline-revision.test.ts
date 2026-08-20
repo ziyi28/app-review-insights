@@ -47,7 +47,6 @@ describe("executeRun (revision path)", () => {
     });
     const prepared = prepareReviews({ kind: "import", parse });
     const rids = prepared.reviews.filter((r) => r.includedInAnalysis).map((r) => r.reviewId);
-    const rid = rids[0];
 
     const model = new ScriptedModelClient([
       // scope
@@ -131,7 +130,6 @@ describe("executeRun (revision path)", () => {
     const rid1 = rids[0];
     const rid2 = rids[1];
     const rid3 = rids[2];
-    const rid4 = rids[3];
 
     const model = new ScriptedModelClient([
       JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),
@@ -230,7 +228,6 @@ describe("executeRun (revision path)", () => {
     });
     const prepared = prepareReviews({ kind: "import", parse });
     const rids = prepared.reviews.filter((r) => r.includedInAnalysis).map((r) => r.reviewId);
-    const rid = rids[0];
 
     const model = new ScriptedModelClient([
       JSON.stringify({ interpretation: "Pricing", filters: { rating: [], versions: [], languages: [], minDate: null, maxDate: null }, explicitLimitations: [] }),

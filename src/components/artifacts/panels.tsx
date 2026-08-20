@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@/i18n";
-import type { Finding, Requirement, TestCase, Prd } from "@/domain/contracts/analysis";
+import type { Finding, Requirement, TestCase, Prd, Assumption } from "@/domain/contracts/analysis";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 import { findingIdsForRequirements, priorityForRequirements } from "@/domain/traceability/evidence-sources";
 import { deriveClosureStatus, type ClosureStatus } from "@/domain/traceability/validate";
@@ -161,7 +161,7 @@ export function RequirementsPanel({
 }: {
   requirements: Requirement[];
   versions: { id: string; name: string; summary: string; requirementIds: string[] }[];
-  assumptions: { id: string; text: string; basis: string }[];
+  assumptions: Assumption[];
   t: Dictionary;
   onJumpToReview?: (id: string) => void;
   onJumpToTests?: (reqId?: string) => void;
