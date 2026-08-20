@@ -104,30 +104,43 @@ describe("useRunStream", () => {
   });
 
   it("keeps retrying on a transient poll failure, not failing the run", async () => {
-    let polls = 0;
-    vi.stubGlobal(
-      "fetch",
-      vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url = String(input);
-        if (url === "/api/runs" && init?.method === "POST") {
-          return { ok: true, json: async () => ({ runId: "run-x" }) };
-        }
-        polls += 1;
-        if (polls <= 2) throw new Error("network down");
-        return { ok: true, json: async () => ({ runId: "run-x", status: "completed", events: [makeEvent(1, "run.completed")], lastSequence: 1 }) };
-      }),
-    );
-    const { result } = renderHook(() => useRunStream());
-    await act(async () => {
-      await result.current.start({});
-    });
-    await waitFor(() => expect(result.current.reconnecting).toBe(true));
-    expect(result.current.error).toBeNull();
-    // The run must not be misreported as failed while reconnecting.
-    expect(result.current.status).not.toBe("failed");
+    vi.useFakeTimers();
+    try {
+      let polls = 0;
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = String(input);
+          if (url === "/api/runs" && init?.method === "POST") {
+            return { ok: true, json: async () => ({ runId: "run-x" }) };
+          }
+          polls += 1;
+          if (polls <= 2) throw new Error("network down");
+          return { ok: true, json: async () => ({ runId: "run-x", status: "completed", events: [makeEvent(1, "run.completed")], lastSequence: 1 }) };
+        }),
+      );
+      const { result } = renderHook(() => useRunStream());
+      await act(async () => {
+        await result.current.start({});
+      });
+      expect(result.current.reconnecting).toBe(true);
+      expect(result.current.error).toBeNull();
+      // The run must not be misreported as failed while reconnecting.
+      expect(result.current.status).not.toBe("failed");
 
-    await waitFor(() => expect(result.current.status).toBe("completed"), { timeout: 4000 });
-    expect(result.current.error).toBeNull();
+      // Advance timers for retry 1 (800ms) and retry 2 (1200ms)
+      await act(async () => { await vi.advanceTimersByTimeAsync(800); });
+      expect(polls).toBe(2);
+      await act(async () => { await vi.advanceTimersByTimeAsync(1200); });
+      expect(polls).toBe(3);
+
+      expect(result.current.status).toBe("completed");
+      expect(result.current.error).toBeNull();
+      expect(result.current.running).toBe(false);
+    } finally {
+      vi.useRealTimers();
+      vi.unstubAllGlobals();
+    }
   });
 
   it("stops polling terminally on a 404 events answer (gone run)", async () => {

@@ -42,7 +42,7 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
 
   // Findings tab shows generated findings and the sufficiency guardrail: with
   // a 2-review corpus both findings are insufficient, so they stay as limited
-  // facts and their requirements are pinned to P2 with no target version.
+  // facts and are converted to assumptions to verify without formal requirements.
   await page.getByRole("tab", { name: /发现/ }).click();
   await expect(page.getByText(/Loves variety/i)).toBeVisible({ timeout: 10_000 });
 
@@ -71,7 +71,9 @@ test("live analysis runs preview-first and shows grounded artifacts", async ({ p
   // happened, and the provenance badge reflects the SerpApi source.
   const state = getUpstreamState();
   expect(state.serpApiRequests).toBe(1);
-  await expect(page.getByText(/SerpApi \/ 美国区 App Store/)).toBeVisible();
+  await expect(
+    page.getByRole("banner").getByText("SerpApi / 美国区 App Store", { exact: true }),
+  ).toBeVisible();
 });
 
 test("selecting a review count sends it with the preview request and starts a live run", async ({ page }) => {
@@ -126,5 +128,7 @@ test("analyzes a forced-fresh SerpApi preview via the settings page", async ({ p
   await page.getByText("关闭", { exact: true }).click();
 
   await startLiveRun(page, "理解最近的健身可用性问题");
-  await expect(page.getByText(/SerpApi \/ 美国区 App Store/, { exact: true })).toBeVisible();
+  await expect(
+    page.getByRole("banner").getByText("SerpApi / 美国区 App Store", { exact: true }),
+  ).toBeVisible();
 });
