@@ -110,6 +110,8 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
                 height: "10px",
                 borderRadius: "50%",
                 background: done ? "var(--ok)" : current ? "var(--accent)" : "var(--border)",
+                boxShadow: current ? "0 0 8px rgba(56, 189, 248, 0.6)" : "none",
+                animation: current ? "pulse 1.2s ease-in-out infinite" : "none",
                 flexShrink: 0,
               }}
             />

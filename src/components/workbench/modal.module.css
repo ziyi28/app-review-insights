@@ -2,7 +2,8 @@
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: rgba(4, 8, 15, 0.6);
+  background: rgba(4, 8, 15, 0.7);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,11 +15,12 @@
   max-height: 90vh;
   overflow-y: auto;
   background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 22px 24px;
   display: grid;
-  gap: 12px;
+  gap: 14px;
 }
 
 .dialogWide {
@@ -26,7 +28,7 @@
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .dialogHead {
@@ -34,12 +36,16 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
 }
 
 .dialogTitle {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.01em;
 }
 
 .closeBtn {
@@ -51,6 +57,11 @@
   width: 28px;
   height: 28px;
   border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 120ms ease;
 }
 
 .closeBtn:hover {
@@ -67,4 +78,6 @@
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 12px;
 }

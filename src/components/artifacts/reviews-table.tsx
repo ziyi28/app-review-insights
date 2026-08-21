@@ -64,27 +64,34 @@ export function ReviewsTable({
   };
 
   return (
-    <div>
-      <div style={{ display: "flex", gap: "8px", marginBottom: "8px", flexWrap: "wrap", alignItems: "center" }}>
-        <div style={{ position: "relative", display: "inline-flex", alignItems: "center" }}>
+    <div style={{ display: "grid", gap: "12px" }}>
+      <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ position: "relative", display: "inline-flex", alignItems: "center", flex: "1 1 240px", maxWidth: "400px" }}>
           <input
             placeholder={t.reviewId}
             value={query}
             onChange={(e) => handleQueryChange(e.target.value)}
-            style={{ padding: "6px 28px 6px 10px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)", minWidth: "240px" }}
+            className="field"
+            style={{ paddingRight: "30px" }}
           />
           {query ? (
             <button
               type="button"
               onClick={() => handleQueryChange("")}
               title={t.clearSearch}
-              style={{ position: "absolute", right: "6px", background: "none", border: "none", color: "var(--text-muted)", padding: "2px", fontSize: "12px", display: "flex", alignItems: "center" }}
+              style={{ position: "absolute", right: "8px", background: "none", border: "none", color: "var(--text-muted)", padding: "2px", fontSize: "12px", cursor: "pointer" }}
             >
               ✕
             </button>
           ) : null}
         </div>
-        <select aria-label="rating" value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value)} style={{ padding: "6px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}>
+        <select
+          aria-label="rating"
+          value={ratingFilter}
+          onChange={(e) => setRatingFilter(e.target.value)}
+          className="field"
+          style={{ width: "auto", minWidth: "110px" }}
+        >
           <option value="all">{t.rating} *</option>
           {[1, 2, 3, 4, 5].map((r) => (
             <option key={r} value={r}>
@@ -92,76 +99,100 @@ export function ReviewsTable({
             </option>
           ))}
         </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ padding: "6px", borderRadius: "4px", border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text)" }}>
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="field"
+          style={{ width: "auto", minWidth: "140px" }}
+        >
           <option value="all">{t.status}</option>
           <option value="unique">{t.status} · unique</option>
           <option value="duplicate">{t.status} · duplicate</option>
           <option value="conflict">{t.status} · conflict</option>
         </select>
+        <span style={{ fontSize: "12px", color: "var(--text-muted)", marginLeft: "auto" }}>
+          {filtered.length} / {reviews.length} {t.supportCount}
+        </span>
       </div>
 
-      <div style={{ overflowX: "auto" }}>
-        <table>
-          <thead>
-            <tr>
-              <th>{t.reviewId}</th>
-              <th>{t.rating}</th>
-              <th>{t.version}</th>
-              <th>{t.language}</th>
-              <th>{t.status}</th>
-              <th>{t.body}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((r, index) => {
-              const rowKey = `${r.reviewId}:${r.rawRef}:${index}`;
-              const isExpanded = activeExpanded === rowKey;
-              return (
-                <Fragment key={rowKey}>
-                  <tr
-                    onClick={() => setExpanded(isExpanded ? null : rowKey)}
-                    style={{ cursor: "pointer", background: isExpanded ? "var(--bg-elevated)" : undefined }}
-                  >
-                    <td>
-                      <code
-                        title={t.copyFullId}
-                        onClick={(e) => copyId(r.reviewId, e)}
-                        style={{ cursor: "copy" }}
-                      >
-                        {copiedId === r.reviewId ? "✓" : r.reviewId.slice(0, 8)}
-                      </code>
-                    </td>
-                    <td>{r.rating}★</td>
-                    <td>{r.version ?? "—"}</td>
-                    <td>{r.language}</td>
-                    <td>
-                      <ProvenanceBadge kind="computed" label={r.dedupeStatus} />
-                    </td>
-                    <td>{r.bodyOriginal.slice(0, 120)}</td>
-                  </tr>
-                  {isExpanded ? (
-                    <tr key={`${rowKey}-detail`}>
-                      <td colSpan={6} style={{ padding: "12px 16px", background: "var(--bg-panel)", borderBottom: "1px solid var(--border)" }}>
-                        <div style={{ display: "grid", gap: "6px" }}>
-                          <h4 style={{ margin: "0 0 4px" }}>{t.title}: {r.titleOriginal || "—"}</h4>
-                          <p style={{ margin: 0 }}>
-                            <strong>{t.body}:</strong> {r.bodyOriginal}
-                          </p>
-                          <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "13px" }}>
-                            <strong>{t.normalized}:</strong> {r.bodyNormalized}
-                          </p>
-                          <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "12px" }}>
-                            <strong>{t.sourceId}:</strong> {r.sourceReviewId} · <strong>{t.source}:</strong> {r.rawRef} · <strong>{t.fullId}:</strong> <code>{r.reviewId}</code>
-                          </p>
-                        </div>
+      <div className="card" style={{ padding: 0, overflow: "hidden" }}>
+        <div style={{ overflowX: "auto" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "13px" }}>
+            <thead>
+              <tr>
+                <th style={{ width: "14%" }}>{t.reviewId}</th>
+                <th style={{ width: "8%" }}>{t.rating}</th>
+                <th style={{ width: "10%" }}>{t.version}</th>
+                <th style={{ width: "10%" }}>{t.language}</th>
+                <th style={{ width: "12%" }}>{t.status}</th>
+                <th style={{ width: "46%" }}>{t.body}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r, index) => {
+                const rowKey = `${r.reviewId}:${r.rawRef}:${index}`;
+                const isExpanded = activeExpanded === rowKey;
+                return (
+                  <Fragment key={rowKey}>
+                    <tr
+                      onClick={() => setExpanded(isExpanded ? null : rowKey)}
+                      style={{ cursor: "pointer", background: isExpanded ? "var(--bg-hover)" : undefined }}
+                    >
+                      <td>
+                        <code
+                          title={t.copyFullId}
+                          onClick={(e) => copyId(r.reviewId, e)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              copyId(r.reviewId, e as unknown as React.MouseEvent);
+                            }
+                          }}
+                          className="code-badge"
+                        >
+                          {copiedId === r.reviewId ? "✓ Copied" : r.reviewId.slice(0, 8)}
+                        </code>
+                      </td>
+                      <td style={{ fontWeight: 600, color: r.rating <= 2 ? "var(--danger)" : r.rating >= 4 ? "var(--ok)" : "var(--warn)" }}>
+                        {r.rating}★
+                      </td>
+                      <td style={{ color: "var(--text-muted)" }}>{r.version ?? "—"}</td>
+                      <td style={{ color: "var(--text-muted)" }}>{r.language}</td>
+                      <td>
+                        <ProvenanceBadge kind="computed" label={r.dedupeStatus} />
+                      </td>
+                      <td style={{ color: "var(--text)", maxWidth: "420px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                        {r.bodyOriginal}
                       </td>
                     </tr>
-                  ) : null}
-                </Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+                    {isExpanded ? (
+                      <tr key={`${rowKey}-detail`}>
+                        <td colSpan={6} style={{ padding: "16px 18px", background: "var(--bg-card)", borderBottom: "1px solid var(--border)" }}>
+                          <div style={{ display: "grid", gap: "8px" }}>
+                            <h4 style={{ margin: "0 0 4px", fontSize: "14px", fontWeight: 600 }}>
+                              {t.title}: {r.titleOriginal || "—"}
+                            </h4>
+                            <div className="quote-box" style={{ margin: 0 }}>
+                              <p style={{ margin: 0 }}>{r.bodyOriginal}</p>
+                            </div>
+                            <div style={{ margin: 0, color: "var(--text-muted)", fontSize: "13px" }}>
+                              <strong>{t.normalized}:</strong> {r.bodyNormalized}
+                            </div>
+                            <div style={{ margin: "4px 0 0", color: "var(--text-faint)", fontSize: "12px" }}>
+                              <strong>{t.sourceId}:</strong> {r.sourceReviewId} · <strong>{t.source}:</strong> {r.rawRef} · <strong>{t.fullId}:</strong> <code>{r.reviewId}</code>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

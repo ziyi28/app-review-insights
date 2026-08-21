@@ -221,6 +221,9 @@ export type Dictionary = {
   copyFailed: string;
   printReport: string;
   userQuote: string;
+  evidenceExcerpts: string;
+  requirements: string;
+  steps: string;
   confidenceLevel: string;
   acceptanceCriteria: string;
   acceptanceCriteriaProvenance: string;
@@ -505,6 +508,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     copyFailed: "Failed to copy",
     printReport: "Print / PDF",
     userQuote: "User Quote",
+    evidenceExcerpts: "Evidence Excerpts",
+    requirements: "Requirements",
+    steps: "Test Steps",
     confidenceLevel: "Confidence",
     acceptanceCriteria: "Acceptance Criteria",
     acceptanceCriteriaProvenance: "AI-suggested targets (not deterministic review statistics)",
@@ -787,6 +793,9 @@ export const dictionaries: Record<Locale, Dictionary> = {
     copyFailed: "复制失败",
     printReport: "打印 / 导出 PDF",
     userQuote: "用户原声",
+    evidenceExcerpts: "原文引述与证据",
+    requirements: "项需求",
+    steps: "测试步骤",
     confidenceLevel: "置信度",
     acceptanceCriteria: "验收准则",
     acceptanceCriteriaProvenance: "验收准则由模型生成，具体数值为建议目标，非评论证据推导",

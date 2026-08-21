@@ -234,6 +234,7 @@ export async function executeRun(
   executionMode: "live" | "import" = deps.source.kind === "import" ? "import" : "live",
   modelConfigured = true,
   metadata?: RunMetadata,
+  signal?: AbortSignal,
 ): Promise<void> {
   const createdAt = new Date().toISOString();
   const stages: Record<string, StageStatus> = {};
@@ -243,11 +244,19 @@ export async function executeRun(
   let prd: Prd | null = null;
   let revisionNeeded = false;
 
+  const checkAborted = () => {
+    if (signal?.aborted) {
+      throw new Error("RUN_CANCELLED");
+    }
+  };
+
   const startStage = async (stage: string) => {
+    checkAborted();
     stages[stage] = { status: "running", startedAt: new Date().toISOString() };
     await publisher.publish({ type: "stage.started", runId, stage: stage as never, data: { stage } });
   };
   const endStage = async (stage: string) => {
+    checkAborted();
     const finishedAt = new Date().toISOString();
     const started = stages[stage]?.startedAt;
     const durationMs =
@@ -787,9 +796,11 @@ export async function executeRun(
       await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
     }
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    limitations.push({ code: "PIPELINE_ERROR", message, stage: "pipeline" });
-    await publisher.publish({ type: "run.failed", runId, data: { error: message } });
+    const isCancelled = signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED");
+    const code = isCancelled ? "RUN_CANCELLED" : "PIPELINE_ERROR";
+    const message = isCancelled ? "Analysis was cancelled by user" : (err instanceof Error ? err.message : String(err));
+    limitations.push({ code, message, stage: "pipeline" });
+    await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
     await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
   }
 }

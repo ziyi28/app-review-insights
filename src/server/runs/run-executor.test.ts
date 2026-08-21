@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { RunStore } from "@/server/runs/run-store";
-import { executeAnalysisTask, executeReplayTask, registerActive, unregisterActive, isRunActive, resetActiveRuns } from "./run-executor";
+import { executeAnalysisTask, executeReplayTask, registerActive, unregisterActive, isRunActive, resetActiveRuns, cancelActiveRun } from "./run-executor";
 import type { ReplayBundle } from "./replay";
 import { EventPublisher } from "@/server/streaming/event-publisher";
 import { parseImportedReviews } from "@/server/sources/import-parser";
@@ -233,5 +233,51 @@ describe("executeReplayTask", () => {
     expect(readC).toBe("id,body,rating,updatedAt\n");
     const readCache = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "sources", "cache", "reviews.attempt-01.json"), "utf8"));
     expect(readCache).toBe('{"schemaVersion":"1","reviews":[]}');
+  });
+
+  it("cancels an in-flight analysis task when cancelActiveRun is invoked", async () => {
+    const runId = store.createRunId();
+    const controller = new AbortController();
+    registerActive(runId, controller);
+    expect(isRunActive(runId)).toBe(true);
+
+    // Cancel before or during execution
+    cancelActiveRun(runId);
+    expect(controller.signal.aborted).toBe(true);
+
+    await executeAnalysisTask({
+      ...importTask(runId),
+      signal: controller.signal,
+    });
+
+    expect(isRunActive(runId)).toBe(false);
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("failed");
+    expect(manifest.limitations.some((l) => l.code === "RUN_CANCELLED")).toBe(true);
+  });
+
+  it("cancels an in-flight replay task when cancelActiveRun is invoked", async () => {
+    const runId = store.createRunId();
+    const controller = new AbortController();
+    registerActive(runId, controller);
+
+    const bundle = replayBundle("src-run");
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay");
+
+    cancelActiveRun(runId);
+
+    await executeReplayTask({
+      runId,
+      store,
+      bundle,
+      delayMs: 10,
+      publisher,
+      signal: controller.signal,
+    });
+
+    expect(isRunActive(runId)).toBe(false);
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("failed");
+    expect(manifest.limitations.some((l) => l.code === "RUN_CANCELLED")).toBe(true);
   });
 });

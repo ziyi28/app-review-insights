@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-21T08:33:45.000Z",
+  "title": "Design System: App Review Insights",
+  "extensions": {
+    "colorMeta": {
+      "bg-canvas": { "role": "neutral", "displayName": "Obsidian Slate Canvas", "canonical": "#090a0f", "tonalRamp": ["#090a0f", "#0d0f17", "#131722", "#181d2c", "#1f2538", "#262e45", "#2f3854", "#3e4a6e"] },
+      "bg-subtle": { "role": "neutral", "displayName": "Subtle Surface", "canonical": "#0d0f17", "tonalRamp": ["#07080c", "#0d0f17", "#151824", "#1d2131", "#262c41", "#323a54", "#404a6a", "#525e86"] },
+      "bg-panel": { "role": "neutral", "displayName": "Panel Surface", "canonical": "#131722", "tonalRamp": ["#0a0c12", "#131722", "#1a202f", "#232a3e", "#2e364f", "#3c4664", "#4c587c", "#606e98"] },
+      "bg-card": { "role": "neutral", "displayName": "Card Surface", "canonical": "#181d2c", "tonalRamp": ["#0d1018", "#181d2c", "#20273a", "#29324b", "#343f5e", "#424f74", "#53638f", "#6779ac"] },
+      "bg-elevated": { "role": "neutral", "displayName": "Interactive Elevated", "canonical": "#1f2538", "tonalRamp": ["#11141f", "#1f2538", "#293148", "#343e5c", "#414d71", "#515f8a", "#6374a5", "#798cc2"] },
+      "text-primary": { "role": "neutral", "displayName": "Primary Text", "canonical": "#f5f7fa", "tonalRamp": ["#1e2436", "#3d4766", "#647299", "#8d9cc2", "#b5c2e0", "#d5def2", "#ebf0fa", "#f5f7fa"] },
+      "text-muted": { "role": "neutral", "displayName": "Muted Text", "canonical": "#9499ad", "tonalRamp": ["#191b22", "#323541", "#4f5366", "#71768e", "#9499ad", "#b4b8c9", "#d4d6e1", "#f0f1f5"] },
+      "accent-sky": { "role": "primary", "displayName": "Crisp Sky Cyan", "canonical": "#38bdf8", "tonalRamp": ["#082f49", "#075985", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc", "#bae6fd", "#e0f2fe"] },
+      "accent-strong": { "role": "primary", "displayName": "Deep Sky Blue", "canonical": "#0ea5e9", "tonalRamp": ["#0c4a6e", "#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#7dd3fc", "#bae6fd", "#f0f9ff"] },
+      "priority-p0": { "role": "tertiary", "displayName": "Priority P0 / Danger", "canonical": "#f87171", "tonalRamp": ["#450a0a", "#7f1d1d", "#b91c1c", "#ef4444", "#f87171", "#fca5a5", "#fecaca", "#fef2f2"] },
+      "priority-p1": { "role": "tertiary", "displayName": "Priority P1 / Warning", "canonical": "#fbbf24", "tonalRamp": ["#451a03", "#78350f", "#b45309", "#f59e0b", "#fbbf24", "#fcd34d", "#fde68a", "#fef3c7"] },
+      "priority-p2": { "role": "tertiary", "displayName": "Priority P2 / Info", "canonical": "#60a5fa", "tonalRamp": ["#172554", "#1e40af", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe", "#eff6ff"] },
+      "status-ok": { "role": "secondary", "displayName": "Status OK", "canonical": "#34d399", "tonalRamp": ["#022c22", "#064e3b", "#047857", "#059669", "#10b981", "#34d399", "#6ee7b7", "#a7f3d0"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "High-impact hero numbers and report titles." },
+      "headline": { "displayName": "Headline", "purpose": "Modal headers and major stage titles." },
+      "title": { "displayName": "Title", "purpose": "Finding, requirement, and wizard card titles." },
+      "body": { "displayName": "Body", "purpose": "PRD requirements, descriptions, and summaries." },
+      "label": { "displayName": "Label / Meta", "purpose": "Uppercase tags, provenance badges, and field labels." }
+    },
+    "shadows": [
+      { "name": "shadow-sm", "value": "0 1px 3px 0 rgba(0, 0, 0, 0.4)", "purpose": "Resting card and segmented button depth." },
+      { "name": "shadow-md", "value": "0 4px 16px -2px rgba(0, 0, 0, 0.6)", "purpose": "Hovered interactive cards and dropdowns." },
+      { "name": "shadow-lg", "value": "0 16px 36px -6px rgba(0, 0, 0, 0.8)", "purpose": "Dialogs and center wizard containers." }
+    ],
+    "motion": [
+      { "name": "ease-instant", "value": "120ms ease", "purpose": "Snappy button and card hover transitions." },
+      { "name": "ease-smooth", "value": "240ms cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "GPU-accelerated scaleX progress transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High-contrast primary action button.",
+      "html": "<button class=\"ds-btn ds-btn-primary\">START ANALYSIS</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 140ms ease; border: 1px solid transparent; } .ds-btn-primary { background: #f5f7fa; color: #040810; } .ds-btn-primary:hover { background: #ffffff; box-shadow: 0 1px 3px 0 rgba(0,0,0,0.4); transform: translateY(-1px); }"
+    },
+    {
+      "name": "Accent Button",
+      "kind": "button",
+      "refersTo": "button-accent",
+      "description": "Prominent accent button for pipeline trigger.",
+      "html": "<button class=\"ds-btn ds-btn-accent\">RUN PIPELINE</button>",
+      "css": ".ds-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 7px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 140ms ease; border: 1px solid #0ea5e9; } .ds-btn-accent { background: #0ea5e9; color: #04121f; } .ds-btn-accent:hover { background: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 12px rgba(56,189,248,0.35); transform: translateY(-1px); }"
+    },
+    {
+      "name": "Code Badge",
+      "kind": "custom",
+      "refersTo": "chip",
+      "description": "Interactive keyboard-accessible review and test anchor chip.",
+      "html": "<button class=\"ds-code-badge\" tabindex=\"0\">rev-8f12a9</button>",
+      "css": ".ds-code-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 4px; background: #1f2538; border: 1px solid #1e2436; color: #38bdf8; font-family: monospace; font-size: 12px; cursor: pointer; transition: all 120ms ease; } .ds-code-badge:hover { background: rgba(56,189,248,0.1); border-color: rgba(56,189,248,0.3); color: #f5f7fa; transform: translateY(-1px); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Precision Evidence Lab 2.0 (精密证据工坊 2.0)",
+    "overview": "App Review Insights 采用深邃雅致的曜石青灰（Obsidian Slate）暗黑调性与科学仪器般的极简高密度排版。系统的核心宗旨是将海量无序的用户评论转化为可溯源、高可信度且确定性验证的 PRD 需求与测试规格。",
+    "keyCharacteristics": [
+      "曜石青灰层次感：以 #090a0f 纯正暗色为画布基底，通过 #0d0f17、#131722、#181d2c、#1f2538 构筑细腻有机的阶梯空间深度。",
+      "克制的天蓝单焦点：天空青蓝（#38bdf8）严格作为点睛与状态激活色，占据屏幕面积 ≤ 5%，确保视觉焦点纯粹。",
+      "语义化证据与追溯：机器来源徽章、原文字段精确对照与代码标签无障碍跳转，形成可闭环审查的证据网络。",
+      "零装饰性色边：坚决拒绝在卡片左侧随意添加 3px 伪彩条，优先级通过规范的语义 Badge 徽章与柔和底色呈现。"
+    ],
+    "rules": [
+      { "name": "The Single Focus Rule", "body": "荧光天蓝色仅出现在当前活跃选项卡、主操作按钮或运行中心跳指示器上，在全屏视觉面积中占比不超过 5%。", "section": "colors" },
+      { "name": "The Priority Badge Rule", "body": "优先级严禁使用卡片左侧粗边线（border-left），必须通过自包含的徽章胶囊清晰传达。", "section": "colors" },
+      { "name": "The Monospace Discipline Rule", "body": "等宽字体仅用于机器 ID、哈希校验码、确凿评论原文摘录与数据表格，绝不作为普通正文的装饰性字体。", "section": "typography" }
+    ],
+    "dos": [
+      "Do 对所有可交互的 Review ID 与追溯链节点提供 role=\"button\"、tabIndex={0} 与键盘无障碍响应。",
+      "Do 将分析分布图组织为自适应 3 列网格以提升横向信息密度。",
+      "Do 进度条动画统一采用 transform: scaleX() 合成加速。",
+      "Do 保持天蓝色重点强调面积 ≤ 全屏 5%。"
+    ],
+    "donts": [
+      "Don't 在卡片左侧使用粗彩色线条（border-left）做装饰。",
+      "Don't 对 width 或 height 属性进行 CSS transition 动画。",
+      "Don't 使用未经 Token 规范的离散字体尺寸或硬编码圆角值。",
+      "Don't 在暗色界面上使用没有环境模糊的高发光晕轮或硬阴影。"
+    ]
+  }
+}

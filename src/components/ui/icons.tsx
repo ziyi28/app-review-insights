@@ -29,7 +29,9 @@ export type IconName =
   | "sparkles"
   | "layers"
   | "fileText"
-  | "alertCircle";
+  | "alertCircle"
+  | "x"
+  | "app";
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   name: IconName;
@@ -270,6 +272,20 @@ export function Icon({ name, size = 16, className, ...props }: IconProps) {
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+      );
+    case "x":
+      return (
+        <svg {...commonProps}>
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      );
+    case "app":
+      return (
+        <svg {...commonProps}>
+          <rect x="2" y="2" width="20" height="20" rx="4" />
+          <path d="M7 10h10M7 14h10" />
         </svg>
       );
     default:

@@ -11,7 +11,7 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 20px 24px;
+  padding: 22px 26px;
   border-radius: var(--radius-lg);
   background: var(--bg-card);
   border: 1px solid var(--border-strong);
@@ -28,7 +28,7 @@
 
 .reportTitle {
   margin: 0;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--text);
   letter-spacing: -0.02em;
@@ -51,27 +51,34 @@
 }
 
 .tocBar {
+  position: sticky;
+  top: 12px;
+  z-index: 20;
   display: flex;
-  gap: 8px;
+  gap: 6px;
   align-items: center;
   flex-wrap: wrap;
   padding: 8px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  background: rgba(24, 29, 44, 0.88);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-md);
   font-size: 13px;
 }
 
 .tocItem {
   color: var(--text-muted);
   text-decoration: none;
-  padding: 4px 10px;
-  border-radius: 999px;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
   transition: all 120ms ease;
   cursor: pointer;
   background: none;
   border: none;
   font: inherit;
+  font-size: 12px;
+  font-weight: 500;
 }
 
 .tocItem:hover {
@@ -81,8 +88,8 @@
 
 .section {
   display: grid;
-  gap: 12px;
-  padding: 20px 24px;
+  gap: 14px;
+  padding: 22px 26px;
   border-radius: var(--radius-lg);
   background: var(--bg-panel);
   border: 1px solid var(--border);
@@ -96,7 +103,7 @@
   justify-content: space-between;
   gap: 12px;
   border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 10px;
+  padding-bottom: 12px;
 }
 
 .sectionTitle {
@@ -106,7 +113,7 @@
   color: var(--text);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .gridCards {
@@ -115,7 +122,7 @@
 }
 
 .findingCard {
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-radius: var(--radius);
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -138,28 +145,17 @@
 
 .findingSummary {
   margin: 0 0 8px;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13.5px;
+  line-height: 1.55;
   color: var(--text);
 }
 
 .reqCard {
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-radius: var(--radius);
   background: var(--bg-card);
   border: 1px solid var(--border);
-}
-
-.reqCardP0 {
-  border-left: 4px solid var(--p0);
-}
-
-.reqCardP1 {
-  border-left: 4px solid var(--p1);
-}
-
-.reqCardP2 {
-  border-left: 4px solid var(--p2);
+  box-shadow: var(--shadow-sm);
 }
 
 .criteriaList {
@@ -171,7 +167,7 @@
 }
 
 .testCard {
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: var(--radius);
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -191,7 +187,7 @@
   color: var(--ok);
   background: var(--ok-soft);
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid var(--ok-border);
 }
 

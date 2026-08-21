@@ -16,17 +16,31 @@ import { loadReplayRun, type ReplayBundle } from "./replay";
  * and no cross-process task store is introduced.
  */
 const activeRunIds = new Set<string>();
+const activeRunControllers = new Map<string, AbortController>();
 
-export function registerActive(runId: string): void {
+export function registerActive(runId: string, controller?: AbortController): void {
   activeRunIds.add(runId);
+  if (controller) {
+    activeRunControllers.set(runId, controller);
+  }
 }
 
 export function unregisterActive(runId: string): void {
   activeRunIds.delete(runId);
+  activeRunControllers.delete(runId);
 }
 
 export function isRunActive(runId: string): boolean {
   return activeRunIds.has(runId);
+}
+
+export function cancelActiveRun(runId: string): boolean {
+  const controller = activeRunControllers.get(runId);
+  if (controller) {
+    controller.abort();
+    return true;
+  }
+  return false;
 }
 
 export function activeRunIdsSnapshot(): string[] {
@@ -35,7 +49,15 @@ export function activeRunIdsSnapshot(): string[] {
 
 /** Clears the registry (test-only: isolates assertions across test files). */
 export function resetActiveRuns(): void {
+  for (const controller of activeRunControllers.values()) {
+    try {
+      controller.abort();
+    } catch {
+      // ignore
+    }
+  }
   activeRunIds.clear();
+  activeRunControllers.clear();
 }
 
 export type AnalysisTaskInput = {
@@ -47,6 +69,7 @@ export type AnalysisTaskInput = {
   modelConfigured: boolean;
   metadata: RunMetadata;
   publisher: EventPublisher;
+  signal?: AbortSignal;
 };
 
 export type ReplayTaskInput = {
@@ -55,6 +78,7 @@ export type ReplayTaskInput = {
   bundle: ReplayBundle;
   delayMs: number;
   publisher: EventPublisher;
+  signal?: AbortSignal;
 };
 
 /**
@@ -66,13 +90,14 @@ export type ReplayTaskInput = {
  * event + failed manifest rather than a silent hang.
  */
 export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<void> {
-  const { runId, request, deps, store, executionMode, modelConfigured, metadata, publisher } = input;
+  const { runId, request, deps, store, executionMode, modelConfigured, metadata, publisher, signal } = input;
   try {
-    await executeRun(runId, request.goal, request.outputLocale, deps, publisher, store, executionMode, modelConfigured, metadata);
+    await executeRun(runId, request.goal, request.outputLocale, deps, publisher, store, executionMode, modelConfigured, metadata, signal);
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const isCancelled = signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED");
+    const message = isCancelled ? "Analysis was cancelled by user" : (err instanceof Error ? err.message : String(err));
     try {
-      await publisher.publish({ type: "run.failed", runId, data: { error: message } });
+      await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
     } catch {
       // publisher already failed
     }
@@ -90,7 +115,7 @@ export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<voi
         updatedAt: new Date().toISOString(),
         stages: {},
         artifacts: {},
-        limitations: [{ code: "PIPELINE_ERROR", message, params: { detail: message } }],
+        limitations: [{ code: isCancelled ? "RUN_CANCELLED" : "PIPELINE_ERROR", message, params: { detail: message } }],
         canReplay: false,
       });
     } catch {
@@ -112,7 +137,7 @@ export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<voi
  * `completed` manifest is written only after every event has been replayed.
  */
 export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
-  const { runId, store, bundle, delayMs, publisher } = input;
+  const { runId, store, bundle, delayMs, publisher, signal } = input;
   const artifactsIndex: Record<string, { attempt: number; file: string }> = {};
   try {
     // run.accepted is published by the caller before this task is scheduled; the
@@ -125,8 +150,14 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
     // Replay source events in order. Terminal events are deferred so that any
     // un-referenced-but-compatible artifacts can be backfilled ahead of them.
     for (const evt of sourceEvents) {
+      if (signal?.aborted) {
+        throw new Error("RUN_CANCELLED");
+      }
       if (evt.type === "run.accepted") continue; // we emit our own
       if (delayMs > 0) await new Promise((r) => setTimeout(r, delayMs));
+      if (signal?.aborted) {
+        throw new Error("RUN_CANCELLED");
+      }
       if (evt.type === "run.completed" || evt.type === "run.failed") {
         terminalEvent = evt;
         break;
@@ -147,9 +178,16 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
       await publisher.publish({ type: evt.type, runId, stage: evt.stage, data: evt.data });
     }
 
+    if (signal?.aborted) {
+      throw new Error("RUN_CANCELLED");
+    }
+
     // Backfill compatible artifacts the source events never referenced (legacy
     // snapshots whose manifest indexed artifacts without an event).
     for (const [name, value] of Object.entries(bundle.artifacts)) {
+      if (signal?.aborted) {
+        throw new Error("RUN_CANCELLED");
+      }
       if (referenced.has(name)) continue;
       const attempt = bundle.manifest.artifacts[name]?.attempt ?? 1;
       const file = await store.writeArtifact(runId, name, attempt, value);
@@ -162,6 +200,9 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
     // accepts safe sources/apple|import|cache paths and rejects overwrites, so a
     // malicious bundle can never plant or clobber files outside those trees.
     for (const file of bundle.sourceFiles ?? []) {
+      if (signal?.aborted) {
+        throw new Error("RUN_CANCELLED");
+      }
       await store.writeSourceFile(runId, file.relativePath, file.content);
     }
 
@@ -190,9 +231,10 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
       modelUsage: bundle.manifest.modelUsage,
     });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const isCancelled = signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED");
+    const message = isCancelled ? "Replay was cancelled by user" : (err instanceof Error ? err.message : String(err));
     try {
-      await publisher.publish({ type: "run.failed", runId, data: { error: message } });
+      await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
     } catch {
       // publisher already failed
     }
@@ -205,7 +247,7 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
         updatedAt: new Date().toISOString(),
         stages: {},
         artifacts: artifactsIndex,
-        limitations: [{ code: "REPLAY_ERROR", message }],
+        limitations: [{ code: isCancelled ? "RUN_CANCELLED" : "REPLAY_ERROR", message }],
         canReplay: false,
       });
     } catch {

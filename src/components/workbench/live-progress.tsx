@@ -4,23 +4,9 @@ import type { Dictionary } from "@/i18n";
 import type { RunEvent } from "@/domain/contracts/events";
 import { STAGE_LABELS } from "./stage-rail";
 
-// Heartbeats from the model client carry this fixed "still working" message.
-// They are a fallback for stages that publish no concrete progress; a specific
-// message (e.g. "analyzing review batch 3 of 8") always wins over them.
 const HEARTBEAT_MARKER = "model generation in progress";
-// A retry message is a warning worth keeping on screen: a subsequent heartbeat
-// must not overwrite it until a new batch/specific message or stage completion.
 const RETRY_MARKER = "model retry";
 
-/**
- * Shows the most recent live-progress message for the current stage while a
- * run is in flight, so a long model call (e.g. topic discovery) never looks
- * frozen. A stage's own message (batch counts, what the model is doing) takes
- * precedence over the periodic heartbeat, which only shows when a stage emits
- * nothing else. Retry warnings are kept visible until a newer specific message
- * or a stage change replaces them. Hidden once the run finishes or no message
- * has arrived yet.
- */
 export function LiveProgress({ events, running, t }: { events: RunEvent[]; running: boolean; t: Dictionary }) {
   if (!running) return null;
 
@@ -38,7 +24,6 @@ export function LiveProgress({ events, running, t }: { events: RunEvent[]; runni
       const message = (e.data as { message?: unknown } | undefined)?.message;
       if (typeof message !== "string" || message.trim().length === 0) continue;
       if (message.includes(HEARTBEAT_MARKER)) {
-        // A heartbeat never overwrites a pending retry warning.
         if (latestMessage?.includes(RETRY_MARKER)) continue;
         latestHeartbeat = message;
       } else {
@@ -54,20 +39,30 @@ export function LiveProgress({ events, running, t }: { events: RunEvent[]; runni
 
   return (
     <div
+      className="card card-elevated"
       style={{
         display: "flex",
+        flexDirection: "row",
         alignItems: "center",
-        gap: "8px",
-        padding: "10px 12px",
-        borderRadius: "8px",
-        border: "1px solid var(--border)",
-        background: "var(--bg-panel)",
+        gap: "10px",
+        padding: "10px 14px",
+        borderRadius: "var(--radius)",
         fontSize: "13px",
       }}
     >
-      <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: "var(--accent)", flexShrink: 0, animation: "pulse 1.2s ease-in-out infinite" }} />
-      <span style={{ color: "var(--text-muted)", flexShrink: 0 }}>{stageLabel}:</span>
-      <span>{shown}</span>
+      <span
+        style={{
+          width: "8px",
+          height: "8px",
+          borderRadius: "50%",
+          background: "var(--accent)",
+          flexShrink: 0,
+          animation: "pulse 1.2s ease-in-out infinite",
+          boxShadow: "0 0 8px rgba(56, 189, 248, 0.6)",
+        }}
+      />
+      <span style={{ color: "var(--accent)", fontWeight: 600, flexShrink: 0 }}>{stageLabel}:</span>
+      <span style={{ color: "var(--text)" }}>{shown}</span>
     </div>
   );
 }

@@ -235,4 +235,31 @@ describe("useRunStream", () => {
     expect(result.current.running).toBe(false);
     expect(result.current.runId).toBeNull();
   });
+
+  it("abort calls POST /api/runs/[runId]/abort and stops polling", async () => {
+    const fetchSpy = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url === "/api/runs" && init?.method === "POST") {
+        return { ok: true, json: async () => ({ runId: "run-cancel", status: "running", eventsUrl: "/api/runs/run-cancel/events" }) };
+      }
+      if (url === "/api/runs/run-cancel/abort" && init?.method === "POST") {
+        return { ok: true, json: async () => ({ ok: true, runId: "run-cancel", cancelled: true }) };
+      }
+      return { ok: true, json: async () => ({ runId: "run-cancel", status: "running", events: [makeEvent(1, "run.accepted", "run-cancel")], lastSequence: 1 }) };
+    });
+    vi.stubGlobal("fetch", fetchSpy);
+
+    const { result } = renderHook(() => useRunStream());
+    await act(async () => {
+      await result.current.start({});
+    });
+    await waitFor(() => expect(result.current.runId).toBe("run-cancel"));
+
+    await act(async () => {
+      await result.current.abort();
+    });
+
+    expect(fetchSpy).toHaveBeenCalledWith("/api/runs/run-cancel/abort", expect.objectContaining({ method: "POST" }));
+    expect(result.current.running).toBe(false);
+  });
 });

@@ -7,10 +7,10 @@ import { getDictionary } from "@/i18n";
 import type { RunEvent } from "@/domain/contracts/events";
 import { useRunStream, LAST_RUN_ID_KEY } from "@/hooks/use-run-stream";
 
-
 import { useRunArtifacts } from "@/hooks/use-run-artifacts";
 import { RunForm } from "./run-form";
 import { LiveProgress } from "./live-progress";
+import { StageRail } from "./stage-rail";
 import { SettingsPanel } from "./settings-panel";
 import { HistoryPanel } from "./history-panel";
 import { Sidebar, type TabId } from "./sidebar";
@@ -22,6 +22,7 @@ import { ClassificationPanel, EvidenceValidationPanel, VersionPlanPanel, Artifac
 import { ProvenanceBadge } from "./provenance-badge";
 import { OverviewTab } from "./overview-tab";
 import { ExecutiveReport } from "./executive-report";
+import modalStyles from "./modal.module.css";
 import styles from "./workbench.module.css";
 
 type Tab = TabId;
@@ -80,22 +81,22 @@ function RunDuration({ events, running }: { events: RunEvent[]; running: boolean
   );
 }
 
-/** `null` until GET /api/config resolves, so the header shows a neutral
- *  "checking" chip instead of flashing 未配置 → 已配置 on the first frame. */
 type ConfigStatus = { modelConfigured: boolean; serpApiConfigured: boolean } | null;
 
 export function Workbench() {
   const [uiLocale, setUiLocale] = useState<Locale>("zh-CN");
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [railExpanded, setRailExpanded] = useState(false);
+  const [showNewRunConfirm, setShowNewRunConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+
   const t = getDictionary(uiLocale);
 
-  // Keep the document language in sync with the UI locale so assistive
-  // technology and translation tooling use the right language.
   useEffect(() => {
     document.documentElement.lang = uiLocale === "zh-CN" ? "zh-CN" : "en";
   }, [uiLocale]);
 
-  const { runId, status, events, running, reconnecting, gone, error, canRetry, start, reset, retry, loadHistory } = useRunStream();
+  const { runId, status, events, running, reconnecting, gone, error, canRetry, start, reset, abort, retry, loadHistory } = useRunStream();
   const [tab, setTab] = useState<Tab>("overview");
   const [viewMode, setViewMode] = useState<ViewMode>("workbench");
   const [reviewSearchQuery, setReviewSearchQuery] = useState<string>("");
@@ -140,11 +141,7 @@ export function Workbench() {
     },
   });
 
-
-  // URL state persistence (tab & mode). The restore is deferred to a microtask
-  // so it isn't a synchronous setState inside the effect (which the compiler
-  // flags as a cascading-render risk); microtasks run before the next paint, so
-  // the observable timing is unchanged.
+  // URL state persistence (tab & mode)
   useEffect(() => {
     if (typeof window === "undefined") return;
     const search = new URLSearchParams(window.location.search);
@@ -220,19 +217,21 @@ export function Workbench() {
     }
   }, [loadHistory]);
 
-  // Non-secret config status for the header badges. Fetched once on mount and
-  // refreshed after the settings panel saves/clears.
-  useEffect(() => {
+  // Non-secret config status for the header badges
+  const fetchConfig = useCallback(() => {
     let cancelled = false;
     void (async () => {
       try {
         const res = await fetch("/api/config", { cache: "no-store" });
         const json = (await res.json()) as { modelConfigured?: boolean; serpApiKeyConfigured?: boolean };
         if (!cancelled) {
-          setConfigStatus({ modelConfigured: Boolean(json.modelConfigured), serpApiConfigured: Boolean(json.serpApiKeyConfigured) });
+          setConfigStatus({
+            modelConfigured: Boolean(json.modelConfigured),
+            serpApiConfigured: Boolean(json.serpApiKeyConfigured),
+          });
         }
       } catch {
-        // Non-fatal: badges simply stay "not configured".
+        // Non-fatal
       }
     })();
     return () => {
@@ -240,9 +239,11 @@ export function Workbench() {
     };
   }, []);
 
-  // Source provenance: prefer the structured source-evidence artifact, then the
-  // event/limitation signals, over the deliveryMode fallback — so Imported /
-  // Partial / Suspect Empty and the SocialCrawl provider are never mislabeled.
+  useEffect(() => {
+    return fetchConfig();
+  }, [fetchConfig]);
+
+  // Source provenance
   const sourceBadge = useMemo(() => {
     const last = events.at(-1);
     if (last?.deliveryMode === "cached-replay") return { kind: "limitation" as const, label: t.cachedReplay };
@@ -250,8 +251,6 @@ export function Workbench() {
     if (evidence?.kind === "app-store-reviews" && evidence.provider === "serpapi") {
       return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceSerpApiHistory : t.sourceSerpApi };
     }
-    // Legacy replay only: old cached artifacts may still carry socialcrawl
-    // provenance; it is read-only and never produced by new previews or runs.
     if (evidence?.kind === "app-store-reviews" && evidence.provider === "socialcrawl") {
       return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceSerpApiHistory : t.sourceSerpApi };
     }
@@ -259,25 +258,44 @@ export function Workbench() {
       return { kind: "source" as const, label: evidence.selection === "stable" ? t.sourceRssHistory : t.sourceRssFallback };
     }
     const texts = events.map((e) => JSON.stringify(e.data ?? {}));
-    // A stable sample augmented by the review cache is a hybrid source.
     if (texts.some((s) => s.includes("LOCAL_HISTORY_SELECTED") || s.includes("RSS_CACHE_AUGMENTED"))) return { kind: "source" as const, label: t.sourceLiveCache };
     if (texts.some((s) => s.includes("RSS_SUSPECT_EMPTY"))) return { kind: "conflict" as const, label: t.sourceSuspectEmpty };
     if (texts.some((s) => s.includes("IMPORT_ERROR") || s.includes("RSS_PARTIAL") || s.includes("RSS_UNSTABLE_PAGINATION"))) return { kind: "conflict" as const, label: t.sourcePartial };
-    // If a limitation.reported carries no import/partial marker but the run
-    // used an import source, the limitation code list distinguishes it.
     if (texts.some((s) => s.includes('"kind":"import"') || s.includes("IMPORT_") || s.includes("import:"))) {
       return { kind: "source" as const, label: t.sourceImported };
     }
     return { kind: "source" as const, label: t.sourceLive };
   }, [events, cache.sourceEvidence, t]);
 
-
-  const handleNewRun = () => {
+  const performResetAndNewRun = useCallback(async () => {
+    setShowNewRunConfirm(false);
+    if (running && runId) {
+      await abort(runId);
+    }
     reset();
     resetArtifacts();
     setTab("overview");
     userNavigated.current = false;
-  };
+  }, [running, runId, abort, reset, resetArtifacts]);
+
+  const handleNewRun = useCallback(() => {
+    if (running) {
+      setShowNewRunConfirm(true);
+    } else {
+      performResetAndNewRun();
+    }
+  }, [running, performResetAndNewRun]);
+
+  const performAbortRun = useCallback(async () => {
+    setShowCancelConfirm(false);
+    if (runId) {
+      await abort(runId);
+    }
+    reset();
+    resetArtifacts();
+    setTab("overview");
+    userNavigated.current = false;
+  }, [runId, abort, reset, resetArtifacts]);
 
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -296,7 +314,6 @@ export function Workbench() {
       };
       if (manifest.startRequest) {
         const req = manifest.startRequest;
-        // If retrying a historical live run, strip previewId so it freshly collects or leverages local cache without stale preview snapshot issues. reviewSelection must be stripped together (the server requires previewId + reviewSelection to be paired).
         requestToStart = {
           ...req,
           source: req.source?.kind === "live" && req.source.appStoreUrl
@@ -308,7 +325,6 @@ export function Workbench() {
             : req.source,
         };
       } else if (manifest.appUrl && manifest.goal) {
-        // Fallback for older historical runs without saved startRequest: reconstruct start request
         requestToStart = {
           protocolVersion: "1",
           mode: "analyze",
@@ -334,10 +350,7 @@ export function Workbench() {
     }
   }, [start, loadHistory, uiLocale, resetArtifacts]);
 
-
-  // Refresh recovery: on mount, restore the latest in-flight run (or the last
-  // viewed run) so a page refresh keeps monitoring the same analysis. A stored
-  // id that no longer resolves simply falls back to the idle state.
+  // Refresh recovery
   useEffect(() => {
     if (typeof localStorage === "undefined") return;
     const restored = localStorage.getItem(LAST_RUN_ID_KEY);
@@ -354,29 +367,13 @@ export function Workbench() {
         const target = runningRun?.runId ?? (runs.some((r) => r.runId === restored) ? restored : null);
         if (target && !cancelled) loadHistory(target);
       } catch {
-        // Non-fatal: the idle state remains.
+        // Non-fatal
       }
     })();
     return () => {
       cancelled = true;
     };
   }, [loadHistory]);
-
-  const idle = !running && events.length === 0 && !isRetrying;
-  const starting = running && runId === null;
-
-  const runFailed = useMemo(() => {
-    if (running) return false;
-    // A gone run is terminal even when no event ever arrived (e.g. loading
-    // the history of a since-deleted run).
-    if (gone) return true;
-    if (events.length === 0) return false;
-    if (Boolean(error)) return true;
-    if (status === "failed") return true;
-    if (status === "interrupted") return true;
-    if (events.some((e) => e.type === "run.failed")) return true;
-    return false;
-  }, [running, error, gone, events, status]);
 
   const runFailedMessage = useMemo(() => {
     if (error) return error;
@@ -407,6 +404,20 @@ export function Workbench() {
     return null;
   }, [status, t]);
 
+  const idle = !running && events.length === 0 && !isRetrying;
+  const starting = running && runId === null;
+
+  const runFailed = useMemo(() => {
+    if (running) return false;
+    if (gone) return true;
+    if (events.length === 0) return false;
+    if (Boolean(error)) return true;
+    if (status === "failed") return true;
+    if (status === "interrupted") return true;
+    if (events.some((e) => e.type === "run.failed")) return true;
+    return false;
+  }, [running, error, gone, events, status]);
+
   const runningStatusText = running
     ? (starting ? t.starting : t.running)
     : reconnecting
@@ -415,16 +426,16 @@ export function Workbench() {
 
   return (
     <div className={styles.shell}>
-      {/* Visually-hidden live region for run status. */}
+      {/* Visually-hidden live region for run status */}
       <div className="live-region" aria-live="polite">
         {runningStatusText}
       </div>
 
-      {/* Header */}
+      {/* Top Application Header */}
       <header className={styles.header}>
         <div className={styles.brandWrap}>
           <div className={styles.brandLogo}>
-            <Icon name="sparkles" size={14} />
+            <Icon name="app" size={16} />
           </div>
           <h1 className={styles.brand}>{t.appTitle}</h1>
         </div>
@@ -439,16 +450,19 @@ export function Workbench() {
               {t.modelStatus}: {configStatus.modelConfigured ? t.modelConfigured : t.modelNotConfigured}
             </span>
           )}
+
           <span className="chip chip-accent" title={t.collectionStatus}>
             {t.collectionStatus}: {t.collectionConfigured}
           </span>
+
           <RunDuration events={events} running={running} />
         </div>
 
-        <span className={styles.spacer} />
+        <div className={styles.spacer} />
 
         <ProvenanceBadge kind={sourceBadge.kind} label={sourceBadge.label} />
 
+        {/* View Mode Toggle */}
         <div className={styles.modeSwitcher} role="group" aria-label={t.viewModeWorkbench}>
           <button
             type="button"
@@ -478,6 +492,7 @@ export function Workbench() {
           </button>
         </div>
 
+        {/* Actions & Utilities */}
         <div className={styles.headerActions}>
           {runFailed ? (
             <button className="btn btn-danger" onClick={handleRetryCurrent} disabled={isRetrying}>
@@ -503,32 +518,88 @@ export function Workbench() {
             onChange={(e) => setUiLocale(e.target.value as Locale)}
             aria-label={t.language}
           >
-            <option value="en">English</option>
             <option value="zh-CN">中文</option>
+            <option value="en">English</option>
           </select>
         </div>
 
+        {/* Modals & Drawers */}
         <SettingsPanel
           t={t}
           open={settingsOpen}
-          onClose={() => setSettingsOpen(false)}
-          onConfigChange={(status) => setConfigStatus(status)}
+          onClose={() => {
+            setSettingsOpen(false);
+            fetchConfig();
+          }}
+          onConfigChange={(s) => setConfigStatus(s)}
         />
         <HistoryPanel
           t={t}
           open={historyOpen}
           onClose={() => setHistoryOpen(false)}
-          onView={(runId) => {
+          onView={(hRunId) => {
             setHistoryOpen(false);
-            loadHistory(runId);
+            loadHistory(hRunId);
           }}
-          onReplay={(runId) => {
+          onReplay={(hRunId) => {
             setHistoryOpen(false);
-            void start({ protocolVersion: "1", mode: "cached-replay", sourceRunId: runId });
+            void start({ protocolVersion: "1", mode: "cached-replay", sourceRunId: hRunId });
           }}
           onRetry={handleRetryHistory}
         />
       </header>
+
+      {/* Confirmation Modal for New Run during active run */}
+      {showNewRunConfirm ? (
+        <div className={modalStyles.overlay}>
+          <div className={modalStyles.dialog} role="alertdialog" aria-modal="true" aria-labelledby="confirm-new-run-title">
+            <div className={modalStyles.dialogHead}>
+              <h3 id="confirm-new-run-title" className={modalStyles.dialogTitle}>
+                {uiLocale === "zh-CN" ? "确认放弃当前分析？" : "Abandon Active Run?"}
+              </h3>
+            </div>
+            <p style={{ margin: "4px 0 12px", fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+              {uiLocale === "zh-CN"
+                ? "当前分析任务仍在进行中。开始新建运行将重置当前进度，是否确认放弃？"
+                : "An analysis run is currently in progress. Starting a new run will reset in-flight progress. Are you sure you want to proceed?"}
+            </p>
+            <div className={modalStyles.dialogFoot}>
+              <button type="button" className="btn btn-ghost" onClick={() => setShowNewRunConfirm(false)}>
+                {t.cancel}
+              </button>
+              <button type="button" className="btn btn-danger" onClick={performResetAndNewRun}>
+                {uiLocale === "zh-CN" ? "确认放弃并新建" : "Abandon & New Run"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Confirmation Modal for Aborting in-flight run */}
+      {showCancelConfirm ? (
+        <div className={modalStyles.overlay}>
+          <div className={modalStyles.dialog} role="alertdialog" aria-modal="true" aria-labelledby="confirm-abort-title">
+            <div className={modalStyles.dialogHead}>
+              <h3 id="confirm-abort-title" className={modalStyles.dialogTitle}>
+                {uiLocale === "zh-CN" ? "中止当前分析任务" : "Abort Current Run"}
+              </h3>
+            </div>
+            <p style={{ margin: "4px 0 12px", fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+              {uiLocale === "zh-CN"
+                ? "是否中止当前在运行的评论分析任务并返回初始状态？"
+                : "Are you sure you want to abort the in-flight review analysis and return to the starting screen?"}
+            </p>
+            <div className={modalStyles.dialogFoot}>
+              <button type="button" className="btn btn-ghost" onClick={() => setShowCancelConfirm(false)}>
+                {t.cancel}
+              </button>
+              <button type="button" className="btn btn-danger" onClick={performAbortRun}>
+                {uiLocale === "zh-CN" ? "确认中止" : "Confirm Abort"}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {/* Idle: centered analysis wizard */}
       {idle ? (
@@ -562,13 +633,25 @@ export function Workbench() {
           {/* Right: main content */}
           <main className={styles.content}>
             {runFailed ? (
-              <div className="card" style={{ borderLeft: "3px solid var(--danger)", display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px", flexWrap: "wrap", marginBottom: "16px" }}>
+              <div
+                className="card"
+                style={{
+                  background: "var(--danger-soft)",
+                  borderColor: "var(--danger-border)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  flexWrap: "wrap",
+                  marginBottom: "16px",
+                }}
+              >
                 <div style={{ display: "grid", gap: "4px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "6px", fontWeight: 600, color: "var(--danger)" }}>
                     <Icon name="alertCircle" size={16} />
                     <span>{t.runFailed}</span>
                   </div>
-                  {runFailedMessage ? <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)" }}>{runFailedMessage}</p> : null}
+                  {runFailedMessage ? <p style={{ margin: 0, fontSize: "13px", color: "var(--text)" }}>{runFailedMessage}</p> : null}
                 </div>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <button type="button" className="btn btn-danger" onClick={handleRetryCurrent} disabled={isRetrying}>
@@ -581,9 +664,47 @@ export function Workbench() {
               </div>
             ) : null}
 
-            <div className={styles.progressRow}>
-              <LiveProgress events={events} running={running} t={t} />
-            </div>
+            {/* Pipeline Stage Rail & Live Progress Section */}
+            {events.length > 0 ? (
+              <div className={styles.progressRow}>
+                <div className="card card-elevated" style={{ padding: "10px 14px", display: "grid", gap: "8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: 0 }}>
+                      <LiveProgress events={events} running={running} t={t} />
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0 }}>
+                      <button
+                        type="button"
+                        className="btn btn-ghost"
+                        style={{ padding: "4px 8px", fontSize: "12px" }}
+                        onClick={() => setRailExpanded((prev) => !prev)}
+                        title={railExpanded ? (uiLocale === "zh-CN" ? "收起工序详情" : "Collapse Stages") : (uiLocale === "zh-CN" ? "展开11步工序" : "Expand 11 Stages")}
+                      >
+                        <Icon name="layers" size={13} />
+                        <span>{railExpanded ? (uiLocale === "zh-CN" ? "收起工序" : "Collapse") : (uiLocale === "zh-CN" ? "展开工序" : "Expand Stages")}</span>
+                      </button>
+                      {running ? (
+                        <button
+                          type="button"
+                          className="btn btn-ghost"
+                          style={{ padding: "4px 8px", fontSize: "12px", color: "var(--danger)" }}
+                          onClick={() => setShowCancelConfirm(true)}
+                          title={t.cancel}
+                        >
+                          <Icon name="x" size={13} />
+                          <span>{t.cancel}</span>
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                  {railExpanded ? (
+                    <div style={{ borderTop: "1px solid var(--border-subtle)", paddingTop: "8px", marginTop: "2px" }}>
+                      <StageRail events={events} t={t} />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            ) : null}
 
             {viewMode === "report" ? (
               <ExecutiveReport
@@ -603,91 +724,91 @@ export function Workbench() {
               />
             ) : (
               <div role="tabpanel" id={`panel-${tab}`} aria-labelledby={`tab-${tab}`}>
-              {tab === "overview" ? (
-                <OverviewTab
-                  manifest={versions.manifest}
-                  stats={stats}
-                  findings={cache.findings?.findings}
-                  goalCoverage={cache.goalCoverage}
-                  cleaned={cache.cleaned}
-                  finalReport={cache.finalReport}
-                  activePrd={activePrd}
-                  sourceBadge={sourceBadge}
-                  t={t}
-                  locale={uiLocale}
-                  onSelectTab={handleSelectTab}
-                />
-              ) : null}
-
-              {(tab === "raw" || tab === "cleaned") && cleanedReviews.length > 0 ? (
-                <ReviewsTable
-                  reviews={cleanedReviews}
-                  t={t}
-                  searchQuery={reviewSearchQuery}
-                  onSearchChange={setReviewSearchQuery}
-                />
-              ) : (tab === "raw" || tab === "cleaned") && !running ? (
-                <p className="muted">{t.noData}</p>
-              ) : null}
-
-              {tab === "classification" ? <ClassificationPanel candidates={cache.topicCandidates?.candidates ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
-              {tab === "topics" ? <TopicsPanel topics={cache.topics?.topics ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
-              {tab === "findings" ? <FindingsPanel findings={cache.findings?.findings ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
-              {tab === "evidence" ? <EvidenceValidationPanel report={cache.evidenceValidation as never} t={t} /> : null}
-              {tab === "versions" ? (
-                <>
-                  <ArtifactPhaseSelector revised={versionPlanFinal !== null} phase={versionPhase} onSelect={setVersionPhase} t={t} />
-                  <VersionPlanPanel versionPlan={activeVersionPlan} t={t} />
-                </>
-              ) : null}
-              {tab === "prd" ? (
-                <>
-                  <ArtifactPhaseSelector revised={prdFinal !== null} phase={prdPhase} onSelect={setPrdPhase} t={t} />
-                  <RequirementsPanel
-                    requirements={activePrd?.requirements ?? []}
-                    versions={activePrd?.versions ?? []}
-                    assumptions={activePrd?.assumptions ?? []}
-                    t={t}
-                    onJumpToReview={jumpToReview}
-                    onJumpToTests={jumpToTests}
-                  />
-                </>
-              ) : null}
-              {tab === "tests" ? (
-                <>
-                  <ArtifactPhaseSelector revised={testsFinal.length > 0} phase={testsPhase} onSelect={setTestsPhase} t={t} />
-                  <TestsPanel
-                    tests={activeTests}
-                    requirements={activePrd?.requirements ?? []}
-                    t={t}
-                    onJumpToReview={jumpToReview}
-                    onJumpToPrd={jumpToPrd}
-                  />
-                </>
-              ) : null}
-              {tab === "traceability" ? (
-                <>
-                  <ArtifactPhaseSelector revised={traceFinal !== null} phase={tracePhase} onSelect={setTracePhase} t={t} />
-                  <TraceabilityPanel
-                    report={activeTrace}
-                    revisedAndValid={traceFinal?.valid === true}
+                {tab === "overview" ? (
+                  <OverviewTab
+                    manifest={versions.manifest}
+                    stats={stats}
                     findings={cache.findings?.findings}
-                    prd={activePrd}
-                    tests={activeTests}
+                    goalCoverage={cache.goalCoverage}
+                    cleaned={cache.cleaned}
+                    finalReport={cache.finalReport}
+                    activePrd={activePrd}
+                    sourceBadge={sourceBadge}
                     t={t}
-                    onJumpToReview={jumpToReview}
-                    onJumpToPrd={jumpToPrd}
-                    onJumpToTests={jumpToTests}
+                    locale={uiLocale}
+                    onSelectTab={handleSelectTab}
                   />
-                </>
-              ) : null}
-              {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} goalCoverage={cache.goalCoverage} t={t} locale={uiLocale} /> : null}
-              {tab === "diagnostics" ? <RunLogPanel events={events} t={t} locale={uiLocale} /> : null}
-            </div>
-          )}
-        </main>
-      </div>
-        )}
+                ) : null}
+
+                {(tab === "raw" || tab === "cleaned") && cleanedReviews.length > 0 ? (
+                  <ReviewsTable
+                    reviews={cleanedReviews}
+                    t={t}
+                    searchQuery={reviewSearchQuery}
+                    onSearchChange={setReviewSearchQuery}
+                  />
+                ) : (tab === "raw" || tab === "cleaned") && !running ? (
+                  <p className="muted">{t.noData}</p>
+                ) : null}
+
+                {tab === "classification" ? <ClassificationPanel candidates={cache.topicCandidates?.candidates ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
+                {tab === "topics" ? <TopicsPanel topics={cache.topics?.topics ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
+                {tab === "findings" ? <FindingsPanel findings={cache.findings?.findings ?? []} t={t} onJumpToReview={jumpToReview} /> : null}
+                {tab === "evidence" ? <EvidenceValidationPanel report={cache.evidenceValidation as never} t={t} /> : null}
+                {tab === "versions" ? (
+                  <>
+                    <ArtifactPhaseSelector revised={versionPlanFinal !== null} phase={versionPhase} onSelect={setVersionPhase} t={t} />
+                    <VersionPlanPanel versionPlan={activeVersionPlan} t={t} />
+                  </>
+                ) : null}
+                {tab === "prd" ? (
+                  <>
+                    <ArtifactPhaseSelector revised={prdFinal !== null} phase={prdPhase} onSelect={setPrdPhase} t={t} />
+                    <RequirementsPanel
+                      requirements={activePrd?.requirements ?? []}
+                      versions={activePrd?.versions ?? []}
+                      assumptions={activePrd?.assumptions ?? []}
+                      t={t}
+                      onJumpToReview={jumpToReview}
+                      onJumpToTests={jumpToTests}
+                    />
+                  </>
+                ) : null}
+                {tab === "tests" ? (
+                  <>
+                    <ArtifactPhaseSelector revised={testsFinal.length > 0} phase={testsPhase} onSelect={setTestsPhase} t={t} />
+                    <TestsPanel
+                      tests={activeTests}
+                      requirements={activePrd?.requirements ?? []}
+                      t={t}
+                      onJumpToReview={jumpToReview}
+                      onJumpToPrd={jumpToPrd}
+                    />
+                  </>
+                ) : null}
+                {tab === "traceability" ? (
+                  <>
+                    <ArtifactPhaseSelector revised={traceFinal !== null} phase={tracePhase} onSelect={setTracePhase} t={t} />
+                    <TraceabilityPanel
+                      report={activeTrace}
+                      revisedAndValid={traceFinal?.valid === true}
+                      findings={cache.findings?.findings}
+                      prd={activePrd}
+                      tests={activeTests}
+                      t={t}
+                      onJumpToReview={jumpToReview}
+                      onJumpToPrd={jumpToPrd}
+                      onJumpToTests={jumpToTests}
+                    />
+                  </>
+                ) : null}
+                {tab === "deliverables" ? <FinalDeliverablesPanel finalPrd={prdFinal ?? prdDraft} report={traceFinal ?? traceDraft} manifest={versions.manifest} goalCoverage={cache.goalCoverage} t={t} locale={uiLocale} /> : null}
+                {tab === "diagnostics" ? <RunLogPanel events={events} t={t} locale={uiLocale} /> : null}
+              </div>
+            )}
+          </main>
+        </div>
+      )}
     </div>
   );
 }

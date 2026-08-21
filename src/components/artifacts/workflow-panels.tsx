@@ -23,26 +23,38 @@ export function ClassificationPanel({
 }) {
   if (!candidates.length) return <p style={{ color: "var(--text-muted)" }}>{t.noData}</p>;
   return (
-    <div style={{ display: "grid", gap: "8px" }}>
+    <div style={{ display: "grid", gap: "10px" }}>
       {candidates.map((c) => (
-        <div key={c.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <h4 style={{ margin: "0 0 4px" }}>
-            {c.label} <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
-          </h4>
-          <p style={{ margin: "0 0 4px", fontSize: "13px" }}>“{c.quote}”</p>
-          <div style={{ color: "var(--text-muted)", fontSize: "12px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
+        <div key={c.id} className="card" style={{ padding: "14px 16px" }}>
+          <div className="card-header" style={{ marginBottom: "4px" }}>
+            <div className="card-title-wrap">
+              <h4 className="card-title">{c.label}</h4>
+              <ProvenanceBadge kind="ai-generated" label={t.aiGenerated} />
+            </div>
+            <code style={{ fontSize: "12px", color: "var(--text-muted)" }}>{c.id}</code>
+          </div>
+          <p className="card-desc" style={{ margin: "4px 0 8px" }}>“{c.quote}”</p>
+          <div style={{ color: "var(--text-muted)", fontSize: "12px", display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
             <span>{t.reviewId}:</span>
             {c.supportingReviewIds.map((id, i) => (
               <span key={`${id}-${i}`}>
                 {i > 0 ? ", " : ""}
                 <code
                   onClick={() => onJumpToReview?.(id)}
+                  role={onJumpToReview ? "button" : undefined}
+                  tabIndex={onJumpToReview ? 0 : undefined}
+                  onKeyDown={
+                    onJumpToReview
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onJumpToReview(id);
+                          }
+                        }
+                      : undefined
+                  }
                   title={onJumpToReview ? `${t.jumpToReview} ${id}` : undefined}
-                  style={{
-                    color: onJumpToReview ? "var(--accent)" : "inherit",
-                    cursor: onJumpToReview ? "pointer" : "default",
-                    textDecoration: onJumpToReview ? "underline" : "none",
-                  }}
+                  className="code-badge"
                 >
                   {id.length > 8 ? id.slice(0, 8) : id}
                 </code>
@@ -58,44 +70,46 @@ export function ClassificationPanel({
 export function EvidenceValidationPanel({ report, t }: { report: EvidenceValidationReport | null; t: Dictionary }) {
   if (!report) return <p style={{ color: "var(--text-muted)" }}>{t.legacyArtifactUnavailable}</p>;
   return (
-    <div style={{ display: "grid", gap: "10px" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "8px" }}>
+    <div style={{ display: "grid", gap: "12px" }}>
+      <div className="stat-grid">
         {[
-          { k: `${t.evidenceSufficient}: ${report.sufficientCount}`, v: report.sufficientCount },
-          { k: `${t.evidenceInsufficient}: ${report.insufficientCount}`, v: report.insufficientCount },
-          { k: `${t.errors}: ${report.rejectedFindingCount}`, v: report.rejectedFindingCount },
+          { k: `${t.evidenceSufficient}: ${report.sufficientCount}`, v: report.sufficientCount, color: "var(--ok)" },
+          { k: `${t.evidenceInsufficient}: ${report.insufficientCount}`, v: report.insufficientCount, color: "var(--warn)" },
+          { k: `${t.errors}: ${report.rejectedFindingCount}`, v: report.rejectedFindingCount, color: "var(--danger)" },
         ].map((s) => (
-          <div key={s.k} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-            <div style={{ fontSize: "20px", fontWeight: 700 }}>{s.v}</div>
-            <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>{s.k}</div>
+          <div key={s.k} className="stat-card">
+            <div className="stat-value" style={{ color: s.color }}>{s.v}</div>
+            <div className="stat-label">{s.k}</div>
           </div>
         ))}
       </div>
       {report.findings.map((f) => (
-        <div key={f.findingId} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <code>{f.findingId}</code>
-            <ProvenanceBadge kind="computed" label={`${t.confidence}: ${f.confidence}`} />
-            <ProvenanceBadge
-              kind={f.sufficiency === "sufficient" ? "computed" : "conflict"}
-              label={f.sufficiency === "sufficient" ? t.evidenceSufficient : t.evidenceInsufficient}
-            />
+        <div key={f.findingId} className="card" style={{ padding: "14px 16px" }}>
+          <div className="card-header">
+            <div className="card-title-wrap">
+              <code style={{ fontWeight: 600, color: "var(--text)" }}>{f.findingId}</code>
+              <ProvenanceBadge kind="computed" label={`${t.confidence}: ${f.confidence}`} />
+              <ProvenanceBadge
+                kind={f.sufficiency === "sufficient" ? "computed" : "conflict"}
+                label={f.sufficiency === "sufficient" ? t.evidenceSufficient : t.evidenceInsufficient}
+              />
+            </div>
           </div>
           <p style={{ margin: "6px 0 0", color: "var(--text-muted)", fontSize: "13px" }}>
-            {t.supportCount}: {f.supportCount} / {f.corpusCount} · {t.supportRatio} {f.supportRatio.toFixed(4)} · {t.conflict}: {f.conflictCount}
+            {t.supportCount}: <strong>{f.supportCount}</strong> / {f.corpusCount} · {t.supportRatio} {f.supportRatio.toFixed(4)} · {t.conflict}: {f.conflictCount}
           </p>
           {f.reasons.length > 0 ? (
-            <p style={{ margin: "4px 0 0", color: "var(--warn)", fontSize: "13px" }}>{f.reasons.join(", ")}</p>
+            <p style={{ margin: "4px 0 0", color: "var(--warn)", fontSize: "12.5px" }}>{f.reasons.join(", ")}</p>
           ) : null}
         </div>
       ))}
       {report.rejected.length > 0 ? (
         <div>
-          <h4>{t.errors}</h4>
+          <h4 style={{ margin: "12px 0 6px", fontSize: "14px" }}>{t.errors}</h4>
           {report.rejected.map((r, i) => (
-            <p key={i} style={{ fontSize: "13px", margin: "4px 0" }}>
-              <ProvenanceBadge kind="conflict" label={r.code} /> {r.message}
-            </p>
+            <div key={i} style={{ fontSize: "13px", margin: "4px 0", display: "flex", gap: "8px", alignItems: "center" }}>
+              <ProvenanceBadge kind="conflict" label={r.code} /> <span>{r.message}</span>
+            </div>
           ))}
         </div>
       ) : null}
@@ -123,43 +137,61 @@ const FACTOR_TEXT: Record<string, keyof Dictionary> = {
 export function VersionPlanPanel({ versionPlan, t }: { versionPlan: VersionPlanArtifact | null; t: Dictionary }) {
   if (!versionPlan) return <p style={{ color: "var(--text-muted)" }}>{t.legacyArtifactUnavailable}</p>;
   return (
-    <div style={{ display: "grid", gap: "10px" }}>
+    <div style={{ display: "grid", gap: "14px" }}>
       {versionPlan.versions.length === 0 ? (
         <p style={{ color: "var(--text-muted)" }}>{t.noSchedulableRequirements}</p>
       ) : null}
-      {versionPlan.versions.map((v) => (
-        <div key={v.id} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <strong>{v.name}</strong> — {v.summary}
-          {v.rationale ? (
-            <p style={{ margin: "4px 0 0", fontSize: "13px", color: "var(--text-muted)" }}>
-              <strong>{t.versionRationale}:</strong> {v.rationale}
-            </p>
-          ) : null}
-          <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "4px" }}>{v.requirementIds.join(", ")}</div>
-        </div>
-      ))}
-      {versionPlan.decisions.map((d) => (
-        <div key={d.requirementId} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-            <code>{d.requirementId}</code>
-            <ProvenanceBadge kind="computed" label={`${t.priority}: ${d.priority}`} />
-            <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{d.versionId ?? t.notChecked}</span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "6px", marginTop: "6px" }}>
-            {FACTOR_LABELS.map((key) => (
-              <div key={key} style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                <strong>{t[FACTOR_TEXT[key]]}:</strong>{" "}
-                {key === "dependencyRequirementIds"
-                  ? (d.planningFactors[key] as string[]).join(", ") || "—"
-                  : String(d.planningFactors[key])}
+      
+      {versionPlan.versions.length > 0 ? (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "10px" }}>
+          {versionPlan.versions.map((v) => (
+            <div key={v.id} className="card" style={{ padding: "14px 16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+                <strong style={{ fontSize: "15px", color: "var(--accent)" }}>{v.name}</strong>
+                <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>{v.requirementIds.length} {t.requirements}</span>
               </div>
-            ))}
-          </div>
-          <div style={{ marginTop: "6px", fontSize: "13px" }}>
-            <strong>{t.versionRationale}:</strong> {d.planningFactors.rationale}
-          </div>
+              <div style={{ fontSize: "13px", color: "var(--text)", marginBottom: "4px" }}>{v.summary}</div>
+              {v.rationale ? (
+                <div style={{ margin: "4px 0", fontSize: "12.5px", color: "var(--text-muted)" }}>
+                  <strong>{t.versionRationale}:</strong> {v.rationale}
+                </div>
+              ) : null}
+              <div style={{ color: "var(--text-faint)", fontSize: "12px", fontFamily: "monospace", marginTop: "4px" }}>
+                {v.requirementIds.join(", ")}
+              </div>
+            </div>
+          ))}
         </div>
-      ))}
+      ) : null}
+
+      <div style={{ display: "grid", gap: "10px" }}>
+        {versionPlan.decisions.map((d) => (
+          <div key={d.requirementId} className="card" style={{ padding: "14px 16px" }}>
+            <div className="card-header" style={{ marginBottom: "6px" }}>
+              <div className="card-title-wrap">
+                <code style={{ fontWeight: 600, color: "var(--text)" }}>{d.requirementId}</code>
+                <ProvenanceBadge kind="computed" label={`${t.priority}: ${d.priority}`} />
+                <span style={{ color: "var(--accent)", fontSize: "12px", fontWeight: 500 }}>{d.versionId ?? t.notChecked}</span>
+              </div>
+            </div>
+            <div className="card-metadata-grid" style={{ marginBottom: "6px" }}>
+              {FACTOR_LABELS.map((key) => (
+                <div key={key} className="card-metadata-item">
+                  <span className="card-metadata-label">{t[FACTOR_TEXT[key]]}</span>
+                  <span className="card-metadata-value">
+                    {key === "dependencyRequirementIds"
+                      ? (d.planningFactors[key] as string[]).join(", ") || "—"
+                      : String(d.planningFactors[key])}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+              <strong>{t.versionRationale}:</strong> {d.planningFactors.rationale}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -206,15 +238,21 @@ export function RunDiagnosticsPanel({ events, t }: { events: RunEvent[]; t: Dict
 
   if (renderable.length === 0) return null;
   return (
-    <div style={{ display: "grid", gap: "10px" }}>
+    <div style={{ display: "grid", gap: "12px" }}>
       {renderable.map((group) => (
-        <div key={group.label}>
-          <h4>{group.label}</h4>
-          {group.items.map((item, i) => (
-            <p key={i} style={{ fontSize: "13px", margin: "4px 0" }}>
-              <ProvenanceBadge kind={group.label === t.diagnosticsError ? "conflict" : group.label === t.diagnosticsRevision ? "computed" : "limitation"} label={item.code} /> {item.message}
-            </p>
-          ))}
+        <div key={group.label} className="card" style={{ padding: "14px 16px" }}>
+          <h4 style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: 600 }}>{group.label}</h4>
+          <div style={{ display: "grid", gap: "6px" }}>
+            {group.items.map((item, i) => (
+              <div key={i} style={{ fontSize: "13px", display: "flex", gap: "8px", alignItems: "center" }}>
+                <ProvenanceBadge
+                  kind={group.label === t.diagnosticsError ? "conflict" : group.label === t.diagnosticsRevision ? "computed" : "limitation"}
+                  label={item.code}
+                />
+                <span style={{ color: "var(--text)" }}>{item.message}</span>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
@@ -224,12 +262,13 @@ export function RunDiagnosticsPanel({ events, t }: { events: RunEvent[]; t: Dict
 export function ArtifactPhaseSelector({ revised, phase, onSelect, t }: { revised: boolean; phase: "draft" | "final"; onSelect: (p: "draft" | "final") => void; t: Dictionary }) {
   if (!revised) return <p style={{ color: "var(--text-muted)", fontSize: "13px" }}>{t.noRevisionRequired}</p>;
   return (
-    <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+    <div className="segmented-control" style={{ marginBottom: "12px" }}>
       {(["draft", "final"] as const).map((p) => (
         <button
           key={p}
+          type="button"
           onClick={() => onSelect(p)}
-          style={{ padding: "4px 12px", borderRadius: "6px", border: phase === p ? "1px solid var(--accent)" : "1px solid var(--border)", background: phase === p ? "var(--bg-elevated)" : "transparent" }}
+          className={`segmented-btn ${phase === p ? "segmented-btn-active" : ""}`}
         >
           {p === "draft" ? t.draft : t.final}
         </button>
@@ -251,8 +290,6 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
   const retryReasons = Array.isArray(usage?.retryReasons) ? (usage.retryReasons as string[]) : [];
   const promptVersions = Array.isArray(manifest?.promptVersions) ? manifest.promptVersions : Array.isArray(usage?.promptVersions) ? (usage.promptVersions as string[]) : [];
 
-  // Mirrors executive-report.tsx buildMarkdownReport: every label goes
-  // through the dictionary so the exported file matches the UI locale.
   const handleExportMarkdown = () => {
     let md = `# ${t.exportPackageTitle}\n\n`;
     if (manifest?.appName) md += `**${t.appNameLabel}**: ${manifest.appName}\n`;
@@ -305,11 +342,11 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
   };
 
   return (
-    <div style={{ display: "grid", gap: "12px" }}>
+    <div style={{ display: "grid", gap: "14px" }}>
       {/* Top Action Bar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-panel)", padding: "12px 16px", borderRadius: "8px", border: "1px solid var(--border)" }}>
+      <div className="card" style={{ padding: "14px 18px", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <div>
-          <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>{t.finalDeliverables}</h4>
+          <h4 style={{ margin: 0, fontSize: "15px", fontWeight: 600 }}>{t.finalDeliverables}</h4>
           <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>{t.finalDeliverablesSubtitle}</span>
         </div>
         <button type="button" className="btn btn-primary" onClick={handleExportMarkdown}>
@@ -319,18 +356,25 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
 
       {goalCoverage ? (
         <div className="card">
-          <h4 style={{ margin: 0 }}>
-            {t.goalCoverage} {goalCoverage.valid ? <ProvenanceBadge kind="computed" label={t.goalCoverageCovered} /> : <ProvenanceBadge kind="conflict" label={t.goalCoverageGap} />}
-          </h4>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "6px", marginTop: "6px" }}>
+          <div className="card-header" style={{ marginBottom: "6px" }}>
+            <h4 className="card-title">
+              {t.goalCoverage}
+            </h4>
+            {goalCoverage.valid ? (
+              <ProvenanceBadge kind="computed" label={t.goalCoverageCovered} />
+            ) : (
+              <ProvenanceBadge kind="conflict" label={t.goalCoverageGap} />
+            )}
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "8px" }}>
             {goalCoverage.items.map((item) => (
-              <div key={item.focusAreaId} style={{ padding: "8px", border: "1px solid var(--border)", borderRadius: "6px", background: "var(--bg-panel)" }}>
-                <div style={{ fontSize: "13px", fontWeight: 600 }}>{item.label}</div>
+              <div key={item.focusAreaId} className="card" style={{ padding: "10px 12px", background: "var(--bg-elevated)" }}>
+                <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text)", marginBottom: "4px" }}>{item.label}</div>
                 <ProvenanceBadge
                   kind={item.status === "covered" ? "computed" : item.status === "uncovered" ? "conflict" : "limitation"}
                   label={item.status === "covered" ? t.goalCoverageCovered : item.status === "uncovered" ? t.goalCoverageUncovered : t.goalCoverageUnsupported}
                 />
-                <div className="muted" style={{ fontSize: "12px", marginTop: "4px" }}>
+                <div style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                   {t.findingId}: {item.findingIds.length} · {t.requirementId}: {item.requirementIds.length}
                 </div>
               </div>
@@ -338,18 +382,20 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
           </div>
         </div>
       ) : null}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "8px" }}>
+
+      <div className="stat-grid">
         {[
           { k: `${t.versionPlan}`, v: finalPrd?.versions.length ?? 0 },
           { k: t.requirementId, v: finalPrd?.requirements.length ?? 0 },
           { k: t.testCases, v: finalPrd?.tests.length ?? 0 },
         ].map((s) => (
-          <div key={s.k} style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-            <div style={{ fontSize: "20px", fontWeight: 700 }}>{s.v}</div>
-            <div style={{ color: "var(--text-muted)", fontSize: "12px" }}>{s.k}</div>
+          <div key={s.k} className="stat-card">
+            <div className="stat-value">{s.v}</div>
+            <div className="stat-label">{s.k}</div>
           </div>
         ))}
       </div>
+
       {report ? (() => {
         const closureStatus = report.closureStatus ?? deriveClosureStatus(finalPrd, report.violations);
         const isClosed = closureStatus === "closed";
@@ -372,13 +418,13 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
 
         return (
           <div style={{ display: "grid", gap: "8px" }}>
-            <div style={{ padding: "10px", borderRadius: "8px", background: report.valid ? "rgba(74,222,128,0.12)" : "rgba(248,113,113,0.12)", border: `1px solid ${report.valid ? "var(--ok)" : "var(--danger)"}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="card" style={{ padding: "12px 16px", flexDirection: "row", justifyContent: "space-between", alignItems: "center", background: report.valid ? "var(--ok-soft)" : "var(--danger-soft)", borderColor: report.valid ? "var(--ok-border)" : "var(--danger-border)" }}>
               <div>
                 <strong>{t.structuralValidation}: {report.valid ? t.completed : t.failed}</strong> — {t.traceability}
               </div>
               <ProvenanceBadge kind={report.valid ? "computed" : "conflict"} label={report.valid ? "VALID" : "INVALID"} />
             </div>
-            <div style={{ padding: "10px", borderRadius: "8px", background: isClosed ? "rgba(74,222,128,0.12)" : isPartial || isAssumptionOnly ? "rgba(251,191,36,0.12)" : "rgba(248,113,113,0.12)", border: `1px solid ${isClosed ? "var(--ok)" : isPartial || isAssumptionOnly ? "var(--warn)" : "var(--danger)"}`, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div className="card" style={{ padding: "12px 16px", flexDirection: "row", justifyContent: "space-between", alignItems: "center", background: isClosed ? "var(--ok-soft)" : isPartial || isAssumptionOnly ? "var(--warn-soft)" : "var(--danger-soft)", borderColor: isClosed ? "var(--ok-border)" : isPartial || isAssumptionOnly ? "var(--warn-border)" : "var(--danger-border)" }}>
               <div>
                 <strong>{t.productClosure}: {closureLabel}</strong>
               </div>
@@ -387,28 +433,36 @@ export function FinalDeliverablesPanel({ finalPrd, report, manifest, goalCoverag
           </div>
         );
       })() : null}
+
       {manifest?.limitations.length ? (
         <div className="card">
-          <h4 style={{ margin: "0 0 8px" }}>{t.limitations}</h4>
-          {dedupeLimitations(manifest.limitations).map((l, i) => (
-            <p key={i} style={{ fontSize: "13px", margin: "6px 0", display: "flex", gap: "8px", alignItems: "center" }}>
-              <ProvenanceBadge kind="limitation" label={translateCode(l.code, locale)} />
-              <span>{translateLimitationMessage(l.code, locale, l.params, l.message)}</span>
-            </p>
-          ))}
+          <h4 style={{ margin: "0 0 8px", fontSize: "14px", fontWeight: 600 }}>{t.limitations}</h4>
+          <div style={{ display: "grid", gap: "6px" }}>
+            {dedupeLimitations(manifest.limitations).map((l, i) => (
+              <div key={i} style={{ fontSize: "13px", display: "flex", gap: "8px", alignItems: "center" }}>
+                <ProvenanceBadge kind="limitation" label={translateCode(l.code, locale)} />
+                <span style={{ color: "var(--text)" }}>{translateLimitationMessage(l.code, locale, l.params, l.message)}</span>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
+
       {manifest ? (
-        <div style={{ padding: "10px", border: "1px solid var(--border)", borderRadius: "8px", background: "var(--bg-panel)" }}>
-          <h4 style={{ margin: "0 0 6px" }}>{t.modelStatus}</h4>
-          <p style={{ fontSize: "13px", margin: "4px 0" }}>
+        <div className="card" style={{ padding: "14px 16px" }}>
+          <h4 style={{ margin: "0 0 6px", fontSize: "14px", fontWeight: 600 }}>{t.modelStatus}</h4>
+          <p style={{ fontSize: "13px", margin: "4px 0", color: "var(--text)" }}>
             {t.logicalCalls}: <strong>{typeof usage?.calls === "number" ? usage.calls : 0}</strong> · {t.modelAttempts}: <strong>{attempts}</strong> · {t.modelRetries}: <strong>{retries}</strong>
           </p>
           {retryReasons.length > 0 ? (
-            <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.modelRetryReasons}: {retryReasons.map((r) => translateCode(r, locale)).join(", ")}</p>
+            <p style={{ fontSize: "12.5px", margin: "4px 0", color: "var(--text-muted)" }}>
+              {t.modelRetryReasons}: {retryReasons.map((r) => translateCode(r, locale)).join(", ")}
+            </p>
           ) : null}
           {promptVersions.length > 0 ? (
-            <p style={{ fontSize: "13px", margin: "4px 0" }}>{t.promptVersions}: {promptVersions.join(", ")}</p>
+            <p style={{ fontSize: "12px", margin: "4px 0", color: "var(--text-faint)", fontFamily: "monospace" }}>
+              {t.promptVersions}: {promptVersions.join(", ")}
+            </p>
           ) : null}
         </div>
       ) : null}

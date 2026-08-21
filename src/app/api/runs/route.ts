@@ -379,8 +379,9 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
   });
   await publisher.publish({ type: "run.accepted", runId, data: { runId } });
 
-  registerActive(runId);
-  after(() => executeAnalysisTask({ runId, request, deps, store, executionMode, modelConfigured, metadata, publisher }));
+  const controller = new AbortController();
+  registerActive(runId, controller);
+  after(() => executeAnalysisTask({ runId, request, deps, store, executionMode, modelConfigured, metadata, publisher, signal: controller.signal }));
 
   return NextResponse.json(
     { runId, status: "running", eventsUrl: `/api/runs/${runId}/events` },
@@ -417,8 +418,9 @@ async function startReplay(sourceRunId: string, store: RunStore, cfg: ReturnType
   });
   await publisher.publish({ type: "run.accepted", runId, data: { runId } });
 
-  registerActive(runId);
-  after(() => executeReplayTask({ runId, store, bundle, delayMs: cfg.replayEventDelayMs, publisher }));
+  const controller = new AbortController();
+  registerActive(runId, controller);
+  after(() => executeReplayTask({ runId, store, bundle, delayMs: cfg.replayEventDelayMs, publisher, signal: controller.signal }));
 
   return NextResponse.json(
     { runId, status: "running", eventsUrl: `/api/runs/${runId}/events` },

@@ -295,19 +295,27 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                   ) : null}
                 </div>
                 <p className={styles.findingSummary}>{f.summary}</p>
-                <div style={{ color: "var(--text-muted)", fontSize: "12px", marginBottom: "6px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
+                <div style={{ color: "var(--text-muted)", fontSize: "12px", marginBottom: "6px", display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                   <span>{t.supportCount}: <strong>{f.supportingSampleCount}</strong> · {t.reviewId}:</span>
                   {f.supportingReviewIds.slice(0, 6).map((id, i) => (
                     <span key={`${id}-${i}`}>
                       {i > 0 ? ", " : ""}
                       <code
                         onClick={() => onJumpToReview?.(id)}
+                        role={onJumpToReview ? "button" : undefined}
+                        tabIndex={onJumpToReview ? 0 : undefined}
+                        onKeyDown={
+                          onJumpToReview
+                            ? (e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  onJumpToReview(id);
+                                }
+                              }
+                            : undefined
+                        }
                         title={onJumpToReview ? `${t.jumpToReview} ${id}` : undefined}
-                        style={{
-                          color: onJumpToReview ? "var(--accent)" : "inherit",
-                          cursor: onJumpToReview ? "pointer" : "default",
-                          textDecoration: onJumpToReview ? "underline" : "none",
-                        }}
+                        className="code-badge"
                       >
                         {id.length > 8 ? id.slice(0, 8) : id}
                       </code>
@@ -325,12 +333,20 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                             {t.reviewId}:{" "}
                             <code
                               onClick={() => onJumpToReview?.(e.reviewId)}
+                              role={onJumpToReview ? "button" : undefined}
+                              tabIndex={onJumpToReview ? 0 : undefined}
+                              onKeyDown={
+                                onJumpToReview
+                                  ? (ev) => {
+                                      if (ev.key === "Enter" || ev.key === " ") {
+                                        ev.preventDefault();
+                                        onJumpToReview(e.reviewId);
+                                      }
+                                    }
+                                  : undefined
+                              }
                               title={onJumpToReview ? `${t.jumpToReview} ${e.reviewId}` : undefined}
-                              style={{
-                                color: onJumpToReview ? "var(--accent)" : "inherit",
-                                cursor: onJumpToReview ? "pointer" : "default",
-                                textDecoration: onJumpToReview ? "underline" : "none",
-                              }}
+                              className="code-badge"
                             >
                               {e.reviewId.slice(0, 8)}
                             </code>
@@ -384,12 +400,13 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
           </div>
           <div className={styles.gridCards}>
             {prd.requirements.map((r) => {
-              const pClass = r.priority === "P0" ? styles.reqCardP0 : r.priority === "P1" ? styles.reqCardP1 : styles.reqCardP2;
               return (
-                <div key={r.id} className={`${styles.reqCard} ${pClass}`}>
+                <div key={r.id} className={styles.reqCard}>
                   <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                     <h4 style={{ margin: 0, fontSize: "14px", fontWeight: 600 }}>{r.title}</h4>
-                    <ProvenanceBadge kind="computed" label={r.priority} />
+                    <span className={`badge-p${r.priority === "P0" ? "0" : r.priority === "P1" ? "1" : "2"}`} style={{ fontSize: "11px", padding: "1px 6px", borderRadius: "var(--radius-xs)" }}>
+                      {r.priority}
+                    </span>
                     <code style={{ fontSize: "12px", color: "var(--text-muted)" }}>{r.id}</code>
                   </div>
                   <p style={{ margin: "4px 0", fontSize: "13px" }}>{r.description}</p>
@@ -472,19 +489,27 @@ export function ExecutiveReport(props: ExecutiveReportProps) {
                   </div>
                 ) : null}
                 {a.sourceReviewIds && a.sourceReviewIds.length > 0 ? (
-                  <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "2px", display: "flex", gap: "4px", alignItems: "center", flexWrap: "wrap" }}>
+                  <div style={{ color: "var(--text-muted)", fontSize: "12px", marginTop: "2px", display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
                     <span>{t.sourceReviews}:</span>
                     {a.sourceReviewIds.slice(0, 6).map((id, i) => (
                       <span key={`${id}-${i}`}>
                         {i > 0 ? ", " : ""}
                         <code
                           onClick={() => onJumpToReview?.(id)}
+                          role={onJumpToReview ? "button" : undefined}
+                          tabIndex={onJumpToReview ? 0 : undefined}
+                          onKeyDown={
+                            onJumpToReview
+                              ? (e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    onJumpToReview(id);
+                                  }
+                                }
+                              : undefined
+                          }
                           title={onJumpToReview ? `${t.jumpToReview} ${id}` : undefined}
-                          style={{
-                            color: onJumpToReview ? "var(--accent)" : "inherit",
-                            cursor: onJumpToReview ? "pointer" : "default",
-                            textDecoration: onJumpToReview ? "underline" : "none",
-                          }}
+                          className="code-badge"
                         >
                           {id.length > 8 ? id.slice(0, 8) : id}
                         </code>

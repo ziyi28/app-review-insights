@@ -20,7 +20,11 @@ function BarList({ bars, t }: { bars: Bar[]; t: Dictionary }) {
           <span className="bar-track">
             <span
               className="bar-fill"
-              style={{ width: max > 0 ? `${(b.count / max) * 100}%` : "0%", background: b.color }}
+              style={{
+                width: "100%",
+                transform: `scaleX(${max > 0 ? b.count / max : 0})`,
+                background: b.color,
+              }}
             />
           </span>
           <span className="bar-count">{b.count}</span>

@@ -9,8 +9,6 @@ import { ProvenanceBadge, type Provenance } from "./provenance-badge";
 import { RatingDistribution, VersionDistribution, LanguageDistribution } from "@/components/artifacts/stats-panels";
 import { dedupeLimitations } from "@/lib/limitations";
 
-/** The stats fields the overview renders (the artifact cache carries a subset
- *  of ReviewStats, so the prop is structural). */
 type StatsShape = {
   rawCount: number;
   includedCount: number;
@@ -57,20 +55,20 @@ export function OverviewTab({
   const cleaning = (cleaned as { cleaning?: CleaningDetails } | undefined)?.cleaning;
 
   return (
-    <div style={{ display: "grid", gap: "14px" }}>
+    <div style={{ display: "grid", gap: "16px" }}>
       {/* App & Goal Banner */}
       {(manifest?.appName || manifest?.appUrl || manifest?.goal) ? (
-        <div className="card" style={{ background: "linear-gradient(135deg, var(--bg-panel) 0%, var(--bg-elevated) 100%)", border: "1px solid var(--border)", display: "grid", gap: "8px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "8px" }}>
-            <div>
-              <h3 style={{ margin: "0 0 4px", fontSize: "16px", fontWeight: 700, display: "flex", alignItems: "center", gap: "8px" }}>
+        <div className="card card-elevated" style={{ padding: "18px 20px" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "10px" }}>
+            <div style={{ display: "grid", gap: "4px" }}>
+              <h3 style={{ margin: 0, fontSize: "17px", fontWeight: 700, display: "flex", alignItems: "center", gap: "10px" }}>
                 <span>{manifest?.appName || t.appSummary}</span>
                 {manifest?.appUrl ? (
                   <a
                     href={manifest.appUrl}
                     target="_blank"
                     rel="noreferrer"
-                    style={{ fontSize: "12px", color: "var(--accent)", textDecoration: "none" }}
+                    style={{ fontSize: "12px", color: "var(--accent)" }}
                     title={t.openInAppStore}
                   >
                     ↗ App Store
@@ -107,17 +105,17 @@ export function OverviewTab({
 
       {/* Top Key Findings Highlight */}
       {findings && findings.length > 0 ? (
-        <div className="card" style={{ borderLeft: "3px solid var(--accent)" }}>
-          <div className="card-header" style={{ marginBottom: "8px" }}>
+        <div className="card">
+          <div className="card-header" style={{ marginBottom: "6px" }}>
             <div className="card-title-wrap">
-              <h4 className="card-title" style={{ fontSize: "14px", fontWeight: 600 }}>
+              <h4 className="card-title" style={{ fontSize: "15px", fontWeight: 600 }}>
                 {t.topFindings} ({findings.length})
               </h4>
             </div>
             <button
               type="button"
               className="btn btn-ghost"
-              style={{ fontSize: "12px", padding: "2px 8px" }}
+              style={{ fontSize: "12px", padding: "3px 10px", height: "auto" }}
               onClick={() => onSelectTab("findings")}
             >
               {t.findings} →
@@ -127,21 +125,21 @@ export function OverviewTab({
             {findings.slice(0, 3).map((f) => (
               <div
                 key={f.id}
+                className="card"
                 style={{
-                  padding: "10px 12px",
-                  borderRadius: "6px",
+                  padding: "12px 14px",
                   background: "var(--bg-elevated)",
                   border: "1px solid var(--border)",
                 }}
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px", marginBottom: "4px" }}>
-                  <strong style={{ fontSize: "13px", color: "var(--text)" }}>{f.title}</strong>
+                  <strong style={{ fontSize: "13.5px", color: "var(--text)" }}>{f.title}</strong>
                   <ProvenanceBadge
                     kind="ai-generated"
                     label={`${t.confidence}: ${typeof f.confidence === "object" && f.confidence !== null ? f.confidence.level : f.confidence}`}
                   />
                 </div>
-                <p style={{ margin: 0, fontSize: "12.5px", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                <p style={{ margin: 0, fontSize: "13px", color: "var(--text-muted)", lineHeight: 1.45 }}>
                   {(f.summary ?? "").length > 120 ? `${f.summary.slice(0, 120)}…` : (f.summary ?? "")}
                 </p>
               </div>
@@ -150,19 +148,19 @@ export function OverviewTab({
         </div>
       ) : null}
 
-      {/* Distributions */}
+      {/* Distributions in Responsive 3-Column Grid */}
       {stats && (stats.ratingDistribution || stats.versionDistribution || stats.languageDistribution) ? (
-        <div className="card" style={{ display: "grid", gap: "16px" }}>
-          <div>
-            <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.ratingDistribution}</h4>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "12px" }}>
+          <div className="card" style={{ padding: "16px 18px" }}>
+            <h4 style={{ margin: "0 0 12px", fontSize: "14px", fontWeight: 600 }}>{t.ratingDistribution}</h4>
             <RatingDistribution distribution={stats.ratingDistribution ?? {}} t={t} />
           </div>
-          <div>
-            <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.versionDistribution}</h4>
+          <div className="card" style={{ padding: "16px 18px" }}>
+            <h4 style={{ margin: "0 0 12px", fontSize: "14px", fontWeight: 600 }}>{t.versionDistribution}</h4>
             <VersionDistribution distribution={stats.versionDistribution ?? {}} t={t} />
           </div>
-          <div>
-            <h4 style={{ margin: "0 0 10px", fontSize: "14px", fontWeight: 600 }}>{t.languageDistribution}</h4>
+          <div className="card" style={{ padding: "16px 18px" }}>
+            <h4 style={{ margin: "0 0 12px", fontSize: "14px", fontWeight: 600 }}>{t.languageDistribution}</h4>
             <LanguageDistribution distribution={stats.languageDistribution ?? {}} t={t} />
           </div>
         </div>
@@ -180,7 +178,7 @@ export function OverviewTab({
               label={goalCoverage.valid ? t.goalCoverageCovered : t.goalCoverageGap}
             />
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "8px", marginTop: "4px" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "8px", marginTop: "4px" }}>
             {goalCoverage.items.map((item) => (
               <div key={item.focusAreaId} className="card card-elevated" style={{ padding: "10px 12px", gap: "6px" }}>
                 <div style={{ fontSize: "13px", fontWeight: 600 }}>{item.label}</div>
@@ -201,7 +199,7 @@ export function OverviewTab({
 
       {/* Collapsible Data Quality Details */}
       {cleaning ? (
-        <details className="card" style={{ cursor: "pointer" }} open>
+        <details className="card" style={{ cursor: "pointer" }}>
           <summary style={{ fontWeight: 600, fontSize: "14px", outline: "none" }}>
             {t.dataCleaningDetails}
           </summary>

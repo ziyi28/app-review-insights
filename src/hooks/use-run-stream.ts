@@ -31,6 +31,7 @@ export type RunStreamState = {
 export type RunStreamActions = {
   start: (body: unknown) => Promise<void>;
   reset: () => void;
+  abort: (targetRunId?: string) => Promise<void>;
   retry: () => Promise<void>;
   /** Switches monitoring to an existing run (read-only history or resume). */
   loadHistory: (runId: string) => void;
@@ -248,6 +249,24 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     [watch],
   );
 
+  const abort = useCallback(
+    async (targetRunId?: string) => {
+      const idToAbort = targetRunId ?? runId;
+      if (idToAbort) {
+        try {
+          await fetch(`/api/runs/${encodeURIComponent(idToAbort)}/abort`, {
+            method: "POST",
+            headers: { "cache-control": "no-store" },
+          });
+        } catch {
+          // Non-fatal
+        }
+      }
+      stop();
+    },
+    [runId, stop],
+  );
+
   // Clear the pending poll timer on unmount.
   useEffect(() => clearTimer, [clearTimer]);
 
@@ -263,6 +282,7 @@ export function useRunStream(): RunStreamState & RunStreamActions {
     canRetry: hasLastBody && !running,
     start,
     reset,
+    abort,
     retry,
     loadHistory,
   };
