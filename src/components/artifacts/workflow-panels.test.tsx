@@ -137,6 +137,12 @@ describe("RunDiagnosticsPanel", () => {
     expect(screen.getAllByText(/validation.failed/)).not.toHaveLength(0);
     expect(screen.getAllByText(/revision.started/)).not.toHaveLength(0);
   });
+
+  it("does not group a user cancellation as an error", () => {
+    const events: RunEvent[] = [event("run.failed", undefined, { error: "Analysis was cancelled by user", cancelled: true })];
+    render(<RunDiagnosticsPanel events={events} t={t} />);
+    expect(screen.queryByText(/Analysis was cancelled by user/)).not.toBeInTheDocument();
+  });
 });
 
 describe("ArtifactPhaseSelector", () => {

@@ -205,6 +205,7 @@ export type Dictionary = {
   delete: string;
   deleteConfirm: string;
   cancel: string;
+  cancelled: string;
   deleteFailed: string;
   viewModeReport: string;
   viewModeWorkbench: string;
@@ -492,6 +493,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     delete: "Delete",
     deleteConfirm: "Delete this run? This cannot be undone.",
     cancel: "Cancel",
+    cancelled: "Cancelled",
     deleteFailed: "Failed to delete the run.",
     viewModeReport: "Executive Report",
     viewModeWorkbench: "Workspace",
@@ -777,6 +779,7 @@ export const dictionaries: Record<Locale, Dictionary> = {
     delete: "删除",
     deleteConfirm: "确定删除该运行？此操作不可恢复。",
     cancel: "取消",
+    cancelled: "已取消",
     deleteFailed: "删除失败。",
     viewModeReport: "执行报告",
     viewModeWorkbench: "结构工作台",

@@ -89,8 +89,8 @@ npm run dev
 分析任务与浏览器连接解耦，作为后台任务运行：
 
 - `POST /api/runs` 立即返回 `202`，响应体为 `{ runId, status: "running", eventsUrl }`；
-  流水线随后通过 Next.js `after()` 在后台执行，**刷新页面、切换历史、新建其他任务都不会
-  终止正在运行的分析**。请求体错误仍以 `application/problem+json` 的 4xx 返回。
+  流水线随后通过 Next.js `after()` 在后台执行，**刷新页面或切换历史不会终止正在运行的分析；确认“新建运行”
+  会先取消当前活动的后端运行，再开始新的分析**。请求体错误仍以 `application/problem+json` 的 4xx 返回。
 - 多个任务可并行运行；「历史」面板是统一的任务列表，每 2 秒刷新一次，展示所有并行任务。
   每个任务有独立的 `runId`、事件发布器与快照目录，事件与产物互不串线。
 - 客户端通过增量轮询 `GET /api/runs/{runId}/events?afterSequence=N` 获取事件，响应为

@@ -311,7 +311,7 @@ describe("OpenAiCompatibleClient", () => {
     expect(client.getUsageLog()).toMatchObject({ attempts: 1, retries: 0 });
   });
 
-  it("does not retry once the client has disconnected", async () => {
+  it("does not call fetch when the client is already disconnected", async () => {
     const controller = new AbortController();
     controller.abort();
     const fetchMock = vi.fn(async () => new Response("err", { status: 500 }));
@@ -323,9 +323,34 @@ describe("OpenAiCompatibleClient", () => {
       signal: controller.signal,
       fetchFn: fetchMock as unknown as typeof fetch,
     });
-    await expect(client.generate(requestBase())).rejects.toThrow(/MODEL_HTTP_ERROR: 500/);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(client.getUsageLog()).toMatchObject({ attempts: 1, retries: 0 });
+    await expect(client.generate(requestBase())).rejects.toThrow(/MODEL_REQUEST_ABORTED/);
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(client.getUsageLog()).toMatchObject({ retries: 0 });
+  });
+
+  it("interrupts retry backoff when the client disconnects", async () => {
+    vi.useFakeTimers();
+    try {
+      const controller = new AbortController();
+      const fetchMock = vi.fn(async () => new Response("err", { status: 500 }));
+      const client = new OpenAiCompatibleClient({
+        baseUrl: "https://example.com/v1",
+        apiKey: "key",
+        model: "model-x",
+        jsonMode: "prompt",
+        signal: controller.signal,
+        fetchFn: fetchMock as unknown as typeof fetch,
+      });
+      const result = client.generate(requestBase());
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+      controller.abort();
+
+      await expect(result).rejects.toThrow(/MODEL_REQUEST_ABORTED/);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("invokes onProgress while the model call is in flight", async () => {

@@ -31,7 +31,7 @@ export type RunStreamState = {
 export type RunStreamActions = {
   start: (body: unknown) => Promise<void>;
   reset: () => void;
-  abort: (targetRunId?: string) => Promise<void>;
+  abort: (targetRunId?: string) => Promise<boolean>;
   retry: () => Promise<void>;
   /** Switches monitoring to an existing run (read-only history or resume). */
   loadHistory: (runId: string) => void;
@@ -250,19 +250,34 @@ export function useRunStream(): RunStreamState & RunStreamActions {
   );
 
   const abort = useCallback(
-    async (targetRunId?: string) => {
+    async (targetRunId?: string): Promise<boolean> => {
       const idToAbort = targetRunId ?? runId;
-      if (idToAbort) {
-        try {
-          await fetch(`/api/runs/${encodeURIComponent(idToAbort)}/abort`, {
-            method: "POST",
-            headers: { "cache-control": "no-store" },
-          });
-        } catch {
-          // Non-fatal
-        }
+      if (!idToAbort) return false;
+
+      let res: Response;
+      try {
+        res = await fetch(`/api/runs/${encodeURIComponent(idToAbort)}/abort`, {
+          method: "POST",
+          headers: { "cache-control": "no-store" },
+        });
+      } catch (err) {
+        throw err instanceof Error ? err : new Error(String(err));
       }
+
+      let payload: { cancelled?: unknown; detail?: unknown; title?: unknown } = {};
+      try {
+        payload = (await res.json()) as typeof payload;
+      } catch {
+        // Use the HTTP status below when an error response has no JSON body.
+      }
+      if (!res.ok) {
+        const detail = typeof payload.detail === "string" ? payload.detail : typeof payload.title === "string" ? payload.title : `HTTP ${res.status}`;
+        throw new Error(detail);
+      }
+      if (payload.cancelled !== true) return false;
+
       stop();
+      return true;
     },
     [runId, stop],
   );

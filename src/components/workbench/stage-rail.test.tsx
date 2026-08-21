@@ -4,7 +4,7 @@ import { getDictionary } from "@/i18n";
 import { StageRail } from "./stage-rail";
 import type { RunEvent } from "@/domain/contracts/events";
 
-function event(type: RunEvent["type"], stage?: string): RunEvent {
+function event(type: RunEvent["type"], stage?: string, data: unknown = {}): RunEvent {
   return {
     protocolVersion: "1",
     sequence: 1,
@@ -14,7 +14,7 @@ function event(type: RunEvent["type"], stage?: string): RunEvent {
     deliveryMode: "live",
     type,
     stage: stage as never,
-    data: {},
+    data,
   };
 }
 
@@ -222,6 +222,22 @@ describe("StageRail", () => {
     const testsItem = screen.getByText("Tests").closest("li");
     expect(testsItem).not.toBeNull();
     expect(within(testsItem!).getByText("Skipped", { exact: true })).toBeVisible();
+  });
+
+  it("marks an in-flight stage Cancelled without showing a failure marker", () => {
+    const events = [
+      event("stage.started", "source"),
+      event("stage.completed", "source"),
+      event("stage.started", "topics"),
+      event("run.failed", undefined, { cancelled: true }),
+    ];
+    render(<StageRail events={events} t={getDictionary("en")} />);
+
+    const topicsItem = screen.getByText("Topics").closest("li");
+    expect(topicsItem).not.toBeNull();
+    expect(within(topicsItem!).getByText("Cancelled", { exact: true })).toBeVisible();
+    expect(topicsItem).not.toHaveTextContent("Failed");
+    expect(screen.queryByText("✕")).not.toBeInTheDocument();
   });
 
   // 强化 interrupted 测试：没有终态事件时，进行中的阶段仍显示 Running，

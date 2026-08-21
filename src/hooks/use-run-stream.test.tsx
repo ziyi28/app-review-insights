@@ -255,11 +255,155 @@ describe("useRunStream", () => {
     });
     await waitFor(() => expect(result.current.runId).toBe("run-cancel"));
 
+    let acknowledged = false;
     await act(async () => {
-      await result.current.abort();
+      acknowledged = await result.current.abort();
     });
 
     expect(fetchSpy).toHaveBeenCalledWith("/api/runs/run-cancel/abort", expect.objectContaining({ method: "POST" }));
+    expect(acknowledged).toBe(true);
     expect(result.current.running).toBe(false);
+  });
+
+  it("keeps the active run and polling when the abort response is HTTP 500", async () => {
+    vi.useFakeTimers();
+    try {
+      let eventPolls = 0;
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = String(input);
+          if (url === "/api/runs" && init?.method === "POST") {
+            return { ok: true, json: async () => ({ runId: "run-cancel" }) };
+          }
+          if (url === "/api/runs/run-cancel/abort" && init?.method === "POST") {
+            return { ok: false, status: 500, json: async () => ({ detail: "server refused cancellation" }) };
+          }
+          eventPolls += 1;
+          return {
+            ok: true,
+            json: async () => ({
+              runId: "run-cancel",
+              status: "running",
+              events: [makeEvent(1, "run.accepted", "run-cancel")],
+              lastSequence: 1,
+            }),
+          };
+        }),
+      );
+      const { result } = renderHook(() => useRunStream());
+
+      await act(async () => {
+        await result.current.start({});
+      });
+      expect(eventPolls).toBe(1);
+
+      await expect(act(async () => result.current.abort())).rejects.toThrow("server refused cancellation");
+      expect(result.current.running).toBe(true);
+      expect(result.current.runId).toBe("run-cancel");
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(800);
+      });
+      expect(eventPolls).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps the active run and polling when the abort request rejects", async () => {
+    vi.useFakeTimers();
+    try {
+      let eventPolls = 0;
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = String(input);
+          if (url === "/api/runs" && init?.method === "POST") {
+            return { ok: true, json: async () => ({ runId: "run-cancel" }) };
+          }
+          if (url === "/api/runs/run-cancel/abort" && init?.method === "POST") {
+            throw new Error("network down");
+          }
+          eventPolls += 1;
+          return {
+            ok: true,
+            json: async () => ({
+              runId: "run-cancel",
+              status: "running",
+              events: [makeEvent(1, "run.accepted", "run-cancel")],
+              lastSequence: 1,
+            }),
+          };
+        }),
+      );
+      const { result } = renderHook(() => useRunStream());
+
+      await act(async () => {
+        await result.current.start({});
+      });
+      expect(eventPolls).toBe(1);
+
+      await expect(act(async () => result.current.abort())).rejects.toThrow("network down");
+      expect(result.current.running).toBe(true);
+      expect(result.current.runId).toBe("run-cancel");
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(800);
+      });
+      expect(eventPolls).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keeps the active run and polling when the server does not acknowledge cancellation", async () => {
+    vi.useFakeTimers();
+    try {
+      let eventPolls = 0;
+      vi.stubGlobal(
+        "fetch",
+        vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+          const url = String(input);
+          if (url === "/api/runs" && init?.method === "POST") {
+            return { ok: true, json: async () => ({ runId: "run-cancel" }) };
+          }
+          if (url === "/api/runs/run-cancel/abort" && init?.method === "POST") {
+            return { ok: true, json: async () => ({ ok: true, runId: "run-cancel", cancelled: false }) };
+          }
+          eventPolls += 1;
+          return {
+            ok: true,
+            json: async () => ({
+              runId: "run-cancel",
+              status: "running",
+              events: [makeEvent(1, "run.accepted", "run-cancel")],
+              lastSequence: 1,
+            }),
+          };
+        }),
+      );
+      const { result } = renderHook(() => useRunStream());
+
+      await act(async () => {
+        await result.current.start({});
+      });
+      expect(eventPolls).toBe(1);
+
+      let acknowledged = true;
+      await act(async () => {
+        acknowledged = await result.current.abort();
+      });
+      expect(acknowledged).toBe(false);
+      expect(result.current.running).toBe(true);
+      expect(result.current.runId).toBe("run-cancel");
+
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(800);
+      });
+      expect(eventPolls).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -20,6 +20,7 @@ type HistoryEntry = {
   createdAt: string;
   canReplay: boolean;
   canRetry?: boolean;
+  cancelled?: boolean;
   goal?: string;
   executionMode?: string;
   appName?: string;
@@ -27,6 +28,10 @@ type HistoryEntry = {
   fileName?: string;
   deletable?: boolean;
 };
+
+function isCancelled(run: HistoryEntry): boolean {
+  return run.status === "cancelled" || run.cancelled === true;
+}
 
 /**
  * Modal listing past runs from GET /api/runs. Each row offers a read-only
@@ -126,7 +131,7 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
           {runs.map((run) => (
             <div key={run.runId} className="card" data-testid={`history-card-${run.runId}`} style={{ display: "grid", gap: "6px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-                <span className={run.status === "completed" ? "chip chip-ok" : run.status === "failed" ? "chip chip-danger" : "chip chip-accent"}>{run.status}</span>
+                <span className={run.status === "completed" && !isCancelled(run) ? "chip chip-ok" : run.status === "failed" && !isCancelled(run) ? "chip chip-danger" : "chip chip-accent"}>{isCancelled(run) ? t.cancelled : run.status}</span>
                 {run.executionMode ? <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{run.executionMode}</span> : null}
                 <span style={{ color: "var(--text-muted)", fontSize: "12px" }}>{new Date(run.createdAt).toLocaleString()}</span>
               </div>
@@ -166,7 +171,7 @@ export function HistoryPanel({ t, open, onClose, onView, onReplay, onRetry }: Hi
                     {t.replay}
                   </button>
                 ) : null}
-                {run.canRetry && onRetry ? (
+                {run.canRetry && !isCancelled(run) && onRetry ? (
                   <button type="button" className="btn btn-primary" data-testid="history-retry" onClick={() => onRetry(run.runId)}>
                     {t.retry}
                   </button>

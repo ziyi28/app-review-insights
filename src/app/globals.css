@@ -65,6 +65,7 @@
   --radius-sm: 6px;
   --radius: 10px;
   --radius-lg: 14px;
+  --radius-full: 999px;
 }
 
 * {

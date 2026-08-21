@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { type Dictionary, type Locale, translateCode } from "@/i18n";
 import { translateLimitationMessage } from "@/i18n/limitation-messages";
-import type { RunEvent } from "@/domain/contracts/events";
+import { isCancelledRunEvent, type RunEvent } from "@/domain/contracts/events";
 import { RunDiagnosticsPanel } from "@/components/artifacts/workflow-panels";
 import styles from "./run-log-panel.module.css";
 
@@ -74,7 +74,7 @@ export function RunLogPanel({ events, t, locale = "zh-CN" }: { events: RunEvent[
     [events, stageFilter, typeFilter],
   );
 
-  const errorCount = events.filter((e) => e.type === "run.failed").length;
+  const errorCount = events.filter((e) => e.type === "run.failed" && !isCancelledRunEvent(e)).length;
   const warningCount = events.filter((e) => e.type === "limitation.reported" || (e.type === "stage.progress" && typeof (e.data as { code?: unknown } | null)?.code === "string")).length;
   const validationCount = events.filter((e) => e.type === "validation.failed").length;
   const revisionCount = events.filter((e) => e.type === "revision.started" || e.type === "revision.completed").length;

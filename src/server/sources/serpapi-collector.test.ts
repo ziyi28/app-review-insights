@@ -199,6 +199,18 @@ describe("collectSerpApiReviews", () => {
     expect(result.limitations).toContainEqual(expect.objectContaining({ code: "SERPAPI_ABORTED" }));
   });
 
+  it("does not call fetch when the caller signal is already aborted", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchFn = jsonFetch(serpPage([reviewItem("must-not-load")]));
+
+    const result = await collectSerpApiReviews(deps({ fetchFn, signal: controller.signal }));
+
+    expect(fetchFn).not.toHaveBeenCalled();
+    expect(result.status).toBe("failed");
+    expect(result.limitations).toContainEqual(expect.objectContaining({ code: "SERPAPI_ABORTED" }));
+  });
+
   it("keeps valid items and drops malformed items as parserDropped", async () => {
     const body = serpPage([reviewItem("good"), { id: "bad", text: "", rating: 9 }]);
     const result = await collectSerpApiReviews(deps({ fetchFn: jsonFetch(body) }));

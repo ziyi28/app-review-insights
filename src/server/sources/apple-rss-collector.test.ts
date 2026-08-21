@@ -36,6 +36,39 @@ describe("collectAppleReviews", () => {
     );
   });
 
+  it("does not call fetch when the caller signal is already aborted", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const deps = depsFor({});
+    deps.signal = controller.signal;
+
+    const result = await collectAppleReviews(deps);
+
+    expect(deps.fetchFn).not.toHaveBeenCalled();
+    expect(result.status).toBe("failed");
+  });
+
+  it("interrupts the delay between pages when the caller aborts", async () => {
+    const controller = new AbortController();
+    const url1 = "https://itunes.apple.com/us/rss/customerreviews/page=1/id=839285684/sortBy=mostRecent/json";
+    const deps = depsFor({ [url1]: fixture("page-01.json") });
+    const sleeping = Promise.withResolvers<void>();
+    const releaseSleep = Promise.withResolvers<void>();
+    deps.signal = controller.signal;
+    deps.sleep = vi.fn(async () => {
+      sleeping.resolve();
+      await releaseSleep.promise;
+    });
+
+    const result = collectAppleReviews(deps);
+    await sleeping.promise;
+    controller.abort();
+
+    await expect(result).rejects.toThrow(/aborted/i);
+    expect(deps.fetchFn).toHaveBeenCalledTimes(1);
+    releaseSleep.resolve();
+  });
+
   it("uses App Store-compatible request headers so the live feed returns reviews", async () => {
     const page1 = JSON.parse(fixture("page-01.json"));
     page1.feed.link.find((l: { attributes?: { rel?: string } }) => l.attributes?.rel === "last").attributes.href =

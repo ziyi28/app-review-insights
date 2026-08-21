@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dictionary } from "@/i18n";
-import type { RunEvent } from "@/domain/contracts/events";
+import { isCancelledRunEvent, type RunEvent } from "@/domain/contracts/events";
 
 const STAGE_ORDER = ["source", "prepare", "scope", "topics", "findings", "evidence-validation", "planning", "requirement-evidence", "tests", "traceability", "revision"] as const;
 export const STAGE_LABELS: Record<(typeof STAGE_ORDER)[number], keyof Dictionary> = {
@@ -43,6 +43,7 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
   const timings = new Map<string, StageTiming>();
   let currentStage: string | null = null;
   let failed = false;
+  let cancelled = false;
   // A run that reached a terminal event (completed/failed) is over: any stage
   // that never started is genuinely SKIPPED, not waiting for input. An
   // interrupted run (no terminal event yet) keeps its unstarted stages as
@@ -66,7 +67,8 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
       });
       if (currentStage === e.stage) currentStage = null;
     }
-    if (e.type === "run.failed") failed = true;
+    if (isCancelledRunEvent(e)) cancelled = true;
+    else if (e.type === "run.failed") failed = true;
     if (e.type === "run.completed" || e.type === "run.failed") hasTerminal = true;
   }
 
@@ -88,6 +90,7 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
         // A stage that started but never finished on a failed run is itself the
         // failure point; once the run is terminal nothing can still be "current".
         const failedStage = failed && started && !done;
+        const cancelledStage = cancelled && started && !done;
         const current = !hasTerminal && currentStage === stage && !done;
         const skipped = hasTerminal && !started;
         const duration = elapsedFor(stage);
@@ -96,13 +99,15 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
           ? t.completed
           : failedStage
             ? t.failed
+            : cancelledStage
+              ? t.cancelled
             : current
               ? t.running
               : skipped
                 ? t.stageSkipped
                 : t.waiting;
         return (
-          <li key={stage} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: done || current || failedStage ? 1 : 0.55 }}>
+          <li key={stage} style={{ display: "flex", alignItems: "center", gap: "8px", opacity: done || current || failedStage || cancelledStage ? 1 : 0.55 }}>
             <span
               aria-hidden="true"
               style={{
@@ -130,6 +135,10 @@ export function StageRail({ events, t }: { events: RunEvent[]; t: Dictionary }) 
                 }}
               >
                 {t.failed}
+              </span>
+            ) : cancelledStage ? (
+              <span aria-hidden="true" style={{ color: "var(--text-muted)", fontSize: "12px", fontWeight: 600, flexShrink: 0 }}>
+                {t.cancelled}
               </span>
             ) : skipped ? (
               <span

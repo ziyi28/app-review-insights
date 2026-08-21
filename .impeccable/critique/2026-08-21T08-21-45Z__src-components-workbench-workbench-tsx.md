@@ -2,7 +2,7 @@
 target: the existing dashboard page
 total_score: 32
 max_score: 40
-na_heuristics: 
+na_heuristics:
 p0_count: 0
 p1_count: 2
 timestamp: 2026-08-21T08-21-45Z
@@ -12,8 +12,8 @@ Method: dual-agent (A: c6c01b1b-2caf-4658-b1bc-509d0b3e1550 · B: 0fc0df62-7e03-
 
 # Design Critique: App Review Insights Dashboard Workbench
 
-**Target**: `src/components/workbench/workbench.tsx` (Dashboard Workbench Surface)  
-**Design Director Metaphor**: "The Precision Evidence Lab" (精密证据工坊)  
+**Target**: `src/components/workbench/workbench.tsx` (Dashboard Workbench Surface)
+**Design Director Metaphor**: "The Precision Evidence Lab" (精密证据工坊)
 **Design Health Score**: **32/40** (Rating: **Good**)
 
 ---

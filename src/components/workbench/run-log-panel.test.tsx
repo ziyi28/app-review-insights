@@ -60,4 +60,15 @@ describe("RunLogPanel", () => {
     expect(within(table).getByText("run.completed")).toBeInTheDocument();
     expect(within(table).queryByText("limitation.reported")).not.toBeInTheDocument();
   });
+
+  it("does not count a user cancellation as a diagnostic error", () => {
+    const cancelled = [
+      event({ sequence: 1, type: "run.accepted" }),
+      event({ sequence: 2, type: "run.failed", data: { error: "Analysis was cancelled by user", cancelled: true } }),
+    ];
+    render(<RunLogPanel events={cancelled} t={t} />);
+
+    const errorStat = screen.getAllByText(t.diagnosticsError).map((el) => el.closest(".stat-card")).find(Boolean);
+    expect(errorStat).toHaveTextContent("0");
+  });
 });

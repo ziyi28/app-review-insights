@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen, waitFor, act, fireEvent } from "@testing-library/react";
+import { render, screen, waitFor, act, fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Workbench } from "./workbench";
 import { getDictionary } from "@/i18n";
@@ -82,6 +82,61 @@ function startStreamingPost() {
   );
 }
 
+function startKnownRunningRun(
+  abortMode: "reject" | "acknowledge" = "acknowledge",
+  terminalStatus: "running" | "cancelled" | "failed" = "running",
+  cancellationFlag = false,
+) {
+  localStorage.setItem("app-review-planner:last-run-id", "run-active");
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    if (url === "/api/config") {
+      return { ok: true, json: async () => ({ modelConfigured: false, serpApiKeyConfigured: false }) };
+    }
+    if (url === "/api/runs" && !init?.method) {
+      return { ok: true, json: async () => ({ runs: [{ runId: "run-active", status: terminalStatus }] }) };
+    }
+    if (url.includes("/api/runs/run-active/events")) {
+      return {
+        ok: true,
+        json: async () => ({
+          runId: "run-active",
+          status: terminalStatus,
+          events: [
+            {
+              protocolVersion: "1",
+              sequence: 1,
+              eventId: "run-active-accepted",
+              runId: "run-active",
+              timestamp: "2026-08-12T00:00:00.000Z",
+              deliveryMode: "live",
+              type: cancellationFlag ? "run.failed" : "run.accepted",
+              data: cancellationFlag ? { cancelled: true } : {},
+            },
+          ],
+          lastSequence: 1,
+        }),
+      };
+    }
+    if (url === "/api/runs/run-active/abort" && init?.method === "POST") {
+      if (abortMode === "reject") throw new Error("cancel request failed");
+      return { ok: true, json: async () => ({ ok: true, runId: "run-active", cancelled: true }) };
+    }
+    return { ok: true, json: async () => ({}) };
+  });
+  vi.stubGlobal("fetch", fetchMock);
+  return fetchMock;
+}
+
+async function findRunCancelTrigger() {
+  await waitFor(() => {
+    expect(
+      screen.getAllByRole("button", { name: tZh.cancel }).some((button) => button.getAttribute("style")?.includes("var(--danger)")),
+    ).toBe(true);
+  });
+  return screen.getAllByRole("button", { name: tZh.cancel }).find((button) => button.getAttribute("style")?.includes("var(--danger)"))!;
+}
+
 describe("Workbench settings integration", () => {
   it("defaults to the Chinese interface", () => {
     stubConfigFetch();
@@ -148,6 +203,83 @@ describe("Workbench settings integration", () => {
     // carry the "starting" text).
     expect(screen.queryByRole("button", { name: tZh.analyzeFresh })).not.toBeInTheDocument();
     expect(screen.getAllByText(tZh.starting).length).toBeGreaterThan(0);
+    expect(screen.getByRole("button", { name: tZh.newRun })).toBeDisabled();
+  });
+
+  it("keeps the cancellation dialog and current task when abort is rejected", async () => {
+    const fetchMock = startKnownRunningRun("reject");
+    const user = userEvent.setup();
+    render(<Workbench />);
+
+    const cancelTrigger = await findRunCancelTrigger();
+    await user.click(cancelTrigger);
+    const dialog = await screen.findByRole("alertdialog");
+    await user.click(within(dialog).getByRole("button", { name: /确认中止/ }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/api/runs/run-active/abort", expect.objectContaining({ method: "POST" }));
+    });
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByText("cancel request failed")).toBeInTheDocument();
+    expect(within(screen.getByRole("alertdialog")).getByRole("button", { name: tZh.cancel })).toBeInTheDocument();
+  });
+
+  it("traps focus, closes on Escape, and restores the New Run trigger focus", async () => {
+    startKnownRunningRun();
+    const user = userEvent.setup();
+    render(<Workbench />);
+
+    await findRunCancelTrigger();
+    const trigger = await screen.findByRole("button", { name: tZh.newRun });
+    await user.click(trigger);
+    const dialog = await screen.findByRole("alertdialog");
+    const cancelButton = within(dialog).getByRole("button", { name: tZh.cancel });
+    const confirmButton = within(dialog).getByRole("button", { name: /确认放弃并新建/ });
+
+    await waitFor(() => expect(cancelButton).toHaveFocus());
+    fireEvent.keyDown(confirmButton, { key: "Tab" });
+    expect(cancelButton).toHaveFocus();
+    fireEvent.keyDown(cancelButton, { key: "Tab", shiftKey: true });
+    expect(confirmButton).toHaveFocus();
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it("traps focus, closes on Escape, and restores the Cancel trigger focus", async () => {
+    startKnownRunningRun();
+    const user = userEvent.setup();
+    render(<Workbench />);
+
+    const trigger = await findRunCancelTrigger();
+    await user.click(trigger);
+    const dialog = await screen.findByRole("alertdialog");
+    const cancelButton = within(dialog).getByRole("button", { name: tZh.cancel });
+    const confirmButton = within(dialog).getByRole("button", { name: /确认中止/ });
+
+    await waitFor(() => expect(cancelButton).toHaveFocus());
+    fireEvent.keyDown(confirmButton, { key: "Tab" });
+    expect(cancelButton).toHaveFocus();
+    fireEvent.keyDown(cancelButton, { key: "Tab", shiftKey: true });
+    expect(confirmButton).toHaveFocus();
+    fireEvent.keyDown(dialog, { key: "Escape" });
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
+
+  it.each([
+    ["cancelled status", "cancelled", false],
+    ["cancelled event flag", "failed", true],
+  ] as const)("does not present cancelled terminal runs as failed (%s)", async (_caseName, terminalStatus, cancellationFlag) => {
+    startKnownRunningRun("acknowledge", terminalStatus, cancellationFlag);
+    render(<Workbench />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: tZh.newRun })).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: tZh.retry })).not.toBeInTheDocument();
+    });
+    expect(screen.queryByText(tZh.runFailed)).not.toBeInTheDocument();
+    expect(screen.getByText(tZh.cancelled)).toBeInTheDocument();
   });
 
   it("retries a failed run from history panel", async () => {

@@ -152,13 +152,13 @@ App Review Insights 采用深邃雅致的曜石青灰（Obsidian Slate）暗黑�
 - **Status AI** (`#818cf8`): 大模型提炼生成标记。
 
 ### Named Rules
-**The Single Focus Rule.** 荧光天蓝色仅出现在当前活跃选项卡、主操作按钮或运行中心跳指示器上，在全屏视觉面积中占比不超过 5%。  
+**The Single Focus Rule.** 荧光天蓝色仅出现在当前活跃选项卡、主操作按钮或运行中心跳指示器上，在全屏视觉面积中占比不超过 5%。
 **The Priority Badge Rule.** 优先级严禁使用卡片左侧粗边线（border-left），必须通过自包含的徽章胶囊（`badge-p0`, `badge-p1`, `badge-p2`）清晰传达。
 
 ## Typography
 
-**Display / Body Font:** 现代操作系统无衬线字体栈 (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif`)  
-**Code / Machine Font:** 高可读等宽字体族 (`ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace`)  
+**Display / Body Font:** 现代操作系统无衬线字体栈 (`-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif`)
+**Code / Machine Font:** 高可读等宽字体族 (`ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace`)
 
 **Character:** 极度克制、清爽利落的现代工具栈排版，数字全部采用等宽对齐（tabular-nums）。
 

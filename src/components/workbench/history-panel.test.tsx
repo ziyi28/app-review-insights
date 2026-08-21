@@ -102,6 +102,33 @@ describe("HistoryPanel", () => {
     expect(onRetry).toHaveBeenCalledWith("run-live");
   });
 
+  it("renders cancelled runs without exposing failed-run retry", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          runs: [
+            { runId: "run-cancelled", status: "cancelled", createdAt: "2026-08-12T00:00:00Z", canReplay: false, canRetry: true, goal: "Stopped by user" },
+            { runId: "run-cancelled-flag", status: "failed", cancelled: true, createdAt: "2026-08-11T00:00:00Z", canReplay: false, canRetry: true, goal: "Stopped with cancellation flag" },
+            { runId: "run-failed", status: "failed", createdAt: "2026-08-10T00:00:00Z", canReplay: false, canRetry: true, goal: "Actual failure" },
+          ],
+        }),
+      }),
+    );
+
+    const onRetry = vi.fn();
+    render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} onRetry={onRetry} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Stopped by user")).toBeInTheDocument();
+    });
+    expect(screen.getAllByText(tEn.cancelled)).toHaveLength(2);
+    expect(screen.getAllByRole("button", { name: tEn.retry })).toHaveLength(1);
+    expect(screen.getByTestId("history-card-run-cancelled")).not.toHaveTextContent(tEn.retry);
+    expect(screen.getByTestId("history-card-run-cancelled-flag")).not.toHaveTextContent(tEn.retry);
+  });
+
   it("shows an empty state when there are no runs", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ runs: [] }) }));
     render(<HistoryPanel t={tEn} open onClose={vi.fn()} onView={vi.fn()} onReplay={vi.fn()} />);

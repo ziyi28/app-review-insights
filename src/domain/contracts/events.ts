@@ -42,3 +42,7 @@ export const RunEventSchema = z.object({
   data: z.unknown(),
 });
 export type RunEvent = z.infer<typeof RunEventSchema>;
+
+export function isCancelledRunEvent(event: RunEvent): boolean {
+  return event.type === "run.failed" && (event.data as { cancelled?: unknown } | null)?.cancelled === true;
+}

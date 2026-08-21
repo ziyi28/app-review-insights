@@ -5,7 +5,9 @@ import path from "node:path";
 import type { RawReview } from "@/domain/contracts/review";
 import type { SourcePreview } from "@/server/sources/source-preview";
 import { RunStore } from "@/server/runs/run-store";
-import { isRunActive, resetActiveRuns } from "@/server/runs/run-executor";
+import { cancelActiveRun, isRunActive, resetActiveRuns } from "@/server/runs/run-executor";
+
+const modelMock = vi.hoisted(() => ({ signals: [] as (AbortSignal | undefined)[], generateCalls: 0 }));
 
 // The route schedules the pipeline via `after()` (which needs a request scope).
 // Tests run the route handler directly, so `after` is stubbed to capture the
@@ -39,6 +41,19 @@ vi.mock("@/server/sources/apple-rss-collector", async (importOriginal) => {
     }),
   };
 });
+
+vi.mock("@/server/model/openai-compatible-client", () => ({
+  OpenAiCompatibleClient: class {
+    constructor(deps: { signal?: AbortSignal }) {
+      modelMock.signals.push(deps.signal);
+    }
+
+    async generate(): Promise<never> {
+      modelMock.generateCalls += 1;
+      throw new Error("test model should not be called");
+    }
+  },
+}));
 
 import { GET, POST } from "./route";
 import { after } from "next/server";
@@ -175,6 +190,8 @@ beforeEach(() => {
   process.env.DATA_CONFIG_FILE = path.join(baseDir, "config.local.json");
   process.env.MODEL_BASE_URL = "https://example.com/v1";
   process.env.MODEL_NAME = "model";
+  modelMock.signals.length = 0;
+  modelMock.generateCalls = 0;
   resetActiveRuns();
   afterMock.mockClear();
 });
@@ -186,6 +203,34 @@ afterEach(() => {
 });
 
 describe("POST /api/runs preview-backed live", () => {
+  it("builds the model with the active run's cancellation signal", async () => {
+    writeSnapshot(snapshot(1));
+    const res = await POST(analyzeRequest("preview-test", "live"));
+    expect(res.status).toBe(202);
+    const body = (await res.json()) as { runId: string };
+    const signal = modelMock.signals.at(-1);
+    expect(signal).toBeDefined();
+    expect(signal?.aborted).toBe(false);
+
+    expect(cancelActiveRun(body.runId)).toBe(true);
+    expect(signal?.aborted).toBe(true);
+  });
+
+  it("does not start model work when cancellation already won before the task callback", async () => {
+    writeSnapshot(snapshot(1));
+    const res = await POST(analyzeRequest("preview-test", "live"));
+    const body = (await res.json()) as { runId: string };
+    const callback = afterMock.mock.calls.at(-1)?.[0] as (() => Promise<void>) | undefined;
+    expect(callback).toBeTypeOf("function");
+
+    expect(cancelActiveRun(body.runId)).toBe(true);
+    await callback!();
+
+    expect(modelMock.generateCalls).toBe(0);
+    const manifest = await new RunStore(process.env.RUNS_DIR!).readManifest(body.runId);
+    expect(manifest.status).toBe("cancelled");
+  });
+
   it("rejects a previewId without a reviewSelection", async () => {
     const req = new Request("http://localhost/api/runs", {
       method: "POST",

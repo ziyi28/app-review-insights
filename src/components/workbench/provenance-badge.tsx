@@ -7,7 +7,7 @@ const PROVENANCE_STYLES: Record<
   { color: string; background: string; border: string }
 > = {
   "ai-generated": {
-    color: "var(--status-ai)",
+    color: "var(--ai)",
     background: "rgba(129, 140, 248, 0.12)",
     border: "1px solid rgba(129, 140, 248, 0.28)",
   },

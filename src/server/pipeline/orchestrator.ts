@@ -124,6 +124,7 @@ type StageStatus = { status: string; startedAt?: string; finishedAt?: string; at
 async function collectSource(
   source: ExecuteDeps["source"],
   deps: ExecuteDeps,
+  signal?: AbortSignal,
 ): Promise<{
   status: "complete" | "suspect-empty" | "partial" | "failed";
   rawReviews: RawReview[];
@@ -132,6 +133,7 @@ async function collectSource(
   sourceSummary: unknown;
   sourceFiles: SourceFile[];
 }> {
+  if (signal?.aborted) throw new Error("RUN_CANCELLED");
   if (source.kind === "preview") {
     const data = source.data;
     return {
@@ -145,15 +147,23 @@ async function collectSource(
   }
   if (source.kind === "apple-rss") {
     const { collectAppleReviews } = await import("@/server/sources/apple-rss-collector");
+    if (signal?.aborted) throw new Error("RUN_CANCELLED");
+    const baseSleep = deps.sleep ?? (async () => {});
+    const sleep = async (ms: number) => {
+      if (signal?.aborted) throw new Error("RUN_CANCELLED");
+      await baseSleep(ms);
+      if (signal?.aborted) throw new Error("RUN_CANCELLED");
+    };
     const collectorDeps = {
       fetchFn: deps.fetchFn ?? fetch,
-      sleep: deps.sleep ?? (async () => {}),
+      sleep,
       now: deps.now ?? (() => new Date().toISOString()),
       baseUrl: source.appleRssBaseUrl,
       appId: source.appId,
       maxPages: deps.maxPages ?? 10,
       pageDelayMs: deps.pageDelayMs ?? 500,
       timeoutMs: deps.timeoutMs ?? 10_000,
+      signal,
     };
     const result = await collectAppleReviews(collectorDeps);
     return {
@@ -235,6 +245,7 @@ export async function executeRun(
   modelConfigured = true,
   metadata?: RunMetadata,
   signal?: AbortSignal,
+  claimFinalization: () => boolean = () => true,
 ): Promise<void> {
   const createdAt = new Date().toISOString();
   const stages: Record<string, StageStatus> = {};
@@ -243,6 +254,9 @@ export async function executeRun(
   let reviews: NormalizedReview[] = [];
   let prd: Prd | null = null;
   let revisionNeeded = false;
+  const terminalState: {
+    intent: { status: "completed" | "failed"; canReplay: boolean; eventPublished: boolean } | null;
+  } = { intent: null };
 
   const checkAborted = () => {
     if (signal?.aborted) {
@@ -276,8 +290,36 @@ export async function executeRun(
   // and finalized at the end; the artifact route falls back to attempt-1 when
   // the manifest has no index for an artifact yet.
   const publishArtifact = async (name: ArtifactName, attempt: number, value: unknown): Promise<void> => {
+    checkAborted();
     const file = await publisher.publishArtifact(runId, name, attempt, value);
+    checkAborted();
     manifestArtifacts[name] = { attempt, file };
+  };
+
+  const finishTerminal = async (
+    status: "completed" | "failed",
+    data: unknown,
+    canReplay: boolean,
+  ): Promise<void> => {
+    checkAborted();
+    if (!claimFinalization()) throw new Error("RUN_CANCELLED");
+    terminalState.intent = { status, canReplay, eventPublished: false };
+    await publisher.publish({ type: status === "completed" ? "run.completed" : "run.failed", runId, data });
+    terminalState.intent.eventPublished = true;
+    await finalizeManifest(
+      runId,
+      status,
+      stages,
+      limitations,
+      canReplay,
+      executionMode,
+      manifestArtifacts,
+      store,
+      goal,
+      deps.model,
+      createdAt,
+      metadata,
+    );
   };
 
   try {
@@ -313,7 +355,8 @@ export async function executeRun(
           ? "loading selected review sample…"
           : "parsing imported reviews…";
     await publisher.publish({ type: "stage.progress", runId, stage: "source", data: { message: sourceStageMessage } });
-    const source = await collectSource(deps.source, deps);
+    const source = await collectSource(deps.source, deps, signal);
+    checkAborted();
     // The authoritative source completeness for the entire run. It is captured
     // once here and threaded into every stage that derives confidence or
     // sufficiency — never re-derived from limitation codes, which would both
@@ -333,6 +376,7 @@ export async function executeRun(
     // already on disk and immutable (the write rejects overwrites). Raw bodies
     // live only in the run directory and are never exposed over the API.
     for (const file of source.sourceFiles) {
+      checkAborted();
       await store.writeSourceFile(runId, file.relativePath, file.content);
     }
     // Persist the exact reviews that entered this run so downstream rawRefs and
@@ -347,8 +391,7 @@ export async function executeRun(
       // so the source limitations enter the ledger here instead.
       limitations.push(...source.limitations);
       limitations.push({ code: "SOURCE_FAILED", message: "Source collection failed; no reviews could be analyzed", stage: "source" });
-      await publisher.publish({ type: "run.failed", runId, data: { error: "source collection failed" } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+      await finishTerminal("failed", { error: "source collection failed" }, false);
       return;
     }
 
@@ -387,8 +430,7 @@ export async function executeRun(
         message: "No model is configured; only collection/import and cleaning ran",
         stage: "scope",
       });
-      await publisher.publish({ type: "run.completed", runId, data: { outcome: "model-not-configured", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+      await finishTerminal("completed", { outcome: "model-not-configured", limitations }, false);
       return;
     }
 
@@ -398,8 +440,7 @@ export async function executeRun(
     const corpus = reviews.filter((r) => r.includedInAnalysis);
     if (corpus.length === 0) {
       // Suspect-empty / no analyzable reviews: do not enter model stages.
-      await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-data", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+      await finishTerminal("completed", { outcome: "insufficient-data", limitations }, false);
       return;
     }
 
@@ -407,6 +448,7 @@ export async function executeRun(
     // stages map findings/requirements back to, so the plan demonstrably covers
     // the goal the user asked for.
     await startStage("scope");
+    checkAborted();
     const scope = await runScopeStage({
       model: deps.model,
       goal,
@@ -435,13 +477,13 @@ export async function executeRun(
     await endStage("scope");
 
     if (scoped.length === 0) {
-      await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-data", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt);
+      await finishTerminal("completed", { outcome: "insufficient-data", limitations }, false);
       return;
     }
 
     // Topics
     await startStage("topics");
+    checkAborted();
     const topics = await runTopicsStage({
       model: deps.model,
       reviews: analysisReviews,
@@ -461,6 +503,7 @@ export async function executeRun(
 
     // Findings
     await startStage("findings");
+    checkAborted();
     const findingsResult = await runFindingsStage({
       model: deps.model,
       reviews: analysisReviews,
@@ -525,8 +568,7 @@ export async function executeRun(
 
     if (findingsResult.findings.length === 0) {
       await publishArtifact("final-report", 1, { prd: null, report: null, limitations });
-      await publisher.publish({ type: "run.completed", runId, data: { outcome: "insufficient-evidence", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+      await finishTerminal("completed", { outcome: "insufficient-evidence", limitations }, false);
       return;
     }
 
@@ -570,25 +612,7 @@ export async function executeRun(
         goalCoverage: goalCoverageArtifact,
       });
 
-      await publisher.publish({
-        type: "run.completed",
-        runId,
-        data: { outcome: "insufficient-evidence", limitations },
-      });
-      await finalizeManifest(
-        runId,
-        "completed",
-        stages,
-        limitations,
-        true,
-        executionMode,
-        manifestArtifacts,
-        store,
-        goal,
-        deps.model,
-        createdAt,
-        metadata,
-      );
+      await finishTerminal("completed", { outcome: "insufficient-evidence", limitations }, true);
       return;
     }
 
@@ -596,6 +620,7 @@ export async function executeRun(
     // sufficient findings but no requirement, exactly one coverage-repair call
     // runs; a non-monotonic repair (losing existing coverage) is rejected.
     await startStage("planning");
+    checkAborted();
     const planning = await runPlanningWithCoverage({ model: deps.model, findings: findingsResult.findings, outputLocale, goal, focusAreas, onProgress: onStageProgress("planning") });
     for (const w of planning.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "planning", data: w });
     await endStage("planning");
@@ -605,6 +630,7 @@ export async function executeRun(
     // set as its formal evidence. sourceReviewIds narrows to direct support;
     // the audit is persisted so the direct/partial/none split is inspectable.
     await startStage("requirement-evidence");
+    checkAborted();
     const requirementEvidence = await runRequirementEvidenceStage({
       model: deps.model,
       requirements: planning.prd.requirements,
@@ -650,6 +676,7 @@ export async function executeRun(
 
     // Tests
     await startStage("tests");
+    checkAborted();
     const testsResult = await runTestsStage({ model: deps.model, requirements: planning.prd.requirements, outputLocale, prd: planning.prd, reviews: analysisReviews, onProgress: onStageProgress("tests") });
     for (const w of testsResult.warnings) await publisher.publish({ type: "stage.progress", runId, stage: "tests", data: w });
     prd = testsResult.prd;
@@ -679,6 +706,7 @@ export async function executeRun(
         requirements: Object.fromEntries(prd.requirements.map((r) => [r.id, r.sourceReviewIds])),
       };
       const allowedReviewIds = [...new Set(analysisReviews.map((r) => r.reviewId))];
+      checkAborted();
       const revision = await runRevisionStage({
         model: deps.model,
         violations: report.violations,
@@ -789,19 +817,43 @@ export async function executeRun(
     await publishArtifact("final-report", 1, { prd, report, limitations, goalCoverage: goalCoverageArtifact });
 
     if (report.valid) {
-      await publisher.publish({ type: "run.completed", runId, data: { outcome: "valid", limitations } });
-      await finalizeManifest(runId, "completed", stages, limitations, true, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+      await finishTerminal("completed", { outcome: "valid", limitations }, true);
     } else {
-      await publisher.publish({ type: "run.failed", runId, data: { outcome: "invalid-after-revision", limitations } });
-      await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+      await finishTerminal("failed", { outcome: "invalid-after-revision", limitations }, false);
     }
   } catch (err) {
-    const isCancelled = signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED");
+    const terminalIntent = terminalState.intent;
+    if (terminalIntent?.eventPublished) {
+      await finalizeManifest(
+        runId,
+        terminalIntent.status,
+        stages,
+        limitations,
+        terminalIntent.canReplay,
+        executionMode,
+        manifestArtifacts,
+        store,
+        goal,
+        deps.model,
+        createdAt,
+        metadata,
+      );
+      return;
+    }
+
+    const isCancelled = terminalIntent === null
+      && (signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED"));
     const code = isCancelled ? "RUN_CANCELLED" : "PIPELINE_ERROR";
     const message = isCancelled ? "Analysis was cancelled by user" : (err instanceof Error ? err.message : String(err));
     limitations.push({ code, message, stage: "pipeline" });
-    await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
-    await finalizeManifest(runId, "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+    if (isCancelled || terminalIntent !== null || claimFinalization()) {
+      try {
+        await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
+      } catch {
+        // A terminal manifest still prevents the run from remaining stuck.
+      }
+      await finalizeManifest(runId, isCancelled ? "cancelled" : "failed", stages, limitations, false, executionMode, manifestArtifacts, store, goal, deps.model, createdAt, metadata);
+    }
   }
 }
 
@@ -846,7 +898,7 @@ function modelUsageFrom(model: unknown): Record<string, unknown> | undefined {
 
 async function finalizeManifest(
   runId: string,
-  status: "completed" | "failed",
+  status: "completed" | "failed" | "cancelled",
   stages: Record<string, StageStatus>,
   limitations: Limitation[],
   canReplay: boolean,

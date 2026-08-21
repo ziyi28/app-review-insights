@@ -15,49 +15,65 @@ import { loadReplayRun, type ReplayBundle } from "./replay";
  * It is intentionally process-local: the project is a single-process local app,
  * and no cross-process task store is introduced.
  */
-const activeRunIds = new Set<string>();
-const activeRunControllers = new Map<string, AbortController>();
+type ActiveRunPhase = "running" | "cancelling" | "finalizing";
+type ActiveRun = { controller: AbortController; phase: ActiveRunPhase };
 
-export function registerActive(runId: string, controller?: AbortController): void {
-  activeRunIds.add(runId);
-  if (controller) {
-    activeRunControllers.set(runId, controller);
-  }
+const activeRuns = new Map<string, ActiveRun>();
+
+export function registerActive(runId: string, controller = new AbortController()): void {
+  activeRuns.set(runId, { controller, phase: controller.signal.aborted ? "cancelling" : "running" });
 }
 
 export function unregisterActive(runId: string): void {
-  activeRunIds.delete(runId);
-  activeRunControllers.delete(runId);
+  activeRuns.delete(runId);
 }
 
 export function isRunActive(runId: string): boolean {
-  return activeRunIds.has(runId);
+  return activeRuns.has(runId);
 }
 
 export function cancelActiveRun(runId: string): boolean {
-  const controller = activeRunControllers.get(runId);
-  if (controller) {
-    controller.abort();
-    return true;
+  const active = activeRuns.get(runId);
+  if (!active || active.phase !== "running") return false;
+  if (active.controller.signal.aborted) {
+    active.phase = "cancelling";
+    return false;
   }
-  return false;
+  active.phase = "cancelling";
+  active.controller.abort();
+  return true;
+}
+
+/** Claims the only terminal completion/failure slot for a still-running task. */
+export function claimRunFinalization(runId: string): boolean {
+  const active = activeRuns.get(runId);
+  if (!active || active.phase !== "running") return false;
+  if (active.controller.signal.aborted) {
+    active.phase = "cancelling";
+    return false;
+  }
+  active.phase = "finalizing";
+  return true;
 }
 
 export function activeRunIdsSnapshot(): string[] {
-  return [...activeRunIds];
+  return [...activeRuns.keys()];
 }
 
 /** Clears the registry (test-only: isolates assertions across test files). */
 export function resetActiveRuns(): void {
-  for (const controller of activeRunControllers.values()) {
+  for (const { controller } of activeRuns.values()) {
     try {
       controller.abort();
     } catch {
       // ignore
     }
   }
-  activeRunIds.clear();
-  activeRunControllers.clear();
+  activeRuns.clear();
+}
+
+function activeRunSignal(runId: string): AbortSignal | undefined {
+  return activeRuns.get(runId)?.controller.signal;
 }
 
 export type AnalysisTaskInput = {
@@ -83,43 +99,58 @@ export type ReplayTaskInput = {
 
 /**
  * Executes a live/import analysis in the background. `executeRun` owns the
- * entire failure surface (it writes `run.failed` and the failed manifest for
- * every pipeline error), so this wrapper only guarantees two things beyond it:
+ * normal failure surface (it writes the terminal event and manifest for every
+ * pipeline outcome), so this wrapper only guarantees two things beyond it:
  * the registry is always cleared when the task settles, and a fatal error
  * escaping `executeRun` (which should not happen) still produces a terminal
- * event + failed manifest rather than a silent hang.
+ * event + terminal manifest rather than a silent hang.
  */
 export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<void> {
-  const { runId, request, deps, store, executionMode, modelConfigured, metadata, publisher, signal } = input;
+  const { runId, request, deps, store, executionMode, modelConfigured, metadata, publisher } = input;
+  const signal = input.signal ?? activeRunSignal(runId);
   try {
-    await executeRun(runId, request.goal, request.outputLocale, deps, publisher, store, executionMode, modelConfigured, metadata, signal);
+    await executeRun(
+      runId,
+      request.goal,
+      request.outputLocale,
+      deps,
+      publisher,
+      store,
+      executionMode,
+      modelConfigured,
+      metadata,
+      signal,
+      () => claimRunFinalization(runId),
+    );
   } catch (err) {
     const isCancelled = signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED");
     const message = isCancelled ? "Analysis was cancelled by user" : (err instanceof Error ? err.message : String(err));
-    try {
-      await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
-    } catch {
-      // publisher already failed
-    }
-    try {
-      await store.writeManifest(runId, {
-        runId,
-        status: "failed",
-        executionMode,
-        goal: request.goal,
-        appName: metadata?.appName,
-        appUrl: metadata?.appUrl,
-        fileName: metadata?.fileName,
-        startRequest: request,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        stages: {},
-        artifacts: {},
-        limitations: [{ code: isCancelled ? "RUN_CANCELLED" : "PIPELINE_ERROR", message, params: { detail: message } }],
-        canReplay: false,
-      });
-    } catch {
-      // manifest already written; leave the last known state
+    if (isCancelled || claimRunFinalization(runId)) {
+      try {
+        await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
+      } catch {
+        // publisher already failed
+      }
+      try {
+        await store.writeManifest(runId, {
+          runId,
+          status: isCancelled ? "cancelled" : "failed",
+          executionMode,
+          goal: request.goal,
+          appName: metadata?.appName,
+          appUrl: metadata?.appUrl,
+          fileName: metadata?.fileName,
+          startRequest: request,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          stages: {},
+          artifacts: {},
+          limitations: [{ code: isCancelled ? "RUN_CANCELLED" : "PIPELINE_ERROR", message, params: { detail: message } }],
+          canReplay: false,
+        });
+      } catch {
+        // manifest already written; leave the last known state
+      }
     }
   } finally {
     unregisterActive(runId);
@@ -137,8 +168,27 @@ export async function executeAnalysisTask(input: AnalysisTaskInput): Promise<voi
  * `completed` manifest is written only after every event has been replayed.
  */
 export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
-  const { runId, store, bundle, delayMs, publisher, signal } = input;
+  const { runId, store, bundle, delayMs, publisher } = input;
+  const signal = input.signal ?? activeRunSignal(runId);
   const artifactsIndex: Record<string, { attempt: number; file: string }> = {};
+  let finalizationClaimed = false;
+  let terminalEventPublished = false;
+  const writeCompletedManifest = () => store.writeManifest(runId, {
+    runId,
+    status: "completed" as const,
+    executionMode: "cached-replay" as const,
+    goal: bundle.manifest.goal,
+    appName: bundle.manifest.appName,
+    appUrl: bundle.manifest.appUrl,
+    fileName: bundle.manifest.fileName,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    stages: bundle.manifest.stages,
+    artifacts: artifactsIndex,
+    limitations: bundle.manifest.limitations,
+    canReplay: true,
+    modelUsage: bundle.manifest.modelUsage,
+  });
   try {
     // run.accepted is published by the caller before this task is scheduled; the
     // same publisher is reused so the sequence stays strictly monotonic across
@@ -208,50 +258,52 @@ export async function executeReplayTask(input: ReplayTaskInput): Promise<void> {
 
     // Emit the terminal event (or a synthetic completion when the source lacked
     // one), then finalize the manifest as completed + replayable.
+    if (signal?.aborted || !claimRunFinalization(runId)) {
+      throw new Error("RUN_CANCELLED");
+    }
+    finalizationClaimed = true;
     if (terminalEvent) {
       await publisher.publish({ type: terminalEvent.type, runId, stage: terminalEvent.stage, data: terminalEvent.data });
     } else {
       await publisher.publish({ type: "run.completed", runId, data: { outcome: "replayed" } });
     }
+    terminalEventPublished = true;
 
-    await store.writeManifest(runId, {
-      runId,
-      status: "completed",
-      executionMode: "cached-replay",
-      goal: bundle.manifest.goal,
-      appName: bundle.manifest.appName,
-      appUrl: bundle.manifest.appUrl,
-      fileName: bundle.manifest.fileName,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      stages: bundle.manifest.stages,
-      artifacts: artifactsIndex,
-      limitations: bundle.manifest.limitations,
-      canReplay: true,
-      modelUsage: bundle.manifest.modelUsage,
-    });
+    await writeCompletedManifest();
   } catch (err) {
-    const isCancelled = signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED");
-    const message = isCancelled ? "Replay was cancelled by user" : (err instanceof Error ? err.message : String(err));
-    try {
-      await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
-    } catch {
-      // publisher already failed
+    if (finalizationClaimed && terminalEventPublished) {
+      await writeCompletedManifest();
+      return;
     }
-    try {
-      await store.writeManifest(runId, {
-        runId,
-        status: "failed",
-        executionMode: "cached-replay",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        stages: {},
-        artifacts: artifactsIndex,
-        limitations: [{ code: isCancelled ? "RUN_CANCELLED" : "REPLAY_ERROR", message }],
-        canReplay: false,
-      });
-    } catch {
-      // manifest already written; leave the last known state
+
+    const isCancelled = !finalizationClaimed
+      && (signal?.aborted || (err instanceof Error && err.message === "RUN_CANCELLED"));
+    const message = isCancelled ? "Replay was cancelled by user" : (err instanceof Error ? err.message : String(err));
+    if (isCancelled || finalizationClaimed || claimRunFinalization(runId)) {
+      try {
+        await publisher.publish({ type: "run.failed", runId, data: { error: message, cancelled: isCancelled } });
+      } catch {
+        // publisher already failed
+      }
+      try {
+        await store.writeManifest(runId, {
+          runId,
+          status: isCancelled ? "cancelled" : "failed",
+          executionMode: "cached-replay",
+          goal: bundle.manifest.goal,
+          appName: bundle.manifest.appName,
+          appUrl: bundle.manifest.appUrl,
+          fileName: bundle.manifest.fileName,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          stages: {},
+          artifacts: artifactsIndex,
+          limitations: [{ code: isCancelled ? "RUN_CANCELLED" : "REPLAY_ERROR", message }],
+          canReplay: false,
+        });
+      } catch {
+        // manifest already written; leave the last known state
+      }
     }
   } finally {
     unregisterActive(runId);

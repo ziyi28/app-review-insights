@@ -120,7 +120,24 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
   // last known value to decide whether the empty page is an early end.
   let advertisedLastPage: number | null = null;
 
+  const abortError = () => new DOMException("aborted by the caller", "AbortError");
+  const wait = async (ms: number): Promise<void> => {
+    if (!signal) return sleep(ms);
+    if (signal.aborted) throw abortError();
+    let onAbort: (() => void) | undefined;
+    const aborted = new Promise<never>((_, reject) => {
+      onAbort = () => reject(abortError());
+      signal.addEventListener("abort", onAbort, { once: true });
+    });
+    try {
+      await Promise.race([sleep(ms), aborted]);
+    } finally {
+      if (onAbort) signal.removeEventListener("abort", onAbort);
+    }
+  };
+
   async function fetchOnce(page: number, attempt: number): Promise<FetchOutcome> {
+    if (signal?.aborted) throw abortError();
     const base = buildPageUrl(baseUrl, page, appId);
     // Cache-busting on retries: the empty response is often a stale CDN cache,
     // so a fresh query parameter forces a new origin lookup.
@@ -129,7 +146,8 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const onAbort = () => controller.abort();
-    signal?.addEventListener("abort", onAbort, { once: true });
+    if (signal?.aborted) controller.abort();
+    else signal?.addEventListener("abort", onAbort, { once: true });
     let res: Response;
     let body: string;
     try {
@@ -209,7 +227,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
   const httpOkEmpty = (o: FetchOutcome): boolean => o.httpStatus === 200 && o.parsed.reviews.length === 0 && !structuralFailure(o);
 
   for (let page = 1; page <= maxPages; page++) {
-    if (page > 1) await sleep(pageDelayMs);
+    if (page > 1) await wait(pageDelayMs);
 
     let outcome: FetchOutcome;
     try {
@@ -267,7 +285,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
       let recovered = false;
       for (const delay of emptyRetryDelays) {
         attempt += 1;
-        await sleep(delay);
+        await wait(delay);
         let retry: FetchOutcome;
         try {
           retry = await fetchOnce(page, attempt);
@@ -324,7 +342,7 @@ export async function collectAppleReviews(deps: CollectorDeps): Promise<SourceRe
       const lastPage = advertisedLastPage ?? outcome.parsed.lastPage;
       const abnormalEarlyEnd = lastPage !== null && page < lastPage;
       if (abnormalEarlyEnd) {
-        await sleep(confirmDelayMs);
+        await wait(confirmDelayMs);
         let confirm: FetchOutcome;
         try {
           confirm = await fetchOnce(page, outcome.attempt + 1);

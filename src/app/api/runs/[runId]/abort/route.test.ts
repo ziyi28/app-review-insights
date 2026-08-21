@@ -30,6 +30,9 @@ describe("POST /api/runs/[runId]/abort", () => {
     expect(json.runId).toBe("test-run-123");
     expect(json.cancelled).toBe(true);
     expect(controller.signal.aborted).toBe(true);
+
+    const second = await postAbort("test-run-123");
+    expect(((await second.json()) as { cancelled: boolean }).cancelled).toBe(false);
   });
 
   it("returns ok with cancelled=false if the run was not active", async () => {

@@ -115,8 +115,9 @@ Analysis is decoupled from the browser connection and runs as a background task:
 
 - `POST /api/runs` returns `202` immediately with `{ runId, status: "running",
   eventsUrl }`; the pipeline then runs in the background via Next.js `after()`.
-  **Refreshing the page, switching history, or starting another task never
-  cancels a running analysis.** Request-shape errors still return 4xx
+  **Refreshing the page or switching history alone never cancels a running
+  analysis; confirming New Run cancels the active backend run before starting
+  the new analysis.** Request-shape errors still return 4xx
   `application/problem+json`.
 - Multiple tasks run in parallel; the **History** panel is the unified task
   list, refreshed every 2s to show all concurrent tasks. Each task has its own

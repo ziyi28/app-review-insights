@@ -6,7 +6,7 @@ import type { Prd, VersionPlanArtifact, PlanningFactors } from "@/domain/contrac
 import { deriveClosureStatus, type TraceabilityReport } from "@/domain/traceability/validate";
 import type { RunManifest } from "@/server/runs/run-store";
 import type { EvidenceValidationReport } from "@/domain/analysis/evidence-validation";
-import type { RunEvent } from "@/domain/contracts/events";
+import { isCancelledRunEvent, type RunEvent } from "@/domain/contracts/events";
 import { dedupeLimitations } from "@/lib/limitations";
 import { ProvenanceBadge } from "@/components/workbench/provenance-badge";
 
@@ -141,7 +141,7 @@ export function VersionPlanPanel({ versionPlan, t }: { versionPlan: VersionPlanA
       {versionPlan.versions.length === 0 ? (
         <p style={{ color: "var(--text-muted)" }}>{t.noSchedulableRequirements}</p>
       ) : null}
-      
+
       {versionPlan.versions.length > 0 ? (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "10px" }}>
           {versionPlan.versions.map((v) => (
@@ -207,7 +207,7 @@ export function RunDiagnosticsPanel({ events, t }: { events: RunEvent[]; t: Dict
   };
   for (const e of events) {
     const data = e.data as Record<string, unknown>;
-    if (e.type === "run.failed") {
+    if (e.type === "run.failed" && !isCancelledRunEvent(e)) {
       groups.Error.push({ code: "run.failed", message: typeof data.error === "string" ? data.error : "run failed" });
     }
     if (e.type === "stage.progress" && data && typeof data === "object" && "code" in data) {

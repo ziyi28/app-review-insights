@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import type { Locale } from "@/i18n";
 import { getDictionary } from "@/i18n";
 
-import type { RunEvent } from "@/domain/contracts/events";
+import { isCancelledRunEvent, type RunEvent } from "@/domain/contracts/events";
 import { useRunStream, LAST_RUN_ID_KEY } from "@/hooks/use-run-stream";
 
 import { useRunArtifacts } from "@/hooks/use-run-artifacts";
@@ -23,6 +23,7 @@ import { ProvenanceBadge } from "./provenance-badge";
 import { OverviewTab } from "./overview-tab";
 import { ExecutiveReport } from "./executive-report";
 import modalStyles from "./modal.module.css";
+import { useModal } from "./use-modal";
 import styles from "./workbench.module.css";
 
 type Tab = TabId;
@@ -89,6 +90,9 @@ export function Workbench() {
   const [railExpanded, setRailExpanded] = useState(false);
   const [showNewRunConfirm, setShowNewRunConfirm] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+  const newRunDialogRef = useRef<HTMLDivElement | null>(null);
+  const cancelDialogRef = useRef<HTMLDivElement | null>(null);
 
   const t = getDictionary(uiLocale);
 
@@ -104,6 +108,19 @@ export function Workbench() {
   const [configStatus, setConfigStatus] = useState<ConfigStatus>(null);
 
   const userNavigated = useRef(false);
+
+  const closeNewRunConfirm = useCallback(() => {
+    setShowNewRunConfirm(false);
+    setCancelError(null);
+  }, []);
+
+  const closeCancelConfirm = useCallback(() => {
+    setShowCancelConfirm(false);
+    setCancelError(null);
+  }, []);
+
+  const { onKeyDown: onNewRunDialogKeyDown } = useModal(showNewRunConfirm, closeNewRunConfirm, newRunDialogRef);
+  const { onKeyDown: onCancelDialogKeyDown } = useModal(showCancelConfirm, closeCancelConfirm, cancelDialogRef);
 
   const {
     cache,
@@ -268,34 +285,57 @@ export function Workbench() {
   }, [events, cache.sourceEvidence, t]);
 
   const performResetAndNewRun = useCallback(async () => {
-    setShowNewRunConfirm(false);
     if (running && runId) {
-      await abort(runId);
+      try {
+        const acknowledged = await abort(runId);
+        if (!acknowledged) {
+          setCancelError(uiLocale === "zh-CN" ? "服务器未确认取消，任务仍在运行。" : "The server did not confirm cancellation; the run is still active.");
+          return;
+        }
+      } catch (err) {
+        setCancelError(err instanceof Error && err.message ? err.message : (uiLocale === "zh-CN" ? "取消请求失败，任务仍在运行。" : "Unable to cancel the active run; it is still running."));
+        return;
+      }
+    } else if (running) {
+      return;
     }
+    setShowNewRunConfirm(false);
+    setCancelError(null);
     reset();
     resetArtifacts();
     setTab("overview");
     userNavigated.current = false;
-  }, [running, runId, abort, reset, resetArtifacts]);
+  }, [running, runId, abort, reset, resetArtifacts, uiLocale]);
 
   const handleNewRun = useCallback(() => {
     if (running) {
+      if (!runId) return;
+      setCancelError(null);
       setShowNewRunConfirm(true);
     } else {
       performResetAndNewRun();
     }
-  }, [running, performResetAndNewRun]);
+  }, [running, runId, performResetAndNewRun]);
 
   const performAbortRun = useCallback(async () => {
-    setShowCancelConfirm(false);
-    if (runId) {
-      await abort(runId);
+    if (!runId) return;
+    try {
+      const acknowledged = await abort(runId);
+      if (!acknowledged) {
+        setCancelError(uiLocale === "zh-CN" ? "服务器未确认取消，任务仍在运行。" : "The server did not confirm cancellation; the run is still active.");
+        return;
+      }
+    } catch (err) {
+      setCancelError(err instanceof Error && err.message ? err.message : (uiLocale === "zh-CN" ? "取消请求失败，任务仍在运行。" : "Unable to cancel the active run; it is still running."));
+      return;
     }
+    setShowCancelConfirm(false);
+    setCancelError(null);
     reset();
     resetArtifacts();
     setTab("overview");
     userNavigated.current = false;
-  }, [runId, abort, reset, resetArtifacts]);
+  }, [runId, abort, reset, resetArtifacts, uiLocale]);
 
   const [isRetrying, setIsRetrying] = useState(false);
 
@@ -375,7 +415,10 @@ export function Workbench() {
     };
   }, [loadHistory]);
 
+  const runCancelled = useMemo(() => status === "cancelled" || events.some(isCancelledRunEvent), [status, events]);
+
   const runFailedMessage = useMemo(() => {
+    if (runCancelled) return null;
     if (error) return error;
     if (gone) return t.runNotFound;
     const failedEvent = events.find((e) => e.type === "run.failed");
@@ -386,7 +429,7 @@ export function Workbench() {
     if (status === "interrupted") return t.interrupted;
     if (status === "failed") return t.failed;
     return null;
-  }, [error, gone, events, status, t]);
+  }, [error, gone, events, status, t, runCancelled]);
 
   const handleRetryCurrent = useCallback(() => {
     if (canRetry) {
@@ -397,18 +440,20 @@ export function Workbench() {
   }, [canRetry, retry, runId, handleRetryHistory]);
 
   const statusLabel = useMemo(() => {
+    if (runCancelled) return t.cancelled;
     if (status === "running") return t.running;
     if (status === "interrupted") return t.interrupted;
     if (status === "completed") return t.completed;
     if (status === "failed") return t.failed;
     return null;
-  }, [status, t]);
+  }, [runCancelled, status, t]);
 
   const idle = !running && events.length === 0 && !isRetrying;
   const starting = running && runId === null;
 
   const runFailed = useMemo(() => {
     if (running) return false;
+    if (runCancelled) return false;
     if (gone) return true;
     if (events.length === 0) return false;
     if (Boolean(error)) return true;
@@ -416,7 +461,7 @@ export function Workbench() {
     if (status === "interrupted") return true;
     if (events.some((e) => e.type === "run.failed")) return true;
     return false;
-  }, [running, error, gone, events, status]);
+  }, [running, error, gone, events, status, runCancelled]);
 
   const runningStatusText = running
     ? (starting ? t.starting : t.running)
@@ -500,7 +545,7 @@ export function Workbench() {
               <span>{isRetrying ? t.retrying : t.retry}</span>
             </button>
           ) : null}
-          <button className="btn btn-primary" onClick={handleNewRun} disabled={isRetrying}>
+          <button className="btn btn-primary" onClick={handleNewRun} disabled={isRetrying || starting}>
             <Icon name="plus" size={13} />
             <span>{t.newRun}</span>
           </button>
@@ -552,19 +597,28 @@ export function Workbench() {
       {/* Confirmation Modal for New Run during active run */}
       {showNewRunConfirm ? (
         <div className={modalStyles.overlay}>
-          <div className={modalStyles.dialog} role="alertdialog" aria-modal="true" aria-labelledby="confirm-new-run-title">
+          <div
+            ref={newRunDialogRef}
+            className={modalStyles.dialog}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-new-run-title"
+            aria-describedby="confirm-new-run-description"
+            onKeyDown={onNewRunDialogKeyDown}
+          >
             <div className={modalStyles.dialogHead}>
               <h3 id="confirm-new-run-title" className={modalStyles.dialogTitle}>
                 {uiLocale === "zh-CN" ? "确认放弃当前分析？" : "Abandon Active Run?"}
               </h3>
             </div>
-            <p style={{ margin: "4px 0 12px", fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+            <p id="confirm-new-run-description" style={{ margin: "4px 0 12px", fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.5 }}>
               {uiLocale === "zh-CN"
                 ? "当前分析任务仍在进行中。开始新建运行将重置当前进度，是否确认放弃？"
                 : "An analysis run is currently in progress. Starting a new run will reset in-flight progress. Are you sure you want to proceed?"}
             </p>
+            {cancelError ? <p role="alert" style={{ margin: "0 0 12px", fontSize: "13px", color: "var(--danger)" }}>{cancelError}</p> : null}
             <div className={modalStyles.dialogFoot}>
-              <button type="button" className="btn btn-ghost" onClick={() => setShowNewRunConfirm(false)}>
+              <button type="button" className="btn btn-ghost" onClick={closeNewRunConfirm}>
                 {t.cancel}
               </button>
               <button type="button" className="btn btn-danger" onClick={performResetAndNewRun}>
@@ -578,19 +632,28 @@ export function Workbench() {
       {/* Confirmation Modal for Aborting in-flight run */}
       {showCancelConfirm ? (
         <div className={modalStyles.overlay}>
-          <div className={modalStyles.dialog} role="alertdialog" aria-modal="true" aria-labelledby="confirm-abort-title">
+          <div
+            ref={cancelDialogRef}
+            className={modalStyles.dialog}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="confirm-abort-title"
+            aria-describedby="confirm-abort-description"
+            onKeyDown={onCancelDialogKeyDown}
+          >
             <div className={modalStyles.dialogHead}>
               <h3 id="confirm-abort-title" className={modalStyles.dialogTitle}>
                 {uiLocale === "zh-CN" ? "中止当前分析任务" : "Abort Current Run"}
               </h3>
             </div>
-            <p style={{ margin: "4px 0 12px", fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.5 }}>
+            <p id="confirm-abort-description" style={{ margin: "4px 0 12px", fontSize: "13.5px", color: "var(--text-muted)", lineHeight: 1.5 }}>
               {uiLocale === "zh-CN"
                 ? "是否中止当前在运行的评论分析任务并返回初始状态？"
                 : "Are you sure you want to abort the in-flight review analysis and return to the starting screen?"}
             </p>
+            {cancelError ? <p role="alert" style={{ margin: "0 0 12px", fontSize: "13px", color: "var(--danger)" }}>{cancelError}</p> : null}
             <div className={modalStyles.dialogFoot}>
-              <button type="button" className="btn btn-ghost" onClick={() => setShowCancelConfirm(false)}>
+              <button type="button" className="btn btn-ghost" onClick={closeCancelConfirm}>
                 {t.cancel}
               </button>
               <button type="button" className="btn btn-danger" onClick={performAbortRun}>
@@ -688,7 +751,10 @@ export function Workbench() {
                           type="button"
                           className="btn btn-ghost"
                           style={{ padding: "4px 8px", fontSize: "12px", color: "var(--danger)" }}
-                          onClick={() => setShowCancelConfirm(true)}
+                          onClick={() => {
+                            setCancelError(null);
+                            setShowCancelConfirm(true);
+                          }}
                           title={t.cancel}
                         >
                           <Icon name="x" size={13} />

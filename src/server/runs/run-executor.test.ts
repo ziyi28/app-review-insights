@@ -1,9 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { RunStore } from "@/server/runs/run-store";
-import { executeAnalysisTask, executeReplayTask, registerActive, unregisterActive, isRunActive, resetActiveRuns, cancelActiveRun } from "./run-executor";
+import {
+  executeAnalysisTask,
+  executeReplayTask,
+  registerActive,
+  unregisterActive,
+  isRunActive,
+  resetActiveRuns,
+  cancelActiveRun,
+  claimRunFinalization,
+} from "./run-executor";
 import type { ReplayBundle } from "./replay";
 import { EventPublisher } from "@/server/streaming/event-publisher";
 import { parseImportedReviews } from "@/server/sources/import-parser";
@@ -75,6 +84,10 @@ function replayBundle(runId: string): ReplayBundle {
       },
       limitations: [],
       canReplay: true,
+      goal: "Keep replay metadata",
+      appName: "Example App",
+      appUrl: "https://apps.apple.com/us/app/example/id123456789",
+      fileName: "reviews.csv",
     },
     events: [
       ev(1, "run.accepted"),
@@ -99,6 +112,23 @@ describe("run-executor registry", () => {
     expect(isRunActive("run-a")).toBe(true);
     unregisterActive("run-a");
     expect(isRunActive("run-a")).toBe(false);
+  });
+
+  it("atomically lets cancellation or finalization claim a running run", () => {
+    const cancelledRun = store.createRunId();
+    const completedRun = store.createRunId();
+    const cancelledController = new AbortController();
+    const completedController = new AbortController();
+    registerActive(cancelledRun, cancelledController);
+    registerActive(completedRun, completedController);
+
+    expect(cancelActiveRun(cancelledRun)).toBe(true);
+    expect(claimRunFinalization(cancelledRun)).toBe(false);
+    expect(cancelledController.signal.aborted).toBe(true);
+
+    expect(claimRunFinalization(completedRun)).toBe(true);
+    expect(cancelActiveRun(completedRun)).toBe(false);
+    expect(completedController.signal.aborted).toBe(false);
   });
 });
 
@@ -144,6 +174,44 @@ describe("executeAnalysisTask", () => {
     const manifest = await store.readManifest(runId).catch(() => null);
     expect(manifest?.status ?? "failed").toBe("failed");
   });
+
+  it("writes a failed terminal state when completion event publishing fails", async () => {
+    const runId = store.createRunId();
+    registerActive(runId);
+    const task = importTask(runId);
+    const publish = task.publisher.publish.bind(task.publisher);
+    vi.spyOn(task.publisher, "publish").mockImplementation(async (input) => {
+      if (input.type === "run.completed") throw new Error("terminal event write failed");
+      await publish(input);
+    });
+
+    await executeAnalysisTask(task);
+
+    expect(isRunActive(runId)).toBe(false);
+    expect((await store.readManifest(runId)).status).toBe("failed");
+  });
+
+  it("retries the claimed completion manifest without publishing a conflicting failure", async () => {
+    const runId = store.createRunId();
+    registerActive(runId);
+    const task = importTask(runId);
+    const writeManifest = store.writeManifest.bind(store);
+    let failedOnce = false;
+    vi.spyOn(store, "writeManifest").mockImplementation(async (targetRunId, manifest) => {
+      if (manifest.status === "completed" && !failedOnce) {
+        failedOnce = true;
+        throw new Error("transient manifest write failed");
+      }
+      await writeManifest(targetRunId, manifest);
+    });
+
+    await executeAnalysisTask(task);
+
+    expect((await store.readManifest(runId)).status).toBe("completed");
+    const events = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "events.ndjson"), "utf8"));
+    expect(events).toContain('"type":"run.completed"');
+    expect(events).not.toContain('"type":"run.failed"');
+  });
 });
 
 describe("executeReplayTask", () => {
@@ -188,6 +256,44 @@ describe("executeReplayTask", () => {
     expect(isRunActive(runId)).toBe(false);
     const manifest = await store.readManifest(runId).catch(() => null);
     expect(manifest?.status ?? "failed").toBe("failed");
+  });
+
+  it("writes a failed replay state when completion event publishing fails", async () => {
+    const runId = store.createRunId();
+    registerActive(runId);
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay");
+    const publish = publisher.publish.bind(publisher);
+    vi.spyOn(publisher, "publish").mockImplementation(async (input) => {
+      if (input.type === "run.completed") throw new Error("terminal event write failed");
+      await publish(input);
+    });
+
+    await executeReplayTask({ runId, store, bundle: replayBundle("src-run"), delayMs: 0, publisher });
+
+    expect(isRunActive(runId)).toBe(false);
+    expect((await store.readManifest(runId)).status).toBe("failed");
+  });
+
+  it("retries the claimed replay manifest without publishing a conflicting failure", async () => {
+    const runId = store.createRunId();
+    registerActive(runId);
+    const publisher = new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay");
+    const writeManifest = store.writeManifest.bind(store);
+    let failedOnce = false;
+    vi.spyOn(store, "writeManifest").mockImplementation(async (targetRunId, manifest) => {
+      if (manifest.status === "completed" && !failedOnce) {
+        failedOnce = true;
+        throw new Error("transient manifest write failed");
+      }
+      await writeManifest(targetRunId, manifest);
+    });
+
+    await executeReplayTask({ runId, store, bundle: replayBundle("src-run"), delayMs: 0, publisher });
+
+    expect((await store.readManifest(runId)).status).toBe("completed");
+    const events = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "events.ndjson"), "utf8"));
+    expect(events).toContain('"type":"run.completed"');
+    expect(events).not.toContain('"type":"run.failed"');
   });
 
   it("copies archived source files into the new run and rejects disallowed paths", async () => {
@@ -252,8 +358,10 @@ describe("executeReplayTask", () => {
 
     expect(isRunActive(runId)).toBe(false);
     const manifest = await store.readManifest(runId);
-    expect(manifest.status).toBe("failed");
+    expect(manifest.status).toBe("cancelled");
     expect(manifest.limitations.some((l) => l.code === "RUN_CANCELLED")).toBe(true);
+    const events = await import("node:fs").then((fs) => fs.readFileSync(path.join(store.resolveRunDir(runId), "events.ndjson"), "utf8"));
+    expect(events.split("\n").some((line) => line.includes('"type":"run.failed"') && line.includes('"cancelled":true'))).toBe(true);
   });
 
   it("cancels an in-flight replay task when cancelActiveRun is invoked", async () => {
@@ -277,7 +385,100 @@ describe("executeReplayTask", () => {
 
     expect(isRunActive(runId)).toBe(false);
     const manifest = await store.readManifest(runId);
-    expect(manifest.status).toBe("failed");
+    expect(manifest.status).toBe("cancelled");
     expect(manifest.limitations.some((l) => l.code === "RUN_CANCELLED")).toBe(true);
+    expect(manifest).toMatchObject({
+      goal: bundle.manifest.goal,
+      appName: bundle.manifest.appName,
+      appUrl: bundle.manifest.appUrl,
+      fileName: bundle.manifest.fileName,
+    });
+  });
+
+  it("keeps cancellation as the terminal outcome after an in-flight replay operation is released", async () => {
+    const runId = store.createRunId();
+    const controller = new AbortController();
+    registerActive(runId, controller);
+    const bundle = replayBundle("src-run");
+    const entered = Promise.withResolvers<void>();
+    const released = Promise.withResolvers<void>();
+    const writeArtifact = store.writeArtifact.bind(store);
+    vi.spyOn(store, "writeArtifact").mockImplementation(async (...args) => {
+      if (args[0] === runId) entered.resolve();
+      await released.promise;
+      return writeArtifact(...args);
+    });
+
+    const task = executeReplayTask({
+      runId,
+      store,
+      bundle,
+      delayMs: 0,
+      publisher: new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay"),
+      signal: controller.signal,
+    });
+    await entered.promise;
+    expect(cancelActiveRun(runId)).toBe(true);
+    released.resolve();
+    await task;
+
+    const manifest = await store.readManifest(runId);
+    expect(manifest.status).toBe("cancelled");
+    expect(manifest.limitations.some((l) => l.code === "RUN_CANCELLED")).toBe(true);
+  });
+
+  it("cancels run A without aborting an in-flight run B", async () => {
+    const runA = store.createRunId();
+    const runB = store.createRunId();
+    const controllerA = new AbortController();
+    const controllerB = new AbortController();
+    registerActive(runA, controllerA);
+    registerActive(runB, controllerB);
+    const bundleA = replayBundle("src-a");
+    const bundleB = replayBundle("src-b");
+    const enteredA = Promise.withResolvers<void>();
+    const enteredB = Promise.withResolvers<void>();
+    const releaseA = Promise.withResolvers<void>();
+    const releaseB = Promise.withResolvers<void>();
+    const writeArtifact = store.writeArtifact.bind(store);
+    vi.spyOn(store, "writeArtifact").mockImplementation(async (...args) => {
+      const targetRunId = args[0];
+      if (targetRunId === runA) {
+        enteredA.resolve();
+        await releaseA.promise;
+      } else if (targetRunId === runB) {
+        enteredB.resolve();
+        await releaseB.promise;
+      }
+      return writeArtifact(...args);
+    });
+
+    const taskA = executeReplayTask({
+      runId: runA,
+      store,
+      bundle: bundleA,
+      delayMs: 0,
+      publisher: new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay"),
+      signal: controllerA.signal,
+    });
+    const taskB = executeReplayTask({
+      runId: runB,
+      store,
+      bundle: bundleB,
+      delayMs: 0,
+      publisher: new EventPublisher(store, () => "2026-08-12T00:00:00.000Z", "cached-replay"),
+      signal: controllerB.signal,
+    });
+    await Promise.all([enteredA.promise, enteredB.promise]);
+    expect(cancelActiveRun(runA)).toBe(true);
+    expect(controllerA.signal.aborted).toBe(true);
+    expect(controllerB.signal.aborted).toBe(false);
+    expect(isRunActive(runB)).toBe(true);
+    releaseA.resolve();
+    releaseB.resolve();
+    await Promise.all([taskA, taskB]);
+
+    expect((await store.readManifest(runA)).status).toBe("cancelled");
+    expect((await store.readManifest(runB)).status).toBe("completed");
   });
 });

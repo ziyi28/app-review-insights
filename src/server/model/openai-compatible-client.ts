@@ -71,6 +71,7 @@ export class OpenAiCompatibleClient {
   }
 
   async generate<T>(request: ModelRequest<T>): Promise<ModelResult<T>> {
+    if (this.signal?.aborted) throw modelAbortError();
     let lastError: Error | null = null;
     for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
       this.usageLog.attempts += 1;
@@ -80,7 +81,7 @@ export class OpenAiCompatibleClient {
         lastError = err instanceof Error ? err : new Error(String(err));
         // Never retry once the client disconnected; otherwise the pipeline would
         // keep working against a dead stream.
-        if (this.signal?.aborted) throw lastError;
+        if (this.signal?.aborted) throw modelAbortError();
         if (!isTransient(lastError) || attempt === MAX_RETRIES) throw lastError;
         const delay = RETRY_BASE_DELAY_MS * 2 ** attempt;
         const reason = modelErrorCode(lastError);
@@ -94,7 +95,7 @@ export class OpenAiCompatibleClient {
           reason,
         });
         console.warn(`[model] transient error (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${delay}ms: ${lastError.message}`);
-        await sleep(delay);
+        await sleep(delay, this.signal);
       }
     }
     // Unreachable (the loop either returns or throws), but satisfies the type.
@@ -132,7 +133,8 @@ export class OpenAiCompatibleClient {
       // Combine the caller's abort signal with a hard per-call deadline.
       const controller = new AbortController();
       const onAbort = () => controller.abort();
-      this.signal?.addEventListener("abort", onAbort, { once: true });
+      if (this.signal?.aborted) controller.abort();
+      else this.signal?.addEventListener("abort", onAbort, { once: true });
       const timer = this.timeoutMs
         ? setTimeout(() => {
             timedOut = true;
@@ -275,8 +277,24 @@ function isTransient(err: Error): boolean {
   return false;
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.reject(modelAbortError());
+  return new Promise((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      reject(modelAbortError());
+    };
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+function modelAbortError(): Error {
+  return new Error("MODEL_REQUEST_ABORTED: caller aborted the request");
 }
 
 /** Extracts the MODEL_* classification for a retry audit (never the body). */

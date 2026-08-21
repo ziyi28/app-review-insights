@@ -173,6 +173,7 @@ async function loadValidPreview(
 }
 
 async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: ReturnType<typeof loadConfig>): Promise<Response> {
+  const controller = new AbortController();
   let deps: ExecuteDeps;
   let executionMode: "live" | "import";
   let appName: string | undefined;
@@ -191,6 +192,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
           jsonMode: cfg.modelJsonMode,
           reasoningEffort: cfg.modelReasoningEffort,
           timeoutMs: cfg.modelTimeoutMs,
+          signal: controller.signal,
         })
       : ({ generate: async () => { throw new Error("model not configured"); } } as never);
 
@@ -236,6 +238,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
                 apiKey: cfg.serpApiKey,
                 appId: parsed.appId,
                 timeoutMs: cfg.serpApiTimeoutMs,
+                signal: controller.signal,
               }
             : null,
           rssCollector: {
@@ -247,6 +250,7 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
             maxPages: cfg.appleRssMaxPages,
             pageDelayMs: cfg.appleRssPageDelayMs,
             timeoutMs: cfg.appleRssTimeoutMs,
+            signal: controller.signal,
           },
           previewsDir: cfg.sourcePreviewsDir,
           cacheDir: cfg.sourceCacheDir,
@@ -379,7 +383,6 @@ async function startAnalysis(request: AnalyzeRequest, store: RunStore, cfg: Retu
   });
   await publisher.publish({ type: "run.accepted", runId, data: { runId } });
 
-  const controller = new AbortController();
   registerActive(runId, controller);
   after(() => executeAnalysisTask({ runId, request, deps, store, executionMode, modelConfigured, metadata, publisher, signal: controller.signal }));
 

@@ -164,11 +164,16 @@ export async function collectSerpApiReviews(deps: SerpApiCollectorDeps): Promise
   return { status: "partial", reviews, rawRefs, limitations, evidence: buildEvidence() };
 
   async function fetchPage(page: number): Promise<{ pageReviews: RawReview[]; nextExists: boolean; dropped: number; suspectEmpty: boolean } | null> {
+    if (signal?.aborted) {
+      limitations.push({ code: "SERPAPI_ABORTED", message: "SerpApi request aborted by the caller", stage: "source" });
+      return null;
+    }
     const url = buildSearchUrl(baseUrl, apiKey, appId, page);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const onAbort = () => controller.abort();
-    signal?.addEventListener("abort", onAbort, { once: true });
+    if (signal?.aborted) controller.abort();
+    else signal?.addEventListener("abort", onAbort, { once: true });
     let res: Response;
     try {
       res = await fetchFn(url, { signal: controller.signal });
